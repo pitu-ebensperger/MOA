@@ -1,11 +1,5 @@
-### Proyecto Marketplace
+##Requerimientos
 
-Consulta el progreso completo en [docs/STATUS.md](./docs/STATUS.md)
-
-
-*node_modules locales, instalar npm i antes de ejecutar run run dev
-
-# Requerimientos
 1. Crear un nuevo proyecto usando npx e instalar las dependencias.
 2. Utilizar React Router para la navegación entre rutas.
 3. Reutilizar componentes haciendo uso del paso de props y renderización dinámica.
@@ -13,5 +7,6 @@ Consulta el progreso completo en [docs/STATUS.md](./docs/STATUS.md)
 5. Utilizar Context para el manejo del estado global.
 
 
-## Convenciones
-- Dejar en componentes si es un elemento genérico o si aparece en 2+ páginas.
+##Convenciones
+
+- Dejar en components/ si es un elemento genérico o si aparece en 2+ páginas.
