@@ -80,15 +80,22 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 - 🟥 src/features/products/QuickViewModal.jsx [ ? ]
 
 ## Hooks
-- 🟥 src/hooks/useAuth.js [ ? ]
-- 🟥 src/hooks/useCart.js [ ? ]
-- 🟥 src/hooks/useDebounce.js [ ? ]
-- 🟥 src/hooks/useDisclosure.js [ ? ]
-- 🟥 src/hooks/useMediaQuery.js [ ? ]
+
+### hooks/state
+- 🟥 src/hooks/useAuth.js [ ? ] //Maneja sesión (login, logout, isAuth, user)
+- 🟥 src/hooks/useCart.js [ ? ] //Carrito
+- 🟥 src/hooks/useCategories.js [ ? ] //Filtros, navegación por categorías
+- 🟥 src/hooks/useOrders.js //Crear y consultar órdenes
+- 🟥 src/hooks/useProducts.js [ ? ] //Listado y detalle de productos
+- 🟥 src/hooks/useUser.js [ ? ] //Perfil del usuario
+- 🟥 src/hooks/useWishlist.js [ ? ] //Carga/agrega/etc favoritos
+### hooks/ui    
+- 🟥 src/hooks/useInput.js [ ? ]
+- 🟥 src/hooks/useModal.js [ ? ]
 - 🟥 src/hooks/usePagination.js [ ? ]
-- 🟥 src/hooks/useQueryParams.js [ ? ]
-- 🟥 src/hooks/useToast.js [ ? ]
-- 🟥 src/hooks/useWishlist.js [ ? ]
+### hooks/utils  
+- 🟥 src/hooks/useDebounce.js [ ? ]
+
 
 ## Routes
 - 🟥 src/routes/auth.route.js [ ? ]
@@ -98,6 +105,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 - 🟥 src/context/AuthContext.jsx [ ? ]
 - 🟥 src/context/CartContext.jsx [ ? ]
 - 🟥 src/context/UIContext.jsx [ ? ]
+
+# Config
+- 🟥 src/config/constant.js 
+
+### Services
+- 🟨 src/services/api.js [ Pitu ]
 
 ### Utils
 - 🟦 src/utils/currency.js [ Pitu ]
@@ -144,3 +157,14 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 - 🟥 src/services/repositories/categories.repo.js [ ? ]
 - 🟥 src/services/repositories/cart.repo.js [ ? ]
 - 🟥 src/services/repositories/orders.repo.js [ ? ]
+
+
+hooks/ui
+      useOnClickOutside.js
+      useIntersectionObserver.js
+      useDocumentTitle.js
+hooks/utils  
+      useLocalStorage.js
+      useSessionStorage.js
+      useEventListener.js
+      usePrevious.js
