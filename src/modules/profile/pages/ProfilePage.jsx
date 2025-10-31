@@ -1,5 +1,5 @@
-export const Profile = () => {
+export const ProfilePage = () => {
   return (
-      <h1>Profile</h1>
+      <h1>Perfil</h1>
   )
 }
