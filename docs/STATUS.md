@@ -6,12 +6,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 //blabla = Comentarios
 
 
-## APP
+## App
 - 🟥 src/app/App.jsx [ ? ]
 - 🟥 src/app/main.jsx [ ? ]
 - 🟥 src/app/routes.jsx [ ? ]
 
-## PAGES
+## Pages
 
 ### pages/home
 - 🟥 src/pages/home/HomePage.jsx [ ? ]
