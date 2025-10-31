@@ -10,3 +10,11 @@
 ##Convenciones
 
 - Dejar en components/ si es un elemento genérico o si aparece en 2+ páginas.
+
+
+##Estado/Asignación Archivos
+ej: archivo > ESTADO [quien lo esta viendo] //Notas 
+    estados: PENDIENTE | EN PROCESO | LISTO | REVISADO | CERRADO | CORREGIR
+    
+- public/favicon.ico > PENDIENTE [?]
+- src/assets.ico > PENDIENTE [?]
