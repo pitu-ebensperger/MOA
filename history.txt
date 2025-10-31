@@ -1,0 +1,37 @@
+*   b46ba4b 2025-10-31  (origin/develop) Merge pull request #3 from pitu-ebensperger/main [pitu-ebensperger]
+|\  
+| * 4cf25ef 2025-10-31  (HEAD -> main, origin/main, origin/HEAD) cambios estructura proyecto [pitu-ebensperger]
+|/  
+| *   a0ef05e 2025-10-31  (refs/stash) On setup: !!GitHub_Desktop<setup> [pitu-ebensperger]
+| |\  
+| | * 45ec32c 2025-10-31  index on setup: 0eaa900 upd [pitu-ebensperger]
+| |/  
+| * 0eaa900 2025-10-31  (private/main) upd [pitu-ebensperger]
+|/  
+* 9653baa 2025-10-31  (develop) limpieza archivos [pitu-ebensperger]
+* 9bf6948 2025-10-30  Update STATUS.md [pitu-ebensperger]
+* 396f980 2025-10-30  Update STATUS.md [pitu-ebensperger]
+* ee5fc50 2025-10-30  update import paths [pitu-ebensperger]
+* 0e2273a 2025-10-30  Update README.md [pitu-ebensperger]
+* 217b51d 2025-10-30  nuevo doc status [pitu-ebensperger]
+* 3436d3c 2025-10-30  ts a js [pitu-ebensperger]
+* 5b01cfc 2025-10-30  Update README.md [pitu-ebensperger]
+*   c6768b6 2025-10-30  Merge pull request #2 from pitu-ebensperger/feature-advance [pitu-ebensperger]
+|\  
+* \   c06f921 2025-10-30  Merge pull request #1 from pitu-ebensperger/feature-advance [pitu-ebensperger]
+|\ \  
+| | | * b28d4fa 2025-10-30  (origin/feature-advance, feature-advance) re-estructura carpetas [pitu-ebensperger]
+| | |/  
+| | * 8cc69aa 2025-10-30  validaciones y formatos [pitu-ebensperger]
+| |/  
+| * b3add57 2025-10-30  re-estructura carpetas [pitu-ebensperger]
+| * 71945b2 2025-10-30  re-estructura carpetas [pitu-ebensperger]
+| * 2f60f41 2025-10-30  convencion componentes [pitu-ebensperger]
+| * 300b07b 2025-10-30  Update package-lock.json [pitu-ebensperger]
+| * fc3c9db 2025-10-30  re estructura proyecto [pitu-ebensperger]
+| * 781ba82 2025-10-29  feat: colors and fonts [Nahara Gutiérrez]
+| * 068a1c9 2025-10-29  feat: components and routes [Nahara Gutiérrez]
+|/  
+* 641b69f 2025-10-27  (test) Create .gitignore [pitu-ebensperger]
+* 952a5c5 2025-10-27  Update README.md [pitu-ebensperger]
+* 6ac9aaa 2025-10-27  Initial commit [pitu-ebensperger]
