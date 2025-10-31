@@ -2,6 +2,9 @@
 
 Consulta el progreso completo en [docs/STATUS.md](./docs/STATUS.md)
 
+
+*node_modules locales, instalar npm i antes de ejecutar run run dev
+
 # Requerimientos
 1. Crear un nuevo proyecto usando npx e instalar las dependencias.
 2. Utilizar React Router para la navegación entre rutas.
