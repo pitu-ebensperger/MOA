@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
@@ -126,22 +125,5 @@ function Button({
   );
 }
 
-Button.propTypes = {  
-  children: PropTypes.node.isRequired,
-  variant: PropTypes.oneOf(["primary", "secondary", "ghost", "link"]),
-  size: PropTypes.oneOf(["sm", "md", "lg"]),
-  fullWidth: PropTypes.bool,
-  isLoading: PropTypes.bool,
-  disabled: PropTypes.bool,
-  to: PropTypes.string,
-  href: PropTypes.string,
-  target: PropTypes.string,
-  rel: PropTypes.string,
-  type: PropTypes.oneOf(["button", "submit", "reset"]),
-  leftIcon: PropTypes.node,
-  rightIcon: PropTypes.node,
-  className: PropTypes.string,
-  onClick: PropTypes.func,
-};
 
 export default Button;
