@@ -1,17 +1,18 @@
 //import { motion } from "motion/react";
 import { HeroSection } from "../components/HeroSection";
 import { ProductsSection } from "../components/ProductsSection";
-import { CategoriesFilter } from "../components/ModernCategories";
-import {ContactSection} from  "../components/ContactSection";
+import { CategoriesMenu } from "../components/CategoriesMenu";
+import { ContactSection } from  "../components/ContactSection";
 
-export const Home = () => {
+export const HomePage = () => {
   return (
     <div>
-    <HeroSection> </HeroSection>
-    <CategoriesFilter> </CategoriesFilter>
-    <ProductsSection> </ProductsSection>
+    <HeroSection /> 
+    <CategoriesMenu /> 
 
-    <ContactSection></ContactSection>
+    <ProductsSection />
+
+    <ContactSection />
     </div>
   )
 }

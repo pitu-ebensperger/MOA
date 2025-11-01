@@ -5,8 +5,8 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 --------------------------------------------------------------------------------------------------
 ## App (src/app)
-- 🟥 src/app/App.jsx 
-- 🟥 src/app/main.jsx 
+- 🟨 src/app/App.jsx 
+- 🟨 src/app/main.jsx 
 
 ----------------------------------
 ## Components (src/components)
@@ -52,12 +52,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 ----------------------------------
 ## Hooks (src/hooks)
 ### state
-- 🟥 src/hooks/state/useCart.js  //Carrito
-- 🟥 src/hooks/state/useCategories.js  //Filtros, navegación por categorías
-- 🟥 src/hooks/state/useOrders.js  //Crear y consultar órdenes
-- 🟥 src/hooks/state/useProducts.js  //Listado y detalle de productos
-- 🟥 src/hooks/state/useUser.js  //Perfil del usuario
-- 🟥 src/hooks/state/useWishlist.js  //Carga/agrega/etc favoritos
+- 🟥 src/hooks/state/useCart.js 
+- 🟥 src/hooks/state/useCategories.js  
+- 🟥 src/hooks/state/useOrders.js 
+- 🟥 src/hooks/state/useProducts.js 
+- 🟥 src/hooks/state/useUser.js
+- 🟥 src/hooks/state/useWishlist.js 
 ### ui
 - 🟥 src/hooks/ui/useInput.js 
 - 🟥 src/hooks/ui/useModal.js 
@@ -103,11 +103,11 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 - 🟥 [src/modules/auth/pages/ForgotPasswordPage.jsx](../src/modules/auth/pages/ForgotPasswordPage.jsx) 
 - 🟥 [src/modules/auth/pages/ResetPasswordPage.jsx](../src/modules/auth/pages/ResetPasswordPage.jsx) 
 #### hook
-- 🟥 [src/modules/auth/hook/useAuth.js](../src/modules/auth/hook/useAuth.js)  //Maneja sesión (login, logout, isAuth, user)
+- 🟦  [src/modules/auth/hook/useAuth.js](../src/modules/auth/hook/useAuth.js)  //Maneja sesión (login, logout, isAuth, user)
 #### context
-- 🟥 [src/modules/auth/context/AuthAccess.js](../src/modules/auth/context/AuthAccess.js) 
+- 🟦  [src/modules/auth/context/AuthContext.js](../src/modules/auth/context/AuthContext.js) 
 #### services
-- 🟥 [src/modules/auth/services/auth.api.js](../src/modules/auth/services/auth.api.js) 
+- 🟦 [src/modules/auth/services/auth.api.js](../src/modules/auth/services/auth.api.js) 
 
 ### Profile
 - 🟥 [src/modules/profile/pages/ProfilePage.jsx](../src/modules/profile/pages/ProfilePage.jsx) 
