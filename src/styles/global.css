@@ -1,6 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Italiana&display=swap');
 @import "tailwindcss";
 
+/* --------------------------------------------------------*/
+
+* { box-sizing: border-box; }
+html:focus-within { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+:where(button, a, [role="button"]) { -webkit-tap-highlight-color: transparent; }
+
+/* --------------------------------------------------------*/
 body {
     font-family: var(--font-primary);
     color: var(--color-dark);
@@ -12,4 +22,3 @@ h1 {
     font-weight: var(--weight-semibold);
     font-size: var(--text-3xl);
 }
-
