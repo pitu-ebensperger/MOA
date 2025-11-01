@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+//import { motion } from "motion/react";
 import { HeroSection } from "../components/HeroSection";
 import { ProductsSection } from "../components/ProductsSection";
 import { CategoriesFilter } from "../components/ModernCategories";
