@@ -14,4 +14,14 @@ Consulta el progreso completo en [docs/STATUS.md](./docs/STATUS.md)
 
 
 ## Convenciones
+
+### Github Flow
+
+**Ramas/Branches**
+- feature/ *(desarrollo de nuevas funcionalidades, ej. feature/add-user-authentication)*
+- fix/ *(correción errores, ej. bugfix/issue-123-login-error)*
+- chore/ *(tareas mantenimiento o administración, ej. chore/update-dependencies)*
+- refactor/ *(restructuración código, ej. refactor/sist-modulos)*
+
+**Organización Proyecto**
 - Dejar en componentes si es un elemento genérico o si aparece en 2+ páginas.
