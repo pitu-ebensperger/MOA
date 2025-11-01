@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Container } from "../../../../components/layout/Container.jsx";
 import { Header } from "../../../../components/layout/Header.jsx";
-import { Button } from "../../../../components/ui/Button.jsx";
+import Button from "../../../../components/ui/Button.jsx";
 
 const initialForm = {
   name: "",
