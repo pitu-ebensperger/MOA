@@ -1,58 +1,147 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot@1.1.2";
-import { cva, type VariantProps } from "class-variance-authority@0.7.1";
+import React from "react";
+import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
-import { cn } from "./utils";
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9 rounded-md",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-);
+// Variantes ------------------------------------------------------------
+const VARIANTS = {
+  primary:
+    "bg-emerald-700 text-white hover:bg-emerald-800 focus-visible:ring-emerald-300",
+  secondary:
+    "bg-slate-800 text-white hover:bg-slate-900 focus-visible:ring-slate-300",
+  ghost:
+    "bg-slate-100 text-slate-900 hover:bg-slate-200 focus-visible:ring-slate-300",
+  link:
+    "bg-transparent text-emerald-700 hover:underline shadow-none focus-visible:ring-emerald-300 px-0",
+};
+
+// Tamaños --------------------------------------------------------------
+const SIZES = {
+  sm: "h-9 px-3 text-sm",
+  md: "h-10 px-4 text-sm",
+  lg: "h-11 px-5 text-base",
+};
+
+// Spinners --------------------------------------------------------------
+const SPINNER = {
+  primary: "border-white/50 border-t-white",
+  secondary: "border-white/50 border-t-white",
+  ghost: "border-slate-900/30 border-t-slate-900",
+  link: "border-emerald-700/30 border-t-emerald-700",
+};
 
 function Button({
+  children,
+  variant = "primary",
+  size = "md",
+  fullWidth = false,
+  isLoading = false,
+  disabled = false,
+  to,          //Link interno <Link> -->  to="/perfil"
+  href,        //Link externo <a> --> href="https://pagina.com"
+  target,
+  rel,
+  type = "button",
+  leftIcon,
+  rightIcon,
   className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot : "button";
+  onClick,
+  ...rest
+}) {
 
+  const classes = cn(     
+    "inline-flex items-center justify-center gap-2 font-medium rounded-xl",
+    "shadow-sm outline-none select-none transition-all",
+    "focus-visible:ring-2 focus-visible:ring-offset-2",
+    "disabled:opacity-60 disabled:pointer-events-none",
+    VARIANTS[variant] || VARIANTS.primary,
+    variant === "link" ? "px-0 h-auto" : (SIZES[size] || SIZES.md),
+    fullWidth && "w-full",
+    isLoading && "cursor-default",
+    className
+  );
+
+  const content = (
+    <>
+      {isLoading && (   // btn con loading spinner
+        <span
+            className={cn("size-4 border-2 rounded-full animate-spin", SPINNER[variant])}
+            aria-hidden="true"
+            />
+      )}
+      {!isLoading && leftIcon ? <span className="shrink-0">{leftIcon}</span> : null}
+      <span className="truncate">
+        <span aria-live="polite" aria-atomic="true">
+          {isLoading ? "Procesando…" : children}
+        </span>
+      </span>
+      {!isLoading && rightIcon ? <span className="shrink-0">{rightIcon}</span> : null}
+    </>
+  );
+
+
+  if (to) {    //Link interno (router) <Link>
+    return (
+      <Link
+        to={to}
+        className={classes}
+        aria-disabled={isLoading || disabled}
+        onClick={isLoading || disabled ? (e) => e.preventDefault() : onClick}
+        {...rest}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  if (href) {    
+    return (
+      <a
+        href={href}
+        target={target}
+        rel={rel || (target === "_blank" ? "noopener noreferrer" : undefined)}
+        className={classes}
+        aria-disabled={isLoading || disabled}
+        onClick={isLoading || disabled ? (e) => e.preventDefault() : onClick}
+        {...rest}
+      >
+        {content}
+      </a>
+    );
+  }
+
+ 
   return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
+    <button
+      type={type}
+      className={classes}
+      disabled={isLoading || disabled}
+      aria-busy={isLoading || undefined}
+      onClick={onClick}
+      {...rest}
+    >
+      {content}
+    </button>
   );
 }
 
-export { Button, buttonVariants };
+Button.propTypes = {  
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(["primary", "secondary", "ghost", "link"]),
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
+  fullWidth: PropTypes.bool,
+  isLoading: PropTypes.bool,
+  disabled: PropTypes.bool,
+  to: PropTypes.string,
+  href: PropTypes.string,
+  target: PropTypes.string,
+  rel: PropTypes.string,
+  type: PropTypes.oneOf(["button", "submit", "reset"]),
+  leftIcon: PropTypes.node,
+  rightIcon: PropTypes.node,
+  className: PropTypes.string,
+  onClick: PropTypes.func,
+};
+
+export default Button;
