@@ -135,7 +135,7 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 ----------------------------------
 ## Services (src/services)
-- 🟨 [src/services/api.js](../src/services/api.js) [ Pitu ]
+- 🟨 [src/services/api.js](../src/services/api.js) 
 
 ----------------------------------
 ## Styles (src/styles)
@@ -144,9 +144,9 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 ----------------------------------
 ## Utils (src/utils)
-- 🟦 [src/utils/currency.js](../src/utils/currency.js) [ Pitu ]
-- 🟦 [src/utils/date.js](../src/utils/date.js) [ Pitu ]
-- 🟦 [src/utils/validators.js](../src/utils/validators.js) [ Pitu ]
+- 🟦 [src/utils/currency.js](../src/utils/currency.js) 
+- 🟦 [src/utils/date.js](../src/utils/date.js)
+- 🟦 [src/utils/validators.js](../src/utils/validators.js) 
 
 ----------------------------------
 ## Public (public)
