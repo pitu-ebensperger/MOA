@@ -1,5 +1,7 @@
-export const Wishlist = () => {
-  return (
-      <h1>Wishlist</h1>
-  )
-}
+const WishlistPage = () => (
+  <main>
+    <h1>Wishlist</h1>
+  </main>
+);
+
+export default WishlistPage;
