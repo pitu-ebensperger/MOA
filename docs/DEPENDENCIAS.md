@@ -1,18 +1,21 @@
 # Listado Dependencias
 
-[*] = Todavía no confirmado 
+[*] = No confirmado/oficial todavía (puede cambiar)
 
 ------------------------------------------------------------------------------
 ## frontend/
 - axios
+- 
 - @heroicons/react [*]
 
-
-**Instalar:** `npm i` / `npm i axios`
+**Instalar:**   `npm create vite@latest my-project`
+                `npm i` 
+                `npm i axios`
 
 ------------------------------------------------------------------------------
 ## backend/
 - express
 - -D nodemon
 
-**Instalar:** `npm init -y` / `npm i express -D nodemon cors`
+**Instalar:**   `npm init -y`
+                `npm i express -D nodemon cors`
