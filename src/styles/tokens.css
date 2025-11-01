@@ -1,0 +1,21 @@
+
+:root {
+    --color-dark: #100E08;
+    --color-primary-1: #443114;
+    --color-primary-2: #453F34;
+    --color-secondary-1: #A69F91;
+    --color-secondary-2: #CCC7BE;
+    --color-light: #E6E0D8;
+
+    --font-primary: 'EB Garamond', serif;
+    --font-accent: 'Italiana', serif;
+
+    --weight-regular: 400;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    --text-base: 1rem;   /* 16px */
+    --text-xl: 1.5rem;   /* 24px */
+    --text-2xl: 2rem;    /* 32px */
+    --text-3xl: 3rem;    /* 48px */
+}
