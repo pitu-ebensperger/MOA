@@ -1,12 +1,18 @@
 {
   "name": "moa-monorepo",
   "private": true,
-  "workspaces": ["frontend", "backend"],
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "npm run -w frontend dev",
     "build": "npm run -w frontend build",
     "lint": "npm run -w frontend lint",
     "preview": "npm run -w frontend preview",
-    "snapshot": "npm run -ws snapshot"
+    "snapshot": "npm run -ws snapshot",
+    "f:dev": "npm run -w frontend dev",
+    "f:lint": "npm run -w frontend lint",
+    "b:dev": "npm run -w backend dev || echo \"(backend vacío)\""
   }
 }
