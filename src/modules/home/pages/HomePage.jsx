@@ -3,6 +3,7 @@ import HeroSection from "../components/HeroSection";
 import ProductsSection from "../components/ProductsSection";
 import CategoriesFilters from "../components/CategoriesFilters";
 import ContactSection from "../components/ContactSection";
+import { Footer } from "../../../components/layout/Footer";
 
 export const Home = () => {
   return (
@@ -15,6 +16,7 @@ export const Home = () => {
       <CategoriesFilters />
       <ProductsSection />
       <ContactSection />
+      <Footer/>
     </motion.div>
   );
 };
