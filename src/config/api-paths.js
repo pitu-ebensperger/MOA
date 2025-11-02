@@ -1,10 +1,12 @@
 export const API_PATHS = {
   auth: {
-    login: "/auth/login",
-    register: "/auth/register",
+    login: "/login",
+    register: "/register",
     profile: "/auth/profile",
+    forgot: '/auth/forgot-password',
+    reset: '/auth/reset-password',
   },
-  catalog: {
+  products: {
     products: "/products",
     productDetail: (id) => `/products/${id}`,
     categories: "/categories",
@@ -20,4 +22,5 @@ export const API_PATHS = {
   wishlist: {
     root: (userId) => `/users/${userId}/wishlist`,
   },
+
 };

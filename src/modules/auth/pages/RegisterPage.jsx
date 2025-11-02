@@ -1,70 +1,181 @@
-import { useState } from "react";
-import { useAuth } from "../hooks/useAuth.jsx";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Mail, Lock, User as UserIcon, Phone } from 'lucide-react'
 
-const RegisterPage = () => {
-  const { register, status, error } = useAuth();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+ import { useAuth } from '../../auth/context/AuthContext.jsx'
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+export default function RegisterPage({ onRegister }){
+  const navigate = useNavigate()
+  const { register } = useAuth() 
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  })
+  const [error, setError] = useState('')
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    try {
-      await register(form);
-    } catch {
-      // manejado por el estado global
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Las contraseñas no coinciden')
+      return
     }
-  };
+
+    if (typeof onRegister === 'function') {
+      await onRegister(formData)
+    } else {
+      console.log('Register payload:', formData)
+    }
+
+    // Redirige a login al terminar
+    navigate('/login')
+  }
 
   return (
-    <main>
-      <h1>Crear cuenta</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nombre
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-          />
-        </label>
+    <div className='page'> 
+    <div className="min-h-[calc(100vh-100px)] grid place-items-center px-6 py-12 bg-gradient-to-br from-[var(--color-light-beige,#f6efe7)] to-[var(--color-beige,#e9dccb)] animate-[fade-in_var(--transition-base,300ms)_both]">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl shadow-xl p-8 animate-[slide-up_var(--transition-slow,500ms)_both]">
+          <h1 className="text-center text-3xl font-semibold text-[var(--color-text-primary,#1f1f1f)] font-[var(--font-display,inherit)]">
+            Crear Cuenta
+          </h1>
+          <p className="mt-1 text-center text-sm text-[var(--color-text-muted,#6b7280)] font-[var(--font-secondary,inherit)]">
+            Únete a nuestra comunidad
+          </p>
 
-        <label>
-          Correo
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-        </label>
+          {/* Error simple */}
+          {error && (
+            <div className="mt-4 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {error}
+            </div>
+          )}
 
-        <label>
-          Contraseña
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            minLength={8}
-            required
-          />
-        </label>
+          <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+            {/* Nombre */}
+            <div className="grid gap-2">
+              <label htmlFor="name" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary,#1f1f1f)]">
+                <UserIcon size={18} />
+                Nombre Completo
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Juan Pérez"
+                required
+                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+              />
+            </div>
 
-        <button type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Creando..." : "Registrarme"}
-        </button>
+            {/* Email */}
+            <div className="grid gap-2">
+              <label htmlFor="email" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary,#1f1f1f)]">
+                <Mail size={18} />
+                Correo Electrónico
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="tu@email.com"
+                required
+                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+              />
+            </div>
 
-        {error && <p role="alert">No pudimos crear tu cuenta.</p>}
-      </form>
-    </main>
-  );
-};
+            {/* Teléfono */}
+            <div className="grid gap-2">
+              <label htmlFor="phone" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary,#1f1f1f)]">
+                <Phone size={18} />
+                Teléfono
+              </label>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+56 9 1234 5678"
+                required
+                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+              />
+            </div>
 
-export default RegisterPage;
+            {/* Password */}
+            <div className="grid gap-2">
+              <label htmlFor="password" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary,#1f1f1f)]">
+                <Lock size={18} />
+                Contraseña
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+              />
+            </div>
+
+            {/* Confirm Password */}
+            <div className="grid gap-2">
+              <label htmlFor="confirmPassword" className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-primary,#1f1f1f)]">
+                <Lock size={18} />
+                Confirmar Contraseña
+              </label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+              />
+            </div>
+
+            {/* Botón */}
+            <button
+              type="submit"
+              className="mt-2 inline-flex items-center justify-center rounded-md bg-[var(--color-primary-brown,#443114)] px-4 py-2 font-semibold text-white shadow-sm transition hover:brightness-105 hover:-translate-y-0.5 active:translate-y-px"
+            >
+              Registrarse
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-8 border-t border-[var(--color-border-light,#f0f2f5)] pt-6 text-center">
+            <p className="text-sm text-[var(--color-text-secondary,#4b5563)]">
+              ¿Ya tienes una cuenta?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="font-semibold underline text-[var(--color-primary-brown,#443114)] hover:opacity-90"
+              >
+                Inicia sesión aquí
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  )
+}

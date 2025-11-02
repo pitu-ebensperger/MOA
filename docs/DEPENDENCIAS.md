@@ -17,8 +17,8 @@
 ### 🎨 UI y estilos
 - ✅ tailwindcss, @tailwindcss/vite > `npm i -D tailwindcss @tailwindcss/vite` | estilos utilitarios (Tailwind v4)
 - ✅ clsx, tailwind-merge > `npm i clsx tailwind-merge` | combina clases condicionales sin conflictos
+- ☑️ lucide-react > `npm i lucide-react` | iconos outline (lib mas grande pero sin fill)
 - ☑️ @heroicons/react > `npm i @heroicons/react` | iconos outline + fill
-- ⬜ lucide-react > `npm i lucide-react` | iconos outline (lib mas grande pero sin fill)
 
 ### ⚙️ Funcionalidad
 - ☑️ react-hook-form > `npm i react-hook-form` | manejo eficiente de formularios y validaciones
