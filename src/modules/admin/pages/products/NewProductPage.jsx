@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Container } from "../../../../components/layout/Container.jsx";
 import { Header } from "../../../../components/layout/Header.jsx";
-import { Button } from "../../../../components/ui/Button.jsx";
+import Button from "../../../../components/ui/Button.jsx";
 
 const initialForm = {
   name: "",
@@ -13,7 +13,7 @@ const initialForm = {
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
-const NewProductPage = () => {
+export const NewProductPage = () => {
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -130,5 +130,3 @@ const NewProductPage = () => {
     </main>
   );
 };
-
-export default NewProductPage;
