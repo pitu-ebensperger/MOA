@@ -1,5 +1,8 @@
 export const ProductsCategory = () => {
   return (
-      <h1>ProductsCategory</h1>
+    <div className="page">
+            <h1>ProductsCategory</h1>
+    </div>
+
   )
 }
