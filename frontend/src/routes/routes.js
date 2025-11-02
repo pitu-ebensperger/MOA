@@ -5,6 +5,8 @@ export const ROUTES = {
   contact: '/contactus',
 
   login: '/login',
+  forgot_password: '/forgot_password',
+  reset_password: '/reser_password',
   register: '/register',
   profile: '/profile',
   cart: '/cart',
