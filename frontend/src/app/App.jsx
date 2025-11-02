@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import { Navbar } from '../components/layout/Navbar.jsx'
-import { Footer } from '../components/layout/Footer.jsx'
+import  Footer  from '../components/layout/Footer.jsx'
 import { HomePage } from '../modules/home/pages/HomePage.jsx'
 import { CartPage } from '../modules/cart/pages/CartPage.jsx'
 import { CheckoutPage } from '../modules/cart/pages/CheckoutPage.jsx'

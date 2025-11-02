@@ -3,7 +3,7 @@ PENDIENTES:
 - armar error handling (tanto con alertas para usuario como mensaje en consola para dev)
 - usar sweetalert para mensajes de error en el login/register
 
-- ARREGLAR DISEÑO HOME (+padding)
+- ARREGLAR DISEÑO HOME (+padding +colores etc)
 
 - afinar diseño register
 - afinar/homologar diseño botones
