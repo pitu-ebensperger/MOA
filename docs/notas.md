@@ -4,7 +4,9 @@ PENDIENTES:
 - usar sweetalert para mensajes de error en el login/register
 
 
-
+-afinar diseño register
+-afinar/homologar diseño botones
+- cambiar placeholderregister
 
 
 

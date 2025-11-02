@@ -97,17 +97,27 @@ export default function LoginPage() {
             {serverError && (
               <p className="text-sm text-red-600 -mt-2">{serverError}</p>
             )}
-            <div className='flex items-center justify-center w-full'> 
+            <div className='flex flex-col items-center justify-center w-full'> 
               <Button
               type="submit"
-              className="btn-primary btn-circle px-5 mt-2 mx-0 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="btn-primary btn-circle px-5 mt-2 mb-0 mx-0 disabled:opacity-60 disabled:cursor-not-allowed"
               disabled={submitting}
             >
               {submitting ? 'Entrando…' : 'Iniciar sesión'}
             </Button>
+
+                 <div className="mt-3 text-center">
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-sm text-tertiary no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </button>
             </div>
-            
-          </form>
+            </div>
+       
+         </form>
 
           <footer className="text-center mt-6 pt-6 border-t border-neutral-200">
             <p className="text-sm text-neutral-600">

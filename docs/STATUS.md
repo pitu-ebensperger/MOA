@@ -1,7 +1,7 @@
 # 🗂️ Estado de archivos (Frontend)
 
 **Leyenda** 
-ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ Corregir / ⬛ Cerrado
+ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Basico/Listo / ✅ Revisado / ⚠️ Corregir / ⬛ Cerrado
 
 --------------------------------------------------------------------------------------------------
 ## App (src/app)
@@ -44,11 +44,6 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 ## Config (src/config)
 - 🟨 [src/config/api-paths.js](../src/config/api-paths.js) 
 - 🟨 [env.js](../src/config/env.js) 
-
-----------------------------------
-## Context (src/context)
-- 🟥 [src/context/AuthContext.jsx](../src/context/AuthContext.jsx) 
-- 🟥 [src/context/cartContext.jsx](../src/context/cartContext.jsx) 
 
 ----------------------------------
 ## Hooks (src/hooks)
@@ -101,11 +96,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 ### Auth
 #### pages
 - 🟦 [src/modules/auth/pages/LoginPage.jsx](../src/modules/auth/pages/LoginPage.jsx) 
-- 🟥 [src/modules/auth/pages/RegisterPage.jsx](../src/modules/auth/pages/RegisterPage.jsx) 
-- 🟥 [src/modules/auth/pages/ForgotPasswordPage.jsx](../src/modules/auth/pages/ForgotPasswordPage.jsx) 
-- 🟥 [src/modules/auth/pages/ResetPasswordPage.jsx](../src/modules/auth/pages/ResetPasswordPage.jsx) 
+- 🟦 [src/modules/auth/pages/RegisterPage.jsx](../src/modules/auth/pages/RegisterPage.jsx) 
+- 🟦 [src/modules/auth/pages/ForgotPasswordPage.jsx](../src/modules/auth/pages/ForgotPasswordPage.jsx) 
+- 🟦 [src/modules/auth/pages/ResetPasswordPage.jsx](../src/modules/auth/pages/ResetPasswordPage.jsx) 
 #### hook
 - 🟦 [src/modules/auth/hook/useAuth.js](../src/modules/auth/hook/useAuth.js)  //Maneja sesión (login, logout, isAuth, user)
+ 🟦 [src/modules/auth/hook/useRedirectAuth.js](../src/modules/auth/hook/useRedirectAuth.js) 
 #### context
 - 🟦 [src/modules/auth/context/AuthContext.js](../src/modules/auth/context/AuthContext.js) 
 #### services
@@ -130,7 +126,8 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 ----------------------------------
 ## Routes (src/routes)
-- 🟨 src/routes/auth.route.js 
+- 🟨 [src/routes/auth.route.js](../src/routes/auth.route.js)
+- 🟨 [src/routes/routes.js](../src/routes/auth.routes.js)
 - 🟥 src/routes/checkout.route.js 
 
 ----------------------------------

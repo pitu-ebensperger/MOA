@@ -3,6 +3,8 @@ export const API_PATHS = {
     login: "/login",
     register: "/register",
     profile: "/auth/profile",
+    forgot: '/auth/forgot-password',
+    reset: '/auth/reset-password',
   },
   products: {
     products: "/products",
@@ -20,4 +22,5 @@ export const API_PATHS = {
   wishlist: {
     root: (userId) => `/users/${userId}/wishlist`,
   },
+
 };
