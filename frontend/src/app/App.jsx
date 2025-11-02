@@ -26,6 +26,7 @@ export const App = () => {
       <Navbar />
       <Routes>
         <Route path='/' element={<HomePage />} />
+        <Route path='/home' element={<HomePage />} />
         <Route path='/cart' element={<CartPage />} />
         <Route path='/checkout' element={<CheckoutPage />} />
         <Route path='*' element={<NotFoundPage />} />

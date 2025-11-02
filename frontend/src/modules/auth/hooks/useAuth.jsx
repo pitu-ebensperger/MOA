@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth as useAuthCtx } from "../context/AuthContext.jsx";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useAuthCtx();
 
 

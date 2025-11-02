@@ -74,7 +74,11 @@ async function request(path, { method = "GET", data, headers = {}, auth = false,
 
   // 401 → dispara handler global (logout) si existe
   if (res.status === 401 && onUnauthorized) {
-    try { onUnauthorized(); } catch {}
+    try {
+      onUnauthorized();
+    } catch (handlerError) {
+      console.error('onUnauthorized handler failed', handlerError);
+    }
   }
 
   if (!res.ok) {

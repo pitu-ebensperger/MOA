@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
 
-// Ítems del navbar (rutas públicas principales)
 const NAV_ITEMS = [
   { label: 'Inicio', href: '/home' },
   { label: 'Categorías', href: '/categories' },
@@ -11,20 +10,13 @@ const NAV_ITEMS = [
   { label: 'Contacto', href: '/contactus' },
 ];
 
-/**
- * @param {string}   currentPage       (opcional, por compatibilidad)
- * @param {function} onNavigate        (opcional, por compatibilidad)
- * @param {number}   cartItemCount     contador del carrito (default 0)
- */
-export function Navbar({ currentPage = 'home', onNavigate, cartItemCount = 0 }) {
+export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, isAdmin, logout } = useAuth();
 
-  // helper para marcar link activo por path
   const isActive = (href) => location.pathname.startsWith(href);
 
-  // navega (si te pasan handler externo) y cierra menú móvil
   const handleNavigate = (page) => {
     onNavigate?.(page);
     setIsMenuOpen(false);
@@ -46,17 +38,25 @@ export function Navbar({ currentPage = 'home', onNavigate, cartItemCount = 0 }) 
 
           {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-8">
-            {NAV_ITEMS.map((item, index) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                className="nav-items transition-colors animate-fade-in-up"
-                style={{ animationDelay: `${index * 100}ms` }} // delay incremental
-                aria-current={isActive(item.href) ? 'page' : undefined}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  aria-current={active ? 'page' : undefined}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={[
+                    'nav-items',
+                    active
+                      ? 'text-[var(--color-secondary1)] underline underline-offset-4'
+                      : '',
+                  ].join(' ')}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Acciones / Iconos (derecha) */}
@@ -105,7 +105,7 @@ export function Navbar({ currentPage = 'home', onNavigate, cartItemCount = 0 }) 
                   </>
                 )}
 
-                {/* Logout (discreto en desktop) */}
+                {/* Logout */}
                 <button onClick={logout} className="hidden md:inline nav-items nav-btn">
                   Salir
                 </button>
@@ -125,7 +125,7 @@ export function Navbar({ currentPage = 'home', onNavigate, cartItemCount = 0 }) 
           </div>
         </div>
 
-        {/* Menú móvil (max-height + opacity) */}
+        {/* Menú móvil */}
         <nav
           id="mobile-menu"
           className={[
@@ -141,9 +141,9 @@ export function Navbar({ currentPage = 'home', onNavigate, cartItemCount = 0 }) 
                 to={item.href}
                 className="nav-items"
                 aria-current={isActive(item.href) ? 'page' : undefined}
-                onClick={() => setIsMenuOpen(false)} // cerrar al navegar
+                onClick={() => setIsMenuOpen(false)}
               >
-                {item.label}e
+                {item.label}
               </Link>
             ))}
 
