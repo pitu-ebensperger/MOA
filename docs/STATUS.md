@@ -26,7 +26,7 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Basico/Listo / ✅ Revisado / �
 ### Layout
 - 🟥 [src/components/layout/Breadcrumbs.jsx](../src/components/layout/Breadcrumbs.jsx) 
 - 🟥 [src/components/layout/Container.jsx](../src/components/layout/Container.jsx) 
-- 🟥 [src/components/layout/Footer.jsx](../src/components/layout/Footer.jsx) 
+- 🟦 [src/components/layout/Footer.jsx](../src/components/layout/Footer.jsx) 
 - 🟥 [src/components/layout/Header.jsx](../src/components/layout/Header.jsx) 
 - 🟦 [src/components/layout/Navbar.jsx](../src/components/layout/Navbar.jsx) 
 
