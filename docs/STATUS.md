@@ -12,7 +12,7 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 ## Components (src/components)
 
 ### Data-display
-- 🟥 [src/components/data-display/Price.jsx](../src/components/data-display/Price.jsx) 
+- 🟦 [src/components/data-display/Price.jsx](../src/components/data-display/Price.jsx) 
 - 🟥 [src/components/data-display/ProductCard.jsx](../src/components/data-display/ProductCard.jsx) 
 
 ### Feedback
@@ -100,7 +100,7 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 ### Auth
 #### pages
-- 🟥 [src/modules/auth/pages/LoginPage.jsx](../src/modules/auth/pages/LoginPage.jsx) 
+- 🟦 [src/modules/auth/pages/LoginPage.jsx](../src/modules/auth/pages/LoginPage.jsx) 
 - 🟥 [src/modules/auth/pages/RegisterPage.jsx](../src/modules/auth/pages/RegisterPage.jsx) 
 - 🟥 [src/modules/auth/pages/ForgotPasswordPage.jsx](../src/modules/auth/pages/ForgotPasswordPage.jsx) 
 - 🟥 [src/modules/auth/pages/ResetPasswordPage.jsx](../src/modules/auth/pages/ResetPasswordPage.jsx) 

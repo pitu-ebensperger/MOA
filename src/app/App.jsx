@@ -1,7 +1,3 @@
-import '../styles/global.css'
-import '../styles/tokens.css'
-import '../styles/motion.css'
-
 import { Routes, Route } from 'react-router-dom'
 import { Navbar } from '../components/layout/Navbar.jsx'
 import { Footer } from '../components/layout/Footer.jsx'
@@ -15,6 +11,11 @@ import { ProductDetailPage } from '../modules/products/pages/ProductDetailPage.j
 import ProductsPage from '../modules/products/pages/ProductsPage.jsx'
 import { ProfilePage } from '../modules/profile/pages/ProfilePage.jsx'
 import WishlistPage from '../modules/profile/pages/WishlistPage.jsx'
+
+import '../styles/global.css'
+import '../styles/tokens.css'
+import '../styles/motion.css'
+import '../styles/components/buttons.css'
 
 
 export const App = () => {
