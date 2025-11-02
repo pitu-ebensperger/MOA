@@ -66,12 +66,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Basico/Listo / ✅ Revisado / �
 ## Modules (src/modules)
 
 ### Home 
-- 🟥 [src/modules/home/pages/HomePage.jsx](../src/modules/home/pages/HomePage.jsx) 
+- 🟦 [src/modules/home/pages/HomePage.jsx](../src/modules/home/pages/HomePage.jsx) 
 #### components
-- 🟥 [src/modules/home/components/CategoriesFilters.jsx](../src/modules/home/components/CategoriesFilters.jsx) 
-- 🟥 [src/modules/home/components/ContactSection.jsx](../src/modules/home/components/ContactSection.jsx) 
-- 🟥 [src/modules/home/components/HeroSection.jsx](../src/modules/home/components/HeroSection.jsx) 
-- 🟥 [src/modules/home/components/ProductsSection.jsx](../src/modules/home/components/ProductsSection.jsx) 
+- 🟦 [src/modules/home/components/CategoriesFilters.jsx](../src/modules/home/components/CategoriesFilters.jsx) 
+- 🟦 [src/modules/home/components/ContactSection.jsx](../src/modules/home/components/ContactSection.jsx) 
+- 🟦 [src/modules/home/components/HeroSection.jsx](../src/modules/home/components/HeroSection.jsx) 
+- 🟦 [src/modules/home/components/ProductsSection.jsx](../src/modules/home/components/ProductsSection.jsx) 
 
 ### Products
 #### pages
