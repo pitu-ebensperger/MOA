@@ -133,3 +133,77 @@ export const apiClient = {
   public: verbs(false),
   private: verbs(true),
 };
+
+
+// Ligero wrapper sobre fetch con 2 clientes: public/private.
+// Expone setTokenGetter() y setOnUnauthorized() para integrarse con AuthContext.
+
+let tokenGetter = () => null;
+let onUnauthorized = null;
+
+/** Permite que AuthContext registre cómo obtener el token actual */
+export function setTokenGetter(fn) { tokenGetter = fn || (() => null); }
+/** Permite que AuthContext registre qué hacer ante 401 (p.ej., logout) */
+export function setOnUnauthorized(fn) { onUnauthorized = fn || null; }
+
+const defaultHeaders = { 'Content-Type': 'application/json' };
+
+async function request(baseURL, path, { method = 'GET', body, headers = {}, auth = false } = {}) {
+  const opts = { method, headers: { ...defaultHeaders, ...headers } };
+  if (body !== undefined) opts.body = typeof body === 'string' ? body : JSON.stringify(body);
+
+  // Header Authorization si es cliente privado
+  if (auth) {
+    const token = tokenGetter?.();
+    if (token) opts.headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(new URL(path, baseURL), opts);
+
+  // 204 No Content
+  if (res.status === 204) return null;
+
+  // Parse JSON seguro
+  let data;
+  const text = await res.text();
+  try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+
+  // 401 → dispara handler global si existe
+  if (res.status === 401 && onUnauthorized) {
+    try { onUnauthorized(); } catch {}
+  }
+
+  if (!res.ok) {
+    const error = new Error(data?.message || `HTTP ${res.status}`);
+    error.status = res.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
+}
+
+function createClient(baseURL) {
+  return {
+    get:    (path, cfg={}) => request(baseURL, path, { ...cfg, method: 'GET' }),
+    post:   (path, body, cfg={}) => request(baseURL, path, { ...cfg, method: 'POST', body }),
+    put:    (path, body, cfg={}) => request(baseURL, path, { ...cfg, method: 'PUT', body }),
+    patch:  (path, body, cfg={}) => request(baseURL, path, { ...cfg, method: 'PATCH', body }),
+    delete: (path, cfg={}) => request(baseURL, path, { ...cfg, method: 'DELETE' }),
+  };
+}
+
+// Lee tu env actual (ya tenías env.js y API_PATHS)
+import { env } from '../config/env.js';
+
+const baseURL = env.API_BASE_URL;
+export const apiClient = {
+  public:  createClient(baseURL),                            // sin Authorization
+  private: {
+    get:    (p, c) => request(baseURL, p, { ...c, method:'GET',    auth:true }),
+    post:   (p, b, c) => request(baseURL, p, { ...c, method:'POST', body:b, auth:true }),
+    put:    (p, b, c) => request(baseURL, p, { ...c, method:'PUT',  body:b, auth:true }),
+    patch:  (p, b, c) => request(baseURL, p, { ...c, method:'PATCH',body:b, auth:true }),
+    delete: (p, c) => request(baseURL, p, { ...c, method:'DELETE',  auth:true }),
+  },
+};

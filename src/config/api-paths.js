@@ -4,7 +4,7 @@ export const API_PATHS = {
     register: "/register",
     profile: "/auth/profile",
   },
-  catalog: {
+  products: {
     products: "/products",
     productDetail: (id) => `/products/${id}`,
     categories: "/categories",
