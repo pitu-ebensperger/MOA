@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './useAuth.jsx';
-import { ROUTES } from '../../../config/routes.js';
+import { ROUTES } from '../../../routes/routes.js';
 
 export function useRedirectAfterAuth() {
   const { isAdmin } = useAuth();
