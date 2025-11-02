@@ -28,11 +28,11 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 - 🟥 [src/components/layout/Container.jsx](../src/components/layout/Container.jsx) 
 - 🟥 [src/components/layout/Footer.jsx](../src/components/layout/Footer.jsx) 
 - 🟥 [src/components/layout/Header.jsx](../src/components/layout/Header.jsx) 
-- 🟥 [src/components/layout/Navbar.jsx](../src/components/layout/Navbar.jsx) 
+- 🟦 [src/components/layout/Navbar.jsx](../src/components/layout/Navbar.jsx) 
 
 ### UI
 - 🟥 [src/components/ui/Badge.jsx](../src/components/ui/Badge.jsx) 
-- 🟥 [src/components/ui/Button.jsx](../src/components/ui/Button.jsx) 
+- 🟦 [src/components/ui/Button.jsx](../src/components/ui/Button.jsx) 
 - 🟥 [src/components/ui/DropdownMenu.jsx](../src/components/ui/DropdownMenu.jsx) 
 - 🟥 [src/components/ui/Input.jsx](../src/components/ui/Input.jsx) 
 - 🟥 [src/components/ui/Modal.jsx](../src/components/ui/Modal.jsx) 
@@ -42,7 +42,8 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 ----------------------------------
 ## Config (src/config)
-- 🟥 src/config/constant.js 
+- 🟨 [src/config/api-paths.js](../src/config/api-paths.js) 
+- 🟨 [env.js](../src/config/env.js) 
 
 ----------------------------------
 ## Context (src/context)
@@ -81,7 +82,8 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 #### pages
 - 🟥 [src/modules/products/pages/ProductsPage.jsx](../src/modules/products/pages/ProductsPage.jsx) 
 - 🟥 [src/modules/products/pages/ProductCategoryPage.jsx](../src/modules/products/pages/ProductCategoryPage.jsx) 
-- 🟥 [src/modules/products/pages/ProductDetailPage.jsx](../src/modules/products/pages/ProductDetailPage.jsx) 
+- 🟥 [src/modules/products/pages/ProductDetailPage.jsx](../src/modules/products/pages/ProductDetailPage.jsx)
+- 🟥 [src/pages/search/SearchResultsPage.jsx](../src/modules/products/pages/SearchResultsPage.jsx)
 #### components
 - 🟥 [src/modules/products/components/CategoryFilter.jsx](../src/modules/products/components/CategoryFilter.jsx) 
 - 🟥 [src/modules/products/components/ProductFilters.jsx](../src/modules/products/components/ProductFilters.jsx) 
@@ -103,9 +105,9 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 - 🟥 [src/modules/auth/pages/ForgotPasswordPage.jsx](../src/modules/auth/pages/ForgotPasswordPage.jsx) 
 - 🟥 [src/modules/auth/pages/ResetPasswordPage.jsx](../src/modules/auth/pages/ResetPasswordPage.jsx) 
 #### hook
-- 🟦  [src/modules/auth/hook/useAuth.js](../src/modules/auth/hook/useAuth.js)  //Maneja sesión (login, logout, isAuth, user)
+- 🟦 [src/modules/auth/hook/useAuth.js](../src/modules/auth/hook/useAuth.js)  //Maneja sesión (login, logout, isAuth, user)
 #### context
-- 🟦  [src/modules/auth/context/AuthContext.js](../src/modules/auth/context/AuthContext.js) 
+- 🟦 [src/modules/auth/context/AuthContext.js](../src/modules/auth/context/AuthContext.js) 
 #### services
 - 🟦 [src/modules/auth/services/auth.api.js](../src/modules/auth/services/auth.api.js) 
 
@@ -125,32 +127,39 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 - 🟥 [src/modules/support/pages/PrivacyPage.jsx](../src/modules/support/pages/PrivacyPage.jsx) 
 - 🟥 [src/modules/support/pages/TermsPage.jsx](../src/modules/support/pages/TermsPage.jsx)
 
-### Others/ 
-- 🟥 src/pages/search/SearchResultsPage.jsx 
 
 ----------------------------------
 ## Routes (src/routes)
-- 🟥 src/routes/auth.route.js 
+- 🟨 src/routes/auth.route.js 
 - 🟥 src/routes/checkout.route.js 
 
 ----------------------------------
 ## Services (src/services)
-- 🟨 src/services/api.js [ Pitu ]
+- 🟨 src/services/api.js 
 
 ----------------------------------
 ## Styles (src/styles)
 - 🟨 [src/styles/global.css](../src/styles/global.css) 
-- 🟥 [src/styles/tokens.css](../src/styles/tokens.css) 
+- 🟨 [src/styles/tokens.css](../src/styles/tokens.css) 
+- 🟨 [src/styles/motion.css](../src/styles/motion.css) 
+- 🟦 [src/styles/components/button.css](../src/styles/components/button.css) 
 
 ----------------------------------
 ## Utils (src/utils)
-- 🟦 src/utils/currency.js [ Pitu ]
-- 🟦 src/utils/date.js [ Pitu ]
-- 🟦 src/utils/validators.js [ Pitu ]
+- 🟦 src/utils/currency.js 
+- 🟦 src/utils/date.js 
+- 🟦 src/utils/validators.js 
 
 ----------------------------------
 ## Public (public)
 - 🟥 [public/favicon.ico](../public/favicon.ico) 
+
+
+
+
+
+
+
 
 
 --------------------------------------------------------------------------------------------------
@@ -177,92 +186,3 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 ### Cart (src/modules/cart)
 - 🟥 src/modules/cart/components/CartSummary.jsx  //Potencial
-
-### src/pages
-#### home
-- 🟥 src/pages/home/HomePage.jsx [ ? ]
-#### products
-- 🟥 src/pages/products/productsPage.jsx [ ? ]
-- 🟥 src/pages/products/ProductDetailPage.jsx [ ? ]
-- 🟥 src/pages/products/ProductCategoryPage.jsx [ ? ]
-#### cart
-- 🟥 src/pages/cart/CartPage.jsx [ ? ]
-- 🟥 src/pages/cart/CheckoutPage.jsx [ ? ]
-#### auth
-- 🟥 src/pages/auth/LoginPage.jsx [ ? ]
-- 🟥 src/pages/auth/RegisterPage.jsx [ ? ]
-- 🟥 src/pages/auth/*/ForgotPasswordPage.jsx [ ? ]
-- 🟥 src/pages/auth/*/ResetPasswordPage.jsx [ ? ]
-#### profile
-- 🟥 src/pages/profile/ProfilePage.jsx [ ? ]
-- 🟥 src/pages/profile/OrdersPage.jsx [ ? ]
-- 🟥 src/pages/profile/OrderDetailPage.jsx [ ? ]
-- 🟥 src/pages/profile/WishlistPage.jsx [ ? ]
-#### admin
-- 🟥 src/pages/admin/AdminDashboardPage.jsx [ ? ]
-- 🟥 src/pages/admin/products/productsAdminPage.jsx [ ? ]
-- 🟥 src/pages/admin/products/NewProductPage.jsx [ ? ]
-- 🟥 src/pages/admin/orders/OrdersListPage.jsx [ ? ]
-- 🟥 src/pages/admin/orders/OrdersDetailPage.jsx [ ? ]
-#### otros
-- 🟥 src/pages/search/SearchResuljsPage.jsx [ ? ]
-- 🟥 src/pages/ErrorPage.jsx [ ? ]
-- 🟥 src/pages/support/PrivacyPage.jsx [ ? ]
-- 🟥 src/pages/support/TermsPage.jsx [ ? ]
-- 🟥 src/pages/support/ContactPage.jsx [ ? ]
-
-### src/components/layout
-- 🟥 src/components/layout/Hero.jsx [ ? ]
-
-### src/components/ui
-- 🟥 src/components/ui/Checkbox.jsx [ ? ]
-- 🟥 [src/components/ui/Icon.jsx](../src/components/ui/Icon.jsx) [ ? ]
-- 🟥 src/components/ui/Loader.jsx [ ? ]
-- 🟥 src/components/ui/Popover.jsx [ ? ]
-- 🟥 src/components/ui/Skeleton.jsx [ ? ]
-- 🟥 src/components/ui/Switch.jsx [ ? ]
-- 🟥 src/components/ui/Tabs.jsx [ ? ]
-
-### src/components/data-display
-- 🟥 src/components/data-display/ProductGrid.jsx [ ? ]
-- 🟥 [src/components/data-display/ProductSkeleton.jsx](../src/components/data-display/ProductSkeleton.jsx) [ ? ]
-- 🟥 src/components/data-display/Rating.jsx [ ? ]
-
-### src/modules/cart
-- 🟥 src/modules/cart/components/CartSummary.jsx [ ? ]
-
-### src/context
-- 🟥 src/context/UIContext.jsx [ ? ]
-
-### src/config
-- 🟥 src/config/constant.js [ ? ]
-
-### src/services/http
-- 🟥 src/services/http/client.js [ ? ]
-- 🟥 src/services/http/interceptors.js [ ? ]
-
-### src/services/repositories
-- 🟥 src/services/repositories/auth.repo.js [ ? ]
-- 🟥 src/services/repositories/cart.repo.js [ ? ]
-- 🟥 src/services/repositories/categories.repo.js [ ? ]
-- 🟥 src/services/repositories/orders.repo.js [ ? ]
-- 🟥 src/services/repositories/products.repo.js [ ? ]
-
-### src/hooks/state
-- 🟥 src/hooks/state/useAuth.js [ ? ] //Maneja sesión (login, logout, isAuth, user)
-
-### src/hooks/ui
-- 🟥 src/hooks/ui/useDocumentTitle.js [ ? ]
-- 🟥 src/hooks/ui/useIntersectionObserver.js [ ? ]
-- 🟥 src/hooks/ui/useOnClickOutside.js [ ? ]
-
-### src/hooks/utils
-- 🟥 src/hooks/utils/useEventListener.js [ ? ]
-- 🟥 src/hooks/utils/useLocalStorage.js [ ? ]
-- 🟥 src/hooks/utils/usePrevious.js [ ? ]
-- 🟥 src/hooks/utils/useSessionStorage.js [ ? ]
-
-### src/assets
-- 🟥 src/assets/icons/ [ ? ]
-- 🟥 src/assets/images/ [ ? ]
-- 🟥 src/assets/fonts/ [ ? ]
