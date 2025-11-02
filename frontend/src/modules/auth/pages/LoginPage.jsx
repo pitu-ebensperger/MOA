@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth.jsx';
 import { useRedirectAfterAuth } from '../../auth/hooks/useRedirectAuth.jsx';
 import { validateEmail, validatePassword } from '../../../utils/validators.js';
 import Button from '../../../components/ui/Button.jsx';
 
+
 export default function LoginPage() {
   const { login } = useAuth();
+  const navigate = useNavigate(); 
   const redirect = useRedirectAfterAuth();
 
   const [email, setEmail] = useState('');
@@ -107,13 +109,13 @@ export default function LoginPage() {
             </Button>
 
                  <div className="mt-3 text-center">
-              <button
+              <Link
                 type="button"
                 onClick={() => navigate('/forgot-password')}
                 className="text-sm text-tertiary no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] transition-colors"
               >
                 ¿Olvidaste tu contraseña?
-              </button>
+              </Link>
             </div>
             </div>
        
