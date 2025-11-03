@@ -7,7 +7,7 @@ const ProductsSection = ({ products = [] }) => {
       <header className="mb-6 flex items-baseline justify-between">
         <h2 className="title-serif text-2xl sm:text-3xl">Productos destacados</h2>
         <span className="ui-sans text-sm text-[var(--text-weak)]">
-          Explorá nuestra selección basada en tus categorías favoritas.
+          Explora nuestra selección basada en tus categorías favoritas.
         </span>
       </header>
 
