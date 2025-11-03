@@ -26,7 +26,7 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Basico/Listo / ✅ Revisado / �
 ### Layout
 - 🟥 [src/components/layout/Breadcrumbs.jsx](../src/components/layout/Breadcrumbs.jsx) 
 - 🟥 [src/components/layout/Container.jsx](../src/components/layout/Container.jsx) 
-- 🟥 [src/components/layout/Footer.jsx](../src/components/layout/Footer.jsx) 
+- 🟦 [src/components/layout/Footer.jsx](../src/components/layout/Footer.jsx) 
 - 🟥 [src/components/layout/Header.jsx](../src/components/layout/Header.jsx) 
 - 🟦 [src/components/layout/Navbar.jsx](../src/components/layout/Navbar.jsx) 
 
@@ -48,12 +48,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Basico/Listo / ✅ Revisado / �
 ----------------------------------
 ## Hooks (src/hooks)
 ### state
-- 🟥 src/hooks/state/useCart.js 
-- 🟥 src/hooks/state/useCategories.js  
-- 🟥 src/hooks/state/useOrders.js 
-- 🟥 src/hooks/state/useProducts.js 
-- 🟥 src/hooks/state/useUser.js
-- 🟥 src/hooks/state/useWishlist.js 
+- 🟦 src/hooks/state/useCart.js 
+- 🟦 src/hooks/state/useCategories.js  
+- 🟦 src/hooks/state/useOrders.js 
+- 🟦 src/hooks/state/useProducts.js 
+- 🟦 src/hooks/state/useUser.js
+- 🟦 src/hooks/state/useWishlist.js 
 ### ui
 - 🟥 src/hooks/ui/useInput.js 
 - 🟥 src/hooks/ui/useModal.js 
