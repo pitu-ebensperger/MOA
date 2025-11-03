@@ -1,26 +1,19 @@
-import { motion } from "motion/react";
-import HeroSection from "../components/HeroSection";
-import ProductsSection from "../components/ProductsSection";
-import CategoriesFilters from "../components/CategoriesMenu";
-import ContactSection from "../components/ContactSection";
-import { Footer } from "../../../components/layout/Footer";
-import { Navbar } from "../../../components/layout/Navbar";
+import HeroSection from "../../../components/layout/HeroSection.jsx";
+import ProductsSection from "../components/ProductsSection.jsx";
+import CategoriesMenu from "../components/CategoriesMenu.jsx";
+import ContactSection from "../components/ContactSection.jsx";
+import Footer from "../../../components/layout/Footer.jsx";
+
+import { CATEGORIES, PRODUCTS } from "../../../utils/mockdata.js";
 
 export const HomePage = () => {
   return (
-    <>
-    <Navbar />
-    <motion.div
-      initial={{ opacity: 0, y: 20 }} // Empieza invisible y ligeramente desplazado hacia abajo
-      animate={{ opacity: 1, y: 0 }} // Luego aparece y sube a su posición normal
-      transition={{ duration: 0.6 }}  // En 0.6 segundos
-    >
+    <div>
       <HeroSection />
-      <CategoriesFilters />
-      <ProductsSection />
+      <CategoriesMenu categories={CATEGORIES} />
+      <ProductsSection categories={CATEGORIES} products={PRODUCTS} />
       <ContactSection />
-      <Footer/>
-    </motion.div>
-    </>
+      <Footer />
+    </div>
   );
 };
