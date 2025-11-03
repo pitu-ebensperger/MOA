@@ -66,12 +66,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Basico/Listo / ✅ Revisado / �
 ## Modules (src/modules)
 
 ### Home 
-- 🟦 [src/modules/home/pages/HomePage.jsx](../src/modules/home/pages/HomePage.jsx) 
+- 🟨 [src/modules/home/pages/HomePage.jsx](../src/modules/home/pages/HomePage.jsx) 
 #### components
-- 🟦 [src/modules/home/components/CategoriesFilters.jsx](../src/modules/home/components/CategoriesFilters.jsx) 
-- 🟦 [src/modules/home/components/ContactSection.jsx](../src/modules/home/components/ContactSection.jsx) 
-- 🟦 [src/modules/home/components/HeroSection.jsx](../src/modules/home/components/HeroSection.jsx) 
-- 🟦 [src/modules/home/components/ProductsSection.jsx](../src/modules/home/components/ProductsSection.jsx) 
+- 🟨 [src/modules/home/components/CategoriesFilters.jsx](../src/modules/home/components/CategoriesFilters.jsx) 
+- 🟨 [src/modules/home/components/ContactSection.jsx](../src/modules/home/components/ContactSection.jsx) 
+- 🟨 [src/modules/home/components/HeroSection.jsx](../src/modules/home/components/HeroSection.jsx) 
+- 🟨 [src/modules/home/components/ProductsSection.jsx](../src/modules/home/components/ProductsSection.jsx) 
 
 ### Products
 #### pages
@@ -83,7 +83,12 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Basico/Listo / ✅ Revisado / �
 - 🟥 [src/modules/products/components/CategoryFilter.jsx](../src/modules/products/components/CategoryFilter.jsx) 
 - 🟥 [src/modules/products/components/ProductFilters.jsx](../src/modules/products/components/ProductFilters.jsx) 
 - 🟥 [src/modules/products/components/ProductGallery.jsx](../src/modules/products/components/ProductGallery.jsx) 
-- 🟥 [src/modules/products/components/QuickViewModal.jsx](../src/modules/products/components/QuickViewModal.jsx) 
+- 🟥 [src/modules/products/components/QuickViewModal.jsx](../src/modules/products/components/QuickViewModal.jsx)
+### hooks
+- 🟦 [src/modules/product/hooks/useProducts.jsx](../src/modules/home/hooks/useProducts.jsx) 
+- 🟥 [src/modules/product/hooks/UseCategories.jsx](../src/modules/home/hooks/UseCategories.jsx)  
+### services
+- 🟦 [src/modules/product/services/product.api.js](../src/modules/home/services/product.jsx) 
 
 ### Cart
 #### pages

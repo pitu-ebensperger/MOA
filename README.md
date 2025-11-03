@@ -1,9 +1,16 @@
 # Proyecto Marketplace
 
-### Notas
-* Cada carpeta gestiona su propio node_modules locales, instalar dependencias antes de ejecutar (link )
+## Estructura del repositorio
+*Cada carpeta gestiona su propio node_modules locales, instalar dependencias antes de ejecutar*
+**`frontend/`**
+    Instalar:   `npm i -w frontend paquete`
+    Ejecutar:   `npm run dev` | `npm run preview` | `npm run test` | `npm run lint`
 
-### Docs
+**`backend/`**
+    Instalar:   `npm i -w backend paquete`
+    Ejecutar:   `npm run -w backend dev`
+
+**`docs/`**
 - [Estructura proyecto y Progreso](./docs/STATUS.md)
 - [Listado de dependecias](./docs/DEPENDENCIAS.md)
 
