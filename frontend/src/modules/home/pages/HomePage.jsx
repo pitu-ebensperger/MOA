@@ -1,12 +1,12 @@
 import { motion } from "motion/react";
 import HeroSection from "../components/HeroSection";
 import ProductsSection from "../components/ProductsSection";
-import CategoriesFilters from "../components/CategoriesFilters";
+import CategoriesFilters from "../components/CategoriesMenu";
 import ContactSection from "../components/ContactSection";
 import { Footer } from "../../../components/layout/Footer";
 import { Navbar } from "../../../components/layout/Navbar";
 
-export const Home = () => {
+export const HomePage = () => {
   return (
     <>
     <Navbar />
