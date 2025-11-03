@@ -1,52 +1,80 @@
+import React from "react";
+
 const ContactSection = () => {
   return (
-    <section className="bg-[var(--paper)]">
-      <div className="container-px mx-auto grid gap-6 py-12 sm:grid-cols-2 sm:items-center">
-        <div>
-          <h2 className="title-serif text-2xl sm:text-3xl">¿Necesitás ayuda para elegir?</h2>
-          <p className="ui-sans mt-3 text-sm leading-relaxed text-[var(--text-weak)]">
-            Nuestro equipo está listo para asesorarte sobre materiales, estilos y opciones de envío.
-            Dejanos tu consulta y te contactamos dentro de las próximas 24 horas hábiles.
-          </p>
-        </div>
+    <section className="bg-light py-20 px-6">
+      <div className="max-w-4xl mx-auto text-center">
+        <h2 className="font-italiana text-4xl text-dark mb-10">
+          Contáctanos
+        </h2>
 
-        <form className="ui-sans grid gap-4 rounded-lg bg-white p-6 shadow-sm">
-          <label className="grid gap-2 text-sm">
-            <span className="font-medium text-[var(--text)]">Nombre completo</span>
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+          {/* Dirección */}
+          <div>
+            <label className="block font-garamond text-dark mb-2">
+              Dirección
+            </label>
             <input
               type="text"
-              name="name"
-              placeholder="Tu nombre"
-              className="rounded-md border border-[var(--line)] px-3 py-2 outline-none focus:border-[var(--brand)]"
+              className="w-full border border-primary2 rounded px-4 py-2 focus:outline-none"
             />
-          </label>
+          </div>
 
-          <label className="grid gap-2 text-sm">
-            <span className="font-medium text-[var(--text)]">Correo electrónico</span>
+          {/* Nombre */}
+          <div>
+            <label className="block font-garamond text-dark mb-2">
+              Nombre
+            </label>
             <input
-              type="email"
-              name="email"
-              placeholder="nombre@correo.com"
-              className="rounded-md border border-[var(--line)] px-3 py-2 outline-none focus:border-[var(--brand)]"
+              type="text"
+              className="w-full border border-primary2 rounded px-4 py-2 focus:outline-none"
             />
-          </label>
+          </div>
 
-          <label className="grid gap-2 text-sm">
-            <span className="font-medium text-[var(--text)]">Consulta</span>
+          {/* Número de teléfono */}
+          <div>
+            <label className="block font-garamond text-dark mb-2">
+              Número de teléfono
+            </label>
+            <input
+              type="tel"
+              placeholder="Ingresa tu número"
+              className="w-full border border-primary2 rounded px-4 py-2 focus:outline-none"
+            />
+          </div>
+
+          {/* Cita */}
+          <div>
+            <label className="block font-garamond text-dark mb-2">
+              Cita
+            </label>
+            <input
+              type="date"
+              className="w-full border border-primary2 rounded px-4 py-2 focus:outline-none"
+            />
+          </div>
+
+          {/* Mensaje */}
+          <div className="md:col-span-2">
+            <label className="block font-garamond text-dark mb-2">
+              Mensaje
+            </label>
             <textarea
-              name="message"
               rows="4"
-              placeholder="Contanos qué estás buscando"
-              className="resize-none rounded-md border border-[var(--line)] px-3 py-2 outline-none focus:border-[var(--brand)]"
-            />
-          </label>
+              placeholder="Ingresa tu mensaje"
+              className="w-full border border-primary2 rounded px-4 py-2 focus:outline-none"
+            ></textarea>
+          </div>
 
-          <button
-            type="submit"
-            className="rounded-md bg-[var(--btn)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--btn-hover)]"
-          >
-            Enviar mensaje
-          </button>
+          {/* Botón */}
+          <div className="md:col-span-2 text-center mt-4">
+            <button
+              type="submit"
+              className="bg-primary1 text-light px-8 py-2 rounded font-garamond hover:bg-primary2 transition"
+            >
+              Enviar
+            </button>
+          </div>
         </form>
       </div>
     </section>
