@@ -1,66 +1,44 @@
-import { Facebook, Twitter, Instagram } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 
 export const Footer = () => {
   return (
-    <footer className="bg-[#d2cbc1] text-gray-800 py-10 px-6 md:px-16">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-        {/* Logo y descripción */}
+    <footer className="border-t border-[var(--line)] bg-[var(--paper)]">
+      <div className="container-px mx-auto grid gap-10 py-10 sm:grid-cols-2">
         <div>
-          <h2 className="text-lg font-semibold mb-2">Logo</h2>
-          <p className="text-sm mb-4">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit
+          <div className="title-serif text-lg">Logo</div>
+          <p className="ui-sans mt-2 text-sm text-[var(--text-weak)] max-w-xs">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
           </p>
-          <div className="flex gap-3 mb-6">
-            <a href="#" className="p-2 bg-white rounded-full hover:bg-gray-200">
-              <Facebook className="w-4 h-4" />
+          <div className="mt-3 flex gap-3 text-[var(--text-weak)]">
+            <a className="rounded-full p-2 ring-1 ring-[var(--line)] hover:bg-white">
+              <Mail className="size-4" />
             </a>
-            <a href="#" className="p-2 bg-white rounded-full hover:bg-gray-200">
-              <Twitter className="w-4 h-4" />
-            </a>
-            <a href="#" className="p-2 bg-white rounded-full hover:bg-gray-200">
-              <Instagram className="w-4 h-4" />
+            <a className="rounded-full p-2 ring-1 ring-[var(--line)] hover:bg-white">
+              <Phone className="size-4" />
             </a>
           </div>
-          <p className="text-xs text-gray-700">
-            ©2025 MOA. All rights reserved
-          </p>
         </div>
-
-        {/* Servicio al cliente */}
-        <div>
-          <h3 className="font-semibold mb-3">Servicio al cliente</h3>
-          <ul className="space-y-2 text-sm">
-            <li>Centro de ayuda</li>
-            <li>Cómo comprar</li>
-            <li>Preguntas frecuentes</li>
-          </ul>
-        </div>
-
-        {/* Mi cuenta */}
-        <div>
-          <h3 className="font-semibold mb-3">Mi cuenta</h3>
-          <ul className="space-y-2 text-sm">
-            <li>Carrito de compras</li>
-            <li>Perfil</li>
-            <li>Mis favoritos</li>
-          </ul>
-        </div>
-
-        {/* Nosotros */}
-        <div>
-          <h3 className="font-semibold mb-3">Nosotros</h3>
-          <ul className="space-y-2 text-sm">
-            <li>Nuestra empresa</li>
-            <li>Contacto</li>
-            <li>Novedades</li>
-          </ul>
+        <div className="flex flex-row gap-20">
+          <div>
+            <h4 className="ui-sans text-sm font-medium">Servicio al cliente</h4>
+            <ul className="ui-sans mt-3 space-y-2 text-sm text-[var(--text-weak)]">
+              <li>Centro de ayuda</li>
+              <li>Cómo comprar</li>
+              <li>Preguntas frecuentes</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="ui-sans text-sm font-medium">Nosotros</h4>
+            <ul className="ui-sans mt-3 space-y-2 text-sm text-[var(--text-weak)]">
+              <li>Nuestra empresa</li>
+              <li>Contacto</li>
+              <li>Novedades</li>
+            </ul>
+          </div>
         </div>
       </div>
-
-      {/* Políticas */}
-      <div className="max-w-7xl mx-auto mt-8 flex flex-col md:flex-row justify-end gap-6 text-sm text-gray-700">
-        <span>Privacy & Policy</span>
-        <span>Terms & Condition</span>
+      <div className="ui-sans border-t border-[var(--line)] py-4 text-center text-xs text-[var(--text-weak)]">
+        ©2025 MOA · Privacy & Policy · Terms & Conditions
       </div>
     </footer>
   );
