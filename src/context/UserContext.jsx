@@ -1,3 +1,21 @@
+import { createContext, UserContext } from "react";
+import { useUser } from "../hooks/state/useUser";
+
+const UserContext = createContext();
+
+export const UserProvider = ({ children }) => {
+  const userState = useUser(); 
+  return (
+    <UserContext.Provider value={userState}>
+      {children}
+    </UserContext.Provider>
+  );
+};
+
+// Hook para acceder fácilmente
+export const useUserContext = () => useContext(UserContext);
+
+
 /** EJEMPLO PIZZER DE USERCONTEXT
  * import { createContext, useState } from "react";
 

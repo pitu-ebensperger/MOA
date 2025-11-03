@@ -14,7 +14,7 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 ## Pages
 
 ### pages/home
-- 🟥 src/pages/home/HomePage.jsx [ ? ]
+- 🟦 src/pages/home/HomePage.jsx [ Lali ]
 ### pages/products
 - 🟥 src/pages/products/productsPage.jsx [ ? ]
 - 🟥 src/pages/products/ProductDetailPage.jsx [ ? ]
@@ -59,7 +59,7 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 ### components/layout
 - 🟥 src/components/layout/Breadcrumbs.jsx [ ? ]
 - 🟥 src/components/layout/Container.jsx [ ? ]
-- 🟥 src/components/layout/Footer.jsx [ ? ]
+- 🟦 src/components/layout/Footer.jsx [ Lali ]
 - 🟥 src/components/layout/Hero.jsx [ ? ]
 - 🟥 src/components/layout/Navbar.jsx [ ? ]
 ### components/data-display
@@ -82,13 +82,13 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 ## Hooks
 
 ### hooks/state
-- 🟥 src/hooks/useAuth.js [ ? ] //Maneja sesión (login, logout, isAuth, user)
-- 🟥 src/hooks/useCart.js [ ? ] //Carrito
-- 🟥 src/hooks/useCategories.js [ ? ] //Filtros, navegación por categorías
-- 🟥 src/hooks/useOrders.js //Crear y consultar órdenes
-- 🟥 src/hooks/useProducts.js [ ? ] //Listado y detalle de productos
-- 🟥 src/hooks/useUser.js [ ? ] //Perfil del usuario
-- 🟥 src/hooks/useWishlist.js [ ? ] //Carga/agrega/etc favoritos
+- 🟦 src/hooks/useAuth.js [ Lali ] //Maneja sesión (login, logout, isAuth, user)
+- 🟦 src/hooks/useCart.js [ Lali ] //Carrito
+- 🟦 src/hooks/useCategories.js [ Lali ] //Filtros, navegación por categorías
+- 🟦 src/hooks/useOrders.js //Crear y consultar órdenes
+- 🟦 src/hooks/useProducts.js [ Lali ] //Listado y detalle de productos
+- 🟦 src/hooks/useUser.js [ Lali ] //Perfil del usuario
+- 🟦 src/hooks/useWishlist.js [ Lali ] //Carga/agrega/etc favoritos
 ### hooks/ui    
 - 🟥 src/hooks/useInput.js [ ? ]
 - 🟥 src/hooks/useModal.js [ ? ]
@@ -103,7 +103,9 @@ ESTADO = 🟥 Pendiente / 🟨 En Proceso / 🟦 Listo /  ✅ Revisado / ⚠️ 
 
 ## Context
 - 🟥 src/context/AuthContext.jsx [ ? ]
-- 🟥 src/context/CartContext.jsx [ ? ]
+- 🟦 src/context/CartContext.jsx [ Lali ]
+- 🟦 src/context/UserContext.jsx [ Lali ]
+- 🟦 src/context/WishlistContext.jsx [ Lali ]
 - 🟥 src/context/UIContext.jsx [ ? ]
 
 # Config
