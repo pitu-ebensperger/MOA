@@ -1,28 +1,21 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
+//.gitignore (raíz)
 node_modules
-dist
-dist-ssr
-*.local
+**/node_modules
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+dist
+**/dist
+.vite
+**/.vite
 
 .env
-*.env
-!*.env.example
+**/.env
+.env.*.local
+**/.env.*.local
+
+snapshots/*.txt
+snapshots/*.json
+
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
