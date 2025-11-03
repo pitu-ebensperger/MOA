@@ -1,4 +1,4 @@
-import { ProductCard } from '../../../components/products/ProductCard.jsx';
+import { ProductCard } from '../../../components/data-display/ProductCard.jsx';
 
 const ProductsSection = ({ products = [] }) => {
   const items = products.slice(0, 4);

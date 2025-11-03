@@ -1,5 +1,5 @@
 
-export const ProducCard = () => {
+export const ProductCard = () => {
   return (
     <div>
         Hero
