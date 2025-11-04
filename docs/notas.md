@@ -14,3 +14,7 @@ PENDIENTES:
 Pendientes chicos no importantes:
 - arreglar badge carrito (sacar numeros)
 
+
+
+PRODUCTS:
+- 
