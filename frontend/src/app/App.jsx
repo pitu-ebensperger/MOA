@@ -34,7 +34,7 @@ export const App = () => {
         <Route path='/register' element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path='/product-detail' element={<ProductDetailPage />} />
+        <Route path='/products/:id' element={<ProductDetailPage />} />
         <Route path='/products' element={<ProductsPage />} />
         <Route path='/profile' element={<ProfilePage />} />
         <Route path='/wishlist' element={<WishlistPage />} />
