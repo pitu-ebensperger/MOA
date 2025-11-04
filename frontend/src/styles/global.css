@@ -127,7 +127,16 @@ a:hover, button:hover {
   right: calc(var(--spacing) * 1);
 }
 
+/* PROFILE --------------------------------------------------------*/
 
+.profile-image{
+    background-color: var(--color-secondary2);
+    border-radius: var(--radius-xl);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--color-light);
+}
 
 /* FORMS --------------------------------------------------------*/
 
