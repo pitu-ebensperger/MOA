@@ -1,7 +1,12 @@
+import Breadcrumbs from "../../../components/ui/Breadcrumbs.jsx"
+import { getCategoryById } from "../../../utils/mockdata.js";
+
+
 export const ProductsCategory = () => {
   return (
     <div className="page">
-            <h1>ProductsCategory</h1>
+            <Breadcrumbs />
+            <h1></h1>
     </div>
 
   )
