@@ -16,7 +16,7 @@ body {
     background-color: var(--color-light);
 }
 
-h1,h2,h3,h4,h5,h6 {
+h1,h2,h4,h5,h6 {
     font-family: var(--font-display);
     color: var(--color-dark);
 }
@@ -54,7 +54,7 @@ a:hover, button:hover {
 
 
 .page {
-  margin-top:80px
+  margin-top:80px;
 }
 /* NAVBAR --------------------------------------------------------*/
 .nav-container {
