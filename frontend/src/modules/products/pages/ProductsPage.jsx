@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import ProductGallery from "../components/ProductGallery.jsx";
 import { ProductSidebar } from "../components/ProductSidebar.jsx";
+import { ProductFiltersDrawer } from "../components/ProductFiltersDrawer.jsx";
 import { CATEGORIES, PRODUCTS as PRODUCTS_MOCK } from "../../../utils/mockdata.js";
 
 const ensureNumber = (value, fallback) => {
@@ -41,6 +42,7 @@ export default function ProductsPage({ products }) {
   const [min, setMin] = useState(minPrice);
   const [max, setMax] = useState(maxPrice);
   const [sort, setSort] = useState("relevance");
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((product) => {
@@ -103,19 +105,28 @@ export default function ProductsPage({ products }) {
           <span className="ui-sans text-sm text-[var(--text-weak)]">
             {filteredProducts.length} resultado{filteredProducts.length === 1 ? "" : "s"}
           </span>
-          <label className="flex items-center gap-2 text-sm text-[var(--text-weak)]">
-            Ordenar por
-            <select
-              value={sort}
-              onChange={(event) => setSort(event.target.value)}
-              className="rounded-full border border-[var(--line,#e3ddd3)] bg-white px-3 py-2 text-sm text-neutral-700 transition focus:border-[var(--color-primary-brown,#443114)] focus:outline-none"
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-[var(--text-weak)]">
+              Ordenar por
+              <select
+                value={sort}
+                onChange={(event) => setSort(event.target.value)}
+                className="rounded-full border border-[var(--line,#e3ddd3)] bg-white px-3 py-2 text-sm text-neutral-700 transition focus:border-[var(--color-primary-brown,#443114)] focus:outline-none"
+              >
+                <option value="relevance">Relevancia</option>
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
+                <option value="name-asc">Nombre A-Z</option>
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => setIsMobileFiltersOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--color-primary-brown,#443114)] px-3 py-2 text-sm font-medium text-[var(--color-primary-brown,#443114)] transition hover:bg-[var(--color-primary-brown,#443114)] hover:text-white lg:hidden"
             >
-              <option value="relevance">Relevancia</option>
-              <option value="price-asc">Precio: menor a mayor</option>
-              <option value="price-desc">Precio: mayor a menor</option>
-              <option value="name-asc">Nombre A-Z</option>
-            </select>
-          </label>
+              Filtros
+            </button>
+          </div>
         </div>
       </header>
 
@@ -153,6 +164,20 @@ export default function ProductsPage({ products }) {
 
         <ProductGallery products={sortedProducts} />
       </div>
+
+      <ProductFiltersDrawer
+        open={isMobileFiltersOpen}
+        onClose={() => setIsMobileFiltersOpen(false)}
+        categories={CATEGORIES}
+        filters={{ category, min, max }}
+        limits={{ min: minPrice, max: maxPrice }}
+        onChangeCategory={(next) => setCategory(next)}
+        onChangePrice={({ min: nextMin, max: nextMax }) => {
+          setMin(ensureNumber(nextMin, minPrice));
+          setMax(ensureNumber(nextMax, maxPrice));
+        }}
+        onReset={resetFilters}
+      />
     </main>
   );
 }
