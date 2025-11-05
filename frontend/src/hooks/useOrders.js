@@ -1,53 +1,40 @@
 import { useState, useEffect } from "react";
 
 export const useOrders = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [orders, setOrders] = useState(() => {
+    const saved = localStorage.getItem("orders");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  //  Obtener todas las órdenes
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch("https://api.example.com/orders");
-      if (!response.ok) throw new Error("Error al obtener las órdenes");
-      const data = await response.json();
-      setOrders(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  // Crear  nueva orden
+  const createOrder = (orderData) => {
+    const newOrder = {
+      id: Date.now(), // ID único (temporal)
+      date: new Date().toISOString(),
+      ...orderData, // { productos, total, etc. }
+    };
+
+    setOrders((prev) => {
+      const updated = [...prev, newOrder];
+      localStorage.setItem("orders", JSON.stringify(updated));
+      return updated;
+    });
+
+    return newOrder;
   };
 
-  // Crear una nueva orden
-  const createOrder = async (newOrder) => {
-    try {
-      setLoading(true);
-      const response = await fetch("https://api.eejemplo.com/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newOrder),
-      });
-      if (!response.ok) throw new Error("Error al crear la orden");
-      const created = await response.json();
-      setOrders((prev) => [...prev, created]);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  // Obtener una orden específica
+  const getOrderById = (id) => orders.find((o) => o.id === id);
+
+  // Borrar  órdenes 
+  const clearOrders = () => {
+    localStorage.removeItem("orders");
+    setOrders([]);
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    localStorage.setItem("orders", JSON.stringify(orders));
+  }, [orders]);
 
-  return {
-    orders,
-    loading,
-    error,
-    fetchOrders,
-    createOrder,
-  };
+  return { orders, createOrder, getOrderById, clearOrders };
 };

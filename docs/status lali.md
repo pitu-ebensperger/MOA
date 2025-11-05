@@ -1,6 +1,5 @@
 #actualizar estos en el princiapl
 ### hooks/state
-- 🟦 src/hooks/useAuth.js [ Lali ] //Maneja sesión (login, logout, isAuth, user)
 - 🟦 src/hooks/useCart.js [ Lali ] //Carrito
 - 🟦 src/hooks/useCategories.js [ Lali ] //Filtros, navegación por categorías
 - 🟦 src/hooks/useOrders.js //Crear y consultar órdenes
