@@ -16,6 +16,10 @@ body {
     background-color: var(--color-light);
 }
 
+main {
+    padding-inline: 1.5rem;
+}
+
 h1,h2,h3,h4,h5,h6 {
     font-family: var(--font-display);
     color: var(--color-dark);
@@ -26,6 +30,10 @@ h1 {
     color: var(--color-dark);
     font-weight: var(--weight-semibold);
     font-size: var(--text-3xl);
+}
+
+footer{
+    margin-top: 4rem;
 }
 
 a:hover, button:hover {
@@ -57,9 +65,10 @@ a:hover, button:hover {
   margin-top:80px
 }
 /* NAVBAR --------------------------------------------------------*/
+
 .nav-container {
     background-color: color-mix(in oklab, var(--color-secondary2) 10%, transparent);
-    border-color: transparent;   
+    border-color: transparent; 
 }
 
 .brand {
