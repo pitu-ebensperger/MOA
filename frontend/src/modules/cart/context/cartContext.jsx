@@ -1,5 +1,7 @@
 import { createContext, useContext } from "react";
-import { useCart } from "../hooks/state/useCart";
+import { useCart } from "../hooks/useCart";
+
+
 
 const CartContext = createContext();
 

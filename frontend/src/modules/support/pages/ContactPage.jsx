@@ -2,7 +2,7 @@ import React from "react";
 
 const ContactPage = () => {
   return (
-    <main className="bg-[#E6E0D8] min-h-screen px-6 py-16 text-[#453F34]">
+    <main className="bg-[#E6E0D8] min-h-screen px-6 py-50 text-[#453F34]">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
         {/* Informacion de Contacto de MOA*/}
         <div className="space-y-8">

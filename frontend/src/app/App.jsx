@@ -13,6 +13,13 @@ import { ProductDetailPage } from '../modules/products/pages/ProductDetailPage.j
 import ProductsPage from '../modules/products/pages/ProductsPage.jsx'
 import { ProfilePage } from '../modules/profile/pages/ProfilePage.jsx'
 import WishlistPage from '../modules/profile/pages/WishlistPage.jsx'
+import { FAQPage } from '../modules/support/pages/FAQPage.jsx'
+import ContactPage from '../modules/support/pages/ContactPage.jsx';
+import {PrivacyPage} from '../modules/support/pages/PrivacyPage.jsx'
+import {TermsPage} from '../modules/support/pages/TermsPage.jsx'
+
+
+
 
 import '../styles/global.css'
 import '../styles/tokens.css'
@@ -29,6 +36,10 @@ export const App = () => {
         <Route path='/home' element={<HomePage />} />
         <Route path='/cart' element={<CartPage />} />
         <Route path='/checkout' element={<CheckoutPage />} />
+        <Route path='/faq' element={<FAQPage />} /> 
+        <Route path='/contact' element={<ContactPage />} /> 
+        <Route path='/privacy' element={<PrivacyPage />} /> 
+        <Route path='/terms' element={<TermsPage/>} /> 
         <Route path='*' element={<NotFoundPage />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
