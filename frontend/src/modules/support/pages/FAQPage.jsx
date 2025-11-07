@@ -32,15 +32,16 @@ export const FAQPage = () => {
     {
       question: "¿Cómo puedo contactar al servicio al cliente?",
       answer:
-        "Puedes comunicarte con nuestro equipo a través de correo electrónico o WhatsApp. Nuestro horario de atención es de lunes a viernes de 9:00 a 18:00 hrs."
+        "Puedes comunicarte con nuestro equipo a través de correo electrónico . Nuestro horario de atención es de lunes a viernes de 9:00 a 18:00 hrs."
     }
   ];
 
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
-        Preguntas Frecuentes
-      </h1>
+<main className="max-w-3xl mx-auto p-6 pt-36 pb-20">
+     <h1 className="text-3xl font-bold text-center mb-6 text-[#2E2B26]">
+  Preguntas Frecuentes
+</h1>
+
       <section className="space-y-4">
         {faqs.map((faq, index) => (
           <div

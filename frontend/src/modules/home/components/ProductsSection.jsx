@@ -4,10 +4,10 @@ const ProductsSection = ({ products = [] }) => {
   const items = products.slice(0, 4);
 
   return (
-    <section className="page container-px mx-auto py-12">
-      <header className="mb-6 flex items-baseline justify-between">
-        <h2 className="title-serif text-2xl sm:text-3xl">Productos destacados</h2>
-        <span className="ui-sans text-sm text-[var(--text-weak)]">
+    <section className="bg-[#d2cbc1] page container-px mx-auto py-12">
+      <header className="mb-6 text-center">
+        <h2 className="title-serif text-2xl sm:text-3xl mb-2">Productos destacados</h2>
+        <span className="ui-sans text-sm text-[var(--text-weak)] block">
           Explora nuestra selección basada en tus categorías favoritas.
         </span>
       </header>
@@ -22,5 +22,3 @@ const ProductsSection = ({ products = [] }) => {
 };
 
 export default ProductsSection;
-
-              
