@@ -25,7 +25,7 @@ export function CategoriesCard({ category, variant = "default" }) {
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-[32px] bg-neutral-900 text-white shadow-xl ${styles.container}`}
+      className={`group relative overflow-hidden rounded-4xl bg-neutral-900 text-white shadow-xl ${styles.container}`}
     >
       <img
         src={category.coverImage}
@@ -34,11 +34,11 @@ export function CategoriesCard({ category, variant = "default" }) {
         loading="lazy"
       />
       <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-t ${styles.overlay} mix-blend-darken`}
+        className={`pointer-events-none absolute inset-0 bg-linear-to-t ${styles.overlay} mix-blend-darken`}
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 rounded-[32px] bg-black/0 transition-opacity duration-300 group-hover:bg-black/10"
+        className="pointer-events-none absolute inset-0 rounded-4xl bg-black/0 transition-opacity duration-300 group-hover:bg-black/10"
         aria-hidden
       />
 
@@ -47,7 +47,7 @@ export function CategoriesCard({ category, variant = "default" }) {
           <h3 className={`title-serif text-white ${styles.title}`}>{category.name}</h3>
           <Link
             to="/products"
-            className="group inline-flex h-[38px] items-center overflow-hidden rounded-full border border-white/60 px-2 py-2 text-sm font-normal text-white transition-all duration-500 ease-out hover:border-white hover:bg-white/5 group-hover:h-auto"
+            className="group inline-flex h-[38px] items-center overflow-hidden rounded-full border border-white/60 px-2 py-2 text-sm font-normal text-white transition-all duration-500 ease-out hover:border-white hover:bg-white/5"
             aria-label={`Explorar ${category.name}`}
           >
             <span className="max-w-0 overflow-hidden whitespace-nowrap text-sm font-normal leading-none tracking-wide opacity-0 transition-all duration-500 ease-out delay-100 group-hover:max-w-[120px] group-hover:pl-3 group-hover:text-white/90 group-hover:opacity-100">

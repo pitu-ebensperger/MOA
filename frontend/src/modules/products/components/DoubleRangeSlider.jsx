@@ -38,18 +38,19 @@ export function DoubleRangeSlider({
       const updateFromClientX = (clientX) => {
         const ratio = clamp((clientX - rect.left) / rect.width, 0, 1);
         const rawValue = min + ratio * (max - min);
-        const rounded = Math.round(rawValue);
+        const stepped = Math.round(rawValue / step) * step;
+        const rounded = clamp(stepped, min, max);
 
         const current = valuesRef.current;
 
         if (activeHandle === "min") {
           const nextMin = Math.min(rounded, current.max);
           valuesRef.current = { min: nextMin, max: current.max };
-          onChange?.({ min: nextMin, max: current.max });
+          onChange?.(nextMin, current.max);
         } else {
           const nextMax = Math.max(rounded, current.min);
           valuesRef.current = { min: current.min, max: nextMax };
-          onChange?.({ min: current.min, max: nextMax });
+          onChange?.(current.min, nextMax);
         }
       };
 
@@ -64,7 +65,7 @@ export function DoubleRangeSlider({
       document.addEventListener("pointermove", pointerMove);
       document.addEventListener("pointerup", pointerUp, { once: true });
     },
-    [min, max, onChange]
+    [min, max, onChange, step]
   );
 
   const adjustValue = useCallback(
@@ -73,11 +74,11 @@ export function DoubleRangeSlider({
       if (handle === "min") {
         const nextMin = clamp(current.min + delta, min, current.max);
         valuesRef.current = { min: nextMin, max: current.max };
-        onChange?.({ min: nextMin, max: current.max });
+        onChange?.(nextMin, current.max);
       } else {
         const nextMax = clamp(current.max + delta, current.min, max);
         valuesRef.current = { min: current.min, max: nextMax };
-        onChange?.({ min: current.min, max: nextMax });
+        onChange?.(current.min, nextMax);
       }
     },
     [min, max, onChange]
@@ -114,7 +115,7 @@ export function DoubleRangeSlider({
         className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-neutral-200"
       >
         <div
-          className="absolute h-full rounded-full bg-[var(--color-primary-brown,#443114)]"
+          className="absolute h-full rounded-full bg-(--color-primary-brown,#443114)"
           style={{
             left: `${percent(valueMin ?? min)}%`,
             right: `${100 - percent(valueMax ?? max)}%`,

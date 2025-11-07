@@ -14,5 +14,11 @@
     "f:dev": "npm run -w frontend dev",
     "f:lint": "npm run -w frontend lint",
     "b:dev": "npm run -w backend dev || echo \"(backend vacío)\""
+  },
+  "devDependencies": {
+    "@asamuzakjp/css-color": "^4.0.5",
+    "cssstyle": "^2.3.0",
+    "jsdom": "^27.1.0",
+    "vite-node": "^5.0.0"
   }
 }

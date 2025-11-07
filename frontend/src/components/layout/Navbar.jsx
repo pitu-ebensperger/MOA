@@ -1,21 +1,45 @@
 import { ShoppingCart, Menu, User, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
 
 const NAV_ITEMS = [
-  { label: 'Inicio', href: '/home' },
+  { label: 'Inicio', href: '/home', match: ['/', '/home'] },
   { label: 'Categorías', href: '/categories' },
   { label: 'Productos', href: '/products' },
-  { label: 'Contacto', href: '/contactus' },
+  { label: 'Contacto', href: '/home#contact', match: '/home' },
 ];
+
+const getPathname = (href = "") => {
+  if (!href) return "/";
+  const [path] = href.split("#");
+  return path || "/";
+};
 
 export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, isAdmin, logout } = useAuth();
 
-  const isActive = (href) => location.pathname.startsWith(href);
+  useEffect(() => {
+    if (!location.hash) return;
+    const targetId = location.hash.replace("#", "");
+    const element = document.getElementById(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.hash]);
+
+  const isActive = (item) => {
+    const targets = Array.isArray(item.match) ? item.match : [item.match ?? getPathname(item.href)];
+    return targets.some((target) => {
+      if (!target) return false;
+      if (target === "/") {
+        return location.pathname === "/" || location.pathname === "/home";
+      }
+      return location.pathname === target || location.pathname.startsWith(`${target}/`);
+    });
+  };
 
   const handleNavigate = (page) => {
     onNavigate?.(page);
@@ -39,7 +63,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
           {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-8">
             {NAV_ITEMS.map((item) => {
-              const active = isActive(item.href);
+              const active = isActive(item);
               return (
                 <Link
                   key={item.label}
@@ -49,7 +73,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                   className={[
                     'nav-items',
                     active
-                      ? 'text-[var(--color-secondary1)] underline underline-offset-4'
+                      ? 'text-(--color-secondary1) underline underline-offset-4'
                       : '',
                   ].join(' ')}
                 >
@@ -140,7 +164,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                 key={item.label}
                 to={item.href}
                 className="nav-items"
-                aria-current={isActive(item.href) ? 'page' : undefined}
+                aria-current={isActive(item) ? 'page' : undefined}
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}

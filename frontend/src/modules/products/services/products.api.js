@@ -1,6 +1,6 @@
 import { env } from "../../../config/env.js";
 import { API_PATHS } from "../../../config/api-paths.js";
-import { mockCatalogApi } from "../../../mocks/api/catalog.js";
+import { mockCatalogApi } from "../../../mocks/api/products.js";
 import { apiClient } from "../../../services/api-client.js";
 
 const buildQueryString = (params = {}) => {

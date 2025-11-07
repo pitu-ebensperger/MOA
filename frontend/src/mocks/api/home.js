@@ -1,5 +1,18 @@
-import { catalogDb, contentDb } from "../database/index.js";
+import { PRODUCTS, CATEGORIES, contentDb } from "../database/index.js";
 import { delay } from "../utils/delay.js";
+
+const normalizeCategory = (category) => ({
+  id: category.id,
+  slug: category.slug,
+  name: category.name,
+  coverImage: category.coverImage ?? null,
+  parentId: category.parentId ?? null,
+});
+
+const catalogDb = {
+  categories: CATEGORIES.map(normalizeCategory),
+  products: PRODUCTS,
+};
 
 const pickCategories = (ids) => {
   if (!Array.isArray(ids) || ids.length === 0) {
@@ -10,7 +23,7 @@ const pickCategories = (ids) => {
         id: category.id,
         slug: category.slug,
         name: category.name,
-        coverImage: category.coverImage ?? null,
+        coverImage: category.coverImage,
       }));
   }
 
@@ -22,7 +35,7 @@ const pickCategories = (ids) => {
         id: item.id,
         slug: item.slug,
         name: item.name,
-        coverImage: item.coverImage ?? null,
+        coverImage: item.coverImage,
       };
     })
     .filter(Boolean);

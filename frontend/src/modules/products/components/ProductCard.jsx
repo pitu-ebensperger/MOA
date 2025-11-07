@@ -1,103 +1,143 @@
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Heart, ShoppingCart } from "lucide-react";
-import { formatCurrencyCLP } from "../../../utils/currency.js";
+import { Price } from "../../../components/data-display/Price.jsx";
 
 const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1540574163026-643ea20ade25?q=80&w=1200&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop";
 
 export default function ProductCard({
   product = {},
-  onAddToCart,
-  onToggleFavorite,
-  isFavorite = false,
+  onAddToCart = () => {},
+  onToggleWishlist = () => {},
 }) {
   const {
     id,
     slug,
+    price = 50000,
     title,
     name,
-    price,
     image,
     imageUrl,
-    images,
-  } = product ?? {};
+    coverImage,
+  } = product;
 
-  const displayName = title ?? name ?? "Producto";
-
-  const imageSrc = useMemo(() => {
-    if (typeof image === "string" && image.length) return image;
-    if (typeof imageUrl === "string" && imageUrl.length) return imageUrl;
-    if (Array.isArray(images) && images.length) return images[0];
-    return FALLBACK_IMAGE;
-  }, [image, imageUrl, images]);
-
-  const href = slug
-    ? `/products/${slug}`
-    : id !== undefined && id !== null
-    ? `/products/${id}`
-    : "/products";
-
-  const formattedPrice = formatCurrencyCLP(price);
-
-  const handleAddToCart = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onAddToCart?.(product);
-  };
-
-  const handleToggleFavorite = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    onToggleFavorite?.(product, !isFavorite);
-  };
+  const displayTitle = title ?? name ?? slug ?? "Nombre Producto";
+  const displayImage = image ?? imageUrl ?? coverImage ?? FALLBACK_IMAGE;
+  const productSlug = slug ?? (id ? String(id) : null);
+  const href = productSlug ? `/products/${productSlug}` : "/products";
 
   return (
-    <article className="group relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-white shadow-lg transition-transform duration-300 focus-within:-translate-y-1 hover-lift animate-fade-in-up">
-      <img
-        src={imageSrc}
-        alt={displayName}
-        loading="lazy"
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+    <article
+      className="
+        group relative w-full max-w-[324px] h-[400px] mx-auto
+        overflow-clip rounded-[10px] shadow-lg
+        bg-(--color-white)]border border(--color-border-light)
+        transition-all duration-300
+        hover:scale-[1.01] hover:shadow-xl
+        focus-within:scale-[1.01]
+      "
+    >
+      {/* Imagen base */}
+      <div className="absolute inset-0 size-full rounded-[10px] overflow-hidden">
+        {displayImage ? (
+          <img
+            src={displayImage}
+            alt={displayTitle}
+            className="
+              absolute inset-0 size-full object-cover rounded-[10px]
+              transition-transform duration-500 group-hover:scale-[1.03]
+            "
+          />
+        ) : (
+          <div className="absolute inset-0 bg-(--color-light)" />
+        )}
+      </div>
+
+      <div
+        className="
+          pointer-events-none absolute left-0 right-0 bottom-0 h-[48%]
+          bg-linear-to-t
+          from-[rgba(72,51,19,0.55)] to-[rgba(170,123,50,0)]
+          mix-blend-multiply
+        "
+        aria-hidden
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(36,27,13,0.55)] via-transparent to-transparent opacity-90 transition-opacity duration-300 group-hover:opacity-[0.98]" />
+      <div
+        className="pointer-events-none absolute inset-0 bg-black/0 rounded-[10px] transition-opacity duration-300 group-hover:bg-black/10"
+        aria-hidden
+      />
 
+      {/* Btn Agregar al carrito (aparece desde arriba al hover/focus) */}
+      <div
+        className=" btn-container flex justify-center w-fit
+          absolute top-4 left-1/2 -translate-x-1/2 z-10
+          opacity-0 -translate-y-6
+          transition-all duration-300
+          group-hover:opacity-100 group-hover:translate-y-0
+          group-focus-within:opacity-100 group-focus-within:translate-y-0
+        "
+      >
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault(); // evita navegar si está envuelto por Link
+            onAddToCart(product);
+          }}
+          className="
+            inline-flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap
+            bg-white text(--color-dark)
+            hover:bg-white/90 transition-colors
+            shadow-lg
+            focus:outline-none focus-visible:ring-[3px] focus-visible:ring-(--color-primary3)/30
+          "
+        >
+          <ShoppingCart className="w-4 h-4" />
+          <span>Agregar al carrito</span>
+        </button>
+      </div>
+
+      {/* Capa clickeable al detalle (centro de la tarjeta) */}
       <Link
         to={href}
         className="absolute inset-0"
-        aria-label={`Ver detalle de ${displayName}`}
+        aria-label={`Ver detalle de ${displayTitle}`}
       />
 
-      <button
-        type="button"
-        onClick={handleAddToCart}
-        className="pointer-events-none absolute left-1/2 top-5 z-10 flex -translate-x-1/2 -translate-y-2 items-center justify-center gap-2 rounded-lg bg-white/95 px-4 py-2 text-sm font-medium text-gray-900 opacity-0 shadow-lg transition-all duration-300 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 whitespace-nowrap"
-      >
-        <ShoppingCart className="size-4" />
-        Agregar al carrito
-      </button>
-
-      <div className="absolute bottom-5 left-0 right-0 z-10 flex items-end justify-between px-6">
+      {/* Texto + wishlist (abajo) */}
+      <div className="absolute bottom-4 left-0 right-0 z-10 px-6 flex items-end justify-between">
+        {/* Nombre & precio */}
         <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-bold text-white drop-shadow-sm">{displayName}</h3>
-          <span className="text-sm text-white/90">{formattedPrice}</span>
+          <h3
+            className="
+              title-sans font-semibold tracking-[-0.012em]
+              text-white drop-shadow-sm
+            "
+          >
+            {displayTitle}
+          </h3>
+          <Price value={price} className="text-white/90 block" />
         </div>
 
+        {/* Corazón wishlist */}
         <button
           type="button"
-          onClick={handleToggleFavorite}
-          aria-pressed={isFavorite}
-          className="inline-flex size-10 items-center justify-center rounded-full bg-white/25 text-white shadow transition-all duration-300 hover:bg-white/35"
-          title={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
+          onClick={(e) => {
+            e.preventDefault(); // no navegar al pulsar
+            onToggleWishlist(product);
+          }}
+          className="
+            shrink-0 p-2 rounded-full bg-white/20 backdrop-blur-sm
+            hover:bg-white/30 transition-colors
+            focus:outline-none focus-visible:ring-[3px] focus-visible:ring-white/50
+          "
+          aria-label="Agregar/Quitar de favoritos"
         >
-          <Heart
-            className={`size-5 ${
-              isFavorite ? "fill-current text-rose-500" : "stroke-current"
-            }`}
-          />
+          <Heart className="w-5 h-5 stroke-white" />
         </button>
       </div>
     </article>
   );
 }
+
+export { ProductCard };

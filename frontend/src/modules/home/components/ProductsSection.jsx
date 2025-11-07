@@ -1,63 +1,150 @@
-import ProductCard from "../../products/components/ProductCard.jsx"; 
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import ProductCard from "../../products/components/ProductCard.jsx";
+import { productsDb, categoriesDb } from "../../../mocks/database/index.js";
 
-const FALLBACK_CATEGORIES = [
+const DEFAULT_CATEGORY_FALLBACK = [
   { id: "all", name: "Todos" },
-  { id: "cat-1", name: "Categoría 1" },
-  { id: "cat-2", name: "Categoría 2" },
-  { id: "cat-3", name: "Categoría 3" },
+  { id: 1, name: "Living" },
+  { id: 2, name: "Comedor" },
+  { id: 3, name: "Dormitorio" },
 ];
 
-const normalizeCategory = (cat, index) => {
-  if (typeof cat === "string") {
-    return { id: `cat-${index}`, name: cat };
-  }
-
-  if (cat && (cat.name || cat.slug || cat.id)) {
-    return {
-      id: cat.id ?? cat.slug ?? `cat-${index}`,
-      name: cat.name ?? cat.slug ?? String(cat.id ?? `Categoría ${index + 1}`),
-    };
-  }
-
-  return { id: `cat-${index}`, name: `Categoría ${index + 1}` };
+const getMockProducts = () => {
+  if (Array.isArray(productsDb?.PRODUCTS)) return productsDb.PRODUCTS;
+  if (Array.isArray(productsDb?.products)) return productsDb.products;
+  return [];
 };
 
-const ProductsSection = ({ products = [], categories = FALLBACK_CATEGORIES }) => {
-  const items = products.slice(0, 4);
+const getMockCategories = () => {
+  if (Array.isArray(categoriesDb?.CATEGORIES) && categoriesDb.CATEGORIES.length) {
+    return categoriesDb.CATEGORIES.filter((category) => category.parentId === null);
+  }
+  if (Array.isArray(categoriesDb?.categories) && categoriesDb.categories.length) {
+    return categoriesDb.categories.filter((category) => category.parentId === null);
+  }
+  return DEFAULT_CATEGORY_FALLBACK;
+};
 
-  const normalizedCategories =
-    Array.isArray(categories) && categories.length
-      ? categories.map(normalizeCategory)
-      : FALLBACK_CATEGORIES;
+const FALLBACK_PRODUCTS = getMockProducts();
+const FALLBACK_CATEGORIES = getMockCategories();
+
+const normalizeProduct = (product, index) => {
+  const safeId = product?.id ?? `featured-${index}`;
+  return {
+    ...product,
+    id: safeId,
+    title: product?.title ?? product?.name ?? `Producto ${index + 1}`,
+    image: product?.image ?? product?.imageUrl ?? product?.coverImage,
+  };
+};
+
+const buildTabs = (categories) => {
+  const source = Array.isArray(categories) && categories.length ? categories : FALLBACK_CATEGORIES;
+
+  const items = source
+    .map((category, index) => {
+      const filterValue = category?.id ?? category?.slug ?? category?.name ?? `category-${index}`;
+      return {
+        id: String(category?.id ?? category?.slug ?? index),
+        label: category?.name ?? category?.title ?? `Categoría ${index + 1}`,
+        value: filterValue,
+      };
+    })
+    .filter((item) => Boolean(item.label));
+
+  const hasAll = items.some((item) => item.value === "all");
+  return hasAll ? items : [{ id: "all", label: "Todos", value: "all" }, ...items];
+};
+
+const matchesCategory = (product, categoryValue) => {
+  if (!categoryValue || categoryValue === "all") return true;
+
+  const pool = [
+    product?.categoryId,
+    ...(Array.isArray(product?.categoryIds) ? product.categoryIds : []),
+  ].filter((id) => id !== undefined && id !== null);
+
+  const comparer = String(categoryValue).toLowerCase();
+  return pool.some((catId) => String(catId).toLowerCase() === comparer);
+};
+
+export default function ProductsSection({ products, categories }) {
+  const tabs = useMemo(() => buildTabs(categories), [categories]);
+  const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? "all");
+
+  useEffect(() => {
+    const fallbackValue = tabs[0]?.value ?? "all";
+    const isValid = tabs.some((tab) => String(tab.value) === String(activeCategory));
+    if (!isValid) {
+      setActiveCategory(fallbackValue);
+    }
+  }, [tabs, activeCategory]);
+
+  const items = useMemo(() => {
+    const source = Array.isArray(products) && products.length ? products : FALLBACK_PRODUCTS;
+    const normalized = source.map(normalizeProduct);
+    const filtered = normalized.filter((product) => matchesCategory(product, activeCategory));
+    return filtered.slice(0, 4);
+  }, [products, activeCategory]);
 
   return (
-    <section className="page container-px mx-auto max-w-7xl">
-      <h2 className="font-display text-4xl text-dark mb-2 text-center">Productos</h2>
-      <p className="font-sans text-center text-secondary1 mb-8">
-        Explora nuestra selección basada en tus categorías favoritas.
-      </p>
-
-      <div className="flex justify-center flex-wrap gap-4">
-        {normalizedCategories.map((cat) => (
-          <button
-            key={cat.id}
-            className="px-6 py-2 border border-secondary2 rounded-md font-garamond text-dark hover:bg-primary1 hover:text-light transition"
-          >
-            {cat.name}
-          </button>
-        ))}
+    <div className="space-y-8">
+      <div className="text-center space-y-3">
+        <h2 className="font-italiana text-4xl text-dark">Productos</h2>
+        <p className="font-garamond text-secondary1 mx-auto max-w-2xl">
+          Explora nuestras categorías principales y descubre piezas curadas para cada ambiente.
+        </p>
       </div>
-      
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-6 border-b border-neutral-200 sm:justify-between">
+        {tabs.map((tab) => {
+          const isActive = String(tab.value) === String(activeCategory);
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveCategory(tab.value)}
+              className={`group relative pb-3 font-garamond text-base tracking-wide transition-colors ${
+                isActive
+                  ? "text-dark"
+                  : "text-neutral-400 hover:text-(--color-primary-brown,#6b4e2f)"
+              }`}
+            >
+              {tab.label}
+              <span
+                className={`pointer-events-none absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-colors ${
+                  isActive
+                    ? "bg-(--color-primary-brown,#443114)"
+                    : "bg-transparent group-hover:bg-(--color-primary-brown,#c8a889)"
+                }`}
+              />
+            </button>
+          );
+        })}
       </div>
-    </section>
+
+      {items.length ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white/80 px-6 py-10 text-center text-sm text-neutral-500">
+          No encontramos productos destacados en los mocks.
+        </div>
+      )}
+
+      <div className="flex justify-center pt-1">
+        <Link
+          to="/products"
+          className="inline-flex items-center gap-2 rounded-full border border-dark px-5 py-2 text-sm font-medium text-dark transition hover:bg-dark hover:text-white"
+        >
+          Ver más productos
+          <span aria-hidden className="text-base leading-none">&rarr;</span>
+        </Link>
+      </div>
+    </div>
   );
-};
-
-export default ProductsSection;
-
-  
+}

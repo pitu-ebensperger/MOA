@@ -13,6 +13,7 @@ import { ProductDetailPage } from '../modules/products/pages/ProductDetailPage.j
 import ProductsPage from '../modules/products/pages/ProductsPage.jsx'
 import { ProfilePage } from '../modules/profile/pages/ProfilePage.jsx'
 import WishlistPage from '../modules/profile/pages/WishlistPage.jsx'
+import { CategoriesPage } from '../modules/categories/pages/CategoriesPage.jsx'
 
 import '../styles/global.css'
 import '../styles/tokens.css'
@@ -29,6 +30,7 @@ export const App = () => {
         <Route path='/home' element={<HomePage />} />
         <Route path='/cart' element={<CartPage />} />
         <Route path='/checkout' element={<CheckoutPage />} />
+        <Route path='/categories' element={<CategoriesPage />} />
         <Route path='*' element={<NotFoundPage />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />

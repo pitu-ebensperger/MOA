@@ -37,6 +37,10 @@ export function ProductFiltersContent({
   const selectedMin = clampValue(Math.round(filters.min), minLimit, maxLimit);
   const selectedMax = clampValue(Math.round(filters.max), selectedMin, maxLimit);
   const sliderStep = Math.max(1, Math.round((maxLimit - minLimit) / 40));
+  const hasCustomMin = Number.isFinite(filters.min) && filters.min !== minLimit;
+  const hasCustomMax = Number.isFinite(filters.max) && filters.max !== maxLimit;
+  const inputMinValue = hasCustomMin ? selectedMin : "";
+  const inputMaxValue = hasCustomMax ? selectedMax : "";
 
   const updateRange = (nextMin, nextMax) => {
     const boundedMin = clampValue(Number(nextMin), minLimit, maxLimit);
@@ -66,7 +70,7 @@ export function ProductFiltersContent({
                 className={[
                   "flex w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition",
                   active
-                    ? "border-[var(--color-primary-brown,#443114)] bg-[var(--color-primary-brown,#443114)] text-white"
+                    ? "border-(--color-primary-brown,#443114) bg-(--color-primary-brown,#443114) text-white"
                     : "border-transparent bg-white text-neutral-700 hover:border-neutral-200",
                 ].join(" ")}
               >
@@ -81,34 +85,43 @@ export function ProductFiltersContent({
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-neutral-700">Rango de precio</h3>
-          <span className="text-xs text-neutral-500">
-            {selectedMin.toLocaleString("es-CL")} – {selectedMax.toLocaleString("es-CL")} CLP
-          </span>
         </div>
 
         <div className="grid gap-4">
           <div className="flex items-center gap-3">
             <input
               type="number"
-              value={selectedMin}
+              value={inputMinValue}
               min={minLimit}
               max={selectedMax}
               onChange={(event) => {
-                const value = Number(event.target.value);
-                updateRange(Number.isFinite(value) ? value : minLimit, selectedMax);
+                const { value } = event.target;
+                if (value === "") {
+                  updateRange(minLimit, selectedMax);
+                  return;
+                }
+                const parsed = Number(value);
+                updateRange(Number.isFinite(parsed) ? parsed : minLimit, selectedMax);
               }}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-[var(--color-primary-brown,#443114)] focus:outline-none"
+              placeholder="Mín."
+              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
             />
             <input
               type="number"
-              value={selectedMax}
+              value={inputMaxValue}
               min={selectedMin}
               max={maxLimit}
               onChange={(event) => {
-                const value = Number(event.target.value);
-                updateRange(selectedMin, Number.isFinite(value) ? value : maxLimit);
+                const { value } = event.target;
+                if (value === "") {
+                  updateRange(selectedMin, maxLimit);
+                  return;
+                }
+                const parsed = Number(value);
+                updateRange(selectedMin, Number.isFinite(parsed) ? parsed : maxLimit);
               }}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-[var(--color-primary-brown,#443114)] focus:outline-none"
+              placeholder="Máx."
+              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
             />
           </div>
 

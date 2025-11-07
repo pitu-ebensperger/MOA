@@ -39,7 +39,7 @@ export function ProductFiltersDrawer({
         <header className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-neutral-900">Filtros</h2>
-            <p className="text-xs text-neutral-500">Personalizá los resultados según tus preferencias.</p>
+            <p className="text-xs text-neutral-500">Personaliza los resultados según tus preferencias.</p>
           </div>
           <button
             type="button"
@@ -70,7 +70,7 @@ export function ProductFiltersDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full bg-[var(--color-primary-brown,#443114)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105"
+            className="rounded-full bg-(--color-primary-brown,#443114) px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105"
           >
             Mostrar resultados
           </button>

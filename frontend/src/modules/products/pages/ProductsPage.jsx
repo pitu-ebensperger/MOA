@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductGallery from "../components/ProductGallery.jsx";
 import { ProductSidebar } from "../components/ProductSidebar.jsx";
 import { ProductFiltersDrawer } from "../components/ProductFiltersDrawer.jsx";
-import { CATEGORIES, PRODUCTS as PRODUCTS_MOCK } from "../../../utils/mockdata.js";
+import { useProducts } from "../hooks/useProducts.js";
+import { useCategories } from "../hooks/useCategories.js";
+import { formatCurrencyCLP } from "../../../utils/currency.js";
 
 const ensureNumber = (value, fallback) => {
   const num = Number(value);
@@ -26,8 +28,20 @@ const matchesCategory = (product, categoryId) => {
   return false;
 };
 
-export default function ProductsPage({ products }) {
-  const allProducts = Array.isArray(products) && products.length ? products : PRODUCTS_MOCK ?? [];
+export default function ProductsPage() {
+  const { products: fetchedProducts, isLoading, error } = useProducts();
+  const { categories: fetchedCategories } = useCategories();
+
+  const categories = useMemo(() => {
+    const base = Array.isArray(fetchedCategories) ? fetchedCategories : [];
+    const hasAll = base.some((category) => category.id === "all");
+    return hasAll ? base : [{ id: "all", name: "Todos" }, ...base];
+  }, [fetchedCategories]);
+
+  const allProducts = useMemo(
+    () => (Array.isArray(fetchedProducts) && fetchedProducts.length ? fetchedProducts : []),
+    [fetchedProducts],
+  );
 
   const { minPrice, maxPrice } = useMemo(() => {
     const prices = allProducts.map((product) => ensureNumber(product.price, 0));
@@ -53,15 +67,22 @@ export default function ProductsPage({ products }) {
     });
   }, [allProducts, category, min, max, minPrice, maxPrice]);
 
+  useEffect(() => {
+    setMin(minPrice);
+    setMax(maxPrice);
+  }, [minPrice, maxPrice]);
+
   const activeCategory = useMemo(() => {
     if (category === "all") return null;
-    return CATEGORIES.find((cat) => cat.id === category || String(cat.id) === String(category));
-  }, [category]);
+    return categories.find(
+      (cat) => cat.id === category || String(cat.id) === String(category),
+    );
+  }, [category, categories]);
 
   const appliedFilters = [
     activeCategory ? { label: activeCategory.name, type: "category" } : null,
-    min > minPrice ? { label: `Desde ${min.toLocaleString("es-CL")} CLP`, type: "min" } : null,
-    max < maxPrice ? { label: `Hasta ${max.toLocaleString("es-CL")} CLP`, type: "max" } : null,
+    min > minPrice ? { label: `Desde ${formatCurrencyCLP(min)}`, type: "min" } : null,
+    max < maxPrice ? { label: `Hasta ${formatCurrencyCLP(max)}`, type: "max" } : null,
   ].filter(Boolean);
 
   const handleRemoveFilter = (type) => {
@@ -92,26 +113,24 @@ export default function ProductsPage({ products }) {
   };
 
   return (
-    <main className="page container-px mx-auto py-10 max-w-7xl">
+    <main className="page mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
-          <h1 className="title-serif text-3xl sm:text-4xl">Productos</h1>
-          <p className="ui-sans text-sm text-[var(--text-weak)]">
-            Encontrá tus piezas favoritas seleccionando filtros por categoría y rango de precio.
+          <p className="ui-sans text-sm text-(--text-weak)">
+            Encuentra tus piezas favoritas seleccionando filtros por categoría y rango de precio.
           </p>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6">
-          <span className="ui-sans text-sm text-[var(--text-weak)]">
+          <span className="ui-sans text-sm text-(--text-weak)">
             {filteredProducts.length} resultado{filteredProducts.length === 1 ? "" : "s"}
           </span>
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-sm text-[var(--text-weak)]">
-              Ordenar por
-              <select
+            <label className="flex items-center gap-2 text-sm text-(--text-weak)">
+              Ordenar por <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
-                className="rounded-full border border-[var(--line,#e3ddd3)] bg-white px-3 py-2 text-sm text-neutral-700 transition focus:border-[var(--color-primary-brown,#443114)] focus:outline-none"
+                className="rounded-full border border-(--line,#e3ddd3) bg-white px-3 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
               >
                 <option value="relevance">Relevancia</option>
                 <option value="price-asc">Precio: menor a mayor</option>
@@ -122,7 +141,7 @@ export default function ProductsPage({ products }) {
             <button
               type="button"
               onClick={() => setIsMobileFiltersOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--color-primary-brown,#443114)] px-3 py-2 text-sm font-medium text-[var(--color-primary-brown,#443114)] transition hover:bg-[var(--color-primary-brown,#443114)] hover:text-white lg:hidden"
+              className="inline-flex items-center gap-2 rounded-full border border-(--color-primary-brown,#443114) px-3 py-2 text-sm font-medium text-(--color-primary-brown,#443114) transition hover:bg-(--color-primary-brown,#443114) hover:text-white lg:hidden"
             >
               Filtros
             </button>
@@ -131,7 +150,7 @@ export default function ProductsPage({ products }) {
       </header>
 
       {appliedFilters.length > 0 && (
-        <div className="mb-8 flex flex-wrap items-center gap-2 rounded-2xl bg-[var(--color-light-beige,#f6efe7)] px-5 py-3">
+        <div className="mb-8 flex flex-wrap items-center gap-2 rounded-2xl bg-(--color-light-beige,#f6efe7) px-5 py-3 lg:hidden">
           <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
             Filtros activos
           </span>
@@ -151,24 +170,44 @@ export default function ProductsPage({ products }) {
 
       <div className="grid gap-8 lg:grid-cols-[18rem_1fr]">
         <ProductSidebar
-          categories={CATEGORIES}
+          categories={categories}
           filters={{ category, min, max }}
           limits={{ min: minPrice, max: maxPrice }}
+          appliedFilters={appliedFilters}
           onChangeCategory={setCategory}
           onChangePrice={({ min: nextMin, max: nextMax }) => {
             setMin(ensureNumber(nextMin, minPrice));
             setMax(ensureNumber(nextMax, maxPrice));
           }}
+          onRemoveFilter={handleRemoveFilter}
           onReset={resetFilters}
         />
 
-        <ProductGallery products={sortedProducts} />
+        <div className="space-y-6">
+          {error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              No pudimos cargar los productos. Intenta nuevamente más tarde.
+            </div>
+          )}
+          {isLoading && sortedProducts.length === 0 ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div
+                  key={`product-skeleton-${index}`}
+                  className="h-80 rounded-2xl bg-neutral-100 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <ProductGallery products={sortedProducts} />
+          )}
+        </div>
       </div>
 
       <ProductFiltersDrawer
         open={isMobileFiltersOpen}
         onClose={() => setIsMobileFiltersOpen(false)}
-        categories={CATEGORIES}
+        categories={categories}
         filters={{ category, min, max }}
         limits={{ min: minPrice, max: maxPrice }}
         onChangeCategory={(next) => setCategory(next)}

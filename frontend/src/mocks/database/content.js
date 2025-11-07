@@ -4,7 +4,7 @@ export const contentDb = {
       id: "home-hero-2024",
       title: "Diseño hecho a medida para espacios conscientes",
       subtitle:
-        "Colecciones limitadas creadas en colaboración con talleres locales. Elegí materiales nobles, pensados para perdurar.",
+        "Colecciones limitadas creadas en colaboración con talleres locales. Elige materiales nobles, pensados para perdurar.",
       backgroundImage:
         "https://images.unsplash.com/photo-1540877460496-99abf1733bc7?q=80&w=1600&auto=format&fit=crop",
       ctaPrimary: { label: "Explorar nueva colección", href: "/products?collection=coleccion-atelier" },
@@ -58,7 +58,7 @@ export const contentDb = {
       mapUrl:
         "https://www.google.com/maps/place/Av.+Italia+1439,+Providencia,+Región+Metropolitana",
       formIntroduction:
-        "Coordiná una visita al showroom o solicitá asesoría remota con nuestro equipo creativo.",
+        "Coordina una visita al showroom o solicita asesoría remota con nuestro equipo creativo.",
     },
   },
   navigation: {
