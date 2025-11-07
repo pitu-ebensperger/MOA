@@ -15,7 +15,6 @@ export function ProtectedRoute() {
   );
 }
 
-
 export function AdminRoute() {
   const { isAuthenticated, isAdmin } = useAuthCtx();
   const location = useLocation();

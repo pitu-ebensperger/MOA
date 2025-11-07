@@ -31,6 +31,7 @@ export const App = () => {
   return (
     <div>
       <Navbar />
+      <main className='main'>
       <Routes>
         <Route path='/' element={<HomePage />} />
         <Route path='/home' element={<HomePage />} />
@@ -51,6 +52,7 @@ export const App = () => {
         <Route path='/wishlist' element={<WishlistPage />} />
 
       </Routes>
+      </main>
       <Footer />
     </div>
   )
