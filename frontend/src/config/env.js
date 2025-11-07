@@ -1,16 +1,11 @@
-const rawEnv = {
-  API_BASE_URL: import.meta.env.VITE_API_URL ?? "http://localhost:3000",
-  API_TIMEOUT: Number(import.meta.env.VITE_API_TIMEOUT ?? 0) || undefined,
-  NODE_ENV: import.meta.env.MODE ?? "development",
+const base = import.meta.env;
+const mode = base.MODE ?? "development";
+
+export const env = {
+  API_BASE_URL: (base.VITE_API_URL ?? "http://localhost:3000").trim(),
+  API_TIMEOUT: Number(base.VITE_API_TIMEOUT) || undefined,
+  USE_MOCKS: String(base.VITE_USE_MOCKS ?? "true").trim().toLowerCase() === "true",
+  NODE_ENV: mode,
+  IS_DEV: mode === "development",
+  IS_PROD: mode === "production",
 };
-
-const normalizeEnv = (values) => ({
-  API_BASE_URL: values.API_BASE_URL,
-  API_TIMEOUT: values.API_TIMEOUT,
-  NODE_ENV: values.NODE_ENV,
-  IS_DEV: values.NODE_ENV === "development",
-  IS_PROD: values.NODE_ENV === "production",
-});
-
-export const env = normalizeEnv(rawEnv);
-
