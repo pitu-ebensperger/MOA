@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 const CategoriesFilters = () => {
-  const categories = ["Todos", "Categoría 1", "Categoría 2", "Categoría 3"];
+  const categories = ["Todos", "Sofás", "Lámparas", "Mesas", "Sillas"];
   const [active, setActive] = useState("Todos");
 
   return (

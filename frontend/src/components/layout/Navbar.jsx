@@ -7,7 +7,7 @@ const NAV_ITEMS = [
   { label: 'Inicio', href: '/home' },
   { label: 'Categorías', href: '/categories' },
   { label: 'Productos', href: '/products' },
-  { label: 'Contacto', href: '/contactus' },
+  { label: 'Contacto', href: '/contact' },
 ];
 
 export function Navbar({ onNavigate, cartItemCount = 0 }) {
