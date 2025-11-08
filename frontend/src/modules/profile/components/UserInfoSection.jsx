@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../../auth/hooks/useAuth'
 
 const UserInfoSection = () => {
 
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false)
+
+  console.log('----> user', user);
 
   const handleEditClick = () => {
     setIsEditing(true)
