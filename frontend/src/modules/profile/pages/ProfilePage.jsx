@@ -1,5 +1,13 @@
+import UserInfoSection from '../components/UserInfoSection.jsx'
+import WishlistSection from '../components/WishlistSection.jsx'
+import OrderSection from '../components/OrderSection.jsx'
+
 export const ProfilePage = () => {
   return (
-      <h1>Perfil</h1>
+    <div>
+      <UserInfoSection />
+      <WishlistSection />
+      <OrderSection />
+    </div>
   )
 }
