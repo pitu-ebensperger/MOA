@@ -20,16 +20,18 @@ main {
     padding-inline: 1.5rem;
 }
 
-h1,h2,h3,h4,h5,h6 {
-    font-family: var(--font-display);
-    color: var(--color-dark);
-}
 
+h1, h2 {
+  font-family: var(--font-display);
+}
 h1 {
-    font-family: var(--font-display);
     color: var(--color-dark);
     font-weight: var(--weight-semibold);
     font-size: var(--text-3xl);
+}
+
+h2{
+  color: var(--color-primary1)
 }
 
 footer{
@@ -62,7 +64,7 @@ a:hover, button:hover {
 
 
 .page {
-  margin-top:80px
+  margin-top:80px;
 }
 /* NAVBAR --------------------------------------------------------*/
 
@@ -150,3 +152,19 @@ a:hover, button:hover {
 /* FORMS --------------------------------------------------------*/
 
 input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, transparent); }
+
+/* Range sliders --------------------------------------------------------*/
+.slider-handle {
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  background: var(--color-primary-brown, #443114);
+  border: 2px solid #fffefb;
+  box-shadow: 0 2px 6px rgba(17, 24, 39, 0.25);
+  cursor: pointer;
+}
+
+.slider-handle:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-primary-brown,#443114) 40%, transparent);
+  outline-offset: 2px;
+}

@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function HeroSection() {
   return (
     <section className="bg-[#d2cbc1] text-[var(--text-strong)]">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { productsApi } from "../services/products.api.js";
 
 const initialState = {
@@ -8,8 +8,9 @@ const initialState = {
   error: null,
 };
 
-export const useProducts = (filters = {}) => {
+export const useProducts = (filters) => {
   const [state, setState] = useState(initialState);
+  const normalizedFilters = useMemo(() => filters ?? {}, [filters]);
 
   const fetchProducts = useCallback(async (params = {}) => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
@@ -27,8 +28,8 @@ export const useProducts = (filters = {}) => {
   }, []);
 
   useEffect(() => {
-    fetchProducts(filters);
-  }, [fetchProducts, filters]);
+    fetchProducts(normalizedFilters);
+  }, [fetchProducts, normalizedFilters]);
 
   return {
     products: state.items,

@@ -1,16 +1,35 @@
-import HeroSection from "../../../components/layout/HeroSection.jsx";
-import ProductsSection from "../components/ProductsSection.jsx";
-import CategoriesMenu from "../components/CategoriesMenu.jsx";
 import ContactSection from "../components/ContactSection.jsx";
-import { CATEGORIES, PRODUCTS } from "../../../utils/mockdata.js";
+import HeroSection from "../components/HeroSection.jsx";
+import ProductsSection from "../components/ProductsSection.jsx";
+import { useHomeLanding } from "../hooks/useHomeLanding.js";
 
 export const HomePage = () => {
+  const { home, isLoading, error } = useHomeLanding();
+
+  const categories = home?.categories ?? undefined;
+  const featuredProducts = home?.featuredProducts ?? undefined;
+
   return (
-    <div>
+    <div className="page px-4 sm:px-6">
       <HeroSection />
-      <CategoriesMenu categories={CATEGORIES} />
-      <ProductsSection categories={CATEGORIES} products={PRODUCTS} />
-      <ContactSection />
+
+      <section className="py-12">
+        <div className="container-px mx-auto max-w-7xl">
+          {error && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              No pudimos cargar los productos. Intenta nuevamente en unos minutos.
+            </div>
+          )}
+          <ProductsSection categories={categories} products={featuredProducts} />
+          {isLoading && (
+            <div className="mt-6 text-center text-sm text-neutral-500">
+              Cargando piezas curadas para ti…
+            </div>
+          )}
+        </div>
+      </section>
+
+      <ContactSection contact={home?.contact} />
     </div>
   );
 };

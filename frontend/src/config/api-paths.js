@@ -6,10 +6,11 @@ export const API_PATHS = {
     forgot: '/auth/forgot-password',
     reset: '/auth/reset-password',
   },
-  products: {
-    products: "/products",
-    productDetail: (id) => `/products/${id}`,
-    categories: "/categories",
+  catalog: {
+    products: "/catalog/products",
+    productDetail: (id) => `/catalog/products/${id}`,
+    categories: "/catalog/categories",
+    collections: "/catalog/collections",
   },
   cart: {
     root: (userId) => `/users/${userId}/cart`,
@@ -22,5 +23,7 @@ export const API_PATHS = {
   wishlist: {
     root: (userId) => `/users/${userId}/wishlist`,
   },
-
+  home: {
+    landing: "/content/home",
+  },
 };

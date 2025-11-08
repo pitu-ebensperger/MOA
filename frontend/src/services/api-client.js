@@ -1,4 +1,3 @@
-//src/services/api-client.js
 import { env } from "../config/env.js";
 
 const DEFAULT_TIMEOUT = env.API_TIMEOUT ?? 15000;

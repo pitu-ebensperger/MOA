@@ -12,7 +12,8 @@ import ResetPasswordPage from '../modules/auth/pages/ResetPasswordPage.jsx'
 import { ProductDetailPage } from '../modules/products/pages/ProductDetailPage.jsx'
 import ProductsPage from '../modules/products/pages/ProductsPage.jsx'
 import { ProfilePage } from '../modules/profile/pages/ProfilePage.jsx'
-import WishlistPage from '../modules/profile/pages/WishlistPage.jsx'
+import { WishlistPage } from '../modules/profile/pages/WishlistPage.jsx'
+import { CategoriesPage } from '../modules/categories/pages/CategoriesPage.jsx'
 import { FAQPage } from '../modules/support/pages/FAQPage.jsx'
 import ContactPage from '../modules/support/pages/ContactPage.jsx';
 import {PrivacyPage} from '../modules/support/pages/PrivacyPage.jsx'
@@ -37,6 +38,7 @@ export const App = () => {
         <Route path='/home' element={<HomePage />} />
         <Route path='/cart' element={<CartPage />} />
         <Route path='/checkout' element={<CheckoutPage />} />
+        <Route path='/categories' element={<CategoriesPage />} />
         <Route path='/faq' element={<FAQPage />} /> 
         <Route path='/contact' element={<ContactPage />} /> 
         <Route path='/privacy' element={<PrivacyPage />} /> 
@@ -46,7 +48,7 @@ export const App = () => {
         <Route path='/register' element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path='/product-detail' element={<ProductDetailPage />} />
+        <Route path='/products/:id' element={<ProductDetailPage />} />
         <Route path='/products' element={<ProductsPage />} />
         <Route path='/profile' element={<ProfilePage />} />
         <Route path='/wishlist' element={<WishlistPage />} />

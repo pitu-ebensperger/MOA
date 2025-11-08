@@ -1,0 +1,62 @@
+export const ordersDb = {
+  orders: [
+    {
+      id: "ord-1001",
+      userId: "usr-001",
+      number: "MOA-2024-001",
+      status: "fulfilled",
+      currency: "CLP",
+      subtotal: 1_389_970,
+      tax: 0,
+      shipping: 24_990,
+      total: 1_414_960,
+      createdAt: "2024-03-05T11:45:00Z",
+      updatedAt: "2024-03-12T16:10:00Z",
+      addressId: "addr-001",
+      paymentId: "pay-5001",
+      shipmentId: "shp-4001",
+    },
+  ],
+  orderItems: [
+    {
+      orderId: "ord-1001",
+      productId: 201,
+      variantId: "niebla",
+      name: "Sofá modular lino niebla",
+      quantity: 1,
+      unitPrice: 1_249_000,
+      currency: "CLP",
+    },
+    {
+      orderId: "ord-1001",
+      productId: 102,
+      variantId: "lino-natural",
+      name: "Lámpara cúpula lino natural",
+      quantity: 2,
+      unitPrice: 59_990,
+      currency: "CLP",
+    },
+  ],
+  payments: [
+    {
+      id: "pay-5001",
+      provider: "Webpay Plus",
+      status: "captured",
+      amount: 1_414_960,
+      currency: "CLP",
+      processedAt: "2024-03-05T11:50:00Z",
+      authorizationCode: "A1B2C3",
+      cuotas: 3,
+    },
+  ],
+  shipping: [
+    {
+      id: "shp-4001",
+      carrier: "Transportes Premium",
+      status: "delivered",
+      trackingNumero: "PREM-009988",
+      shippedAt: "2024-03-08T09:00:00Z",
+      deliveredAt: "2024-03-12T12:45:00Z",
+    },
+  ],
+};

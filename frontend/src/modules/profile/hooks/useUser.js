@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../auth/hooks/useAuth';
 
@@ -9,7 +9,7 @@ export const useUser = () => {
   const [error, setError] = useState(null);
 
   // Traer perfil del usuario 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!authUser) return; // si no hay usuario logueado, no hacemos nada
     setLoading(true);
     try {
@@ -21,10 +21,10 @@ export const useUser = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authUser]);
 
   // Actualizar perfil del usuario
-  const updateProfile = async (updatedData) => {
+  const updateProfile = useCallback(async (updatedData) => {
     if (!authUser) return;
     setLoading(true);
     try {
@@ -38,11 +38,11 @@ export const useUser = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authUser]);
 
   useEffect(() => {
     fetchProfile();
-  }, [authUser]);
+  }, [authUser, fetchProfile]);
 
   return { profile, loading, error, fetchProfile, updateProfile };
 };
