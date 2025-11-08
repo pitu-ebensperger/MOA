@@ -1,4 +1,4 @@
-import Card from '../components/Card.jsx'
+import Card from './Card.jsx'
 import { products  } from '../../../data.js'
 
 const OrderSection = () => {
