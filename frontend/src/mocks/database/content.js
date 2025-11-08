@@ -1,16 +1,5 @@
 export const contentDb = {
   home: {
-    hero: {
-      id: "home-hero-2024",
-      title: "Diseño hecho a medida para espacios conscientes",
-      subtitle:
-        "Colecciones limitadas creadas en colaboración con talleres locales. Elige materiales nobles, pensados para perdurar.",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1540877460496-99abf1733bc7?q=80&w=1600&auto=format&fit=crop",
-      ctaPrimary: { label: "Explorar nueva colección", href: "/products?collection=coleccion-atelier" },
-      ctaSecondary: { label: "Conocer proceso", href: "/about" },
-      textColor: "#ffffff",
-    },
     featuredCategoryIds: [1, 2, 3, 4],
     featuredProductIds: [201, 101, 103, 301],
     editorialSections: [

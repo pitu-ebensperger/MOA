@@ -34,7 +34,7 @@ export default function ContactSection({ contact = FALLBACK_CONTACT }) {
             {contact.whatsapp && (
               <li>
                 <span className="font-semibold text-dark">WhatsApp:</span>{" "}
-                <a href={`https://wa.me/${contact.whatsapp.replace(/\D/g, "")}`} className="underline">
+                <a href={`https://wa.me/${contact.whatsapp.replaceAll(/\D/g, "")}`} className="underline">
                   {contact.whatsapp}
                 </a>
               </li>

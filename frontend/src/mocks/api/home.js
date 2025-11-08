@@ -60,7 +60,6 @@ export const mockHomeApi = {
     const home = contentDb.home;
 
     return {
-      hero: home.hero,
       categories: pickCategories(home.featuredCategoryIds),
       featuredProducts: pickProducts(home.featuredProductIds),
       editorialSections: home.editorialSections ?? [],

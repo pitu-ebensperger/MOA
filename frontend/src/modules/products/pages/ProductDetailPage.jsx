@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { productsApi } from "../services/products.api.js";
 
@@ -12,6 +13,10 @@ const initialState = {
 export const ProductDetailPage = () => {
   const { id } = useParams();
   const [state, setState] = useState(initialState);
+  const baseBreadcrumbItems = [
+    { label: "Inicio", href: "/" },
+    { label: "Productos", href: "/products" },
+  ];
 
   useEffect(() => {
     if (!id) {
@@ -41,6 +46,7 @@ export const ProductDetailPage = () => {
   if (state.isLoading) {
     return (
       <main className="page container-px mx-auto max-w-5xl py-10">
+        <Breadcrumbs items={baseBreadcrumbItems} className="mb-6" />
         <div className="h-64 animate-pulse rounded-3xl bg-neutral-100" />
       </main>
     );
@@ -49,6 +55,7 @@ export const ProductDetailPage = () => {
   if (state.error || !state.product) {
     return (
       <main className="page container-px mx-auto max-w-5xl py-10">
+        <Breadcrumbs items={baseBreadcrumbItems} className="mb-6" />
         <div className="rounded-3xl border border-red-200 bg-red-50 px-6 py-10 text-center text-red-700">
           No encontramos el producto que estás buscando.
         </div>
@@ -57,9 +64,13 @@ export const ProductDetailPage = () => {
   }
 
   const product = state.product;
+  const breadcrumbItems = product?.name
+    ? [...baseBreadcrumbItems, { label: product.name }]
+    : baseBreadcrumbItems;
 
   return (
     <main className="page container-px mx-auto max-w-5xl py-10">
+      <Breadcrumbs items={breadcrumbItems} className="mb-8" />
       <article className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
         <div className="space-y-4">
           <img

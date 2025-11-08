@@ -11,7 +11,7 @@ export const HomePage = () => {
 
   return (
     <div className="page px-4 sm:px-6">
-      <HeroSection hero={home?.hero} />
+      <HeroSection />
 
       <section className="py-12">
         <div className="container-px mx-auto max-w-7xl">

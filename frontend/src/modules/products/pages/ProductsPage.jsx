@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
+import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import ProductGallery from "../components/ProductGallery.jsx";
 import { ProductSidebar } from "../components/ProductSidebar.jsx";
 import { ProductFiltersDrawer } from "../components/ProductFiltersDrawer.jsx";
+import { PaginationControls } from "../components/PaginationControls.jsx";
 import { useProducts } from "../hooks/useProducts.js";
 import { useCategories } from "../hooks/useCategories.js";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
@@ -9,6 +11,22 @@ import { formatCurrencyCLP } from "../../../utils/currency.js";
 const ensureNumber = (value, fallback) => {
   const num = Number(value);
   return Number.isFinite(num) ? num : fallback;
+};
+
+const DEFAULT_PAGE_SIZE = 9;
+const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 12, 18, 24];
+
+const resolveProductPrice = (product) => {
+  const rawPrice =
+    product?.price ??
+    product?.precio ??
+    product?.priceCLP ??
+    product?.precioCLP ??
+    product?.pricing?.price ??
+    null;
+  if (rawPrice === null) return null;
+  const numericValue = Number(rawPrice);
+  return Number.isFinite(numericValue) ? numericValue : null;
 };
 
 const matchesCategory = (product, categoryId) => {
@@ -44,7 +62,9 @@ export default function ProductsPage() {
   );
 
   const { minPrice, maxPrice } = useMemo(() => {
-    const prices = allProducts.map((product) => ensureNumber(product.price, 0));
+    const prices = allProducts
+      .map((product) => resolveProductPrice(product))
+      .filter((value) => Number.isFinite(value));
     if (!prices.length) return { minPrice: 0, maxPrice: 0 };
     return {
       minPrice: Math.min(...prices),
@@ -56,21 +76,56 @@ export default function ProductsPage() {
   const [min, setMin] = useState(minPrice);
   const [max, setMax] = useState(maxPrice);
   const [sort, setSort] = useState("relevance");
+  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGE_SIZE);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((product) => {
-      const price = ensureNumber(product.price, 0);
-      const withinPriceRange = price >= ensureNumber(min, minPrice) && price <= ensureNumber(max, maxPrice);
+      const price = resolveProductPrice(product) ?? 0;
+      const safeMin = ensureNumber(min, minPrice);
+      const safeMax = ensureNumber(max, maxPrice);
+      const withinPriceRange = price >= safeMin && price <= safeMax;
       const matchesCat = matchesCategory(product, category);
       return withinPriceRange && matchesCat;
     });
   }, [allProducts, category, min, max, minPrice, maxPrice]);
 
+  const sortedProducts = useMemo(() => {
+    if (sort === "relevance") return filteredProducts;
+    const copy = [...filteredProducts];
+    if (sort === "price-asc") {
+      return copy.sort(
+        (a, b) => (resolveProductPrice(a) ?? 0) - (resolveProductPrice(b) ?? 0),
+      );
+    }
+    if (sort === "price-desc") {
+      return copy.sort(
+        (a, b) => (resolveProductPrice(b) ?? 0) - (resolveProductPrice(a) ?? 0),
+      );
+    }
+    if (sort === "name-asc") {
+      return copy.sort((a, b) => (a.name ?? a.title ?? "").localeCompare(b.name ?? b.title ?? ""));
+    }
+    return copy;
+  }, [filteredProducts, sort]);
+
+  const totalResults = sortedProducts.length;
+
   useEffect(() => {
     setMin(minPrice);
     setMax(maxPrice);
   }, [minPrice, maxPrice]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [category, min, max, sort]);
+
+  useEffect(() => {
+    const safeLimit = Math.max(1, ensureNumber(itemsPerPage, DEFAULT_PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(totalResults / safeLimit || 1));
+    setCurrentPage((prev) => Math.min(prev, totalPages));
+  }, [itemsPerPage, totalResults]);
 
   const activeCategory = useMemo(() => {
     if (category === "all") return null;
@@ -91,46 +146,73 @@ export default function ProductsPage() {
     if (type === "max") setMax(maxPrice);
   };
 
-  const sortedProducts = useMemo(() => {
-    if (sort === "relevance") return filteredProducts;
-    const copy = [...filteredProducts];
-    if (sort === "price-asc") {
-      return copy.sort((a, b) => ensureNumber(a.price, 0) - ensureNumber(b.price, 0));
-    }
-    if (sort === "price-desc") {
-      return copy.sort((a, b) => ensureNumber(b.price, 0) - ensureNumber(a.price, 0));
-    }
-    if (sort === "name-asc") {
-      return copy.sort((a, b) => (a.name ?? a.title ?? "").localeCompare(b.name ?? b.title ?? ""));
-    }
-    return copy;
-  }, [filteredProducts, sort]);
-
   const resetFilters = () => {
     setCategory("all");
     setMin(minPrice);
     setMax(maxPrice);
+    setCurrentPage(1);
+  };
+
+  const paginationInfo = useMemo(() => {
+    const safeLimit = Math.max(1, ensureNumber(itemsPerPage, DEFAULT_PAGE_SIZE));
+    const totalItems = totalResults;
+    const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
+    const safePage = Math.min(Math.max(1, ensureNumber(currentPage, 1)), totalPages);
+    const startIndex = (safePage - 1) * safeLimit;
+    const endIndex = Math.min(startIndex + safeLimit, totalItems);
+
+    return {
+      items: sortedProducts.slice(startIndex, endIndex),
+      page: safePage,
+      totalPages,
+      totalItems,
+      pageSize: safeLimit,
+      start: totalItems === 0 ? 0 : startIndex + 1,
+      end: endIndex,
+    };
+  }, [sortedProducts, currentPage, itemsPerPage]);
+  const { items: paginatedProducts } = paginationInfo;
+
+  const handleChangeItemsPerPage = (nextValue) => {
+    const numericValue = Math.max(1, ensureNumber(nextValue, DEFAULT_PAGE_SIZE));
+    setItemsPerPage(numericValue);
+    setCurrentPage(1);
   };
 
   return (
     <main className="page mx-auto max-w-7xl px-4 py-10 sm:px-6">
+     
       <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <p className="ui-sans text-sm text-(--text-weak)">
-            Encuentra tus piezas favoritas seleccionando filtros por categoría y rango de precio.
-          </p>
-        </div>
-
+         <Breadcrumbs
+        className="mb-0"
+        items={[
+          { label: "Inicio", href: "/" },
+          { label: "Productos" },
+        ]}
+      />
+  
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6">
-          <span className="ui-sans text-sm text-(--text-weak)">
-            {filteredProducts.length} resultado{filteredProducts.length === 1 ? "" : "s"}
-          </span>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <label className="flex items-center gap-2 text-sm text-(--text-weak)">
-              Ordenar por <select
+              Mostrar{" "}
+              <select
+                value={itemsPerPage}
+                onChange={(event) => handleChangeItemsPerPage(event.target.value)}
+                className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
+              >
+                {PAGE_SIZE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm text-(--text-weak)">
+              Ordenar por{" "}
+              <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
-                className="rounded-full border border-(--line,#e3ddd3) bg-white px-3 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
+                className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
               >
                 <option value="relevance">Relevancia</option>
                 <option value="price-asc">Precio: menor a mayor</option>
@@ -138,6 +220,7 @@ export default function ProductsPage() {
                 <option value="name-asc">Nombre A-Z</option>
               </select>
             </label>
+           
             <button
               type="button"
               onClick={() => setIsMobileFiltersOpen(true)}
@@ -189,7 +272,7 @@ export default function ProductsPage() {
               No pudimos cargar los productos. Intenta nuevamente más tarde.
             </div>
           )}
-          {isLoading && sortedProducts.length === 0 ? (
+          {isLoading && paginationInfo.totalItems === 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 6 }).map((_, index) => (
                 <div
@@ -199,10 +282,21 @@ export default function ProductsPage() {
               ))}
             </div>
           ) : (
-            <ProductGallery products={sortedProducts} />
+            <ProductGallery products={paginatedProducts} />
           )}
         </div>
       </div>
+
+      {paginationInfo.totalItems > 0 && (
+        <div className="mt-10 flex justify-center">
+          <PaginationControls
+            page={paginationInfo.page}
+            totalPages={paginationInfo.totalPages}
+            totalItems={paginationInfo.totalItems}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+      )}
 
       <ProductFiltersDrawer
         open={isMobileFiltersOpen}
@@ -210,11 +304,13 @@ export default function ProductsPage() {
         categories={categories}
         filters={{ category, min, max }}
         limits={{ min: minPrice, max: maxPrice }}
+        appliedFilters={appliedFilters}
         onChangeCategory={(next) => setCategory(next)}
         onChangePrice={({ min: nextMin, max: nextMax }) => {
           setMin(ensureNumber(nextMin, minPrice));
           setMax(ensureNumber(nextMax, maxPrice));
         }}
+        onRemoveFilter={handleRemoveFilter}
         onReset={resetFilters}
       />
     </main>

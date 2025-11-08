@@ -7,8 +7,10 @@ export function ProductFiltersDrawer({
   categories,
   filters,
   limits,
+  appliedFilters = [],
   onChangeCategory,
   onChangePrice,
+  onRemoveFilter,
   onReset,
 }) {
   const panelRef = useRef(null);
@@ -60,6 +62,24 @@ export function ProductFiltersDrawer({
         />
 
         <footer className="mt-auto flex flex-col gap-3">
+          {appliedFilters.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-(--line,#e3ddd3) bg-(--color-light-beige,#f6efe7) px-4 py-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                Filtros activos
+              </span>
+              {appliedFilters.map((filter) => (
+                <button
+                  key={filter.type}
+                  type="button"
+                  onClick={() => onRemoveFilter?.(filter.type)}
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-100"
+                >
+                  {filter.label}
+                  <span aria-hidden className="text-neutral-400">×</span>
+                </button>
+              ))}
+            </div>
+          )}
           <button
             type="button"
             onClick={onReset}

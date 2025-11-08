@@ -3,13 +3,6 @@ import { Link } from "react-router-dom";
 import ProductCard from "../../products/components/ProductCard.jsx";
 import { productsDb, categoriesDb } from "../../../mocks/database/index.js";
 
-const DEFAULT_CATEGORY_FALLBACK = [
-  { id: "all", name: "Todos" },
-  { id: 1, name: "Living" },
-  { id: 2, name: "Comedor" },
-  { id: 3, name: "Dormitorio" },
-];
-
 const getMockProducts = () => {
   if (Array.isArray(productsDb?.PRODUCTS)) return productsDb.PRODUCTS;
   if (Array.isArray(productsDb?.products)) return productsDb.products;
@@ -23,7 +16,7 @@ const getMockCategories = () => {
   if (Array.isArray(categoriesDb?.categories) && categoriesDb.categories.length) {
     return categoriesDb.categories.filter((category) => category.parentId === null);
   }
-  return DEFAULT_CATEGORY_FALLBACK;
+  return [];
 };
 
 const FALLBACK_PRODUCTS = getMockProducts();
@@ -31,11 +24,27 @@ const FALLBACK_CATEGORIES = getMockCategories();
 
 const normalizeProduct = (product, index) => {
   const safeId = product?.id ?? `featured-${index}`;
+  const normalizedTitle = product?.title ?? product?.name ?? product?.nombre ?? `Producto ${index + 1}`;
+  const normalizedImage =
+    product?.image ?? product?.imageUrl ?? product?.imagen_url ?? product?.coverImage;
+  const normalizedPrice = product?.price ?? product?.precio ?? 50000;
+  const normalizedCategoryId =
+    product?.categoryId ?? product?.fk_categoria_id ?? product?.categoria_id ?? null;
+
   return {
     ...product,
     id: safeId,
-    title: product?.title ?? product?.name ?? `Producto ${index + 1}`,
-    image: product?.image ?? product?.imageUrl ?? product?.coverImage,
+    title: normalizedTitle,
+    name: product?.name ?? product?.nombre ?? product?.title,
+    image: normalizedImage,
+    imageUrl: normalizedImage,
+    price: normalizedPrice,
+    categoryId: normalizedCategoryId ?? product?.categoryId,
+    categoryIds: Array.isArray(product?.categoryIds)
+      ? product.categoryIds
+      : normalizedCategoryId !== null
+        ? [normalizedCategoryId]
+        : product?.categoryIds,
   };
 };
 
@@ -89,8 +98,8 @@ export default function ProductsSection({ products, categories }) {
   }, [products, activeCategory]);
 
   return (
-    <div className="space-y-8">
-      <div className="text-center space-y-3">
+    <div className="space-y-8 p-10">
+      <div className="text-center space-y-3 pb-10">
         <h2 className="font-italiana text-4xl text-dark">Productos</h2>
         <p className="font-garamond text-secondary1 mx-auto max-w-2xl">
           Explora nuestras categorías principales y descubre piezas curadas para cada ambiente.
@@ -108,7 +117,7 @@ export default function ProductsSection({ products, categories }) {
               className={`group relative pb-3 font-garamond text-base tracking-wide transition-colors ${
                 isActive
                   ? "text-dark"
-                  : "text-neutral-400 hover:text-(--color-primary-brown,#6b4e2f)"
+                  : "text-(--color-secondary1,#6b4e2f) hover:text-(--color-primary-brown,#6b4e2f)"
               }`}
             >
               {tab.label}
@@ -132,7 +141,7 @@ export default function ProductsSection({ products, categories }) {
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-neutral-200 bg-white/80 px-6 py-10 text-center text-sm text-neutral-500">
-          No encontramos productos destacados en los mocks.
+          No encontramos productos destacados.
         </div>
       )}
 

@@ -1,5 +1,7 @@
 export const siteDb = {
-  settings: {
+
+
+  SETTINGS: {
     currency: "CLP",
     defaultLocale: "es-CL",
     supportEmail: "soporte@moa-studio.cl",
@@ -10,7 +12,9 @@ export const siteDb = {
       linkedin: "https://www.linkedin.com/company/moa-studio",
     },
   },
-  storePolicies: {
+
+
+  STORE_POLICIES: {
     shipping:
       "Despachamos en Santiago en 5 a 10 días hábiles. Regiones entre 10 y 20 días hábiles según disponibilidad de transportes asociados.",
     returns:
@@ -18,7 +22,9 @@ export const siteDb = {
     warranty:
       "Todos nuestros muebles cuentan con garantía de 1 año sobre estructura y herrajes. Para textiles, la garantía es de 6 meses.",
   },
-  faqs: [
+
+  
+  FAQS: [
     {
       id: "faq-despachos",
       question: "¿Qué zonas cubren los despachos?",

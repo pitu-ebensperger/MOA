@@ -55,7 +55,7 @@ Explora nuestras líneas de muebles y decoración según el ambiente o estilo qu
       )}
 
       {remainingCategories.length > 0 && (
-        <section className="container-px mx-auto mt-10 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+        <section className="container-px mx-auto mt-10 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {remainingCategories.map((category) => (
             <CategoriesCard key={category.id} category={category} />
           ))}
