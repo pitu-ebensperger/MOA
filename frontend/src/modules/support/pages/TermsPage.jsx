@@ -1,7 +1,7 @@
 export const TermsPage = () => {
   return (
-    <main className="bg-[#E6E0D8] min-h-screen px-8 py-16 text-[#453F34]">
-      <section className="max-w-3xl mx-auto">
+<main className="bg-[#E6E0D8] min-h-screen px-8 py-50 text-[#453F34]">
+        <section className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold text-[#443114] mb-6 text-center">
           Términos y Condiciones
         </h1>

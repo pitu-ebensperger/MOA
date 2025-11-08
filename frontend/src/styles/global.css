@@ -16,6 +16,10 @@ body {
     background-color: var(--color-light);
 }
 
+ main {
+    padding-inline: 1.5rem;
+}
+
 h1,h2,h4,h5,h6 {
     font-family: var(--font-display);
     color: var(--color-dark);
@@ -26,6 +30,10 @@ h1 {
     color: var(--color-dark);
     font-weight: var(--weight-semibold);
     font-size: var(--text-3xl);
+}
+
+footer{
+    margin-top: 4rem;
 }
 
 a:hover, button:hover {
