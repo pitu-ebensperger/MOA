@@ -4,6 +4,7 @@ import { mockCatalogApi } from "../../../mocks/api/products.js";
 import { apiClient } from "../../../services/api-client.js";
 
 const coerceNumber = (value) => {
+  if (value === undefined || value === null || value === "") return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 };

@@ -1,4 +1,4 @@
-r// Formatos comunes de fecha (Chile): dd/MM/yyyy y relativeTime.
+// Formatos comunes de fecha (Chile): dd/MM/yyyy y relativeTime.
 
 const LOCALE = 'es-CL';
 const TIME_ZONE = 'America/Santiago';

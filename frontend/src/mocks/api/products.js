@@ -27,6 +27,11 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const normalizeSlug = (value) => {
+  if (typeof value !== "string") return null;
+  return value.trim().toLowerCase();
+};
+
 const matchesText = (product, text) => {
   if (!text) return true;
   const haystack = [
@@ -155,9 +160,14 @@ export const mockCatalogApi = {
     }
     await delay();
     const numericId = toNumber(productId);
+    const targetSlug = normalizeSlug(productId);
     const product = catalogDb.products.find((item) => {
-      if (numericId !== null) return item.id === numericId;
-      return String(item.id) === String(productId);
+      if (numericId !== null && Number(item.id) === numericId) return true;
+      if (String(item.id) === String(productId)) return true;
+      if (targetSlug && item.slug) {
+        return normalizeSlug(item.slug) === targetSlug;
+      }
+      return false;
     });
     if (!product) {
       const error = new Error("Product not found");
