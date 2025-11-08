@@ -35,14 +35,6 @@
 - Dejar en componentes si es un elemento genérico o si aparece en 2+ páginas.
 
 
-### Mantener tu rama actualizada
-
-1. Asegúrate de tener la rama `main` actualizada ejecutando `git fetch` y `git checkout main && git pull`.
-2. Cambia nuevamente a tu rama de trabajo con `git checkout work` (o el nombre correspondiente).
-3. Integra los cambios de `main` usando `git merge main` o `git rebase main`, resolviendo los conflictos en el proceso.
-4. Ejecuta las pruebas y revisa que el proyecto siga funcionando antes de subir los cambios.
-5. Sube tu rama y crea un Pull Request describiendo que sincronizaste tu rama con `main`.
-
 --------------------------------------------------------------------------------------------------
 
 ## Requerimientos
