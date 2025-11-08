@@ -11,6 +11,7 @@ html:focus-within { scroll-behavior: smooth; }
 
 /* GENERAL --------------------------------------------------------*/
 body {
+    margin: 0;
     font-family: var(--font-sans);
     color: var(--color-text);
     background-color: var(--color-light);
