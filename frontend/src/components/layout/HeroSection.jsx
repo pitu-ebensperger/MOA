@@ -2,7 +2,7 @@ export default function HeroSection() {
   return (
     <section className="bg-[#d2cbc1] text-[var(--text-strong)]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-12 px-6 py-50 sm:px-10 lg:px-20">
-
+        
         {/* Texto */}
         <div>
           <p className="text-sm text-[var(--text-weak)] mb-2 uppercase tracking-wide">
