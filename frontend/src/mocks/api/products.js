@@ -1,7 +1,7 @@
 import { productsDb, PRODUCTS, CATEGORIES } from "../database/index.js";
 import { delay } from "../utils/delay.js";
-import { buildProductCategoryPool } from "../modules/products/utils/product.js";
-import { ALL_CATEGORY_ID } from "../modules/products/constants.js";
+import { buildProductCategoryPool } from "../../modules/products/utils/product.js";
+import { ALL_CATEGORY_ID } from "../../modules/products/constants.js";
 
 const normalizeCategory = (category) => ({
   id: category.id,
