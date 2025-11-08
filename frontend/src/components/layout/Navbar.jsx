@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { label: 'Inicio', href: '/home', match: ['/', '/home'] },
   { label: 'Categorías', href: '/categories' },
   { label: 'Productos', href: '/products' },
-  { label: 'Contacto', href: '/home#contact', match: '/home' },
+  { label: 'Contacto', href: '/contact' },
 ];
 
 const getPathname = (href = "") => {
