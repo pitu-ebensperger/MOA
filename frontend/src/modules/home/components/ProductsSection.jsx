@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../../products/components/ProductCard.jsx";
 import { productsDb, categoriesDb } from "../../../mocks/database/index.js";
+import { matchesProductCategory } from "../../products/utils/product.js";
+import { ALL_CATEGORY_ID } from "../../products/constants.js";
 
 const getMockProducts = () => {
   if (Array.isArray(productsDb?.PRODUCTS)) return productsDb.PRODUCTS;
@@ -56,27 +58,18 @@ const buildTabs = (categories) => {
     })
     .filter((item) => Boolean(item.label));
 
-  const hasAll = items.some((item) => item.value === "all");
-  return hasAll ? items : [{ id: "all", label: "Todos", value: "all" }, ...items];
-};
-
-const matchesCategory = (product, categoryValue) => {
-  if (!categoryValue || categoryValue === "all") return true;
-
-  const pool = [product?.fk_category_id, product?.categoryId]
-    .filter((id) => id !== undefined && id !== null)
-    .map((id) => String(id).toLowerCase());
-
-  const comparer = String(categoryValue).toLowerCase();
-  return pool.some((catId) => catId === comparer);
+  const hasAll = items.some((item) => item.value === ALL_CATEGORY_ID);
+  return hasAll
+    ? items
+    : [{ id: ALL_CATEGORY_ID, label: "Todos", value: ALL_CATEGORY_ID }, ...items];
 };
 
 export default function ProductsSection({ products, categories }) {
   const tabs = useMemo(() => buildTabs(categories), [categories]);
-  const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? "all");
+  const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
 
   useEffect(() => {
-    const fallbackValue = tabs[0]?.value ?? "all";
+    const fallbackValue = tabs[0]?.value ?? ALL_CATEGORY_ID;
     const isValid = tabs.some((tab) => String(tab.value) === String(activeCategory));
     if (!isValid) {
       setActiveCategory(fallbackValue);
@@ -86,7 +79,9 @@ export default function ProductsSection({ products, categories }) {
   const items = useMemo(() => {
     const source = Array.isArray(products) && products.length ? products : FALLBACK_PRODUCTS;
     const normalized = source.map(normalizeProduct);
-    const filtered = normalized.filter((product) => matchesCategory(product, activeCategory));
+    const filtered = normalized.filter((product) =>
+      matchesProductCategory(product, activeCategory),
+    );
     return filtered.slice(0, 4);
   }, [products, activeCategory]);
 

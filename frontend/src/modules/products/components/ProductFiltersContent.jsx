@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { DoubleRangeSlider } from "./DoubleRangeSlider.jsx";
+import { ALL_CATEGORY_ID } from "../constants.js";
 
 const normalizeCategories = (categories = []) => {
   const base = Array.isArray(categories) ? categories : [];
@@ -18,8 +19,8 @@ const normalizeCategories = (categories = []) => {
     })
     .filter(Boolean);
 
-  const hasAll = mapped.some((cat) => cat.id === "all");
-  return hasAll ? mapped : [{ id: "all", name: "Todas" }, ...mapped];
+  const hasAll = mapped.some((cat) => cat.id === ALL_CATEGORY_ID);
+  return hasAll ? mapped : [{ id: ALL_CATEGORY_ID, name: "Todas" }, ...mapped];
 };
 
 const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);

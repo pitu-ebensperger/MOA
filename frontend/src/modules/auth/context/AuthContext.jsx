@@ -28,15 +28,8 @@ export const AuthProvider = ({ children }) => {
   // Estado inicial: si hay token guardado, intentamos cargar perfil
   const [token, setToken] = useState(() => storage.get(TOKEN_KEY));
   const [user, setUser]   = useState(() => {
-    // const raw = storage.get(USER_KEY);
-    // return raw ? safeParseJson(raw) : null;
-    return {
-      name: 'Nahara Gutierrez',
-      email: 'nahgutie@gmail.com',
-      phone: '569 123 456 78',
-      address: 'Calle Diagonal Laguna 1'
-    }
-    
+    const raw = storage.get(USER_KEY);
+    return raw ? safeParseJson(raw) : null;
   });
   const [status, setStatus] = useState(() => (storage.get(TOKEN_KEY) ? STATUS.LOADING : STATUS.IDLE));
   const [error, setError] = useState(null);

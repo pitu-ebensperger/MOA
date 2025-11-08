@@ -54,18 +54,21 @@ export const Footer = () => {
             </div>
 
             <div className="mt-6 flex gap-4">
-              {SOCIAL_LINKS.map(({ label, href, icon: Icon }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={label}
-                  className="group rounded-full border border-neutral-200 p-2 text-neutral-500 transition hover:border-primary1 hover:text-primary1"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
+              {SOCIAL_LINKS.map(({ label, href, icon }) => {
+                const IconComponent = icon;
+                return (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={label}
+                    className="group rounded-full border border-neutral-200 p-2 text-neutral-500 transition hover:border-primary1 hover:text-primary1"
+                  >
+                    <IconComponent className="h-4 w-4" />
+                  </a>
+                );
+              })}
             </div>
           </section>
 

@@ -1,5 +1,7 @@
 import { productsDb, PRODUCTS, CATEGORIES } from "../database/index.js";
 import { delay } from "../utils/delay.js";
+import { buildProductCategoryPool } from "../modules/products/utils/product.js";
+import { ALL_CATEGORY_ID } from "../modules/products/constants.js";
 
 const normalizeCategory = (category) => ({
   id: category.id,
@@ -46,25 +48,8 @@ const matchesText = (product, text) => {
   return haystack.includes(text.toLowerCase());
 };
 
-const buildCategoryPool = (product) => {
-  const pool = [];
-  if (product?.fk_category_id !== undefined && product?.fk_category_id !== null) {
-    pool.push(product.fk_category_id);
-  }
-  if (product?.categoryId !== undefined && product?.categoryId !== null) {
-    pool.push(product.categoryId);
-  }
-  if (Array.isArray(product?.categoryIds)) {
-    pool.push(...product.categoryIds);
-  }
-  if (Array.isArray(product?.categoria_ids)) {
-    pool.push(...product.categoria_ids);
-  }
-  return pool;
-};
-
 const resolveCategoryTarget = (value) => {
-  if (value === undefined || value === null || value === "all") return null;
+  if (value === undefined || value === null || value === ALL_CATEGORY_ID) return null;
   const numeric = toNumber(value);
   if (numeric !== null) return numeric;
   if (typeof value === "string" && value.trim()) {
@@ -77,8 +62,8 @@ const resolveCategoryTarget = (value) => {
 };
 
 const matchesCategory = (product, categoryValue) => {
-  if (!categoryValue || categoryValue === "all") return true;
-  const pool = buildCategoryPool(product);
+  if (!categoryValue || categoryValue === ALL_CATEGORY_ID) return true;
+  const pool = buildProductCategoryPool(product);
   if (!pool.length) return false;
 
   const targetId = resolveCategoryTarget(categoryValue);

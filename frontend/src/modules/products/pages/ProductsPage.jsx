@@ -7,39 +7,9 @@ import { PaginationControls } from "../components/PaginationControls.jsx";
 import { useProducts } from "../hooks/useProducts.js";
 import { useCategories } from "../hooks/useCategories.js";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
-
-const ensureNumber = (value, fallback) => {
-  const num = Number(value);
-  return Number.isFinite(num) ? num : fallback;
-};
-
-const DEFAULT_PAGE_SIZE = 9;
-const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 12, 18, 24];
-
-const resolveProductPrice = (product) => {
-  const candidates = [product?.price, product?.pricing?.price];
-  const rawPrice = candidates.find((value) => value !== undefined && value !== null);
-  if (rawPrice === undefined || rawPrice === null) return null;
-  const numericValue = Number(rawPrice);
-  return Number.isFinite(numericValue) ? numericValue : null;
-};
-
-const matchesCategory = (product, categoryId) => {
-  if (categoryId === "all") return true;
-  if (!categoryId) return true;
-
-  const idString = String(categoryId).toLowerCase();
-  const candidates = [
-    product?.fk_category_id,
-    product?.categoryId,
-    product?.categoria_id,
-    product?.categorySlug,
-  ];
-
-  return candidates
-    .filter((value) => value !== undefined && value !== null)
-    .some((value) => String(value).toLowerCase() === idString);
-};
+import { ensureNumber } from "../../../utils/number.js";
+import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "../constants.js";
+import { matchesProductCategory, resolveProductPrice } from "../utils/product.js";
 
 export default function ProductsPage() {
   const { products: fetchedProducts, isLoading, error } = useProducts();
@@ -47,8 +17,8 @@ export default function ProductsPage() {
 
   const categories = useMemo(() => {
     const base = Array.isArray(fetchedCategories) ? fetchedCategories : [];
-    const hasAll = base.some((category) => category.id === "all");
-    return hasAll ? base : [{ id: "all", name: "Todos" }, ...base];
+    const hasAll = base.some((category) => category.id === ALL_CATEGORY_ID);
+    return hasAll ? base : [{ id: ALL_CATEGORY_ID, name: "Todos" }, ...base];
   }, [fetchedCategories]);
 
   const allProducts = useMemo(
@@ -67,7 +37,7 @@ export default function ProductsPage() {
     };
   }, [allProducts]);
 
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState(ALL_CATEGORY_ID);
   const [min, setMin] = useState(minPrice);
   const [max, setMax] = useState(maxPrice);
   const [sort, setSort] = useState("relevance");
@@ -81,7 +51,7 @@ export default function ProductsPage() {
       const safeMin = ensureNumber(min, minPrice);
       const safeMax = ensureNumber(max, maxPrice);
       const withinPriceRange = price >= safeMin && price <= safeMax;
-      const matchesCat = matchesCategory(product, category);
+      const matchesCat = matchesProductCategory(product, category);
       return withinPriceRange && matchesCat;
     });
   }, [allProducts, category, min, max, minPrice, maxPrice]);
@@ -123,7 +93,7 @@ export default function ProductsPage() {
   }, [itemsPerPage, totalResults]);
 
   const activeCategory = useMemo(() => {
-    if (category === "all") return null;
+    if (category === ALL_CATEGORY_ID) return null;
     return categories.find(
       (cat) => cat.id === category || String(cat.id) === String(category),
     );
@@ -136,13 +106,13 @@ export default function ProductsPage() {
   ].filter(Boolean);
 
   const handleRemoveFilter = (type) => {
-    if (type === "category") setCategory("all");
+    if (type === "category") setCategory(ALL_CATEGORY_ID);
     if (type === "min") setMin(minPrice);
     if (type === "max") setMax(maxPrice);
   };
 
   const resetFilters = () => {
-    setCategory("all");
+    setCategory(ALL_CATEGORY_ID);
     setMin(minPrice);
     setMax(maxPrice);
     setCurrentPage(1);
@@ -165,7 +135,7 @@ export default function ProductsPage() {
       start: totalItems === 0 ? 0 : startIndex + 1,
       end: endIndex,
     };
-  }, [sortedProducts, currentPage, itemsPerPage]);
+  }, [sortedProducts, currentPage, itemsPerPage, totalResults]);
   const { items: paginatedProducts } = paginationInfo;
 
   const handleChangeItemsPerPage = (nextValue) => {
