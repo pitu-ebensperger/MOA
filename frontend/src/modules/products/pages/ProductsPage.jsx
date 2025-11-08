@@ -33,17 +33,24 @@ const matchesCategory = (product, categoryId) => {
   if (categoryId === "all") return true;
   if (!categoryId) return true;
 
-  const idString = String(categoryId);
-  const productId = product?.categoryId;
-  if (productId !== undefined && productId !== null) {
-    if (productId === categoryId || String(productId) === idString) return true;
-  }
+  const idString = String(categoryId).toLowerCase();
+  const candidates = [
+    product?.categoryId,
+    product?.fk_categoria_id,
+    product?.categoria_id,
+    product?.categoria_slug,
+  ];
 
   if (Array.isArray(product?.categoryIds)) {
-    return product.categoryIds.some((cat) => cat === categoryId || String(cat) === idString);
+    candidates.push(...product.categoryIds);
+  }
+  if (Array.isArray(product?.category_slugs)) {
+    candidates.push(...product.category_slugs);
   }
 
-  return false;
+  return candidates
+    .filter((value) => value !== undefined && value !== null)
+    .some((value) => String(value).toLowerCase() === idString);
 };
 
 export default function ProductsPage() {

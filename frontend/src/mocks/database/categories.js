@@ -1,6 +1,6 @@
 export const CATEGORIES = [
   {
-    id: 1,
+    id: 1000,
     slug: "living",
     name: "Living",
     description:
@@ -10,7 +10,7 @@ export const CATEGORIES = [
     parentId: null,
   },
   {
-    id: 2,
+    id: 2000,
     slug: "comedor",
     name: "Comedor",
     description:
@@ -20,7 +20,7 @@ export const CATEGORIES = [
     parentId: null,
   },
   {
-    id: 3,
+    id: 3000,
     slug: "dormitorio",
     name: "Dormitorio",
     description:
@@ -30,7 +30,7 @@ export const CATEGORIES = [
     parentId: null,
   },
   {
-    id: 4,
+    id: 4000,
     slug: "iluminacion",
     name: "Iluminación",
     description:
@@ -40,7 +40,7 @@ export const CATEGORIES = [
     parentId: null,
   },
   {
-    id: 5,
+    id: 5000,
     slug: "oficina",
     name: "Oficina",
     description:
@@ -50,7 +50,7 @@ export const CATEGORIES = [
     parentId: null,
   },
    {
-    id: 6,
+    id: 6000,
     slug: "decoracion",
     name: "Decoración",
     description:
@@ -63,32 +63,32 @@ export const CATEGORIES = [
 
 export const SUBCATEGORIES = [
   // Living (1)
-  { id: 110, slug: "sofas",            name: "Sofás",            parentId: 1 },
-  { id: 120, slug: "sillones",         name: "Sillones",         parentId: 1 },
-  { id: 130, slug: "mesas-centro",     name: "Mesas de centro",  parentId: 1 },
-  { id: 140, slug: "mesas-laterales",  name: "Mesas laterales",  parentId: 1 },
+  { id: 1100, slug: "sofas",            name: "Sofás",            parentId: 1000 },
+  { id: 1200, slug: "sillones",         name: "Sillones",         parentId: 1000 },
+  { id: 1300, slug: "mesas-centro",     name: "Mesas de centro",  parentId: 1000 },
+  { id: 1400, slug: "mesas-laterales",  name: "Mesas laterales",  parentId: 1000 },
 
   // Comedor (2)
-  { id: 210, slug: "mesas-comedor",    name: "Mesas de comedor", parentId: 2 },
-  { id: 220, slug: "sillas-comedor",   name: "Sillas de comedor",parentId: 2 },
-  { id: 230, slug: "aparadores",       name: "Aparadores",       parentId: 2 },
+  { id: 2100, slug: "mesas-comedor",    name: "Mesas de comedor", parentId: 2000 },
+  { id: 2200, slug: "sillas-comedor",   name: "Sillas de comedor",parentId: 2000 },
+  { id: 2300, slug: "aparadores",       name: "Aparadores",       parentId: 2000 },
 
   // Dormitorio (3)
-  { id: 310, slug: "camas",            name: "Camas",            parentId: 3 },
-  { id: 320, slug: "veladores",        name: "Veladores",        parentId: 3 },
-  { id: 330, slug: "textiles",         name: "Textiles",         parentId: 3 },
+  { id: 3100, slug: "camas",            name: "Camas",            parentId: 3000 },
+  { id: 3200, slug: "veladores",        name: "Veladores",        parentId: 3000 },
+  { id: 3300, slug: "textiles",         name: "Textiles",         parentId: 3000 },
 
   // Iluminación (4)
-  { id: 410, slug: "lamparas-techo",   name: "Lámparas de techo",parentId: 4 },
-  { id: 420, slug: "lamparas-mesa",    name: "Lámparas de mesa", parentId: 4 },
+  { id: 4100, slug: "lamparas-techo",   name: "Lámparas de techo",parentId: 4000 },
+  { id: 4200, slug: "lamparas-mesa",    name: "Lámparas de mesa", parentId: 4000 },
 
   // Oficina (5)
-  { id: 510, slug: "escritorios",      name: "Escritorios",      parentId: 5 },
-  { id: 520, slug: "sillas-oficina",   name: "Sillas de oficina",parentId: 5 },
+  { id: 5100, slug: "escritorios",      name: "Escritorios",      parentId: 5000 },
+  { id: 5200, slug: "sillas-oficina",   name: "Sillas de oficina",parentId: 5000},
 
   // Decoración (6)
-  { id: 610, slug: "plantas", name: "Plantas", parentId: 6 },
-  { id: 620, slug: "lounge-exterior",  name: "Lounge exterior",  parentId: 6 },
+  { id: 6100, slug: "plantas", name: "Plantas", parentId: 6000 },
+  { id: 6200, slug: "espejos",  name: "Espejos",  parentId: 6000 },
 ];
 
 export const categoriesDb = {

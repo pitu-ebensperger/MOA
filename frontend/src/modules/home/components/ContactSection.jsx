@@ -13,8 +13,7 @@ export default function ContactSection({ contact = FALLBACK_CONTACT }) {
       <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-[1.1fr_1fr]">
         <div className="space-y-6 text-left">
           <h2 className="font-italiana text-4xl text-dark">Coordinemos una visita</h2>
-          <p className="font-garamond text-secondary1">{contact.formIntroduction ?? FALLBACK_CONTACT.formIntroduction}</p>
-
+          
           <ul className="space-y-3 text-sm text-neutral-700">
             {contact.showroomAddress && (
               <li>
@@ -51,6 +50,8 @@ export default function ContactSection({ contact = FALLBACK_CONTACT }) {
         </div>
 
         <form className="grid grid-cols-1 gap-5 rounded-3xl border border-neutral-200 bg-white/70 p-8 shadow-sm backdrop-blur">
+                  <h2 className="font-italiana text-4xl text-dark">Contáctanos</h2>
+
           <label className="flex flex-col gap-2">
             <span className="font-garamond text-sm text-dark">Nombre</span>
             <input
