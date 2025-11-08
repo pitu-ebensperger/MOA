@@ -77,24 +77,15 @@ const matchesCategory = (product, categoryValue) => {
 
 const matchesCollection = (product, collectionId) => {
   if (!collectionId) return true;
-  const pool = [];
-  if (product?.fk_collection_id !== undefined && product?.fk_collection_id !== null) {
-    pool.push(product.fk_collection_id);
-  }
-  if (product?.collectionId !== undefined && product?.collectionId !== null) {
-    pool.push(product.collectionId);
-  }
-  if (Array.isArray(product?.collectionIds)) {
-    pool.push(...product.collectionIds);
-  }
-  if (!pool.length) return false;
+  const productCollection = product?.fk_collection_id;
+  if (productCollection === undefined || productCollection === null) return false;
 
   const targetNumber = toNumber(collectionId);
   if (targetNumber !== null) {
-    return pool.some((id) => Number(id) === targetNumber);
+    return Number(productCollection) === targetNumber;
   }
   const normalized = String(collectionId).toLowerCase();
-  return pool.some((id) => String(id).toLowerCase() === normalized);
+  return String(productCollection).toLowerCase() === normalized;
 };
 
 const matchesPrice = (product, minPrice, maxPrice) => {

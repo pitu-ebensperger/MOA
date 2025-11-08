@@ -15,12 +15,11 @@ export default function ProductCard({
   showBadge = false,
   badgeText = "NUEVO",
 }) {
-  const { id, slug, price, name, title, image, imageUrl, imgUrl, coverImage, gallery } = product;
+  const { id, slug, price, name, imgUrl, gallery } = product;
 
   const navigate = useNavigate();
-  const displayTitle = name ?? title ?? slug ?? "Nombre Producto";
-  const displayImage =
-    imgUrl ?? image ?? imageUrl ?? coverImage ?? gallery?.[0] ?? FALLBACK_IMAGE;
+  const displayTitle = name ?? slug ?? "Nombre Producto";
+  const displayImage = imgUrl ?? gallery?.[0] ?? FALLBACK_IMAGE;
   const displayPrice = price ?? 50000;
   const productSlug = slug ?? (id ? String(id) : null);
   const href = productSlug ? `/products/${productSlug}` : "/products";

@@ -1,7 +1,6 @@
 import { ALL_CATEGORY_ID } from "../constants.js";
 
-const CATEGORY_VALUE_KEYS = ["fk_category_id", "categoryId", "categoria_id", "categorySlug"];
-const CATEGORY_ARRAY_KEYS = ["categoryIds", "categoria_ids"];
+const CATEGORY_VALUE_KEYS = ["fk_category_id"];
 
 const normalizeCategoryToken = (value) => {
   if (value === undefined || value === null) {
@@ -37,15 +36,6 @@ export const buildProductCategoryPool = (product) => {
     }
   });
 
-  CATEGORY_ARRAY_KEYS.forEach((key) => {
-    const collection = product?.[key];
-    if (Array.isArray(collection)) {
-      pool.push(
-        ...collection.filter((value) => value !== undefined && value !== null),
-      );
-    }
-  });
-
   return pool;
 };
 
@@ -71,10 +61,7 @@ export const matchesProductCategory = (product, categoryValue) => {
 };
 
 export const resolveProductPrice = (product) => {
-  const candidates = [product?.price, product?.pricing?.price];
-  const rawPrice = candidates.find(
-    (value) => value !== undefined && value !== null,
-  );
+  const rawPrice = product?.price;
   if (rawPrice === undefined || rawPrice === null) return null;
   const numericValue = Number(rawPrice);
   return Number.isFinite(numericValue) ? numericValue : null;

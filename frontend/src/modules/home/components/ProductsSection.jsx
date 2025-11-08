@@ -26,21 +26,16 @@ const FALLBACK_CATEGORIES = getMockCategories();
 
 const normalizeProduct = (product, index) => {
   const safeId = product?.id ?? `featured-${index}`;
-  const normalizedTitle = product?.name ?? product?.title ?? product?.slug ?? `Producto ${index + 1}`;
-  const normalizedImage =
-    product?.imgUrl ?? product?.image ?? product?.imageUrl ?? product?.coverImage;
+  const normalizedName = product?.name ?? product?.slug ?? `Producto ${index + 1}`;
+  const normalizedImage = product?.imgUrl ?? product?.gallery?.[0] ?? null;
   const normalizedPrice = product?.price ?? 50000;
-  const normalizedCategoryId = product?.fk_category_id ?? product?.categoryId ?? null;
 
   return {
     ...product,
     id: safeId,
-    title: normalizedTitle,
-    name: normalizedTitle,
-    image: normalizedImage,
+    name: normalizedName,
     imgUrl: normalizedImage,
     price: normalizedPrice,
-    fk_category_id: normalizedCategoryId,
   };
 };
 

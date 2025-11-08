@@ -9,15 +9,6 @@ const coerceNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const pickFirst = (...values) => {
-  for (const value of values) {
-    if (value !== undefined && value !== null) {
-      return value;
-    }
-  }
-  return null;
-};
-
 const slugify = (value) => {
   if (!value) return null;
   return String(value)
@@ -47,45 +38,21 @@ const buildQueryString = (params = {}) => {
 };
 
 const normalizeProduct = (product = {}) => {
-  const resolvedId = pickFirst(
-    product.id,
-    product.productId,
-    product.product_id,
-    product.sku,
-    product.slug,
-  );
+  const resolvedId = product.id ?? null;
 
-  const name = pickFirst(product.name, product.nombre, product.title, product.slug) ?? "Producto MOA";
+  const name = product.name ?? "Producto MOA";
 
-  const slug =
-    pickFirst(product.slug, resolvedId !== null ? String(resolvedId) : null, slugify(name)) ?? null;
+  const slug = product.slug ?? (resolvedId !== null ? String(resolvedId) : slugify(name)) ?? null;
 
-  const price = coerceNumber(
-    pickFirst(
-      product.price,
-      product.precio,
-      product.priceCLP,
-      product.precioCLP,
-      product?.pricing?.price,
-    ),
-  );
+  const price = coerceNumber(product.price);
 
-  const compareAtPrice = coerceNumber(
-    pickFirst(
-      product.compareAtPrice,
-      product.precio_original,
-      product.precioNormal,
-      product.priceBefore,
-    ),
-  );
+  const compareAtPrice = coerceNumber(product.compareAtPrice);
 
-  const imgUrl = pickFirst(
-    product.imgUrl,
-    product.imageUrl,
-    product.imagen_url,
-    product.image,
-    product.coverImage,
-  );
+  const imgUrl = product.imgUrl ?? null;
+  const sku = product.sku ?? null;
+  const description = product.description ?? "";
+  const shortDescription = product.shortDescription ?? "";
+  const color = product.color ?? null;
 
   const gallery =
     Array.isArray(product.gallery) && product.gallery.length
@@ -94,20 +61,11 @@ const normalizeProduct = (product = {}) => {
         ? [imgUrl]
         : [];
 
-  const fkCategoryId = pickFirst(
-    product.fk_category_id,
-    product.categoryId,
-    product.category_id,
-    product.fk_categoria_id,
-  );
-
-  const fkCollectionId = pickFirst(
-    product.fk_collection_id,
-    product.collectionId,
-    product.collection_id,
-  );
+  const fkCategoryId = product.fk_category_id ?? null;
+  const fkCollectionId = product.fk_collection_id ?? null;
 
   const stock = coerceNumber(product.stock);
+  const normalizedStock = stock ?? 0;
 
   const badgeList = Array.isArray(product.badge)
     ? product.badge
@@ -133,32 +91,32 @@ const normalizeProduct = (product = {}) => {
   const updatedAt = product.updatedAt ?? createdAt;
 
   return {
-    id: resolvedId ?? null,
+    id: resolvedId,
     name,
     slug,
-    sku: pickFirst(product.sku, product.codigo, product.productSku, slug) ?? slug ?? null,
-    price: price ?? null,
-    stock: stock ?? 0,
-    description: product.description ?? product.descripcion ?? "",
-    shortDescription: product.shortDescription ?? product.descripcion ?? "",
-    imgUrl: imgUrl ?? null,
+    sku,
+    price,
+    stock: normalizedStock,
+    description,
+    shortDescription,
+    imgUrl,
     gallery,
     badge: badgeList,
-    status: product.status ?? ((stock ?? 0) > 0 ? "activo" : "sin_stock"),
+    status: product.status ?? (normalizedStock > 0 ? "activo" : "sin_stock"),
     tags,
     material,
     materials,
-    color: product.color ?? product.finish ?? null,
+    color,
     dimensions: product.dimensions ?? null,
     weight: product.weight ?? null,
     specs: product.specs ?? null,
     variantOptions: product.variantOptions ?? [],
     createdAt,
     updatedAt,
-    fk_category_id: fkCategoryId ?? null,
-    fk_collection_id: fkCollectionId ?? null,
-    collection: pickFirst(product.collection, product.collectionName, product.collectionLabel) ?? null,
-    compareAtPrice: compareAtPrice ?? null,
+    fk_category_id: fkCategoryId,
+    fk_collection_id: fkCollectionId,
+    collection: product.collection ?? null,
+    compareAtPrice,
   };
 };
 
