@@ -24,27 +24,21 @@ const FALLBACK_CATEGORIES = getMockCategories();
 
 const normalizeProduct = (product, index) => {
   const safeId = product?.id ?? `featured-${index}`;
-  const normalizedTitle = product?.title ?? product?.name ?? product?.nombre ?? `Producto ${index + 1}`;
+  const normalizedTitle = product?.name ?? product?.title ?? product?.slug ?? `Producto ${index + 1}`;
   const normalizedImage =
-    product?.image ?? product?.imageUrl ?? product?.imagen_url ?? product?.coverImage;
-  const normalizedPrice = product?.price ?? product?.precio ?? 50000;
-  const normalizedCategoryId =
-    product?.categoryId ?? product?.fk_categoria_id ?? product?.categoria_id ?? null;
+    product?.imgUrl ?? product?.image ?? product?.imageUrl ?? product?.coverImage;
+  const normalizedPrice = product?.price ?? 50000;
+  const normalizedCategoryId = product?.fk_category_id ?? product?.categoryId ?? null;
 
   return {
     ...product,
     id: safeId,
     title: normalizedTitle,
-    name: product?.name ?? product?.nombre ?? product?.title,
+    name: normalizedTitle,
     image: normalizedImage,
-    imageUrl: normalizedImage,
+    imgUrl: normalizedImage,
     price: normalizedPrice,
-    categoryId: normalizedCategoryId ?? product?.categoryId,
-    categoryIds: Array.isArray(product?.categoryIds)
-      ? product.categoryIds
-      : normalizedCategoryId !== null
-        ? [normalizedCategoryId]
-        : product?.categoryIds,
+    fk_category_id: normalizedCategoryId,
   };
 };
 
@@ -69,13 +63,12 @@ const buildTabs = (categories) => {
 const matchesCategory = (product, categoryValue) => {
   if (!categoryValue || categoryValue === "all") return true;
 
-  const pool = [
-    product?.categoryId,
-    ...(Array.isArray(product?.categoryIds) ? product.categoryIds : []),
-  ].filter((id) => id !== undefined && id !== null);
+  const pool = [product?.fk_category_id, product?.categoryId]
+    .filter((id) => id !== undefined && id !== null)
+    .map((id) => String(id).toLowerCase());
 
   const comparer = String(categoryValue).toLowerCase();
-  return pool.some((catId) => String(catId).toLowerCase() === comparer);
+  return pool.some((catId) => catId === comparer);
 };
 
 export default function ProductsSection({ products, categories }) {

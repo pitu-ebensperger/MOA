@@ -55,8 +55,7 @@ const normalizeProduct = (product = {}) => {
     product.slug,
   );
 
-  const name =
-    pickFirst(product.name, product.nombre, product.title, product.slug) ?? "Producto MOA";
+  const name = pickFirst(product.name, product.nombre, product.title, product.slug) ?? "Producto MOA";
 
   const slug =
     pickFirst(product.slug, resolvedId !== null ? String(resolvedId) : null, slugify(name)) ?? null;
@@ -72,57 +71,94 @@ const normalizeProduct = (product = {}) => {
   );
 
   const compareAtPrice = coerceNumber(
-    pickFirst(product.compareAtPrice, product.precio_original, product.precioNormal),
+    pickFirst(
+      product.compareAtPrice,
+      product.precio_original,
+      product.precioNormal,
+      product.priceBefore,
+    ),
   );
 
-  const imageUrl = pickFirst(product.imageUrl, product.imagen_url, product.image, product.coverImage);
+  const imgUrl = pickFirst(
+    product.imgUrl,
+    product.imageUrl,
+    product.imagen_url,
+    product.image,
+    product.coverImage,
+  );
 
   const gallery =
     Array.isArray(product.gallery) && product.gallery.length
       ? product.gallery
-      : imageUrl
-        ? [imageUrl]
+      : imgUrl
+        ? [imgUrl]
         : [];
 
-  const categoryId = pickFirst(
+  const fkCategoryId = pickFirst(
+    product.fk_category_id,
     product.categoryId,
+    product.category_id,
     product.fk_categoria_id,
-    product.categoria_id,
   );
 
-  const categoryIds =
-    Array.isArray(product.categoryIds) && product.categoryIds.length
-      ? product.categoryIds
-      : categoryId !== undefined && categoryId !== null
-        ? [categoryId]
+  const fkCollectionId = pickFirst(
+    product.fk_collection_id,
+    product.collectionId,
+    product.collection_id,
+  );
+
+  const stock = coerceNumber(product.stock);
+
+  const badgeList = Array.isArray(product.badge)
+    ? product.badge
+    : product.badge
+      ? [product.badge]
+      : [];
+
+  const tags =
+    Array.isArray(product.tags) && product.tags.length
+      ? product.tags
+      : typeof product.tags === "string"
+        ? product.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
         : [];
 
-  const collectionIds =
-    Array.isArray(product.collectionIds) && product.collectionIds.length
-      ? product.collectionIds
-      : product.categoria_slug
-        ? [product.categoria_slug]
-        : [];
+  const material = product.material ?? (Array.isArray(product.materials) ? product.materials[0] : null);
+  const materials = Array.isArray(product.materials)
+    ? product.materials
+    : material
+      ? [material]
+      : [];
+
+  const createdAt = product.createdAt ?? product.updatedAt ?? new Date().toISOString();
+  const updatedAt = product.updatedAt ?? createdAt;
 
   return {
-    ...product,
     id: resolvedId ?? null,
-    slug,
     name,
-    title: product.title ?? name,
-    shortDescription: product.shortDescription ?? product.descripcion ?? "",
-    description: product.description ?? product.descripcion ?? "",
+    slug,
+    sku: pickFirst(product.sku, product.codigo, product.productSku, slug) ?? slug ?? null,
     price: price ?? null,
-    priceCLP: price ?? product.priceCLP ?? product.precioCLP ?? null,
-    compareAtPrice: compareAtPrice ?? null,
-    imageUrl: imageUrl ?? null,
-    imagen_url: product.imagen_url ?? imageUrl ?? null,
+    stock: stock ?? 0,
+    description: product.description ?? product.descripcion ?? "",
+    shortDescription: product.shortDescription ?? product.descripcion ?? "",
+    imgUrl: imgUrl ?? null,
     gallery,
-    categoryId: categoryId ?? null,
-    categoryIds,
-    collectionIds,
-    sku: product.sku ?? product.codigo ?? null,
-    stock: coerceNumber(product.stock),
+    badge: badgeList,
+    status: product.status ?? ((stock ?? 0) > 0 ? "activo" : "sin_stock"),
+    tags,
+    material,
+    materials,
+    color: product.color ?? product.finish ?? null,
+    dimensions: product.dimensions ?? null,
+    weight: product.weight ?? null,
+    specs: product.specs ?? null,
+    variantOptions: product.variantOptions ?? [],
+    createdAt,
+    updatedAt,
+    fk_category_id: fkCategoryId ?? null,
+    fk_collection_id: fkCollectionId ?? null,
+    collection: pickFirst(product.collection, product.collectionName, product.collectionLabel) ?? null,
+    compareAtPrice: compareAtPrice ?? null,
   };
 };
 

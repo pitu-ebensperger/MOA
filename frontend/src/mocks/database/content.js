@@ -1,7 +1,7 @@
 export const contentDb = {
   home: {
-    featuredCategoryIds: [1, 2, 3, 4],
-    featuredProductIds: [201, 101, 103, 301],
+    featuredCategoryIds: [1000, 2000, 3000, 4000, 5000],
+    featuredProductIds: [11001, 21001, 31001, 41001, 20301],
     editorialSections: [
       {
         id: "atelier-story",

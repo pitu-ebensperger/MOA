@@ -1,363 +1,548 @@
-const coerceNumber = (value) => {
-  if (value === undefined || value === null || value === "") return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const firstDefined = (...values) => {
-  for (const value of values) {
-    if (value !== undefined && value !== null) {
-      return value;
-    }
-  }
-  return null;
-};
-
-const slugify = (value) => {
-  if (!value) return null;
-  return String(value)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-};
-
-const normalizeProductRecord = (product = {}, index) => {
-  const resolvedId =
-    firstDefined(product.id, product.productId, product.product_id, coerceNumber(product.sku)) ??
-    index + 1;
-
-  const name =
-    firstDefined(product.name, product.nombre, product.title, product.slug) ??
-    `Producto ${index + 1}`;
-
-  const slug =
-    firstDefined(product.slug, slugify(name), resolvedId !== null ? String(resolvedId) : null) ??
-    `product-${index + 1}`;
-
-  const price = coerceNumber(
-    firstDefined(
-      product.price,
-      product.precio,
-      product.priceCLP,
-      product.precioCLP,
-      product?.pricing?.price,
-    ),
-  );
-
-  const compareAtPrice = coerceNumber(
-    firstDefined(product.compareAtPrice, product.precio_original, product.precioNormal),
-  );
-
-  const imageUrl =
-    firstDefined(product.imageUrl, product.imagen_url, product.image, product.coverImage) ?? null;
-
-  const gallery =
-    Array.isArray(product.gallery) && product.gallery.length
-      ? product.gallery
-      : imageUrl
-        ? [imageUrl]
-        : [];
-
-  const categoryId = firstDefined(
-    product.categoryId,
-    product.fk_categoria_id,
-    product.categoria_id,
-  );
-
-  const categoryIds =
-    Array.isArray(product.categoryIds) && product.categoryIds.length
-      ? product.categoryIds
-      : categoryId !== undefined && categoryId !== null
-        ? [categoryId]
-        : [];
-
-  const collectionIds =
-    Array.isArray(product.collectionIds) && product.collectionIds.length
-      ? product.collectionIds
-      : product.categoria_slug
-        ? [product.categoria_slug]
-        : [];
-
-  const stock = coerceNumber(product.stock) ?? 0;
-
-  const sku =
-    firstDefined(product.sku, product.codigo) ??
-    (resolvedId !== undefined && resolvedId !== null ? `SKU-${resolvedId}` : `SKU-${index + 1}`);
-
-  return {
-    ...product,
-    id: resolvedId,
-    slug,
-    name,
-    title: product.title ?? name,
-    shortDescription: product.shortDescription ?? product.descripcion ?? "",
-    description: product.description ?? product.descripcion ?? "",
-    price: price ?? null,
-    priceCLP: price ?? product.priceCLP ?? product.precioCLP ?? null,
-    compareAtPrice: compareAtPrice ?? null,
-    imageUrl,
-    imagen_url: product.imagen_url ?? imageUrl,
-    gallery,
-    categoryId: categoryId ?? null,
-    categoryIds,
-    collectionIds,
-    stock,
-    sku,
-  };
-};
-
-const RAW_PRODUCTS = [
-  // Living
+export const PRODUCTS = [
   {
     id: 11001,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Sofá Modular Lino Arena",
-    descripcion: "Módulos combinables, tapizado en lino tono arena; líneas suaves y cojines blandos.",
-    precio: 459990,
+    name: "Sofá Modular Lino Arena",
+    slug: "sofa-modular-lino-arena",
+    sku: "MOA-LIV-SOFA-001",
+    price: 459990,
     stock: 6,
-    sku: "LIV-SOFAMODU-20101",
-    imagen_url:
+    description:
+      "Módulos combinables, tapizado en lino tono arena; líneas suaves y cojines blandos.",
+    shortDescription: "Módulos combinables tapizados en lino arena con cojines envolventes.",
+    imgUrl:
       "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1616593918824-4fef16054381?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["destacado"],
+    status: "activo",
+    tags: ["living", "sofa", "modular", "lino"],
+    material: "Estructura de madera seca y tapiz lino",
+    color: "arena",
+    dimensions: { height: 82, width: 220, length: 95, unit: "cm" },
+    weight: { value: 48, unit: "kg" },
+    createdAt: "2024-01-05T10:00:00Z",
+    updatedAt: "2024-02-12T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1100,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11002,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Mesa de Centro Roble Natural",
-    descripcion: "Tablero macizo con borde orgánico; base metálica minimal.",
-    precio: 189990,
+    name: "Mesa de Centro Roble Natural",
+    slug: "mesa-de-centro-roble-natural",
+    sku: "MOA-LIV-MESA-002",
+    price: 189990,
     stock: 10,
-    sku: "LIV-MESACENT-20102",
-    imagen_url:
+    description: "Tablero macizo con borde orgánico y base metálica minimalista.",
+    shortDescription: "Mesa de centro en roble macizo con base metálica minimalista.",
+    imgUrl:
       "https://images.unsplash.com/photo-1540574163026-643ea20ade25?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1540574163026-643ea20ade25?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1505692794400-5e0b0c10a5e1?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["living", "mesa", "roble"],
+    material: "Roble macizo y base de acero pintado",
+    color: "roble natural",
+    dimensions: { height: 38, width: 120, length: 60, unit: "cm" },
+    weight: { value: 32, unit: "kg" },
+    createdAt: "2024-01-07T10:00:00Z",
+    updatedAt: "2024-02-08T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1101,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11003,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Alfombra Yute & Algodón",
-    descripcion: "Tejido cálido bicolor para capas; textura natural.",
-    precio: 129990,
+    name: "Alfombra Yute & Algodón",
+    slug: "alfombra-yute-algodon",
+    sku: "MOA-LIV-TEXT-003",
+    price: 129990,
     stock: 12,
-    sku: "LIV-ALFOMBRA-20103",
-    imagen_url:
+    description: "Tejido cálido bicolor con textura natural en yute y algodón.",
+    shortDescription: "Tejido cálido bicolor ideal para capas y zonas de estar.",
+    imgUrl:
       "https://images.unsplash.com/photo-1556910096-6f5e72db6802?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1556910096-6f5e72db6802?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["nuevo"],
+    status: "activo",
+    tags: ["living", "alfombra", "textil"],
+    material: "Yute y algodón",
+    color: "arena y crema",
+    dimensions: { height: 2, width: 200, length: 300, unit: "cm" },
+    weight: { value: 9, unit: "kg" },
+    createdAt: "2024-01-09T10:00:00Z",
+    updatedAt: "2024-02-10T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1102,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11004,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Rack TV Fresno Bajo",
-    descripcion: "Mueble bajo en fresno con puertas lisas y pata cónica.",
-    precio: 239990,
+    name: "Rack TV Fresno Bajo",
+    slug: "rack-tv-fresno-bajo",
+    sku: "MOA-LIV-RACK-004",
+    price: 239990,
     stock: 8,
-    sku: "LIV-RACKTVFR-20104",
-    imagen_url:
+    description: "Mueble bajo en fresno con puertas lisas y patas cónicas.",
+    shortDescription: "Rack bajo en fresno natural con almacenaje oculto.",
+    imgUrl:
       "https://images.unsplash.com/photo-1600585154510-8e89f5a2e1f1?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1600585154510-8e89f5a2e1f1?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1616486886892-ff36634351b7?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["living", "rack", "madera"],
+    material: "Fresno enchapado con base metálica",
+    color: "fresno natural",
+    dimensions: { height: 55, width: 180, length: 45, unit: "cm" },
+    weight: { value: 42, unit: "kg" },
+    createdAt: "2024-01-11T10:00:00Z",
+    updatedAt: "2024-02-11T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1103,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11005,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Sillón Bouclé Marfil",
-    descripcion: "Curvas envolventes y tela bouclé; rincón de lectura perfecto.",
-    precio: 219990,
+    name: "Sillón Bouclé Marfil",
+    slug: "sillon-boucle-marfil",
+    sku: "MOA-LIV-SILL-005",
+    price: 219990,
     stock: 7,
-    sku: "LIV-SILLONBO-20105",
-    imagen_url:
+    description: "Curvas envolventes y tela bouclé; rincón de lectura perfecto.",
+    shortDescription: "Sillón envolvente tapizado en bouclé marfil.",
+    imgUrl:
       "https://images.unsplash.com/photo-1616628182504-d51a0ff4e39f?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1616628182504-d51a0ff4e39f?q=80&w=1600&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1617325247661-675ab4b64ae2?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["destacado"],
+    status: "activo",
+    tags: ["living", "sillón", "bouclé"],
+    material: "Estructura de madera y tapiz bouclé",
+    color: "marfil",
+    dimensions: { height: 78, width: 92, length: 88, unit: "cm" },
+    weight: { value: 28, unit: "kg" },
+    createdAt: "2024-01-12T10:00:00Z",
+    updatedAt: "2024-02-03T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1104,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11006,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Mesas Nido (Set x2)",
-    descripcion: "Par de mesas livianas en madera clara para apoyo flexible.",
-    precio: 139990,
+    name: "Mesas Nido (Set x2)",
+    slug: "mesas-nido",
+    sku: "MOA-LIV-NIDO-006",
+    price: 139990,
     stock: 15,
-    sku: "LIV-MESASNID-20106",
-    imagen_url:
+    description: "Par de mesas livianas en madera clara para apoyo flexible.",
+    shortDescription: "Set de dos mesas nido en madera clara.",
+    imgUrl:
       "https://images.unsplash.com/photo-1598300183876-573f42e1d1f8?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1598300183876-573f42e1d1f8?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["oferta"],
+    status: "activo",
+    tags: ["living", "mesas", "set"],
+    material: "Madera lenga y hierro",
+    color: "madera clara",
+    dimensions: { height: 48, width: 60, length: 40, unit: "cm" },
+    weight: { value: 18, unit: "kg" },
+    createdAt: "2024-01-13T10:00:00Z",
+    updatedAt: "2024-02-01T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1105,
+    collection: "Living Essentials",
+    compareAtPrice: 159990,
   },
   {
     id: 11007,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Biblioteca Abierta 5 Repisas",
-    descripcion: "Estantería ligera para libros, plantas y objetos.",
-    precio: 259990,
+    name: "Biblioteca Abierta 5 Repisas",
+    slug: "biblioteca-abierta-5-repisas",
+    sku: "MOA-LIV-ESTA-007",
+    price: 259990,
     stock: 5,
-    sku: "LIV-BIBLIOTE-20107",
-    imagen_url:
+    description: "Estantería ligera para libros, plantas y objetos.",
+    shortDescription: "Biblioteca abierta en madera natural y hierro.",
+    imgUrl:
       "https://images.unsplash.com/photo-1600585154209-c3d27e7b1a5b?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1600585154209-c3d27e7b1a5b?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["living", "estantería", "madera"],
+    material: "Madera y acero",
+    color: "madera tostada",
+    dimensions: { height: 190, width: 100, length: 35, unit: "cm" },
+    weight: { value: 36, unit: "kg" },
+    createdAt: "2024-01-15T10:00:00Z",
+    updatedAt: "2024-02-06T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1106,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11008,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Puf Trenzado Algodón",
-    descripcion: "Puf bajo con funda trenzada en tono beige.",
-    precio: 69990,
+    name: "Puf Trenzado Algodón",
+    slug: "puf-trenzado-algodon",
+    sku: "MOA-LIV-PUFF-008",
+    price: 69990,
     stock: 20,
-    sku: "LIV-PUFTRENZ-20108",
-    imagen_url:
+    description: "Puf bajo con funda trenzada en tono beige.",
+    shortDescription: "Puf redondeado con funda trenzada desmontable.",
+    imgUrl:
       "https://images.unsplash.com/photo-1597047084897-51e81819a499?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1597047084897-51e81819a499?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["nuevo"],
+    status: "activo",
+    tags: ["living", "puf", "algodón"],
+    material: "Algodón y relleno reciclado",
+    color: "beige",
+    dimensions: { height: 35, width: 60, length: 60, unit: "cm" },
+    weight: { value: 6, unit: "kg" },
+    createdAt: "2024-01-16T10:00:00Z",
+    updatedAt: "2024-02-04T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1107,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11009,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Mesa Lateral Disco",
-    descripcion: "Superficie redonda en metal pintado mate; acento moderno.",
-    precio: 79990,
+    name: "Mesa Lateral Disco",
+    slug: "mesa-lateral-disco",
+    sku: "MOA-LIV-LATE-009",
+    price: 79990,
     stock: 18,
-    sku: "LIV-MESALATE-20109",
-    imagen_url:
+    description: "Superficie redonda en metal pintado mate; acento moderno.",
+    shortDescription: "Mesa lateral tipo pedestal en acabado mate.",
+    imgUrl:
       "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["living", "mesa auxiliar", "metal"],
+    material: "Acero pintado",
+    color: "terracota",
+    dimensions: { height: 52, width: 45, length: 45, unit: "cm" },
+    weight: { value: 12, unit: "kg" },
+    createdAt: "2024-01-18T10:00:00Z",
+    updatedAt: "2024-02-02T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1108,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
   {
     id: 11010,
-    fk_categoria_id: 1,
-    categoria_slug: "living",
-    nombre: "Manta Cashmere Blend",
-    descripcion: "Manta suave con flecos finos en tono crema.",
-    precio: 89990,
+    name: "Manta Cashmere Blend",
+    slug: "manta-cashmere-blend",
+    sku: "MOA-LIV-TEXT-010",
+    price: 89990,
     stock: 25,
-    sku: "LIV-MANTACAS-20110",
-    imagen_url:
+    description: "Manta suave con flecos finos en tono crema.",
+    shortDescription: "Manta cashmere blend en tono neutro.",
+    imgUrl:
       "https://images.unsplash.com/photo-1604335399105-a0c19c68bdb0?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1604335399105-a0c19c68bdb0?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["nuevo"],
+    status: "activo",
+    tags: ["living", "textil", "manta"],
+    material: "Cashmere y algodón",
+    color: "crema",
+    dimensions: { height: 1, width: 130, length: 180, unit: "cm" },
+    weight: { value: 2, unit: "kg" },
+    createdAt: "2024-01-19T10:00:00Z",
+    updatedAt: "2024-02-09T10:00:00Z",
+    fk_category_id: 1000,
+    fk_collection_id: 1109,
+    collection: "Living Essentials",
+    compareAtPrice: null,
   },
-  // Comedor
   {
     id: 21001,
-    fk_categoria_id: 2,
-    categoria_slug: "comedor",
-    nombre: "Mesa Comedor Roble",
-    descripcion: "Mesa de comedor de roble con acabado natural; capacidad para 6 personas.",
-    precio: 399990,
+    name: "Mesa Comedor Roble",
+    slug: "mesa-comedor-roble",
+    sku: "MOA-COM-MESA-001",
+    price: 399990,
     stock: 5,
-    sku: "COM-MESAROB-2101",
-    imagen_url:
+    description: "Mesa de comedor de roble con acabado natural para 6 personas.",
+    shortDescription: "Mesa rectangular de comedor en roble macizo.",
+    imgUrl:
       "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["destacado"],
+    status: "activo",
+    tags: ["comedor", "mesa", "roble"],
+    material: "Roble europeo",
+    color: "roble natural",
+    dimensions: { height: 75, width: 200, length: 95, unit: "cm" },
+    weight: { value: 58, unit: "kg" },
+    createdAt: "2024-01-20T10:00:00Z",
+    updatedAt: "2024-02-07T10:00:00Z",
+    fk_category_id: 2000,
+    fk_collection_id: 2100,
+    collection: "Mesa & Comedor",
+    compareAtPrice: null,
   },
   {
     id: 22001,
-    fk_categoria_id: 2,
-    categoria_slug: "comedor",
-    nombre: "Silla Comedor Tapizada",
-    descripcion: "Silla de comedor tapizada en tela resistente; patas de madera.",
-    precio: 99990,
+    name: "Silla Comedor Tapizada",
+    slug: "silla-comedor-tapizada",
+    sku: "MOA-COM-SILL-002",
+    price: 99990,
     stock: 10,
-    sku: "COM-SILLATAP-2201",
-    imagen_url:
+    description: "Silla tapizada en tela resistente con patas de madera.",
+    shortDescription: "Silla tapizada con respaldo curvo y patas de fresno.",
+    imgUrl:
       "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1600861194942-f883de0dfe96?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["comedor", "silla", "tapizada"],
+    material: "Tapiz bouclé y patas de fresno",
+    color: "tiza",
+    dimensions: { height: 86, width: 50, length: 55, unit: "cm" },
+    weight: { value: 9, unit: "kg" },
+    createdAt: "2024-01-22T10:00:00Z",
+    updatedAt: "2024-02-05T10:00:00Z",
+    fk_category_id: 2000,
+    fk_collection_id: 2101,
+    collection: "Mesa & Comedor",
+    compareAtPrice: null,
   },
-  // Dormitorio
   {
     id: 31001,
-    fk_categoria_id: 3,
-    categoria_slug: "dormitorio",
-    nombre: "Cama Queen Roble + Cabecera Tela",
-    descripcion: "Estructura en roble con cabecera tapizada en lino natural.",
-    precio: 499990,
+    name: "Cama Queen Roble + Cabecera",
+    slug: "cama-queen-roble-cabecera",
+    sku: "MOA-DOR-CAMA-001",
+    price: 499990,
     stock: 4,
-    sku: "DOR-CAMAQUEE-20201",
-    imagen_url:
+    description: "Estructura en roble con cabecera tapizada en lino natural.",
+    shortDescription: "Cama queen con cabecera acolchada en lino.",
+    imgUrl:
       "https://images.unsplash.com/photo-1616596878578-c3b3f9c9bfaa?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1616596878578-c3b3f9c9bfaa?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["destacado"],
+    status: "activo",
+    tags: ["dormitorio", "cama", "lino"],
+    material: "Roble macizo y lino",
+    color: "roble y lino",
+    dimensions: { height: 120, width: 165, length: 210, unit: "cm" },
+    weight: { value: 70, unit: "kg" },
+    createdAt: "2024-01-24T10:00:00Z",
+    updatedAt: "2024-02-04T10:00:00Z",
+    fk_category_id: 3000,
+    fk_collection_id: 3100,
+    collection: "Dormitorio Cálido",
+    compareAtPrice: null,
   },
   {
     id: 32002,
-    fk_categoria_id: 3,
-    categoria_slug: "dormitorio",
-    nombre: "Velador Rústico",
-    descripcion: "Velador compacto en madera envejecida con cajón oculto para esenciales.",
-    precio: 89990,
+    name: "Velador Rústico",
+    slug: "velador-rustico",
+    sku: "MOA-DOR-VELA-002",
+    price: 89990,
     stock: 10,
-    sku: "DOR-VELARRUS-32002",
-    imagen_url:
-      "https://images.unsplash.com/photo-1532372320572-cda25653a26d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw2OXx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=800",
+    description: "Velador compacto en madera envejecida con cajón oculto.",
+    shortDescription: "Velador con cajón oculto y repisa inferior.",
+    imgUrl:
+      "https://images.unsplash.com/photo-1532372320572-cda25653a26d?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1532372320572-cda25653a26d?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["dormitorio", "velador", "madera"],
+    material: "Madera reciclada",
+    color: "nogal",
+    dimensions: { height: 58, width: 45, length: 40, unit: "cm" },
+    weight: { value: 14, unit: "kg" },
+    createdAt: "2024-01-26T10:00:00Z",
+    updatedAt: "2024-02-03T10:00:00Z",
+    fk_category_id: 3000,
+    fk_collection_id: 3101,
+    collection: "Dormitorio Cálido",
+    compareAtPrice: null,
   },
   {
     id: 32003,
-    fk_categoria_id: 3,
-    categoria_slug: "dormitorio",
-    nombre: "Mesilla blanca con acentos de madera",
-    descripcion:
-      "Mesa lateral lacada en blanco con repisa inferior y detalles en roble natural.",
-    precio: 74990,
+    name: "Mesilla Blanca + Acentos",
+    slug: "mesilla-blanca-acentos-madera",
+    sku: "MOA-DOR-MESA-003",
+    price: 74990,
     stock: 16,
-    sku: "DOR-MESILLAB-32003",
-    imagen_url:
-      "https://images.unsplash.com/photo-1499933374294-4584851497cc?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=870",
+    description: "Mesilla lacada en blanco con detalles en roble natural.",
+    shortDescription: "Mesilla con cajón y repisa en blanco mate.",
+    imgUrl:
+      "https://images.unsplash.com/photo-1499933374294-4584851497cc?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1499933374294-4584851497cc?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["nuevo"],
+    status: "activo",
+    tags: ["dormitorio", "mesilla", "minimal"],
+    material: "MDF lacado y chapa roble",
+    color: "blanco y roble",
+    dimensions: { height: 60, width: 48, length: 38, unit: "cm" },
+    weight: { value: 12, unit: "kg" },
+    createdAt: "2024-01-27T10:00:00Z",
+    updatedAt: "2024-02-02T10:00:00Z",
+    fk_category_id: 3000,
+    fk_collection_id: 3102,
+    collection: "Dormitorio Cálido",
+    compareAtPrice: null,
   },
-  // Iluminación
   {
     id: 41001,
-    fk_categoria_id: 4,
-    categoria_slug: "iluminacion",
-    fk_subcategoria_id: 4100,
-    nombre: "Lámpara Colgante Globo Opal",
-    descripcion:
-      "Luminaria colgante con difusor de vidrio opal y herrajes metálicos en tono dorado.",
-    precio: 149990,
+    name: "Lámpara Colgante Globo Opal",
+    slug: "lampara-colgante-globo-opal",
+    sku: "MOA-ILU-COLG-001",
+    price: 149990,
     stock: 12,
-    sku: "ILU-COLGLOBO-20406",
-    imagen_url:
-      "https://images.unsplash.com/photo-1600421684846-e7ebc943403b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw1OXx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=800",
-    specs: { diametro_cm: 30, voltaje: "220–240V", casquillo: "E27" },
-    tags: ["colgante", "vidrio opal", "luz cálida", "moderno"],
+    description: "Luminaria colgante con difusor de vidrio opal y herrajes dorados.",
+    shortDescription: "Colgante globo opal con terminación dorada.",
+    imgUrl:
+      "https://images.unsplash.com/photo-1600421684846-e7ebc943403b?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1600421684846-e7ebc943403b?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: ["destacado"],
+    status: "activo",
+    tags: ["iluminacion", "colgante", "vidrio"],
+    material: "Vidrio opal y latón",
+    color: "opal y dorado",
+    dimensions: { height: 30, width: 30, length: 30, unit: "cm" },
+    weight: { value: 4, unit: "kg" },
+    createdAt: "2024-01-29T10:00:00Z",
+    updatedAt: "2024-02-01T10:00:00Z",
+    fk_category_id: 4000,
+    fk_collection_id: 4100,
+    collection: "Iluminación Escultórica",
+    compareAtPrice: null,
+    specs: { voltage: "220-240V", socket: "E27" },
   },
   {
     id: 42002,
-    fk_categoria_id: 4,
-    categoria_slug: "iluminacion",
-    fk_subcategoria_id: 4200,
-    nombre: "Lámpara de Mesa Textil Plisado",
-    descripcion:
-      "Base cerámica en tono crema con pantalla plisada de lino. Ideal para veladores o rincones de lectura.",
-    precio: 89990,
+    name: "Lámpara de Mesa Textil Plisado",
+    slug: "lampara-mesa-textil-plisado",
+    sku: "MOA-ILU-MESA-002",
+    price: 89990,
     stock: 15,
-    sku: "ILU-MESAPLI-20407",
-    imagen_url:
-      "https://images.unsplash.com/photo-1579656618142-5192f72e2d3d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw2M3x8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=800",
-    specs: { altura_cm: 45, voltaje: "220–240V", casquillo: "E14" },
-    tags: ["mesa", "pantalla textil", "cerámica", "cálido"],
+    description:
+      "Base cerámica en tono crema con pantalla plisada de lino. Ideal para veladores o rincones de lectura.",
+    shortDescription: "Lámpara de mesa con pantalla plisada en lino.",
+    imgUrl:
+      "https://images.unsplash.com/photo-1579656618142-5192f72e2d3d?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1579656618142-5192f72e2d3d?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["iluminacion", "mesa", "textil"],
+    material: "Cerámica y lino",
+    color: "crema",
+    dimensions: { height: 45, width: 25, length: 25, unit: "cm" },
+    weight: { value: 3, unit: "kg" },
+    createdAt: "2024-01-30T10:00:00Z",
+    updatedAt: "2024-02-05T10:00:00Z",
+    fk_category_id: 4000,
+    fk_collection_id: 4101,
+    collection: "Iluminación Escultórica",
+    compareAtPrice: null,
+    specs: { voltage: "220-240V", socket: "E14" },
   },
-  // Oficina
   {
     id: 20301,
-    fk_categoria_id: 5,
-    categoria_slug: "oficina",
-    nombre: "Escritorio de Madera Maciza Fresno",
-    descripcion:
-      "Escritorio minimalista en madera maciza de fresno con acabado mate. Superficie amplia y líneas limpias; ideal para un home office cálido y funcional.",
-    precio: 189990,
+    name: "Escritorio Fresno Home Office",
+    slug: "escritorio-fresno-home-office",
+    sku: "MOA-OFI-ESCR-001",
+    price: 189990,
     stock: 8,
-    sku: "HOM-ESCRITOR-20306",
-    imagen_url:
-      "https://images.unsplash.com/photo-1646003607550-4b1b62e3a2d4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwzOHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=800",
+    description:
+      "Escritorio minimalista en fresno con superficie amplia y líneas limpias para home office.",
+    shortDescription: "Escritorio de fresno con bandeja para cables integrada.",
+    imgUrl:
+      "https://images.unsplash.com/photo-1646003607550-4b1b62e3a2d4?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1646003607550-4b1b62e3a2d4?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["oficina", "escritorio", "fresno"],
+    material: "Fresno y acero",
+    color: "madera clara",
+    dimensions: { height: 75, width: 140, length: 70, unit: "cm" },
+    weight: { value: 34, unit: "kg" },
+    createdAt: "2024-02-01T10:00:00Z",
+    updatedAt: "2024-02-10T10:00:00Z",
+    fk_category_id: 5000,
+    fk_collection_id: 5100,
+    collection: "Home Office",
+    compareAtPrice: null,
   },
-  // Decoración
   {
     id: 62001,
-    fk_categoria_id: 6000,
-    categoria_slug: "decoracion",
-    nombre: "Espejo Redondo Marco Madera",
-    descripcion:
-      "Espejo decorativo redondo con marco de madera natural y acabado mate. Aporta luz y profundidad a living, dormitorio o pasillos, realzando una estética cálida y minimalista.",
-    precio: 129990,
+    name: "Espejo Redondo Marco Madera",
+    slug: "espejo-redondo-marco-madera",
+    sku: "MOA-DEC-ESPE-001",
+    price: 129990,
     stock: 9,
-    sku: "DEC-ESPEJORD-20610",
-    imagen_url:
-      "https://images.unsplash.com/photo-1598116132066-b730a4f8616a?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw0Nnx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=800",
-    tags: ["madera", "minimal", "redondo", "decoración mural"],
+    description:
+      "Espejo decorativo redondo con marco de madera natural y acabado mate.",
+    shortDescription: "Espejo redondo con marco de madera natural.",
+    imgUrl:
+      "https://images.unsplash.com/photo-1598116132066-b730a4f8616a?q=80&w=1600&auto=format&fit=crop",
+    gallery: [
+      "https://images.unsplash.com/photo-1598116132066-b730a4f8616a?q=80&w=1600&auto=format&fit=crop",
+    ],
+    badge: [],
+    status: "activo",
+    tags: ["decoracion", "espejo", "madera"],
+    material: "Madera de fresno",
+    color: "madera natural",
+    dimensions: { height: 3, width: 90, length: 90, unit: "cm" },
+    weight: { value: 8, unit: "kg" },
+    createdAt: "2024-02-02T10:00:00Z",
+    updatedAt: "2024-02-08T10:00:00Z",
+    fk_category_id: 6000,
+    fk_collection_id: 6100,
+    collection: "Decoración Curada",
+    compareAtPrice: null,
   },
 ];
-
-export const PRODUCTS = RAW_PRODUCTS.map(normalizeProductRecord);
 
 export const productsDb = {
   PRODUCTS,

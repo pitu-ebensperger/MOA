@@ -12,7 +12,7 @@ import ResetPasswordPage from '../modules/auth/pages/ResetPasswordPage.jsx'
 import { ProductDetailPage } from '../modules/products/pages/ProductDetailPage.jsx'
 import ProductsPage from '../modules/products/pages/ProductsPage.jsx'
 import { ProfilePage } from '../modules/profile/pages/ProfilePage.jsx'
-import WishlistPage from '../modules/profile/pages/WishlistPage.jsx'
+import { WishlistPage } from '../modules/profile/pages/WishlistPage.jsx'
 import { CategoriesPage } from '../modules/categories/pages/CategoriesPage.jsx'
 import { FAQPage } from '../modules/support/pages/FAQPage.jsx'
 import ContactPage from '../modules/support/pages/ContactPage.jsx';

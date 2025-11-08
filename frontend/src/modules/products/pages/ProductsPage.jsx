@@ -17,14 +17,9 @@ const DEFAULT_PAGE_SIZE = 9;
 const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 12, 18, 24];
 
 const resolveProductPrice = (product) => {
-  const rawPrice =
-    product?.price ??
-    product?.precio ??
-    product?.priceCLP ??
-    product?.precioCLP ??
-    product?.pricing?.price ??
-    null;
-  if (rawPrice === null) return null;
+  const candidates = [product?.price, product?.pricing?.price];
+  const rawPrice = candidates.find((value) => value !== undefined && value !== null);
+  if (rawPrice === undefined || rawPrice === null) return null;
   const numericValue = Number(rawPrice);
   return Number.isFinite(numericValue) ? numericValue : null;
 };
@@ -35,18 +30,11 @@ const matchesCategory = (product, categoryId) => {
 
   const idString = String(categoryId).toLowerCase();
   const candidates = [
+    product?.fk_category_id,
     product?.categoryId,
-    product?.fk_categoria_id,
     product?.categoria_id,
-    product?.categoria_slug,
+    product?.categorySlug,
   ];
-
-  if (Array.isArray(product?.categoryIds)) {
-    candidates.push(...product.categoryIds);
-  }
-  if (Array.isArray(product?.category_slugs)) {
-    candidates.push(...product.category_slugs);
-  }
 
   return candidates
     .filter((value) => value !== undefined && value !== null)
@@ -112,7 +100,7 @@ export default function ProductsPage() {
       );
     }
     if (sort === "name-asc") {
-      return copy.sort((a, b) => (a.name ?? a.title ?? "").localeCompare(b.name ?? b.title ?? ""));
+      return copy.sort((a, b) => (a.name ?? a.slug ?? "").localeCompare(b.name ?? b.slug ?? ""));
     }
     return copy;
   }, [filteredProducts, sort]);

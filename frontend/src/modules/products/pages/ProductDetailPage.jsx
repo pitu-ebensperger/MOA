@@ -4,6 +4,9 @@ import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { productsApi } from "../services/products.api.js";
 
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop";
+
 const initialState = {
   product: null,
   isLoading: true,
@@ -68,13 +71,25 @@ export const ProductDetailPage = () => {
     ? [...baseBreadcrumbItems, { label: product.name }]
     : baseBreadcrumbItems;
 
+  const heroImage = product.imgUrl ?? product.gallery?.[0] ?? FALLBACK_IMAGE;
+  const collectionLabel =
+    product.collection ??
+    (product.fk_collection_id ? `Colección ${product.fk_collection_id}` : "Colección MOA");
+  const descriptionPreview = product.shortDescription ?? product.description;
+  const materialList =
+    Array.isArray(product.materials) && product.materials.length
+      ? product.materials
+      : product.material
+        ? [product.material]
+        : [];
+
   return (
     <main className="page container-px mx-auto max-w-5xl py-10">
       <Breadcrumbs items={breadcrumbItems} className="mb-8" />
       <article className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
         <div className="space-y-4">
           <img
-            src={product.imageUrl}
+            src={heroImage}
             alt={product.name}
             className="aspect-4/5 w-full rounded-3xl object-cover"
           />
@@ -93,10 +108,10 @@ export const ProductDetailPage = () => {
         <div className="space-y-6">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-neutral-400">
-              {product.collectionIds?.[0] ?? "Colección MOA"}
+              {collectionLabel}
             </p>
             <h1 className="title-serif text-3xl sm:text-4xl">{product.name}</h1>
-            <p className="mt-3 text-lg text-neutral-600">{product.shortDescription}</p>
+            <p className="mt-3 text-lg text-neutral-600">{descriptionPreview}</p>
           </div>
 
           <div className="flex items-baseline gap-3">
@@ -127,12 +142,10 @@ export const ProductDetailPage = () => {
             </div>
           )}
 
-          {product.materials && (
+          {materialList.length > 0 && (
             <section className="space-y-2">
               <h2 className="text-sm font-medium text-neutral-700">Materiales</h2>
-              <p className="text-sm text-neutral-600">
-                {Array.isArray(product.materials) ? product.materials.join(" · ") : product.materials}
-              </p>
+              <p className="text-sm text-neutral-600">{materialList.join(" · ")}</p>
             </section>
           )}
         </div>

@@ -47,11 +47,20 @@ const matchesText = (product, text) => {
 };
 
 const buildCategoryPool = (product) => {
-  const list = Array.isArray(product?.categoryIds) ? product.categoryIds : [];
-  if (product?.categoryId !== undefined && product?.categoryId !== null) {
-    return [...list, product.categoryId];
+  const pool = [];
+  if (product?.fk_category_id !== undefined && product?.fk_category_id !== null) {
+    pool.push(product.fk_category_id);
   }
-  return list;
+  if (product?.categoryId !== undefined && product?.categoryId !== null) {
+    pool.push(product.categoryId);
+  }
+  if (Array.isArray(product?.categoryIds)) {
+    pool.push(...product.categoryIds);
+  }
+  if (Array.isArray(product?.categoria_ids)) {
+    pool.push(...product.categoria_ids);
+  }
+  return pool;
 };
 
 const resolveCategoryTarget = (value) => {
@@ -83,8 +92,24 @@ const matchesCategory = (product, categoryValue) => {
 
 const matchesCollection = (product, collectionId) => {
   if (!collectionId) return true;
-  if (!Array.isArray(product.collectionIds)) return false;
-  return product.collectionIds.some((id) => id === collectionId);
+  const pool = [];
+  if (product?.fk_collection_id !== undefined && product?.fk_collection_id !== null) {
+    pool.push(product.fk_collection_id);
+  }
+  if (product?.collectionId !== undefined && product?.collectionId !== null) {
+    pool.push(product.collectionId);
+  }
+  if (Array.isArray(product?.collectionIds)) {
+    pool.push(...product.collectionIds);
+  }
+  if (!pool.length) return false;
+
+  const targetNumber = toNumber(collectionId);
+  if (targetNumber !== null) {
+    return pool.some((id) => Number(id) === targetNumber);
+  }
+  const normalized = String(collectionId).toLowerCase();
+  return pool.some((id) => String(id).toLowerCase() === normalized);
 };
 
 const matchesPrice = (product, minPrice, maxPrice) => {
