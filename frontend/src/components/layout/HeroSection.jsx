@@ -1,26 +1,41 @@
-import React from "react";
-
 export default function HeroSection() {
   return (
-    <section className="container-px mx-auto grid gap-6 pb-8 pt-6 sm:pb-12 sm:pt-10">
-      <div className="grid grid-cols-1 items-center gap-8 sm:grid-cols-2">
+    <section className="bg-[#d2cbc1] text-[var(--text-strong)]">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-12 px-6 py-50 sm:px-10 lg:px-20">
+
+        {/* Texto */}
         <div>
-          <h1 className="title-serif text-3xl leading-tight sm:text-4xl">Lorem Ipsum Neque porro qui dolorem</h1>
-          <p className="ui-sans mt-3 max-w-xl text-sm leading-relaxed text-[var(--text-weak)]">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.
+          <p className="text-sm text-[var(--text-weak)] mb-2 uppercase tracking-wide">
+            Diseño · Calidad · Comodidad
           </p>
-          <div className="mt-6 flex gap-3">
-            <button className="rounded-md bg-[var(--btn)] px-5 py-2 text-sm text-white hover:bg-[var(--btn-hover)]">Ver más</button>
-            <button className="rounded-md border border-[var(--line)] bg-white px-5 py-2 text-sm hover:bg-[var(--paper)]">Saber más</button>
+          <h1 className="title-serif text-4xl sm:text-5xl leading-tight font-semibold mb-4">
+            Dale vida a tu hogar con el estilo MOA
+          </h1>
+          <p className="ui-sans text-base leading-relaxed text-[var(--text-weak)] mb-6 max-w-lg">
+            Descubre muebles únicos que combinan elegancia, confort y funcionalidad.  
+            En <strong>MOA</strong> creemos que cada espacio merece un toque especial.
+          </p>
+          <div className="flex gap-4">
+            <button className="rounded-md bg-[var(--btn)] px-6 py-2.5 text-sm text-white hover:bg-[var(--btn-hover)] transition-colors">
+              Ver más
+            </button>
+            <button className="rounded-md border border-[var(--line)] bg-white px-6 py-2.5 text-sm hover:bg-[var(--paper)] transition-colors">
+              Saber más
+            </button>
           </div>
         </div>
-        <div className="aspect-[16/10] w-full overflow-hidden rounded-xl">
-          <img
-            src="https://images.unsplash.com/photo-1505691723518-36a5ac3b2d52?q=80&w=1600&auto=format&fit=crop"
-            alt="Sofa hero"
-            className="h-full w-full object-cover"
-          />
+
+        {/* Imagen */}
+        <div className="w-full flex justify-center md:justify-end">
+          <div className="aspect-[4/3] w-full md:w-full lg:w-full overflow-hidden rounded-2xl shadow-md">
+            <img
+              src="https://plus.unsplash.com/premium_photo-1676321688606-2f3b026710a5?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1470"
+              alt="Muebles MOA"
+              className="h-full w-full object-cover"
+            />
+          </div>
         </div>
+
       </div>
     </section>
   );
