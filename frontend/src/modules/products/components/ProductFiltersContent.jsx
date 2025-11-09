@@ -1,6 +1,7 @@
 import { useMemo } from "react";
+
 import { DoubleRangeSlider } from "./DoubleRangeSlider.jsx";
-import { ALL_CATEGORY_ID } from "../utils/constants.js";
+import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
 
 const normalizeCategories = (categories = []) => {
   const base = Array.isArray(categories) ? categories : [];

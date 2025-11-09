@@ -2,7 +2,7 @@ import { PRODUCTS, CATEGORIES, COLLECTIONS } from "../database/index.js";
 import { delay } from "../../utils/delay.js";
 import { normalizeCategory } from "../../utils/normalizers.js";
 import { buildProductCategoryPool } from "../../modules/products/utils/product.js";
-import { ALL_CATEGORY_ID } from "../../modules/products/utils/constants.js";
+import { ALL_CATEGORY_ID } from "../../utils/constants.js";
 
 const cloneProduct = (product) => ({
   ...product,

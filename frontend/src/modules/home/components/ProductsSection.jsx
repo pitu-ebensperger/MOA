@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../../products/components/ProductCard.jsx";
 import { matchesProductCategory } from "../../products/utils/product.js";
-import { ALL_CATEGORY_ID } from "../../products/utils/constants.js";
+import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
 
 const normalizeProduct = (product, index) => {
   const safeId = product?.id ?? `featured-${index}`;

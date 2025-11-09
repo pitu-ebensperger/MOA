@@ -1,8 +1,8 @@
 export const PRODUCTS = [
   {
     id: 11001,
-    name: "Sofá Modular Lino Arena",
-    slug: "sofa-modular-lino-arena",
+    name: "Sofá Modular Arena",
+    slug: "sofa-modular-arena",
     sku: "MOA-LIV-SOFA-001",
     price: 459990,
     stock: 6,

@@ -24,8 +24,15 @@ export function ProductSidebar({
           </button>
         </header>
 
+        <ProductFiltersContent
+          categories={categories}
+          filters={filters}
+          limits={limits}
+          onChangeCategory={onChangeCategory}
+          onChangePrice={onChangePrice}
+        />
         {appliedFilters.length > 0 && (
-          <div className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl bg-(--color-light-beige,#f6efe7) px-4 py-3">
+          <div className="mt-6 flex flex-wrap items-center gap-2 rounded-2xl bg-(--color-light-beige,#f6efe7) px-4 py-3">
             <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
               Filtros activos
             </span>
@@ -42,14 +49,6 @@ export function ProductSidebar({
             ))}
           </div>
         )}
-
-        <ProductFiltersContent
-          categories={categories}
-          filters={filters}
-          limits={limits}
-          onChangeCategory={onChangeCategory}
-          onChangePrice={onChangePrice}
-        />
       </div>
     </aside>
   );
