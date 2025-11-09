@@ -1,220 +1,61 @@
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+// layout/ui
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
+import { Pagination } from "../../../components/ui/Pagination.jsx";
+// secciones
 import ProductGallery from "../components/ProductGallery.jsx";
-import { ProductSidebar } from "../components/ProductSidebar.jsx";
-import { ProductFiltersDrawer } from "../components/ProductFiltersDrawer.jsx";
-import { PaginationControls } from "../components/PaginationControls.jsx";
-import { useProducts } from "../hooks/useProducts.js";
+import { ProductsFiltersPanel } from "../components/ProductsFiltersPanel.jsx";
+// hooks
 import { useCategories } from "../hooks/useCategories.js";
-import { formatCurrencyCLP } from "../../../utils/currency.js";
-import { ensureNumber } from "../../../utils/number.js";
-import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "../utils/constants.js";
-import { matchesProductCategory, resolveProductPrice } from "../utils/product.js";
+import { useProducts } from "../hooks/useProducts.js";
+import { useProductFilters } from "../hooks/useProductFilters.js";
+import { useCatalogControls } from "../hooks/useCatalogControls.js";
 
 export default function ProductsPage() {
   const { products: fetchedProducts, isLoading, error } = useProducts();
   const { categories: fetchedCategories } = useCategories();
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const categories = useMemo(() => {
-    const base = Array.isArray(fetchedCategories) ? fetchedCategories : [];
-    const hasAll = base.some((category) => category.id === ALL_CATEGORY_ID);
-    return hasAll ? base : [{ id: ALL_CATEGORY_ID, name: "Todos" }, ...base];
-  }, [fetchedCategories]);
-
-  const categoryQuery = searchParams.get("category");
-  const searchParamsSnapshot = searchParams.toString();
-
-  const resolvedCategoryFromQuery = useMemo(() => {
-    if (!categoryQuery) return ALL_CATEGORY_ID;
-    if (String(categoryQuery).toLowerCase() === String(ALL_CATEGORY_ID)) {
-      return ALL_CATEGORY_ID;
-    }
-
-    const match = categories.find((cat) => {
-      if (!cat) return false;
-      if (cat.slug && String(cat.slug).toLowerCase() === String(categoryQuery).toLowerCase()) {
-        return true;
-      }
-      return String(cat.id) === String(categoryQuery);
-    });
-
-    if (match?.id !== undefined && match?.id !== null) {
-      return match.id;
-    }
-
-    const numeric = Number(categoryQuery);
-    return Number.isFinite(numeric) ? numeric : ALL_CATEGORY_ID;
-  }, [categoryQuery, categories]);
-
-  const allProducts = useMemo(
-    () => (Array.isArray(fetchedProducts) && fetchedProducts.length ? fetchedProducts : []),
-    [fetchedProducts],
-  );
-
-  const { minPrice, maxPrice } = useMemo(() => {
-    const prices = allProducts
-      .map((product) => resolveProductPrice(product))
-      .filter((value) => Number.isFinite(value));
-    if (!prices.length) return { minPrice: 0, maxPrice: 0 };
-    return {
-      minPrice: Math.min(...prices),
-      maxPrice: Math.max(...prices),
-    };
-  }, [allProducts]);
-
-  const [category, setCategory] = useState(ALL_CATEGORY_ID);
-  const [min, setMin] = useState(minPrice);
-  const [max, setMax] = useState(maxPrice);
-  const [sort, setSort] = useState("relevance");
-  const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGE_SIZE);
-  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    sort,
+    setSort,
+    itemsPerPage,
+    handleChangeItemsPerPage,
+    pageSizeOptions,
+  } = useCatalogControls();
+  const {
+    categories,
+    filters,
+    limits,
+    appliedFilters,
+    paginationInfo,
+    paginatedProducts,
+    setCurrentPage,
+    onChangeCategory,
+    onChangePrice,
+    handleRemoveFilter,
+    resetFilters,
+  } = useProductFilters({
+    products: fetchedProducts,
+    categories: fetchedCategories,
+    sort,
+    itemsPerPage,
+  });
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
-    if (resolvedCategoryFromQuery === undefined || resolvedCategoryFromQuery === null) return;
-    setCategory((prev) => {
-      if (prev === resolvedCategoryFromQuery) return prev;
-      return resolvedCategoryFromQuery;
-    });
-  }, [resolvedCategoryFromQuery]);
-
-  const filteredProducts = useMemo(() => {
-    return allProducts.filter((product) => {
-      const price = resolveProductPrice(product) ?? 0;
-      const safeMin = ensureNumber(min, minPrice);
-      const safeMax = ensureNumber(max, maxPrice);
-      const withinPriceRange = price >= safeMin && price <= safeMax;
-      const matchesCat = matchesProductCategory(product, category);
-      return withinPriceRange && matchesCat;
-    });
-  }, [allProducts, category, min, max, minPrice, maxPrice]);
-
-  const sortedProducts = useMemo(() => {
-    if (sort === "relevance") return filteredProducts;
-    const copy = [...filteredProducts];
-    if (sort === "price-asc") {
-      return copy.sort(
-        (a, b) => (resolveProductPrice(a) ?? 0) - (resolveProductPrice(b) ?? 0),
-      );
-    }
-    if (sort === "price-desc") {
-      return copy.sort(
-        (a, b) => (resolveProductPrice(b) ?? 0) - (resolveProductPrice(a) ?? 0),
-      );
-    }
-    if (sort === "name-asc") {
-      return copy.sort((a, b) => (a.name ?? a.slug ?? "").localeCompare(b.name ?? b.slug ?? ""));
-    }
-    return copy;
-  }, [filteredProducts, sort]);
-
-  const totalResults = sortedProducts.length;
-
-  useEffect(() => {
-    setMin(minPrice);
-    setMax(maxPrice);
-  }, [minPrice, maxPrice]);
-
-  useEffect(() => {
     setCurrentPage(1);
-  }, [category, min, max, sort]);
-
-  useEffect(() => {
-    const safeLimit = Math.max(1, ensureNumber(itemsPerPage, DEFAULT_PAGE_SIZE));
-    const totalPages = Math.max(1, Math.ceil(totalResults / safeLimit || 1));
-    setCurrentPage((prev) => Math.min(prev, totalPages));
-  }, [itemsPerPage, totalResults]);
-
-  useEffect(() => {
-    const nextParam =
-      category === ALL_CATEGORY_ID
-        ? null
-        : (() => {
-            const active = categories.find(
-              (cat) => String(cat.id) === String(category),
-            );
-            if (active?.slug) return active.slug;
-            return String(category);
-          })();
-
-    const normalizedCurrent = categoryQuery ?? null;
-    if ((nextParam ?? null) === normalizedCurrent) return;
-
-    const nextSearchParams = new URLSearchParams(searchParamsSnapshot);
-    if (nextParam === null) {
-      nextSearchParams.delete("category");
-    } else {
-      nextSearchParams.set("category", nextParam);
-    }
-    setSearchParams(nextSearchParams, { replace: true });
-  }, [category, categories, categoryQuery, searchParamsSnapshot, setSearchParams]);
-
-  const activeCategory = useMemo(() => {
-    if (category === ALL_CATEGORY_ID) return null;
-    return categories.find(
-      (cat) => cat.id === category || String(cat.id) === String(category),
-    );
-  }, [category, categories]);
-
-  const appliedFilters = [
-    activeCategory ? { label: activeCategory.name, type: "category" } : null,
-    min > minPrice ? { label: `Desde ${formatCurrencyCLP(min)}`, type: "min" } : null,
-    max < maxPrice ? { label: `Hasta ${formatCurrencyCLP(max)}`, type: "max" } : null,
-  ].filter(Boolean);
-
-  const handleRemoveFilter = (type) => {
-    if (type === "category") setCategory(ALL_CATEGORY_ID);
-    if (type === "min") setMin(minPrice);
-    if (type === "max") setMax(maxPrice);
-  };
-
-  const resetFilters = () => {
-    setCategory(ALL_CATEGORY_ID);
-    setMin(minPrice);
-    setMax(maxPrice);
-    setCurrentPage(1);
-  };
-
-  const paginationInfo = useMemo(() => {
-    const safeLimit = Math.max(1, ensureNumber(itemsPerPage, DEFAULT_PAGE_SIZE));
-    const totalItems = totalResults;
-    const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
-    const safePage = Math.min(Math.max(1, ensureNumber(currentPage, 1)), totalPages);
-    const startIndex = (safePage - 1) * safeLimit;
-    const endIndex = Math.min(startIndex + safeLimit, totalItems);
-
-    return {
-      items: sortedProducts.slice(startIndex, endIndex),
-      page: safePage,
-      totalPages,
-      totalItems,
-      pageSize: safeLimit,
-      start: totalItems === 0 ? 0 : startIndex + 1,
-      end: endIndex,
-    };
-  }, [sortedProducts, currentPage, itemsPerPage, totalResults]);
-  const { items: paginatedProducts } = paginationInfo;
-
-  const handleChangeItemsPerPage = (nextValue) => {
-    const numericValue = Math.max(1, ensureNumber(nextValue, DEFAULT_PAGE_SIZE));
-    setItemsPerPage(numericValue);
-    setCurrentPage(1);
-  };
+  }, [itemsPerPage, setCurrentPage]);
 
   return (
     <main className="page mx-auto max-w-7xl px-4 py-10 sm:px-6">
-     
       <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-         <Breadcrumbs
-        className="mb-0"
-        items={[
-          { label: "Inicio", href: "/" },
-          { label: "Productos" },
-        ]}
-      />
-  
+        <Breadcrumbs
+          className="mb-0"
+          items={[
+            { label: "Inicio", href: "/" },
+            { label: "Productos" },
+          ]}
+        />
+
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <label className="flex items-center gap-2 text-sm text-(--text-weak)">
@@ -224,7 +65,7 @@ export default function ProductsPage() {
                 onChange={(event) => handleChangeItemsPerPage(event.target.value)}
                 className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
               >
-                {PAGE_SIZE_OPTIONS.map((option) => (
+                {pageSizeOptions.map((option) => (
                   <option key={option} value={option}>
                     {option}
                   </option>
@@ -244,7 +85,7 @@ export default function ProductsPage() {
                 <option value="name-asc">Nombre A-Z</option>
               </select>
             </label>
-           
+
             <button
               type="button"
               onClick={() => setIsMobileFiltersOpen(true)}
@@ -269,51 +110,48 @@ export default function ProductsPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-100"
             >
               {filter.label}
-              <span aria-hidden className="text-neutral-400">×</span>
+              <span aria-hidden className="text-neutral-400">
+                ×
+              </span>
             </button>
           ))}
         </div>
       )}
 
-      <div className="grid gap-8 lg:grid-cols-[18rem_1fr]">
-        <ProductSidebar
-          categories={categories}
-          filters={{ category, min, max }}
-          limits={{ min: minPrice, max: maxPrice }}
-          appliedFilters={appliedFilters}
-          onChangeCategory={setCategory}
-          onChangePrice={({ min: nextMin, max: nextMax }) => {
-            setMin(ensureNumber(nextMin, minPrice));
-            setMax(ensureNumber(nextMax, maxPrice));
-          }}
-          onRemoveFilter={handleRemoveFilter}
-          onReset={resetFilters}
-        />
-
-        <div className="space-y-6">
-          {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              No pudimos cargar los productos. Intenta nuevamente más tarde.
-            </div>
-          )}
-          {isLoading && paginationInfo.totalItems === 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, index) => (
-                <div
-                  key={`product-skeleton-${index}`}
-                  className="h-80 rounded-2xl bg-neutral-100 animate-pulse"
-                />
-              ))}
-            </div>
-          ) : (
-            <ProductGallery products={paginatedProducts} />
-          )}
-        </div>
-      </div>
+      <ProductsFiltersPanel
+        categories={categories}
+        filters={filters}
+        limits={limits}
+        appliedFilters={appliedFilters}
+        isMobileFiltersOpen={isMobileFiltersOpen}
+        onCloseMobileFilters={() => setIsMobileFiltersOpen(false)}
+        onChangeCategory={onChangeCategory}
+        onChangePrice={onChangePrice}
+        onRemoveFilter={handleRemoveFilter}
+        onResetFilters={resetFilters}
+      >
+        {error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            No pudimos cargar los productos. Intenta nuevamente más tarde.
+          </div>
+        )}
+        {isLoading && paginationInfo.totalItems === 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={`product-skeleton-${index}`}
+                className="h-80 rounded-2xl bg-neutral-100 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <ProductGallery products={paginatedProducts} />
+        )}
+      </ProductsFiltersPanel>
 
       {paginationInfo.totalItems > 0 && (
         <div className="mt-10 flex justify-center">
-          <PaginationControls
+          <Pagination
             page={paginationInfo.page}
             totalPages={paginationInfo.totalPages}
             totalItems={paginationInfo.totalItems}
@@ -321,22 +159,6 @@ export default function ProductsPage() {
           />
         </div>
       )}
-
-      <ProductFiltersDrawer
-        open={isMobileFiltersOpen}
-        onClose={() => setIsMobileFiltersOpen(false)}
-        categories={categories}
-        filters={{ category, min, max }}
-        limits={{ min: minPrice, max: maxPrice }}
-        appliedFilters={appliedFilters}
-        onChangeCategory={(next) => setCategory(next)}
-        onChangePrice={({ min: nextMin, max: nextMax }) => {
-          setMin(ensureNumber(nextMin, minPrice));
-          setMax(ensureNumber(nextMax, maxPrice));
-        }}
-        onRemoveFilter={handleRemoveFilter}
-        onReset={resetFilters}
-      />
     </main>
   );
 }

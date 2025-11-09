@@ -18,6 +18,7 @@ import { FAQPage } from '../modules/support/pages/FAQPage.jsx'
 import ContactPage from '../modules/support/pages/ContactPage.jsx';
 import {PrivacyPage} from '../modules/support/pages/PrivacyPage.jsx'
 import {TermsPage} from '../modules/support/pages/TermsPage.jsx'
+import { ScrollToTop } from '../components/layout/ScrollToTop.jsx'
 
 
 
@@ -32,6 +33,7 @@ export const App = () => {
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[var(--color-light)]">
       <Navbar />
+      <ScrollToTop />
       <main className='main w-full'>
       <Routes>
         <Route path='/' element={<HomePage />} />
