@@ -1,4 +1,4 @@
-const buildPages = (currentPage, totalPages) => {
+const Pages = (currentPage, totalPages) => {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, index) => index + 1);
   }
@@ -33,13 +33,13 @@ const buildPages = (currentPage, totalPages) => {
   return pages;
 };
 
-export function PaginationControls({ page, totalPages, totalItems, onPageChange }) {
+export function Pagination({ page, totalPages, totalItems, onPageChange }) {
   if (!totalItems) return null;
 
   const safePage = Math.max(1, Math.min(page, totalPages));
   const canGoPrev = safePage > 1;
   const canGoNext = safePage < totalPages;
-  const pageItems = buildPages(safePage, totalPages);
+  const pageItems = Pages(safePage, totalPages);
 
   const handlePrev = () => {
     if (!canGoPrev) return;

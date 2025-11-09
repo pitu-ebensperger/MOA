@@ -4,7 +4,7 @@ import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import ProductGallery from "../components/ProductGallery.jsx";
 import { ProductSidebar } from "../components/ProductSidebar.jsx";
 import { ProductFiltersDrawer } from "../components/ProductFiltersDrawer.jsx";
-import { PaginationControls } from "../components/PaginationControls.jsx";
+import { Pagination } from "../../../components/ui/Pagination.jsx";
 import { useProducts } from "../hooks/useProducts.js";
 import { useCategories } from "../hooks/useCategories.js";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
@@ -313,7 +313,7 @@ export default function ProductsPage() {
 
       {paginationInfo.totalItems > 0 && (
         <div className="mt-10 flex justify-center">
-          <PaginationControls
+          <Pagination
             page={paginationInfo.page}
             totalPages={paginationInfo.totalPages}
             totalItems={paginationInfo.totalItems}
