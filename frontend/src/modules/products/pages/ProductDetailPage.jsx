@@ -5,7 +5,7 @@ import { Price } from "../../../components/data-display/Price.jsx";
 import { productsApi } from "../services/products.api.js";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import { useCategories } from "../hooks/useCategories.js";
-import {ChevronDown, Minus, Plus,Recycle, ShieldCheck,Sparkles,Truck,} from "lucide-react";
+import {ChevronDown, Minus, Plus,Recycle, ShieldCheck,Truck,} from "lucide-react";
 
 const initialState = {
   product: null,
@@ -43,43 +43,21 @@ const ProductMediaGallery = ({ images, selectedImage, onSelectImage }) => {
   if (!images.length) return null;
 
   return (
-    <section className="flex flex-col gap-6 lg:flex-row">
-
-
-      <div className="order-1 flex-1 overflow-hidden rounded-[32px] bg-neutral-50">
-        <img
-          src={selectedImage}
-          alt=""
-          className="aspect-[4/5] w-full object-cover"
-        />
-      </div>
-    </section>
+    <div className="overflow-hidden rounded-[32px] bg-neutral-50">
+      <img
+        src={selectedImage}
+        alt=""
+        className="h-full w-full object-contain"
+      />
+    </div>
   );
 };
 
-const FeatureList = ({ items }) => {
-  if (!items.length) return null;
-  return (
-    <ul className="space-y-3">
-      {items.map((item) => (
-        <li key={item.label} className="flex items-center gap-4">
-          <span className="inline-flex size-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-700">
-            {item.icon}
-          </span>
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-neutral-900">{item.label}</p>
-            <p className="text-sm text-neutral-500">{item.description}</p>
-          </div>
-        </li>
-      ))}
-    </ul>
-  );
-};
 
 const AccordionSection = ({ title, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <section className="border-b border-neutral-200">
+    <section className="border-b border-(--color-secondary2)">
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
@@ -97,22 +75,6 @@ const AccordionSection = ({ title, children, defaultOpen = false }) => {
       </button>
       {isOpen && <div className="pb-6 text-sm leading-relaxed text-neutral-600">{children}</div>}
     </section>
-  );
-};
-
-const InfoGrid = ({ items }) => {
-  if (!items.length) return null;
-  return (
-    <dl className="grid gap-4 sm:grid-cols-2">
-      {items.map((item) => (
-        <div key={item.label} className="rounded-2xl border border-neutral-200 px-4 py-3">
-          <dt className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-400">
-            {item.label}
-          </dt>
-          <dd className="mt-1 text-sm text-neutral-800">{item.value}</dd>
-        </div>
-      ))}
-    </dl>
   );
 };
 
@@ -221,7 +183,6 @@ export const ProductDetailPage = () => {
     });
   }, [variantOptions]);
 
-  const collectionLabel = product?.collection ?? "Colección MOA";
   const descriptionPreview = product?.shortDescription || product?.description;
   const materialList = useMemo(() => {
     if (!product) return [];
@@ -237,15 +198,6 @@ export const ProductDetailPage = () => {
     if (!specs || typeof specs !== "object" || Array.isArray(specs)) return [];
     return Object.entries(specs);
   }, [product]);
-
-  const infoItems = useMemo(() => {
-    if (!product) return [];
-    return [
-
-      product.dimensions ? { label: "Dimensiones", value: formatDimensions(product.dimensions) } : null,
-      product.weight ? { label: "Peso", value: formatWeight(product.weight) } : null,
-    ].filter(Boolean);
-  }, [product, collectionLabel, materialList]);
 
   const highlights = [
     {
@@ -296,12 +248,12 @@ export const ProductDetailPage = () => {
             </li>
           )}
           {specEntries.map(([key, value]) => (
-              <li key={key}>
-                <span className="font-medium text-neutral-800">{key}:&nbsp;</span>
-                <span>{value}</span>
-              </li>
-            ))}
-          {!product?.dimensions && !product?.weight && specEntries.length === 0 && (
+            <li key={key}>
+              <span className="font-medium text-neutral-800">{key}:&nbsp;</span>
+              <span>{value}</span>
+            </li>
+          ))}
+          {specEntries.length === 0 && (
             <li>Consultar ficha técnica para más detalles.</li>
           )}
         </ul>
@@ -343,92 +295,109 @@ export const ProductDetailPage = () => {
     );
   }
 
-  const breadcrumbItems = product?.name
-    ? [...baseBreadcrumbItems, { label: product.name }]
+  const breadcrumbItems = categoryBreadcrumb
+    ? [...baseBreadcrumbItems, categoryBreadcrumb]
     : baseBreadcrumbItems;
 
   return (
+    <container>
     <main className="page container-px mx-auto max-w-6xl py-12 lg:py-16">
-   
-      <article className="grid gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
-        <ProductMediaGallery
-          images={galleryImages}
-          selectedImage={selectedImage}
-          onSelectImage={setSelectedImage} />
+      <article className="grid items-start gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
+        <div className="lg:col-span-1">
+          <ProductMediaGallery
+            images={galleryImages}
+            selectedImage={selectedImage}
+            onSelectImage={setSelectedImage}
+          />
+        </div>
 
-        <section className="space-y-8">
-          <div className="space-y-3">
-
-            <Breadcrumbs items={breadcrumbItems} className="mt-5 mb-6 lg:mb-5 text-sm font-light" />
-            <h1 className="title-serif text-3xl text-(--color-primary1) sm:text-4xl">{product.name}</h1>
-            <p className="text-xs uppercase tracking-[0.25em] text-(--color-secondary1)">{product.sku}</p>
-
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4 border-y border-neutral-200 py-4">
-            <Price value={product.price} className="text-4xl text-(--font-display) text-neutral-900" />
-            {product.compareAtPrice && (
-              <Price
-                value={product.compareAtPrice}
-                className="text-base text-neutral-400 line-through" />)}
-
-
-          </div>
-
-
-
-        </section>
-      
-
-        <section className="space-y-3">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <div className="inline-flex w-full items-center justify-between rounded-full border border-neutral-200 px-4 py-2 text-lg sm:w-40">
-              <button
-                type="button"
-                onClick={handleDecrease}
-                className="rounded-full p-1.5 text-neutral-500 transition hover:text-neutral-900"
-                aria-label="Disminuir cantidad"
-              >
-                <Minus className="size-4" aria-hidden />
-              </button>
-              <span className="font-semibold text-neutral-900">{quantity}</span>
-              <button
-                type="button"
-                onClick={handleIncrease}
-                className="rounded-full p-1.5 text-neutral-500 transition hover:text-neutral-900"
-                aria-label="Aumentar cantidad"
-              >
-                <Plus className="size-4" aria-hidden />
-              </button>
+        <div className="lg:col-span-1">
+          <div className="mt-3">
+            <div className="text-neutral-500 pb-6">
+                    <Breadcrumbs items={breadcrumbItems} className="mb-8 text-sm font-light" />            
             </div>
+                   <div className="mb-15">
+                <div className="title-sans text-2xl text-(--color-secondary12) sm:text-3xl">
+                {product.name}
+              </div>
+     
+              <div className="mb-10">
+                <Price
+                  value={product.price}
+                  className="text-3xl font-semibold text-(--color-secondary1)"
+                />
+                {product.compareAtPrice && (
+                  <Price
+                    value={product.compareAtPrice}
+                    className="text-base text-neutral-400 line-through"
+                  />
+                )}
+              </div>
 
-            <button
-              type="button"
-              className="w-full rounded-full bg-neutral-900 px-6 py-3 text-base font-medium text-white transition hover:bg-neutral-800"
-            >
-              Agregar al carrito
-            </button>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <div className="flex items-center justify-between rounded-full px-4 py-2 text-lg font-medium text-neutral-900 sm:w-40">
+                  <button
+                    type="button"
+                    onClick={handleDecrease}
+                    className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
+                    aria-label="Disminuir cantidad"
+                  >
+                    <Minus className="size-4" aria-hidden />
+                  </button>
+                  <span>{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={handleIncrease}
+                    className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
+                    aria-label="Aumentar cantidad"
+                  >
+                    <Plus className="size-4" aria-hidden />
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="w-full rounded-full border border-(--color-secondary1) px-6 py-2 text-base font-medium text-(--color-primary1) transition hover:bg-(--color-primary1) hover:text-(--color-light) sm:w-auto hover:text-medium"
+                >
+                  Agregar al carrito
+                </button>
+              </div>
+            </div>
           </div>
-        </section>
 
-        <FeatureList items={highlights} />
-    </article>
-    <section className="mt-16 grid gap-12 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,0.35fr)]">
-        <div className="space-y-2">
-          {sections.map((section, index) => (
-            <AccordionSection key={section.title} title={section.title} defaultOpen={index === 0}>
-              {section.content}
-            </AccordionSection>
+          <section className="space-y-2 border-t border-(--color-secondary2) pt-2">
+              <p className="text-xs uppercase tracking-[0.25em] text-(--color-secondary1)">
+                SKU {product.sku}
+              </p>
+            {sections.map((section, index) => (
+              <AccordionSection
+                key={section.title}
+                title={section.title}
+                defaultOpen={index === 0}
+              >
+                {section.content}
+              </AccordionSection>
+            ))}
+          </section>
+
+        </div>
+      </article>
+      </main>
+      <section className="w-full py-6 bg-(--color-secondary1)">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 divide-y divide-(--color-secondary2) text-sm text-(--color-light) sm:grid-cols-2 lg:grid-cols-3 sm:divide-y-0 sm:divide-x sm:divide-(--color-secondary2)">
+          {highlights.map((highlight) => (
+            <div
+              key={highlight.label}
+              className="flex flex-col gap-2 px-4 py-4"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{highlight.icon}</span>
+                <p className="font-semibold">{highlight.label}</p>
+              </div>
+              <p>{highlight.description}</p>
+            </div>
           ))}
         </div>
-        <div className="space-y-4">
-          <InfoGrid items={infoItems} />
-          {Array.isArray(product.tags) && product.tags.length > 0 && (
-            <div>
-            </div>
-          )}
-        </div>
       </section>
-    </main>
+    </container>
   );
 };

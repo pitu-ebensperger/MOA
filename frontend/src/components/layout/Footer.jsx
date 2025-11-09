@@ -9,8 +9,6 @@ const CUSTOMER_SERVICE_LINKS = [
 
 const ABOUT_LINKS = [
   { label: "Contacto", href: "/contact" },
-  { label: "Showroom", href: "/home#contact" },
-  { label: "Proyectos especiales", href: "/products" },
 ];
 
 const POLICY_LINKS = [
@@ -29,30 +27,15 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="mt-20 border-t border-neutral-200 bg-white/75 text-sm text-neutral-600 backdrop-blur">
+    <footer className="border-t border-neutral-200 bg-white/75 text-sm text-neutral-600 backdrop-blur">
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <section>
             <Link to="/home" aria-label="Ir al inicio" className="inline-flex">
-              <span className="text-3xl font-italiana tracking-tight text-primary1">MOA</span>
+              <span className="text-2xl text-serif tracking-tight text-secondary1">MOA</span>
             </Link>
-            <p className="mt-3 max-w-sm text-sm text-neutral-500">
-              Diseño de autor con foco en materiales nobles, fabricación responsable y objetos que
-              elevan cada espacio de tu hogar.
-            </p>
 
-            <div className="mt-6 space-y-1 text-sm">
-              <p className="font-semibold text-neutral-700">Showroom</p>
-              <p>Av. Italia 1439, Providencia</p>
-              <p>Lunes a sábado · 10:00 – 19:00</p>
-              <a href="tel:+56227916543" className="block text-primary1 hover:underline">
-                +56 2 2791 6543
-              </a>
-              <a href="mailto:hola@moa-studio.cl" className="block text-primary1 hover:underline">
-                hola@moa-studio.cl
-              </a>
-            </div>
-
+          
             <div className="mt-6 flex gap-4">
               {SOCIAL_LINKS.map(({ label, href, icon }) => {
                 const IconComponent = icon;
@@ -73,7 +56,7 @@ export const Footer = () => {
           </section>
 
           <FooterColumn title="Servicio al cliente" links={CUSTOMER_SERVICE_LINKS} />
-          <FooterColumn title="Nosotros" links={ABOUT_LINKS} />
+
         </div>
 
         <div className="mt-12 flex flex-col gap-4 border-t border-neutral-200 pt-6 text-xs text-neutral-500 md:flex-row md:items-center md:justify-between">

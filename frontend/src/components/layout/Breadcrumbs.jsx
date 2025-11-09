@@ -10,10 +10,13 @@ const normalizeItems = (items = []) => {
       const label = item.label ?? item.title;
       if (!label) return null;
       const isLast = index === array.length - 1;
+      const href = item.href ?? item.to ?? null;
+      const isCurrent =
+        item.isCurrent ?? (isLast && href === null && !item.to);
       return {
         label,
-        href: item.href ?? item.to ?? null,
-        isCurrent: item.isCurrent ?? isLast,
+        href,
+        isCurrent,
       };
     })
     .filter(Boolean);
