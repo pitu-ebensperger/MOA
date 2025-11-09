@@ -10,17 +10,28 @@ html:focus-within { scroll-behavior: smooth; }
 :where(button, a, [role="button"]) { -webkit-tap-highlight-color: transparent; }
 
 /* GENERAL --------------------------------------------------------*/
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+}
+
+html {
+    margin: 0;
+    padding: 0;
+}
+
 body {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
     font-family: var(--font-sans);
     color: var(--color-text);
     background-color: var(--color-light);
+    overflow-x: hidden;
 }
-
-main {
-    padding-inline: 1.5rem;
-}
-
 
 h1, h2 {
   font-family: var(--font-display);

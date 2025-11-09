@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Container } from "../../../../components/layout/Container.jsx";
 import { Header } from "../../../../components/layout/Header.jsx";
 import Button from "../../../../components/ui/Button.jsx";
+import { productsApi } from "../../../products/services/products.api.js";
 
 const initialForm = {
   name: "",
@@ -10,8 +11,6 @@ const initialForm = {
   stock: "",
   description: "",
 };
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export const NewProductPage = () => {
   const [form, setForm] = useState(initialForm);
@@ -31,26 +30,18 @@ export const NewProductPage = () => {
     setFeedback(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/products`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...form,
-          price: Number(form.price),
-          stock: form.stock ? Number(form.stock) : 0,
-        }),
-      });
-
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-        const message = payload?.message ?? "No pudimos crear el producto.";
-        throw new Error(message);
-      }
+      const payload = {
+        ...form,
+        price: Number(form.price),
+        stock: form.stock ? Number(form.stock) : 0,
+      };
+      const product = await productsApi.create(payload);
 
       setForm(initialForm);
-      setFeedback({ type: "success", message: "Producto creado correctamente." });
+      setFeedback({
+        type: "success",
+        message: `Producto "${product.name}" creado correctamente.`,
+      });
     } catch (error) {
       console.error("Error al crear el producto", error);
       setFeedback({

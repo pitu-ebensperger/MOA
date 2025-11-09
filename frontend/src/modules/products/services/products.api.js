@@ -2,21 +2,12 @@ import { env } from "../../../config/env.js";
 import { API_PATHS } from "../../../config/api-paths.js";
 import { mockCatalogApi } from "../../../mocks/api/products.js";
 import { apiClient } from "../../../services/api-client.js";
+import { normalizeCategoryList } from "../../../utils/normalizers.js";
 
 const coerceNumber = (value) => {
   if (value === undefined || value === null || value === "") return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-};
-
-const slugify = (value) => {
-  if (!value) return null;
-  return String(value)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 };
 
 const buildQueryString = (params = {}) => {
@@ -41,8 +32,8 @@ const normalizeProduct = (product = {}) => {
   const resolvedId = product.id ?? null;
 
   const name = product.name ?? "Producto MOA";
-
-  const slug = product.slug ?? (resolvedId !== null ? String(resolvedId) : slugify(name)) ?? null;
+  const slugSource = product.slug ?? (resolvedId !== null ? String(resolvedId) : name);
+  const slug = slugSource ? String(slugSource) : null;
 
   const price = coerceNumber(product.price);
 
@@ -141,20 +132,6 @@ const normalizeListResponse = (payload = {}) => {
   return { items, total, page };
 };
 
-const normalizeCategory = (category = {}) => ({
-  id: category.id,
-  slug: category.slug,
-  name: category.name,
-  parentId: category.parentId ?? null,
-  description: category.description ?? "",
-  coverImage: category.coverImage ?? null,
-});
-
-const normalizeCategoryList = (payload) => {
-  const list = Array.isArray(payload) ? payload : Array.isArray(payload?.items) ? payload.items : [];
-  return list.map(normalizeCategory);
-};
-
 const remoteProductsApi = {
   async list(params = {}) {
     const query = buildQueryString(params);
@@ -175,6 +152,11 @@ const remoteProductsApi = {
     const data = await apiClient.public.get(`${API_PATHS.catalog.categories}${query}`);
     return normalizeCategoryList(data);
   },
+
+  async create(payload = {}) {
+    const data = await apiClient.private.post(API_PATHS.catalog.products, payload);
+    return normalizeProduct(data);
+  },
 };
 
 const mockProductsApi = {
@@ -194,6 +176,11 @@ const mockProductsApi = {
   async listCategories(params = {}) {
     const data = await mockCatalogApi.listCategories(params);
     return normalizeCategoryList(data);
+  },
+
+  async create(payload = {}) {
+    const data = await mockCatalogApi.create(payload);
+    return normalizeProduct(data);
   },
 };
 

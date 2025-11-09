@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import ProductGallery from "../components/ProductGallery.jsx";
 import { ProductSidebar } from "../components/ProductSidebar.jsx";
@@ -8,18 +9,44 @@ import { useProducts } from "../hooks/useProducts.js";
 import { useCategories } from "../hooks/useCategories.js";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
 import { ensureNumber } from "../../../utils/number.js";
-import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "../constants.js";
+import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from "../utils/constants.js";
 import { matchesProductCategory, resolveProductPrice } from "../utils/product.js";
 
 export default function ProductsPage() {
   const { products: fetchedProducts, isLoading, error } = useProducts();
   const { categories: fetchedCategories } = useCategories();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const categories = useMemo(() => {
     const base = Array.isArray(fetchedCategories) ? fetchedCategories : [];
     const hasAll = base.some((category) => category.id === ALL_CATEGORY_ID);
     return hasAll ? base : [{ id: ALL_CATEGORY_ID, name: "Todos" }, ...base];
   }, [fetchedCategories]);
+
+  const categoryQuery = searchParams.get("category");
+  const searchParamsSnapshot = searchParams.toString();
+
+  const resolvedCategoryFromQuery = useMemo(() => {
+    if (!categoryQuery) return ALL_CATEGORY_ID;
+    if (String(categoryQuery).toLowerCase() === String(ALL_CATEGORY_ID)) {
+      return ALL_CATEGORY_ID;
+    }
+
+    const match = categories.find((cat) => {
+      if (!cat) return false;
+      if (cat.slug && String(cat.slug).toLowerCase() === String(categoryQuery).toLowerCase()) {
+        return true;
+      }
+      return String(cat.id) === String(categoryQuery);
+    });
+
+    if (match?.id !== undefined && match?.id !== null) {
+      return match.id;
+    }
+
+    const numeric = Number(categoryQuery);
+    return Number.isFinite(numeric) ? numeric : ALL_CATEGORY_ID;
+  }, [categoryQuery, categories]);
 
   const allProducts = useMemo(
     () => (Array.isArray(fetchedProducts) && fetchedProducts.length ? fetchedProducts : []),
@@ -44,6 +71,14 @@ export default function ProductsPage() {
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGE_SIZE);
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    if (resolvedCategoryFromQuery === undefined || resolvedCategoryFromQuery === null) return;
+    setCategory((prev) => {
+      if (prev === resolvedCategoryFromQuery) return prev;
+      return resolvedCategoryFromQuery;
+    });
+  }, [resolvedCategoryFromQuery]);
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((product) => {
@@ -91,6 +126,30 @@ export default function ProductsPage() {
     const totalPages = Math.max(1, Math.ceil(totalResults / safeLimit || 1));
     setCurrentPage((prev) => Math.min(prev, totalPages));
   }, [itemsPerPage, totalResults]);
+
+  useEffect(() => {
+    const nextParam =
+      category === ALL_CATEGORY_ID
+        ? null
+        : (() => {
+            const active = categories.find(
+              (cat) => String(cat.id) === String(category),
+            );
+            if (active?.slug) return active.slug;
+            return String(category);
+          })();
+
+    const normalizedCurrent = categoryQuery ?? null;
+    if ((nextParam ?? null) === normalizedCurrent) return;
+
+    const nextSearchParams = new URLSearchParams(searchParamsSnapshot);
+    if (nextParam === null) {
+      nextSearchParams.delete("category");
+    } else {
+      nextSearchParams.set("category", nextParam);
+    }
+    setSearchParams(nextSearchParams, { replace: true });
+  }, [category, categories, categoryQuery, searchParamsSnapshot, setSearchParams]);
 
   const activeCategory = useMemo(() => {
     if (category === ALL_CATEGORY_ID) return null;

@@ -1,21 +1,26 @@
-import { productsDb, PRODUCTS, CATEGORIES } from "../database/index.js";
-import { delay } from "../utils/delay.js";
+import { PRODUCTS, CATEGORIES, COLLECTIONS } from "../database/index.js";
+import { delay } from "../../utils/delay.js";
+import { normalizeCategory } from "../../utils/normalizers.js";
 import { buildProductCategoryPool } from "../../modules/products/utils/product.js";
-import { ALL_CATEGORY_ID } from "../../modules/products/constants.js";
+import { ALL_CATEGORY_ID } from "../../modules/products/utils/constants.js";
 
-const normalizeCategory = (category) => ({
-  id: category.id,
-  slug: category.slug,
-  name: category.name,
-  parentId: category.parentId ?? null,
-  description: category.description ?? "",
-  coverImage: category.coverImage ?? null,
+const cloneProduct = (product) => ({
+  ...product,
+  gallery: Array.isArray(product.gallery) ? [...product.gallery] : [],
+  badge: Array.isArray(product.badge) ? [...product.badge] : [],
+  tags: Array.isArray(product.tags) ? [...product.tags] : [],
+  materials: Array.isArray(product.materials) ? [...product.materials] : [],
+});
+
+const cloneCollection = (collection) => ({
+  ...collection,
+  productIds: Array.isArray(collection.productIds) ? [...collection.productIds] : [],
 });
 
 const catalogDb = {
   categories: CATEGORIES.map(normalizeCategory),
-  products: PRODUCTS,
-  collections: Array.isArray(productsDb?.collections) ? productsDb.collections : [],
+  products: PRODUCTS.map(cloneProduct),
+  collections: COLLECTIONS.map(cloneCollection),
 };
 
 const CATEGORY_SLUG_TO_ID = new Map(
@@ -27,11 +32,6 @@ const CATEGORY_SLUG_TO_ID = new Map(
 const toNumber = (value) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-};
-
-const normalizeSlug = (value) => {
-  if (typeof value !== "string") return null;
-  return value.trim().toLowerCase();
 };
 
 const matchesText = (product, text) => {
@@ -114,6 +114,69 @@ const sortProducts = (products, sortBy) => {
   }
 };
 
+const normalizeIncomingProduct = (payload = {}) => {
+  if (payload.id === undefined || payload.id === null) {
+    throw new Error("product id is required in mock mode");
+  }
+  const id = payload.id;
+  const now = new Date().toISOString();
+  const price = Number(payload.price ?? 0);
+  const stock = Number(payload.stock ?? 0);
+
+  const gallery =
+    Array.isArray(payload.gallery) && payload.gallery.length
+      ? payload.gallery
+      : payload.imgUrl
+        ? [payload.imgUrl]
+        : [];
+
+  const tags =
+    Array.isArray(payload.tags) && payload.tags.length
+      ? payload.tags
+      : typeof payload.tags === "string"
+        ? payload.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+        : [];
+
+  const materials =
+    Array.isArray(payload.materials) && payload.materials.length
+      ? payload.materials
+      : payload.material
+        ? [payload.material]
+        : [];
+
+  const slugSource = payload.slug ?? payload.name ?? `producto-${id}`;
+
+  return {
+    id,
+    name: payload.name ?? `Producto ${id}`,
+    slug: slugSource ? String(slugSource) : null,
+    sku: payload.sku ?? `MOA-${id}`,
+    price: Number.isFinite(price) ? price : 0,
+    stock: Number.isFinite(stock) ? stock : 0,
+    description: payload.description ?? "",
+    shortDescription: payload.shortDescription ?? "",
+    imgUrl: payload.imgUrl ?? gallery[0] ?? null,
+    gallery,
+    badge: Array.isArray(payload.badge) ? payload.badge : payload.badge ? [payload.badge] : [],
+    status: payload.status ?? "activo",
+    tags,
+    material: payload.material ?? materials[0] ?? null,
+    materials,
+    color: payload.color ?? null,
+    dimensions: payload.dimensions ?? null,
+    weight: payload.weight ?? null,
+    specs: payload.specs ?? null,
+    variantOptions: Array.isArray(payload.variantOptions) ? payload.variantOptions : [],
+    fk_category_id: payload.fk_category_id ?? null,
+    fk_collection_id: payload.fk_collection_id ?? null,
+    collection: payload.collection ?? null,
+    collectionDescription: payload.collectionDescription ?? null,
+    createdAt: now,
+    updatedAt: now,
+    compareAtPrice: payload.compareAtPrice ?? null,
+  };
+};
+
 export const mockCatalogApi = {
   async list(params = {}) {
     const {
@@ -161,12 +224,11 @@ export const mockCatalogApi = {
     }
     await delay();
     const numericId = toNumber(productId);
-    const targetSlug = normalizeSlug(productId);
     const product = catalogDb.products.find((item) => {
       if (numericId !== null && Number(item.id) === numericId) return true;
       if (String(item.id) === String(productId)) return true;
-      if (targetSlug && item.slug) {
-        return normalizeSlug(item.slug) === targetSlug;
+      if (typeof productId === "string" && typeof item.slug === "string") {
+        return item.slug === productId;
       }
       return false;
     });
@@ -216,8 +278,15 @@ export const mockCatalogApi = {
       };
     });
   },
+
+  async create(payload = {}) {
+    await delay();
+    const product = normalizeIncomingProduct(payload);
+    catalogDb.products.unshift(product);
+    return product;
+  },
 };
 
 export async function getProducts() {
-  return PRODUCTS;
+  return catalogDb.products;
 }

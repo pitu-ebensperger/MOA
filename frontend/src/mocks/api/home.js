@@ -1,13 +1,6 @@
 import { PRODUCTS, CATEGORIES, contentDb } from "../database/index.js";
-import { delay } from "../utils/delay.js";
-
-const normalizeCategory = (category) => ({
-  id: category.id,
-  slug: category.slug,
-  name: category.name,
-  coverImage: category.coverImage ?? null,
-  parentId: category.parentId ?? null,
-});
+import { delay } from "../../utils/delay.js";
+import { normalizeCategory } from "../../utils/normalizers.js";
 
 const catalogDb = {
   categories: CATEGORIES.map(normalizeCategory),

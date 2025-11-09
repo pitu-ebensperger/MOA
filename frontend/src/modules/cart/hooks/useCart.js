@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 export const useCart = () => {
   //  Inicializar el carrito desde localStorage 
@@ -11,17 +11,8 @@ export const useCart = () => {
     }
   });
 
-  const [total, setTotal] = useState(0);
-
-  //  Calcular total cada vez que cambie el carrito
+  //  Persistir carrito cada vez que cambie
   useEffect(() => {
-    const newTotal = cartItems.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
-    setTotal(newTotal);
-
-    //  Guardar carrito actualizado 
     localStorage.setItem("cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
@@ -60,6 +51,11 @@ export const useCart = () => {
     setCartItems([]);
     localStorage.removeItem("cart");
   };
+
+  const total = useMemo(
+    () => cartItems.reduce((acc, item) => acc + (Number(item.price) || 0) * (item.quantity ?? 0), 0),
+    [cartItems],
+  );
 
   return {
     cartItems,

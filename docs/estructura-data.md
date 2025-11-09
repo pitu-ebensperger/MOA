@@ -22,7 +22,6 @@
 - ❗ `images: ProductImage[]` (≥ 3 recomendado)
 - ❗ `stock: number`
 - ❗ `createdAt: string` (ISO-8601)
-- ❔ `subcategory?: string`
 
 
 
@@ -54,7 +53,6 @@ Campos obligatorios:
 - `createdAt: string` (ISO-8601)
 
 Campos recomendados:
-- `subcategory?: string`
 - `shortDescription: string (≤ 140 chars)`
 - `description: string (2–5 frases)`
 - `collections?: string[]`
@@ -126,7 +124,7 @@ Campos recomendados:
 **products**
 - `id` PK, `sku` UNIQUE, `slug` UNIQUE
 - `name`, `short_description`, `description`
-- `category`, `subcategory`
+- `category`
 - `price` INT, `compare_at_price` INT NULL, `currency` CHAR(3)
 - `dimensions_json` JSON, `materials_json` JSON, `colors_json` JSON
 - `images_json` JSON, `variants_json` JSON
@@ -149,7 +147,7 @@ Campos recomendados:
 - `price >= 0`, `compareAtPrice == null || compareAtPrice > price`.
 - `images.length >= 3` (recomendado).
 - Si hay `variants`, cada `variant.sku` único.
-- `category` existe en taxonomía; si hay `subcategory`, pertenece a `category`.
+- `category` existe en taxonomía.
 
 ---
 
@@ -207,7 +205,6 @@ Ej.: `MUE-MUE-SOF-AB3K-25`
   "shortDescription":"Sofá de 3 cuerpos tapizado en lino con patas de roble.",
   "description":"De inspiración nórdica, combina lino texturizado y roble natural.",
   "category":"muebles",
-  "subcategory":"sofas",
   "collections":["living-nordico","madera-clara"],
   "badges":["fabricación local"],
   "price":649990,
@@ -230,4 +227,3 @@ Ej.: `MUE-MUE-SOF-AB3K-25`
   "seo":{"title":"Sofá Lino Alba | Sitio","description":"Sofá nórdico de lino y roble."},
   "createdAt":"2025-11-05T00:00:00.000Z"
 }
-

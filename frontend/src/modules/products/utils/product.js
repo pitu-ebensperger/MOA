@@ -1,4 +1,4 @@
-import { ALL_CATEGORY_ID } from "../constants.js";
+import { ALL_CATEGORY_ID } from "./constants.js";
 
 const CATEGORY_VALUE_KEYS = ["fk_category_id"];
 

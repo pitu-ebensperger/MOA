@@ -1,28 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../../products/components/ProductCard.jsx";
-import { productsDb, categoriesDb } from "../../../mocks/database/index.js";
 import { matchesProductCategory } from "../../products/utils/product.js";
-import { ALL_CATEGORY_ID } from "../../products/constants.js";
-
-const getMockProducts = () => {
-  if (Array.isArray(productsDb?.PRODUCTS)) return productsDb.PRODUCTS;
-  if (Array.isArray(productsDb?.products)) return productsDb.products;
-  return [];
-};
-
-const getMockCategories = () => {
-  if (Array.isArray(categoriesDb?.CATEGORIES) && categoriesDb.CATEGORIES.length) {
-    return categoriesDb.CATEGORIES.filter((category) => category.parentId === null);
-  }
-  if (Array.isArray(categoriesDb?.categories) && categoriesDb.categories.length) {
-    return categoriesDb.categories.filter((category) => category.parentId === null);
-  }
-  return [];
-};
-
-const FALLBACK_PRODUCTS = getMockProducts();
-const FALLBACK_CATEGORIES = getMockCategories();
+import { ALL_CATEGORY_ID } from "../../products/utils/constants.js";
 
 const normalizeProduct = (product, index) => {
   const safeId = product?.id ?? `featured-${index}`;
@@ -40,23 +20,28 @@ const normalizeProduct = (product, index) => {
 };
 
 const buildTabs = (categories) => {
-  const source = Array.isArray(categories) && categories.length ? categories : FALLBACK_CATEGORIES;
+  const source =
+    Array.isArray(categories) && categories.length
+      ? categories.filter((category) => category?.parentId === null || category?.parentId === undefined)
+      : [];
 
   const items = source
     .map((category, index) => {
-      const filterValue = category?.id ?? category?.slug ?? category?.name ?? `category-${index}`;
+      const filterValue = category?.id ?? category?.slug ?? `category-${index}`;
       return {
         id: String(category?.id ?? category?.slug ?? index),
-        label: category?.name ?? category?.title ?? `Categoría ${index + 1}`,
+        label: category?.name ?? `Categoría ${index + 1}`,
         value: filterValue,
       };
     })
     .filter((item) => Boolean(item.label));
 
-  const hasAll = items.some((item) => item.value === ALL_CATEGORY_ID);
-  return hasAll
+  const hasAll = items.some((item) => String(item.value) === String(ALL_CATEGORY_ID));
+  const baseTabs = hasAll
     ? items
     : [{ id: ALL_CATEGORY_ID, label: "Todos", value: ALL_CATEGORY_ID }, ...items];
+
+  return baseTabs.length ? baseTabs : [{ id: ALL_CATEGORY_ID, label: "Todos", value: ALL_CATEGORY_ID }];
 };
 
 export default function ProductsSection({ products, categories }) {
@@ -72,7 +57,7 @@ export default function ProductsSection({ products, categories }) {
   }, [tabs, activeCategory]);
 
   const items = useMemo(() => {
-    const source = Array.isArray(products) && products.length ? products : FALLBACK_PRODUCTS;
+    const source = Array.isArray(products) ? products : [];
     const normalized = source.map(normalizeProduct);
     const filtered = normalized.filter((product) =>
       matchesProductCategory(product, activeCategory),

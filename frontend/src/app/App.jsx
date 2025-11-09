@@ -30,9 +30,9 @@ import '../styles/components/buttons.css'
 
 export const App = () => {
   return (
-    <div>
+    <div className="min-h-screen w-full overflow-x-hidden bg-[var(--color-light)]">
       <Navbar />
-      <main className='main'>
+      <main className='main w-full'>
       <Routes>
         <Route path='/' element={<HomePage />} />
         <Route path='/home' element={<HomePage />} />

@@ -1,27 +1,23 @@
 import { useMemo } from "react";
-import { categoriesDb } from "../../../mocks/database/index.js";
 import { CategoriesCard } from "../components/CategoriesCard.jsx";
-
-const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1600&auto=format&fit=crop";
-
-const getMockCategories = () => {
-  if (Array.isArray(categoriesDb?.CATEGORIES)) return categoriesDb.CATEGORIES;
-  if (Array.isArray(categoriesDb?.categories)) return categoriesDb.categories;
-  return [];
-};
-
-const buildParentCategories = () => {
-  const categories = getMockCategories();
-  return categories
-    .filter((category) => category.parentId === null)
-    .map((category) => ({
-      ...category,
-      coverImage: category.coverImage ?? FALLBACK_IMAGE,
-    }));
-};
+import { useCategories } from "../../products/hooks/useCategories.js";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 
 export const CategoriesPage = () => {
-  const parents = useMemo(() => buildParentCategories(), []);
+  const { categories, isLoading, error } = useCategories();
+
+  const parents = useMemo(() => {
+    const source = Array.isArray(categories) ? categories : [];
+    return source
+      .filter((category) => category?.parentId === null)
+      .map((category, index) => ({
+        ...category,
+        id: category?.id ?? `category-${index}`,
+        name: category?.name ?? `Categoría ${index + 1}`,
+        coverImage: category?.coverImage ?? DEFAULT_PLACEHOLDER_IMAGE,
+      }));
+  }, [categories]);
+
   const heroCategory = parents[0] ?? null;
   const featuredCategories = parents.slice(1, 3);
   const remainingCategories = parents.slice(3);
@@ -33,9 +29,13 @@ export const CategoriesPage = () => {
         <p className="text-xs uppercase tracking-[0.4em] text-secondary2">Categorías</p>
         <h1 className="title-serif mt-4 text-4xl text-dark sm:text-5xl">Encuentra lo que buscas</h1>
         <p className="mx-auto mt-4 max-w-2xl text-base text-secondary1 sm:text-lg">
-          
-Explora nuestras líneas de muebles y decoración según el ambiente o estilo que más te inspire.
+          Explora nuestras líneas de muebles y decoración según el ambiente o estilo que más te inspire.
         </p>
+        {error && (
+          <p className="mt-4 text-sm text-red-600">
+            No pudimos cargar las categorías. Intenta nuevamente en unos minutos.
+          </p>
+        )}
       </section>
 
       {heroCategory && (
@@ -62,9 +62,15 @@ Explora nuestras líneas de muebles y decoración según el ambiente o estilo qu
         </section>
       )}
 
-      {!hasCategories && (
+      {!hasCategories && !isLoading && (
         <div className="container-px mx-auto mt-12 max-w-4xl rounded-3xl border border-dashed border-neutral-200 bg-white px-6 py-12 text-center text-neutral-500">
           Categorías no disponibles por el momento.
+        </div>
+      )}
+
+      {isLoading && (
+        <div className="container-px mx-auto mt-12 max-w-4xl rounded-3xl border border-dashed border-neutral-200 bg-white px-6 py-12 text-center text-neutral-500">
+          Cargando categorías...
         </div>
       )}
     </main>

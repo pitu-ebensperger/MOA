@@ -10,26 +10,28 @@ export const HomePage = () => {
   const featuredProducts = home?.featuredProducts ?? undefined;
 
   return (
-    <div className="page px-4 sm:px-6">
+    <div className="page">
       <HeroSection />
 
-      <section className="py-12">
-        <div className="container-px mx-auto max-w-7xl">
-          {error && (
-            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              No pudimos cargar los productos. Intenta nuevamente en unos minutos.
-            </div>
-          )}
-          <ProductsSection categories={categories} products={featuredProducts} />
-          {isLoading && (
-            <div className="mt-6 text-center text-sm text-neutral-500">
-              Cargando piezas curadas para ti…
-            </div>
-          )}
-        </div>
-      </section>
+      <div className="px-4 sm:px-6">
+        <section className="py-12">
+          <div className="container-px mx-auto max-w-7xl">
+            {error && (
+              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                No pudimos cargar los productos. Intenta nuevamente en unos minutos.
+              </div>
+            )}
+            <ProductsSection categories={categories} products={featuredProducts} />
+            {isLoading && (
+              <div className="mt-6 text-center text-sm text-neutral-500">
+                Cargando piezas curadas para ti…
+              </div>
+            )}
+          </div>
+        </section>
 
-      <ContactSection contact={home?.contact} />
+        <ContactSection contact={home?.contact} />
+      </div>
     </div>
   );
 };

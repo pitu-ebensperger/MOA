@@ -1,13 +1,36 @@
-import Card from '../components/Card.jsx'
-import { products } from '../../../data.js'
+import Card from "../components/Card.jsx";
+import { useProducts } from "../../products/hooks/useProducts.js";
 
-export const WishlistPage = () => (
-  <main>
-    <h1 className="font-italiana text-4xl text-dark mt-24 mb-10 flex justify-center">Wishlist</h1>
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-  {products.map((product) => (
-    <Card key={product.id} data={product} />
-  ))}
-</div>
-  </main>
-)
+export const WishlistPage = () => {
+  const {
+    products = [],
+    isLoading,
+    error,
+  } = useProducts({ limit: 24 });
+
+  return (
+    <main className="px-4 py-10">
+      <h1 className="font-italiana text-4xl text-dark mt-14 mb-8 flex justify-center">Wishlist</h1>
+      {isLoading && (
+        <p className="text-center text-sm text-dark/70">Cargando tus favoritos...</p>
+      )}
+      {!isLoading && error && (
+        <p role="alert" className="text-center text-sm text-red-600">
+          No pudimos cargar tus favoritos. Intenta nuevamente.
+        </p>
+      )}
+      {!isLoading && !error && products.length === 0 && (
+        <div className="rounded-xl border border-dashed border-primary2/40 bg-white/60 p-8 text-center text-sm text-dark/70">
+          Aún no tienes productos guardados.
+        </div>
+      )}
+      {!isLoading && !error && products.length > 0 && (
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          {products.map((product) => (
+            <Card key={product.id ?? product.slug} data={product} />
+          ))}
+        </div>
+      )}
+    </main>
+  );
+};

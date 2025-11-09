@@ -49,7 +49,7 @@ export const CATEGORIES = [
       "https://images.unsplash.com/photo-1616593918824-4fef16054381?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mzd8fGhvbWUlMjBvZmZpY2V8ZW58MHx8MHx8fDI%3D&auto=format&fit=crop&q=60&w=800", // escritorio/silla office
     parentId: null,
   },
-   {
+  {
     id: 6000,
     slug: "decoracion",
     name: "Decoración",
@@ -60,40 +60,3 @@ export const CATEGORIES = [
     parentId: null,
   },
 ];
-
-export const SUBCATEGORIES = [
-  // Living (1)
-  { id: 1100, slug: "sofas",            name: "Sofás",            parentId: 1000 },
-  { id: 1200, slug: "sillones",         name: "Sillones",         parentId: 1000 },
-  { id: 1300, slug: "mesas-centro",     name: "Mesas de centro",  parentId: 1000 },
-  { id: 1400, slug: "mesas-laterales",  name: "Mesas laterales",  parentId: 1000 },
-
-  // Comedor (2)
-  { id: 2100, slug: "mesas-comedor",    name: "Mesas de comedor", parentId: 2000 },
-  { id: 2200, slug: "sillas-comedor",   name: "Sillas de comedor",parentId: 2000 },
-  { id: 2300, slug: "aparadores",       name: "Aparadores",       parentId: 2000 },
-
-  // Dormitorio (3)
-  { id: 3100, slug: "camas",            name: "Camas",            parentId: 3000 },
-  { id: 3200, slug: "veladores",        name: "Veladores",        parentId: 3000 },
-  { id: 3300, slug: "textiles",         name: "Textiles",         parentId: 3000 },
-
-  // Iluminación (4)
-  { id: 4100, slug: "lamparas-techo",   name: "Lámparas de techo",parentId: 4000 },
-  { id: 4200, slug: "lamparas-mesa",    name: "Lámparas de mesa", parentId: 4000 },
-
-  // Oficina (5)
-  { id: 5100, slug: "escritorios",      name: "Escritorios",      parentId: 5000 },
-  { id: 5200, slug: "sillas-oficina",   name: "Sillas de oficina",parentId: 5000},
-
-  // Decoración (6)
-  { id: 6100, slug: "plantas", name: "Plantas", parentId: 6000 },
-  { id: 6200, slug: "espejos",  name: "Espejos",  parentId: 6000 },
-];
-
-export const categoriesDb = {
-  CATEGORIES,
-  categories: CATEGORIES,
-  SUBCATEGORIES,
-  subcategories: SUBCATEGORIES,
-};

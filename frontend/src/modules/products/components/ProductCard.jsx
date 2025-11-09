@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
 import { Price } from "../../../components/data-display/Price.jsx";
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 
 export default function ProductCard({
   product = {},
@@ -19,7 +17,7 @@ export default function ProductCard({
 
   const navigate = useNavigate();
   const displayTitle = name ?? slug ?? "Nombre Producto";
-  const displayImage = imgUrl ?? gallery?.[0] ?? FALLBACK_IMAGE;
+  const displayImage = imgUrl ?? gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
   const displayPrice = price ?? 50000;
   const productSlug = slug ?? (id ? String(id) : null);
   const href = productSlug ? `/products/${productSlug}` : "/products";

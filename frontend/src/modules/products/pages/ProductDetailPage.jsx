@@ -3,9 +3,7 @@ import { useParams } from "react-router-dom";
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { productsApi } from "../services/products.api.js";
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=1200&auto=format&fit=crop";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 
 const initialState = {
   product: null,
@@ -71,17 +69,10 @@ export const ProductDetailPage = () => {
     ? [...baseBreadcrumbItems, { label: product.name }]
     : baseBreadcrumbItems;
 
-  const heroImage = product.imgUrl ?? product.gallery?.[0] ?? FALLBACK_IMAGE;
-  const collectionLabel =
-    product.collection ??
-    (product.fk_collection_id ? `Colección ${product.fk_collection_id}` : "Colección MOA");
-  const descriptionPreview = product.shortDescription ?? product.description;
-  const materialList =
-    Array.isArray(product.materials) && product.materials.length
-      ? product.materials
-      : product.material
-        ? [product.material]
-        : [];
+  const heroImage = product.imgUrl ?? product.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
+  const collectionLabel = product.collection ?? "Colección MOA";
+  const descriptionPreview = product.shortDescription || product.description;
+  const materialList = Array.isArray(product.materials) ? product.materials.filter(Boolean) : [];
 
   return (
     <main className="page container-px mx-auto max-w-5xl py-10">

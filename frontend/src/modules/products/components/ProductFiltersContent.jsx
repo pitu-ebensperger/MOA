@@ -1,26 +1,24 @@
 import { useMemo } from "react";
 import { DoubleRangeSlider } from "./DoubleRangeSlider.jsx";
-import { ALL_CATEGORY_ID } from "../constants.js";
+import { ALL_CATEGORY_ID } from "../utils/constants.js";
 
 const normalizeCategories = (categories = []) => {
   const base = Array.isArray(categories) ? categories : [];
   const mapped = base
     .map((cat, index) => {
+      if (!cat) return null;
       if (typeof cat === "string") {
-        return { id: `cat-${index}`, name: cat };
+        return { id: cat, name: cat };
       }
-      if (cat && (cat.id || cat.slug || cat.name)) {
-        return {
-          id: cat.id ?? cat.slug ?? `cat-${index}`,
-          name: cat.name ?? cat.slug ?? String(cat.id ?? `Categoría ${index + 1}`),
-        };
-      }
-      return null;
+      const id = cat.id ?? cat.slug ?? `cat-${index}`;
+      const name = cat.name ?? String(cat.slug ?? cat.id ?? `Categoría ${index + 1}`);
+      return { id, name };
     })
     .filter(Boolean);
 
-  const hasAll = mapped.some((cat) => cat.id === ALL_CATEGORY_ID);
-  return hasAll ? mapped : [{ id: ALL_CATEGORY_ID, name: "Todas" }, ...mapped];
+  const hasAll = mapped.some((cat) => String(cat.id) === String(ALL_CATEGORY_ID));
+  const normalized = hasAll ? mapped : [{ id: ALL_CATEGORY_ID, name: "Todas" }, ...mapped];
+  return normalized.length ? normalized : [{ id: ALL_CATEGORY_ID, name: "Todas" }];
 };
 
 const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
