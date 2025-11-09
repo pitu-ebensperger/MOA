@@ -155,6 +155,7 @@ export const ProductDetailPage = () => {
   }, [id]);
 
   const product = state.product;
+<<<<<<< Updated upstream
    const categoryBreadcrumb = useMemo(() => {
     if (!product) return null;
     const candidateId =
@@ -180,6 +181,8 @@ export const ProductDetailPage = () => {
     return null;
   }, [product, categories]);
 
+=======
+>>>>>>> Stashed changes
   const galleryImages = useMemo(() => normalizeGallery(product), [product]);
 
   useEffect(() => {
@@ -333,6 +336,10 @@ export const ProductDetailPage = () => {
   if (state.isLoading) {
     return (
       <main className="page container-px mx-auto max-w-6xl py-12">
+<<<<<<< Updated upstream
+=======
+        <Breadcrumbs items={baseBreadcrumbItems} className="mb-6" />
+>>>>>>> Stashed changes
         <div className="h-[30rem] animate-pulse rounded-[32px] bg-neutral-100" />
       </main>
     );
@@ -350,6 +357,7 @@ export const ProductDetailPage = () => {
     );
   }
 
+<<<<<<< Updated upstream
   const breadcrumbItems = categoryBreadcrumb
     ? [...baseBreadcrumbItems, categoryBreadcrumb]
       : baseBreadcrumbItems;
@@ -358,10 +366,20 @@ export const ProductDetailPage = () => {
   return (
     <main className="page container-px mx-auto max-w-6xl py-12 lg:py-16">
 
+=======
+  const breadcrumbItems = product?.name
+    ? [...baseBreadcrumbItems, { label: product.name }]
+    : baseBreadcrumbItems;
+
+  return (
+    <main className="page container-px mx-auto max-w-6xl py-12 lg:py-16">
+   
+>>>>>>> Stashed changes
       <article className="grid gap-12 lg:grid-cols-[minmax(0,0.55fr)_minmax(0,0.45fr)]">
         <ProductMediaGallery
           images={galleryImages}
           selectedImage={selectedImage}
+<<<<<<< Updated upstream
           onSelectImage={setSelectedImage} />
 
         <section className="space-y-8">
@@ -422,6 +440,104 @@ export const ProductDetailPage = () => {
         <FeatureList items={highlights} />
     </article>
     <section className="mt-16 grid gap-12 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,0.35fr)]">
+=======
+          onSelectImage={setSelectedImage}
+        />
+
+        <section className="space-y-8">
+          <div className="space-y-3">
+            <Breadcrumbs items={breadcrumbItems} className="mb-6 lg:mb-5 text-xs font-light" />
+            <h1 className="title-serif text-3xl text-(--color-primary1) sm:text-4xl">{product.name}</h1>
+            <p className="text-xs uppercase tracking-[0.45em] text-(--color-secondary1)">{product.sku}</p>
+           
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 border-y border-neutral-200 py-4">
+            <Price value={product.price} className="text-4xl font-semibold text-neutral-900" />
+            {product.compareAtPrice && (
+              <Price
+                value={product.compareAtPrice}
+                className="text-base text-neutral-400 line-through"
+              />
+            )}
+            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-900 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-neutral-900">
+              <Sparkles className="size-3.5" aria-hidden />
+              {product.stock > 0 ? "Disponible" : "A pedido"}
+            </span>
+          </div>
+
+          {variantOptions.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="text-sm font-medium text-neutral-800">Terminaciones</h2>
+              <div className="flex flex-wrap gap-2">
+                {variantOptions.map((variant) => {
+                  const isActive = activeVariant === variant.id;
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => setActiveVariant(variant.id)}
+                      className={[
+                        "flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
+                        isActive
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 text-neutral-700 hover:border-neutral-300",
+                      ].join(" ")}
+                    >
+                      {variant.colorHex && (
+                        <span
+                          className="inline-flex size-3 rounded-full border border-white/40"
+                          style={{ backgroundColor: variant.colorHex }}
+                          aria-hidden
+                        />
+                      )}
+                      {variant.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium text-neutral-800">Cantidad</h2>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="inline-flex w-full items-center justify-between rounded-full border border-neutral-200 px-4 py-2 text-lg sm:w-40">
+                <button
+                  type="button"
+                  onClick={handleDecrease}
+                  className="rounded-full p-1.5 text-neutral-500 transition hover:text-neutral-900"
+                  aria-label="Disminuir cantidad"
+                >
+                  <Minus className="size-4" aria-hidden />
+                </button>
+                <span className="font-semibold text-neutral-900">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={handleIncrease}
+                  className="rounded-full p-1.5 text-neutral-500 transition hover:text-neutral-900"
+                  aria-label="Aumentar cantidad"
+                >
+                  <Plus className="size-4" aria-hidden />
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="w-full rounded-full bg-neutral-900 px-6 py-3 text-base font-medium text-white transition hover:bg-neutral-800"
+              >
+                Agregar al carrito
+              </button>
+            </div>
+            <p className="text-xs text-neutral-500">Envíos coordinados una vez confirmada la compra.</p>
+          </section>
+
+          <FeatureList items={highlights} />
+        </section>
+      </article>
+
+      <section className="mt-16 grid gap-12 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,0.35fr)]">
+>>>>>>> Stashed changes
         <div className="space-y-2">
           {sections.map((section, index) => (
             <AccordionSection key={section.title} title={section.title} defaultOpen={index === 0}>
@@ -433,7 +549,11 @@ export const ProductDetailPage = () => {
           <InfoGrid items={infoItems} />
           {Array.isArray(product.tags) && product.tags.length > 0 && (
             <div>
+<<<<<<< Updated upstream
 
+=======
+             
+>>>>>>> Stashed changes
             </div>
           )}
         </div>

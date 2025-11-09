@@ -23,6 +23,12 @@ export function CategoriesCard({ category, variant = "default" }) {
   if (!category) return null;
   const styles = VARIANT_STYLES[variant] ?? VARIANT_STYLES.default;
 
+  const resolvedCategoryParam =
+    category?.slug ?? (category?.id !== undefined ? String(category.id) : null);
+  const targetHref = resolvedCategoryParam
+    ? `/products?category=${encodeURIComponent(resolvedCategoryParam)}`
+    : "/products";
+
   return (
     <article
       className={`group relative overflow-hidden rounded-4xl bg-neutral-900 text-white shadow-xl ${styles.container}`}
@@ -46,7 +52,7 @@ export function CategoriesCard({ category, variant = "default" }) {
         <div className="flex items-end justify-between gap-4">
           <h3 className={`title-serif text-white ${styles.title}`}>{category.name}</h3>
           <Link
-            to="/products"
+            to={targetHref}
             className="group inline-flex h-[38px] items-center overflow-hidden rounded-full border border-white/60 px-2 py-2 text-sm font-normal text-white transition-all duration-500 ease-out hover:border-white hover:bg-white/5"
             aria-label={`Explorar ${category.name}`}
           >
