@@ -46,8 +46,6 @@ const buildPriceBounds = (products = []) => {
   };
 };
 
-const clampToRange = (value, min, max) => Math.min(Math.max(value, min), max);
-
 export const useProductFilters = ({
   products: fetchedProducts = [],
   categories: fetchedCategories = [],

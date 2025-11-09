@@ -39,7 +39,7 @@ const normalizeGallery = (product) => {
   return Array.from(new Set(base));
 };
 
-const ProductMediaGallery = ({ images, selectedImage, onSelectImage }) => {
+const ProductMediaGallery = ({ images, selectedImage }) => {
   if (!images.length) return null;
 
   return (
@@ -84,7 +84,6 @@ export const ProductDetailPage = () => {
   const [state, setState] = useState(initialState);
   const [selectedImage, setSelectedImage] = useState(DEFAULT_PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
-  const [activeVariant, setActiveVariant] = useState(null);
 
   const baseBreadcrumbItems = [
     { label: "Inicio", href: "/" },
@@ -117,7 +116,7 @@ export const ProductDetailPage = () => {
   }, [id]);
 
   const product = state.product;
-   const categoryBreadcrumb = useMemo(() => {
+  const categoryBreadcrumb = useMemo(() => {
     if (!product) return null;
     const candidateId =
       product.fk_category_id ?? product.categoryId ?? product.category?.id ?? null;
@@ -149,41 +148,6 @@ export const ProductDetailPage = () => {
     setSelectedImage(galleryImages[0]);
   }, [galleryImages]);
 
-  const variantOptions = useMemo(() => {
-    if (!product) return [];
-    if (Array.isArray(product.variantOptions) && product.variantOptions.length) {
-      return product.variantOptions.map((variant, index) => ({
-        id: variant.id ?? index,
-        label: variant.name ?? `Opción ${index + 1}`,
-        colorHex: variant.colorHex,
-      }));
-    }
-    if (product.color) {
-      return [
-        {
-          id: product.color,
-          label: product.color,
-          colorHex: product.variantOptions?.[0]?.colorHex,
-        },
-      ];
-    }
-    return [];
-  }, [product]);
-
-  useEffect(() => {
-    if (!variantOptions.length) {
-      setActiveVariant(null);
-      return;
-    }
-    setActiveVariant((prev) => {
-      if (prev !== null && variantOptions.some((variant) => variant.id === prev)) {
-        return prev;
-      }
-      return variantOptions[0].id;
-    });
-  }, [variantOptions]);
-
-  const descriptionPreview = product?.shortDescription || product?.description;
   const materialList = useMemo(() => {
     if (!product) return [];
     const materials = Array.isArray(product.materials) ? product.materials : [];
@@ -307,7 +271,6 @@ export const ProductDetailPage = () => {
           <ProductMediaGallery
             images={galleryImages}
             selectedImage={selectedImage}
-            onSelectImage={setSelectedImage}
           />
         </div>
 
