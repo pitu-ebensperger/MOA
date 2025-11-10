@@ -50,7 +50,7 @@ const ProductMediaGallery = ({ images, selectedImage }) => {
       <img
         src={selectedImage}
         alt=""
-        className="h-full w-full object-contain"
+        className="h-full w-full object-cover"
       />
     </div>
   );

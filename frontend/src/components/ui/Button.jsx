@@ -10,6 +10,10 @@ const VARIANTS = {
   secondary: "btn-secondary",
   ghost: "btn-ghost",
   link: "btn-link",
+  animated: "btn-animated",
+  "card-solid": "btn-card-solid",
+  "card-outline": "btn-card-outline",
+  "cta-home": "btn-cta-home",
 };
 
 // Tamaños --------------------------------------------------------------

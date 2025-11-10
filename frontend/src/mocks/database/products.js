@@ -306,63 +306,38 @@ export const PRODUCTS = [
     compareAtPrice: null,
   },
   {
-    id: 22001,
-    name: "Silla Curvada Tapizada",
-    slug: "silla-curvada-tapizada",
-    sku: "COM-SILLACUR-20509",
-    price: 89990,
-    stock: 16,
-    description:
-      "Silla de comedor con estructura en madera curvada y asiento tapizado en lino beige. Combina confort y diseño orgánico, ideal para comedores contemporáneos y espacios cálidos.",
-    shortDescription: "Silla en madera curvada con asiento tapizado en lino beige.",
-    imgUrl:
-      "https://images.unsplash.com/photo-1724035784216-a1ae7172cd8d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDQxfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900",
-    gallery: [
-      "https://images.unsplash.com/photo-1724035784216-a1ae7172cd8d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDQxfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900",
-    ],
-    badge: [],
-    status: "activo",
-    tags: ["silla", "madera curvada", "tapizado lino", "comedor", "orgánico"],
-    material: "Madera curvada y lino",
-    color: "madera y lino beige",
-    createdAt: "2024-02-10T10:00:00Z",
-    updatedAt: "2024-02-15T10:00:00Z",
-    fk_category_id: 2000,
-    fk_collection_id: 2200,
-    compareAtPrice: null,
-  },
-  {
   id: 12001,
-  name: "Silla Lounge Madera Trenzada",
-  slug: "silla-lounge-madera-trenzada",
+  name: "Silla Lounge Madera y Rejilla Natural",
+  slug: "silla-lounge-madera-rejilla-natural",
   sku: "LIV-SILLALOU-12001",
-  price: 229990,
+  price: 219990,
   stock: 8,
   description:
-    "Silla lounge artesanal en madera clara con asiento trenzado y respaldo inclinado. Incluye cojín de lino y manta tipo piel que aportan textura y calidez. Ideal para rincones de lectura o livings luminosos con estética natural y minimalista.",
+    "Silla lounge artesanal fabricada en madera clara con asiento y respaldo en rejilla natural. Su diseño de líneas limpias y estructura abierta la convierte en una pieza versátil, perfecta para espacios cálidos, naturales o estilo japandi.",
   shortDescription:
-    "Silla lounge en madera clara con asiento trenzado, cojín de lino y manta suave.",
+    "Silla lounge de madera clara con asiento y respaldo en rejilla natural.",
   imgUrl:
-    "https://images.unsplash.com/photo-1616628182504-d51a0ff4e39f?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1741121893351-934936d1e97c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw1NHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=900",
   gallery: [
-    "https://images.unsplash.com/photo-1616628182504-d51a0ff4e39f?q=80&w=1600&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1741121893351-934936d1e97c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw1NHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=900",
   ],
   badge: [],
   status: "activo",
   tags: [
     "silla lounge",
-    "madera",
-    "asiento trenzado",
-    "cojín lino",
+    "madera clara",
+    "rejilla natural",
+    "artesanal",
     "living",
-    "natural",
+    "japandi",
+    "minimalista",
   ],
-  material: "Madera clara, fibras trenzadas y lino",
-  color: "madera natural y crema",
+  material: "Madera natural y rejilla tejida",
+  color: "madera clara y beige natural",
   createdAt: "2024-02-11T10:00:00Z",
-  updatedAt: "2024-02-16T10:00:00Z",
-  fk_category_id: 1000,  
-  fk_collection_id: 1200, 
+  updatedAt: "2024-03-07T10:00:00Z",
+  fk_category_id: 1000,   // Living
+  fk_collection_id: 1200, // Sillones / asientos
   compareAtPrice: null,
 },
 {
@@ -1027,6 +1002,40 @@ export const PRODUCTS = [
   updatedAt: "2024-03-07T10:00:00Z",
   fk_category_id: 6000,   // Decoración
   fk_collection_id: 6100, // Plantas
+  compareAtPrice: null,
+},
+{
+  id: 21004,
+  name: "Mesa Redonda Escandinava",
+  slug: "mesa-redonda-escandinava",
+  sku: "COM-MESAREDES-21004",
+  price: 359990,
+  stock: 5,
+  description:
+    "Mesa de comedor redonda elaborada en madera natural con acabado mate. Su diseño escandinavo y proporciones equilibradas la hacen ideal para espacios luminosos y ambientes cálidos. Perfecta para reuniones cotidianas o comedores de estilo minimalista.",
+  shortDescription:
+    "Mesa redonda en madera natural de diseño escandinavo y acabado mate.",
+  imgUrl:
+    "https://images.unsplash.com/photo-1721742145236-d89b27b8ceb0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDUzfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900",
+  gallery: [
+    "https://images.unsplash.com/photo-1721742145236-d89b27b8ceb0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDUzfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900",
+  ],
+  badge: [],
+  status: "activo",
+  tags: [
+    "mesa comedor",
+    "madera natural",
+    "escandinavo",
+    "minimalista",
+    "nórdico",
+    "diseño cálido",
+  ],
+  material: "Madera natural con acabado mate",
+  color: "madera clara",
+  createdAt: "2024-03-05T10:00:00Z",
+  updatedAt: "2024-03-07T10:00:00Z",
+  fk_category_id: 2000,   // Comedor
+  fk_collection_id: 2100, // Mesas de comedor
   compareAtPrice: null,
 },
 

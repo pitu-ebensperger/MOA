@@ -7,7 +7,7 @@ const DEBUG_LINKS = [ //SACAR DSPS
 ];
 
 const CUSTOMER_SERVICE_LINKS = [
-  { label: "Contacto", href: "/contact" },
+  { label: "Contacto", href: "/#contact" },
   { label: "Cambios y devoluciones", href: "/privacy" },
   { label: "Preguntas frecuentes", href: "/faq" },
 ];
@@ -57,7 +57,7 @@ export const Footer = () => {
   );
 
   return (
-    <footer className="border-t border-neutral-200 bg-white/75 text-sm text-neutral-600 backdrop-blur">
+  <footer className="bg-white/75 text-sm text-neutral-600 backdrop-blur">
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.3fr_repeat(3,1fr)]">
           <section>
@@ -90,7 +90,7 @@ export const Footer = () => {
 
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-neutral-200 pt-6 text-xs text-neutral-500 md:flex-row md:items-center md:justify-between">
+        <div className="mt-12 flex flex-col gap-4 pt-6 text-xs text-neutral-500 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-x-6 gap-y-3">
             {POLICY_LINKS.map(({ label, href }) => (
               <Link key={label} to={href} className="hover:text-primary1 hover:underline">

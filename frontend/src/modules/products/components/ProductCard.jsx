@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
+import Button from "../../../components/ui/Button.jsx";
+import Badge from "../../../components/ui/Badge.jsx";
 
 export default function ProductCard({
   product = {},
@@ -111,11 +113,9 @@ export default function ProductCard({
       />
 
       {showBadge && (
-        <div className="absolute top-[311px] left-[21px] z-30 flex h-[16.665px] w-[123px] items-center justify-center rounded-[15.768px] bg-[#d1ab84] px-[9.523px] py-[1.587px]">
-          <p className="font-['Plus_Jakarta_Sans:Bold',sans-serif] text-[7.935px] font-bold leading-[11.13px] tracking-[1.5871px] text-white">
-            {badgeText}
-          </p>
-        </div>
+        <Badge className="absolute top-[311px] left-[21px] z-30 h-[16.665px] w-[123px]">
+          {badgeText}
+        </Badge>
       )}
 
       <div
@@ -152,35 +152,35 @@ export default function ProductCard({
           isHovered ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
         }`}
       >
-        <button
+        <Button
           type="button"
+          variant="card-solid"
+          size="md"
           onClick={handleAddToCart}
-          className={`flex h-10 w-[160px] items-center justify-center gap-2 rounded-[7px] border border-transparent px-6 text-sm font-medium transition-all ${
-            cartButtonPressed
-              ? "scale-95 bg-[#d1ab84] text-white"
-              : "bg-white text-[#9e7e67] hover:bg-neutral-50"
+          className={`w-[160px] gap-3 transition-all ${
+            cartButtonPressed ? "scale-95 btn-card-solid-pressed" : ""
           }`}
         >
           <ShoppingCart
-            size={18}
-            className={cartButtonPressed ? "text-white" : "text-[#9e7e67]"}
+            size={18} className={`text-current btn-icon-left ${
+              cartButtonPressed ? "text-white" : "text-[#9e7e67]"}`}
           />
-          <span className={cartButtonPressed ? "text-white" : "text-[#9e7e67]"}>Agregar</span>
-        </button>
+          <span>Agregar</span>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="card-outline"
+          size="md"
           onClick={handleViewDetails}
           disabled={!href}
-          className={`flex h-10 w-[160px] items-center justify-center gap-2 rounded-[7px] border px-6 text-sm font-medium transition-all ${
-            detailsButtonPressed
-              ? "scale-95 border-[#d1ab84] bg-[#d1ab84] text-white"
-              : "border-white text-white hover:bg-white/10"
+          className={`w-[160px] gap-3 transition-all ${
+            detailsButtonPressed ? "scale-95 btn-card-outline-pressed" : "hover:bg-white/10"
           } ${!href ? "pointer-events-none opacity-40" : ""}`}
         >
-          <Eye size={18} className="text-current" />
+          <Eye size={18} className="text-current btn-icon-left" />
           <span>Ver detalles</span>
-        </button>
+        </Button>
       </div>
 
       {/* Texto (abajo) */}
