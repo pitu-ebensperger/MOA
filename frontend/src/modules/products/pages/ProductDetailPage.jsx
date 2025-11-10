@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
->>>>>>> parent of c47310b... admin y carro
-=======
-
->>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";

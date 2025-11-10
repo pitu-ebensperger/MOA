@@ -3,16 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
+
 import Button from "../../../components/ui/Button.jsx";
 import Badge from "../../../components/ui/Badge.jsx";
->>>>>>> parent of c47310b... admin y carro
-=======
-import Button from "../../../components/ui/Button.jsx";
-import Badge from "../../../components/ui/Badge.jsx";
->>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
 
 export default function ProductCard({
   product = {},

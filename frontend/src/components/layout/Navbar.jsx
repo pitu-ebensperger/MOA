@@ -2,14 +2,7 @@ import { ShoppingCart, Menu, User, X, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 import { SearchBar } from '../ui/SearchBar.jsx';
->>>>>>> parent of c47310b... admin y carro
-=======
-import { SearchBar } from '../ui/SearchBar.jsx';
->>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
 
 const NAV_ITEMS = [
   { label: 'Inicio', href: '/home', match: ['/', '/home'] },
@@ -31,13 +24,6 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, logout } = useAuth();
-<<<<<<< HEAD
-<<<<<<< HEAD
-  const portalTarget = typeof document !== "undefined" ? document.body : null;
-=======
->>>>>>> parent of c47310b... admin y carro
-=======
->>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
 
   useEffect(() => {
     if (!location.hash) return;
