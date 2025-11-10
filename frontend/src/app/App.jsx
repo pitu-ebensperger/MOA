@@ -18,8 +18,6 @@ import { FAQPage } from '../modules/support/pages/FAQPage.jsx'
 import ContactPage from '../modules/support/pages/ContactPage.jsx';
 import {PrivacyPage} from '../modules/support/pages/PrivacyPage.jsx'
 import {TermsPage} from '../modules/support/pages/TermsPage.jsx'
-import AdminDashboardPage from '../modules/admin/pages/AdminDashboardPage.jsx'
-import { AdminRoute } from '../modules/auth/hooks/useAuth.jsx'
 import { ScrollToTop } from '../components/layout/ScrollToTop.jsx'
 
 
@@ -47,9 +45,6 @@ export const App = () => {
         <Route path='/contact' element={<ContactPage />} /> 
         <Route path='/privacy' element={<PrivacyPage />} /> 
         <Route path='/terms' element={<TermsPage/>} /> 
-        <Route element={<AdminRoute />}>
-          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-        </Route>
         <Route path='*' element={<NotFoundPage />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
