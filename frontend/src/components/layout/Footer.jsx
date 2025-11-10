@@ -1,11 +1,6 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const DEBUG_LINKS = [ //SACAR DSPS
-  { label: "Perfil", href: "/profile" },
-  { label: "Dashboard admin", href: "/admin/dashboard" },
-];
-
 const CUSTOMER_SERVICE_LINKS = [
   { label: "Contacto", href: "/#contact" },
   { label: "Cambios y devoluciones", href: "/privacy" },
@@ -86,7 +81,6 @@ export const Footer = () => {
           </section>
 
           {renderColumn("Servicio al cliente", CUSTOMER_SERVICE_LINKS)}
-          {renderColumn("Vista temporal", DEBUG_LINKS)}
 
         </div>
 
