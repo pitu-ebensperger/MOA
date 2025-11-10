@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of c47310b... admin y carro
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { productsApi } from "../services/products.api.js";

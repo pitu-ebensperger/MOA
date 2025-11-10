@@ -3,6 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
+<<<<<<< HEAD
+=======
+import { SearchBar } from '../ui/SearchBar.jsx';
+>>>>>>> parent of c47310b... admin y carro
 
 const NAV_ITEMS = [
   { label: 'Inicio', href: '/home', match: ['/', '/home'] },
@@ -26,7 +30,10 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, logout } = useAuth();
+<<<<<<< HEAD
   const portalTarget = typeof document !== "undefined" ? document.body : null;
+=======
+>>>>>>> parent of c47310b... admin y carro
 
   useEffect(() => {
     if (!location.hash) return;
