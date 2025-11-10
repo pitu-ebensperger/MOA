@@ -64,3 +64,10 @@
 2. Realizar el deploy de la aplicación backend.
 3. Realizar el deploy de la base de datos.
 4. Integrar la aplicación cliente con la aplicación backend en producción.
+
+--------------------------------------------------------------------------------------------------
+
+## Tablas
+
+![Tablas](https://github.com/user-attachments/assets/b2f58314-b984-429a-bdea-96cca7ab55a1)
+
