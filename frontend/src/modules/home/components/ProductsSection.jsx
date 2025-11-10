@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import ProductCard from "../../products/components/ProductCard.jsx";
+import Button from "../../../components/ui/Button.jsx";
 import { matchesProductCategory } from "../../products/utils/product.js";
 import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
 
@@ -74,7 +74,7 @@ export default function ProductsSection({ products, categories }) {
         </p>
       </div>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-6 border-b border-neutral-200 sm:justify-between">
+      <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-center gap-6 border-b border-[rgba(207,195,181,0.5)] sm:justify-between">
         {tabs.map((tab) => {
           const isActive = String(tab.value) === String(activeCategory);
           return (
@@ -114,13 +114,15 @@ export default function ProductsSection({ products, categories }) {
       )}
 
       <div className="flex justify-center pt-1">
-        <Link
+        <Button
           to="/products"
-          className="inline-flex items-center gap-2 rounded-full border border-dark px-5 py-2 text-sm font-medium text-dark transition hover:bg-dark hover:text-white"
+          variant="cta-outline"
+          size="md"
+          className="btn-cta-outline inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-dark hover:text-light"
         >
           Ver más productos
-          <span aria-hidden className="text-base leading-none">&rarr;</span>
-        </Link>
+          <span aria-hidden className="text-base leading-none btn-icon-right">&rarr;</span>
+        </Button>
       </div>
     </div>
   );

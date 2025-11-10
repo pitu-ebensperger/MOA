@@ -1,125 +1,90 @@
-import React from "react";
+import React from 'react';
+import Button from '../../../components/ui/Button'
+import Swal from 'sweetalert2';
 
-const ContactPage = () => {
+export default function ContactPage() {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const name = formData.get('name');
+
+    Swal.fire({
+      title: 'Mensaje enviado',
+      text: `Gracias, ${name || '😊'} — hemos recibido tu mensaje.`,
+      icon: 'success',
+      confirmButtonText: 'Cerrar',
+      confirmButtonColor: '#5c4526',
+    });
+
+    e.target.reset();
+  };
+
   return (
-    <main className="bg-[#E6E0D8] min-h-screen px-6 py-50 text-[#453F34]">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* Informacion de Contacto de MOA*/}
-        <div className="space-y-8">
-          <h1 className="text-4xl font-bold text-[#443114] mb-4">
-            Contáctanos
-          </h1>
-          <div>
-            <h3 className="text-lg font-semibold text-[#443114] mb-1">
-              Dirección postal
-            </h3>
-            <p className="text-[#5C5245]">
-              MOA<br />
-              Calle del Olmo 42, Barrio de Las Letras<br />
-              Madrid, España 28012
-            </p>
-          </div>
+    <main className="page min-h-screen bg-[#f4efe9] text-(--color-primary1)">
+      <section className="py-20 px-6 md:px-16 lg:px-32 grid md:grid-cols-2 gap-12 items-stretch">
 
-          <div>
-            <h3 className="text-lg font-semibold text-[#443114] mb-1">
-              Correo electrónico
-            </h3>
-            <p className="text-[#5C5245]">
-              soporte@moa.com
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-[#443114] mb-1">
-              Teléfono
-            </h3>
-            <p className="text-[#5C5245]">
-              +5600 939 801<br />
-              <span className="text-sm text-[#A69F91]">Horario: Lunes a Viernes, 9am - 6pm</span>
-            </p>
-          </div>
+        <div className="hidden md:flex h-full max-h-[600px] overflow-hidden rounded-xl bg-[#44311417]">
+          <img
+            src="https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwyMDR8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop"
+            alt="Ambiente cálido con detalles naturales"
+            className="object-cover h-full w-full"
+          />
         </div>
 
-        {/*Formulario para Contactar*/}
-        <section className="bg-[#E6E0D8] py-10 px-6 rounded-xl shadow-md">
-          <div className="text-center">
-            <h2 className="font-italiana text-4xl text-[#100E08] mb-10">
-              Contáctanos
-            </h2>
-
-            <form className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              {/* Dirección */}
-              <div>
-                <label className="block font-garamond text-[#100E08] mb-2">
-                  Dirección
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-[#453F34] rounded px-4 py-2 focus:outline-none"
-                />
-              </div>
-
-              {/* Nombre */}
-              <div>
-                <label className="block font-garamond text-[#100E08] mb-2">
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  className="w-full border border-[#453F34] rounded px-4 py-2 focus:outline-none"
-                />
-              </div>
-
-              {/* Número de teléfono */}
-              <div>
-                <label className="block font-garamond text-[#100E08] mb-2">
-                  Número de teléfono
-                </label>
-                <input
-                  type="tel"
-                  placeholder="Ingresa tu número"
-                  className="w-full border border-[#453F34] rounded px-4 py-2 focus:outline-none"
-                />
-              </div>
-
-              {/* Cita */}
-              <div>
-                <label className="block font-garamond text-[#100E08] mb-2">
-                  Cita
-                </label>
-                <input
-                  type="date"
-                  className="w-full border border-[#453F34] rounded px-4 py-2 focus:outline-none"
-                />
-              </div>
-
-              {/* Mensaje */}
-              <div className="md:col-span-2">
-                <label className="block font-garamond text-[#100E08] mb-2">
-                  Mensaje
-                </label>
-                <textarea
-                  rows="4"
-                  placeholder="Ingresa tu mensaje"
-                  className="w-full border border-[#453F34] rounded px-4 py-2 focus:outline-none"
-                ></textarea>
-              </div>
-
-              {/* Botón */}
-              <div className="md:col-span-2 text-center mt-4">
-                <button
-                  type="submit"
-                  className="bg-[#443114] text-[#E6E0D8] px-8 py-2 rounded font-garamond hover:bg-[#453F34] transition"
-                >
-                  Enviar
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
-      </div>
+        <div className="flex flex-col justify-center h-full max-h-[600px]">
+          <h1 className="text-5xl font-serif tracking-tight mb-6">Contacto</h1>
+          <p className="text-base mb-8">
+            ¿Tienes una consulta o deseas una cotización personalizada? Escríbenos y nuestro equipo te responderá a la brevedad.
+          </p>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium mb-1 text-(--color-secondary1)">
+                Nombre
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Tu nombre completo"
+                className="text-sm text-(--color-primary1) w-full  bg-white/75  rounded-lg p-3 focus:ring-2 focus:ring-(--color-secondary2) outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium mb-1 text-(--color-secondary1)">
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="tu@email.com"
+                className="text-sm w-full rounded-lg p-3 bg-white/75 focus:ring-2 focus:ring-(--color-secondary2) outline-none"
+                required
+              />
+            </div>
+            <div>
+        <label htmlFor="name" className="block text-sm font-medium mb-1 text-(--color-secondary1)">
+                Mensaje
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows="5"
+                placeholder="Cuéntanos en qué podemos ayudarte..."
+                className="text-sm w-full  rounded-lg p-3  bg-white/75  focus:ring-2 focus:ring-(--color-secondary2)  outline-none"
+                required
+              ></textarea>
+            </div>
+            <Button
+              type="submit"
+              className="bg-[#5c4526] hover:bg-[#7a5b38] text-white px-8 py-3 btn-primary-round transition-all"
+            >
+              Enviar mensaje
+            </Button>
+          </form>
+        </div>
+      </section>
     </main>
   );
-};
-
-export default ContactPage;
+}

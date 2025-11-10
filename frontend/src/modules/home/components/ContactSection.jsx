@@ -1,64 +1,46 @@
+import { Link } from "react-router-dom";
+
+const backgroundImageUrl =
+  "https://images.unsplash.com/photo-1650370363832-c6a735a7abf0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop";
+
 export default function ContactSection() {
   return (
-    <section id="contact" className="bg-light px-6 py-20 scroll-mt-24">
-      <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-[1.1fr_1fr]">
+    <section
+      id="contact"
+      className="relative mx-auto w-full max-w-7xl px-10 py-0  mb-15"
+    >
+      <div className="relative w-full max-w-7xl overflow-hidden rounded-lg">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("${backgroundImageUrl}")`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom",
+          }}
+        />
+        <div className="absolute inset-0 bg-[rgba(60,45,27,0.5)]" />
 
-        <form className="grid grid-cols-1 gap-5 rounded-3xl border border-neutral-200 bg-white/70 p-8 shadow-sm backdrop-blur">
-                  <h2 className="font-italiana text-4xl text-dark">Contáctanos</h2>
-
-          <label className="flex flex-col gap-2">
-            <span className="font-garamond text-sm text-dark">Nombre</span>
-            <input
-              type="text"
-              name="name"
-              placeholder="¿Cómo te llamas?"
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2 text-sm transition focus:border-primary1 focus:outline-none"
-            />
-          </label>
-
-          <label className="flex flex-col gap-2">
-            <span className="font-garamond text-sm text-dark">Correo electrónico</span>
-            <input
-              type="email"
-              name="email"
-              placeholder="nombre@estudio.cl"
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2 text-sm transition focus:border-primary1 focus:outline-none"
-            />
-          </label>
-
-          <label className="flex flex-col gap-2">
-            <span className="font-garamond text-sm text-dark">Teléfono</span>
-            <input
-              type="tel"
-              name="phone"
-              placeholder="+56 9 1234 5678"
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2 text-sm transition focus:border-primary1 focus:outline-none"
-            />
-          </label>
-
-          <label className="flex flex-col gap-2">
-            <span className="font-garamond text-sm text-dark">Mensaje</span>
-            <textarea
-              name="message"
-              rows={4}
-              placeholder="Cuéntanos qué estás buscando o qué proyecto necesitas resolver."
-              className="w-full rounded-lg border border-neutral-200 px-4 py-2 text-sm transition focus:border-primary1 focus:outline-none"
-            />
-          </label>
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              className="rounded-full bg-primary1 px-7 py-2 font-garamond text-base tracking-wide text-light transition hover:bg-primary2"
-            >
-              Enviar consulta
-            </button>
-          </div>
-        </form>
-        <div className="space-y-6 text-left">
-       
+        <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-6 rounded-3xl px-8 py-12 text-center text-white">
+          <p className="text-xs uppercase tracking-[0.5em] text-white">
+            Conecta con nosotros
+          </p>
+          <h2
+            className="font-italiana text-4xl leading-tight text-white sm:text-5xl"
+            style={{ color: "#ffffff" }}
+          >
+            ¿Listo para tu próximo proyecto?
+          </h2>
+          <p className="text-sm text-white sm:text-base">
+            Cuéntanos qué necesitas: estamos atentos para coordinar una llamada,
+            brindar asesoría o preparar una muestra especialmente pensada para ti.
+          </p>
+          <Link
+            to="/contact"
+            className="inline-flex items-center rounded-full border border-white/70 bg-white px-8 py-3 text-base font-semibold text-black transition hover:bg-white/90"
+          >
+            Escríbenos →
+          </Link>
         </div>
-
       </div>
     </section>
   );

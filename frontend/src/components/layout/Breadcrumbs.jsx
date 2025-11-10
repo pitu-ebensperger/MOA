@@ -49,7 +49,7 @@ export function Breadcrumbs({ items = [], className, separator }) {
             ) : (
               <Link
                 to={item.href}
-                className="transition-colors hover:text-(--color-primary-brown,#4a341a)"
+                className="transition-colors hover:text-(--color-primary1)"
               >
                 {item.label}
               </Link>

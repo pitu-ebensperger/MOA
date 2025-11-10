@@ -9,11 +9,13 @@ const Card = ({ data = {} }) => {
 
   return (
     <div className="relative bg-white rounded-md shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 w-full max-w-sm group">
-      <img
-        src={image}
-        alt={name}
-        className="w-full h-70 object-cover"
-      />
+      <div className="bg-[#44311417] overflow-hidden">
+        <img
+          src={image}
+          alt={name}
+          className="w-full h-70 object-cover"
+        />
+      </div>
 
       <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-black/70 to-transparent">
         <h3 className="text-lg font-semibold mb-1 !text-white drop-shadow-md">{name}</h3>

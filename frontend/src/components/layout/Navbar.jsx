@@ -1,12 +1,15 @@
 import { ShoppingCart, Menu, User, X, Search } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
 import { SearchBar } from '../ui/SearchBar.jsx';
 >>>>>>> parent of c47310b... admin y carro
+=======
+import { SearchBar } from '../ui/SearchBar.jsx';
+>>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
 
 const NAV_ITEMS = [
   { label: 'Inicio', href: '/home', match: ['/', '/home'] },
@@ -25,15 +28,16 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef(null);
-  const bodyOverflowRef = useRef("");
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, logout } = useAuth();
 <<<<<<< HEAD
+<<<<<<< HEAD
   const portalTarget = typeof document !== "undefined" ? document.body : null;
 =======
 >>>>>>> parent of c47310b... admin y carro
+=======
+>>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
 
   useEffect(() => {
     if (!location.hash) return;
@@ -74,74 +78,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     setIsSearchOpen(false);
   };
 
-  useEffect(() => {
-    if (!isSearchOpen) return undefined;
-    const handler = (event) => {
-      if (event.key === "Escape") {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [isSearchOpen]);
-
-  useEffect(() => {
-    if (isSearchOpen) {
-      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
-      return () => cancelAnimationFrame(id);
-    }
-    return undefined;
-  }, [isSearchOpen]);
-
-  useEffect(() => {
-    if (!portalTarget) return undefined;
-    if (isSearchOpen) {
-      bodyOverflowRef.current = portalTarget.style.overflow;
-      portalTarget.style.overflow = "hidden";
-    } else {
-      portalTarget.style.overflow = bodyOverflowRef.current || "";
-    }
-    return () => {
-      portalTarget.style.overflow = bodyOverflowRef.current || "";
-    };
-  }, [isSearchOpen, portalTarget]);
-
-  const searchOverlay =
-    isSearchOpen && portalTarget
-      ? createPortal(
-          <div className="fixed inset-0 z-60 flex items-start justify-center px-4">
-            <button
-              type="button"
-              aria-label="Cerrar buscador"
-              className="absolute inset-0 z-10 bg-black/30"
-              onClick={() => setIsSearchOpen(false)}
-            />
-
-            <form
-              onSubmit={handleSearchSubmit}
-              className="relative z-20 mt-32 flex w-full max-w-2xl items-center gap-3 rounded-full bg-white px-6 py-3 shadow-2xl"
-            >
-              <Search className="h-5 w-5 text-neutral-400" />
-              <input
-                ref={searchInputRef}
-                type="search"
-                placeholder="¿Qué estás buscando hoy?"
-                className="w-full border-none bg-transparent text-base text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800"
-              >
-                Buscar
-              </button>
-            </form>
-          </div>,
-          portalTarget
-        )
-      : null;
+  const handleSearchChange = (event) => setSearchQuery(event.target.value);
 
   return (
     <>
@@ -348,8 +285,14 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
           </div>
         </nav>
       </div>
-      </div>
-      {searchOverlay}
+    </div>
+    <SearchBar
+      isOpen={isSearchOpen}
+      value={searchQuery}
+      onChange={handleSearchChange}
+      onSubmit={handleSearchSubmit}
+      onClose={() => setIsSearchOpen(false)}
+    />
     </>
   );
 }

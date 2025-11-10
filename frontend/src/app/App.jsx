@@ -19,10 +19,15 @@ import ContactPage from '../modules/support/pages/ContactPage.jsx';
 import {PrivacyPage} from '../modules/support/pages/PrivacyPage.jsx'
 import {TermsPage} from '../modules/support/pages/TermsPage.jsx'
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 import AdminDashboardPage from '../modules/admin/pages/AdminDashboardPage.jsx'
 import { AdminRoute } from '../modules/auth/hooks/useAuth.jsx'
 >>>>>>> parent of c47310b... admin y carro
+=======
+import AdminDashboardPage from '../modules/admin/pages/AdminDashboardPage.jsx'
+import { AdminRoute } from '../modules/auth/hooks/useAuth.jsx'
+>>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
 import { ScrollToTop } from '../components/layout/ScrollToTop.jsx'
 
 
@@ -51,11 +56,17 @@ export const App = () => {
         <Route path='/privacy' element={<PrivacyPage />} /> 
         <Route path='/terms' element={<TermsPage/>} /> 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         <Route element={<AdminRoute />}>
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
         </Route>
 >>>>>>> parent of c47310b... admin y carro
+=======
+        <Route element={<AdminRoute />}>
+          <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        </Route>
+>>>>>>> parent of 6535e00... Revert "Merge pull request #31 from pitu-ebensperger/dev"
         <Route path='*' element={<NotFoundPage />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
