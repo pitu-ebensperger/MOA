@@ -8,8 +8,11 @@ const USER_KEY  = "moa.user";
 const STATUS = { IDLE: "idle", LOADING: "loading", AUTH: "authenticated" };
 
 // Permite que el backend cambie nombre/campo del rol sin romper front
-const isAdminRole = (user) =>
-  user?.role === "admin" || user?.rol === "admin" || user?.role_code === "ADMIN";
+const isAdminRole = (user) => {
+  if (!user) return false;
+  const role = String(user.role ?? user.rol ?? user.role_code ?? "").toLowerCase();
+  return role === "admin";
+};
 
 const safeParseJson = (value) => {
   try { return JSON.parse(value); } catch { return null; }

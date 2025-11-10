@@ -2,6 +2,7 @@ import { ShoppingCart, Menu, User, X, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
+import { useCartContext } from '../../modules/cart/context/cartContext.jsx';
 import { SearchBar } from '../ui/SearchBar.jsx';
 
 const NAV_ITEMS = [
@@ -17,13 +18,16 @@ const getPathname = (href = "") => {
   return path || "/";
 };
 
-export function Navbar({ onNavigate, cartItemCount = 0 }) {
+export function Navbar({ onNavigate, cartItemCount }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { cartItems, openDrawer } = useCartContext();
+  const computedCartCount =
+    typeof cartItemCount === "number" ? cartItemCount : cartItems.length;
 
   useEffect(() => {
     if (!location.hash) return;
@@ -137,16 +141,17 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                       <User className="nav-icon" />
                     </Link>
 
-                    <Link
-                      aria-label="Ver carrito"
-                      to="/cart"
+                    <button
+                      type="button"
+                      aria-label="Abrir carrito"
+                      onClick={openDrawer}
                       className="nav-icon-bg transition-all hover:scale-105 active:scale-95 relative"
                     >
                       <ShoppingCart className="nav-icon" />
-                      {cartItemCount > 0 && (
-                        <span className="cart-badge absolute">{cartItemCount}</span>
+                      {computedCartCount > 0 && (
+                        <span className="cart-badge absolute">{computedCartCount}</span>
                       )}
-                    </Link>
+                    </button>
                   </>
                 )}
 
@@ -244,17 +249,20 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                     >
                       <User className="nav-icon" />
                     </Link>
-                    <Link
-                      to="/cart"
+                    <button
+                      type="button"
                       className="nav-icon-bg relative"
-                      onClick={() => setIsMenuOpen(false)}
-                      aria-label="Ver carrito"
+                      onClick={() => {
+                        openDrawer();
+                        setIsMenuOpen(false);
+                      }}
+                      aria-label="Abrir carrito"
                     >
                       <ShoppingCart className="nav-icon" />
-                      {cartItemCount > 0 && (
-                        <span className="cart-badge absolute">{cartItemCount}</span>
+                      {computedCartCount > 0 && (
+                        <span className="cart-badge absolute">{computedCartCount}</span>
                       )}
-                    </Link>
+                    </button>
                     <button
                       className="nav-btn"
                       onClick={() => {

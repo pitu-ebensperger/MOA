@@ -1,8 +1,9 @@
 import { apiClient } from '../../../services/api-client.js'
 import { API_PATHS } from '../../../config/api-paths.js'
+import { env } from '../../../config/env.js'
+import { mockAuthApi } from './auth.mock.js'
 
-// Auth API agrupada
-export const authApi = {
+const remoteAuthApi = {
   // POST /auth/login
   login: async (payload) => {
     const res = await apiClient.public.post(API_PATHS.auth.login, payload)
@@ -39,6 +40,8 @@ export const authApi = {
     return res?.data ?? res
   },
 }
+
+export const authApi = env.USE_MOCKS ? mockAuthApi : remoteAuthApi
 
 // (Opcional) Exponer funciones con nombre si te gusta ese estilo:
 export const requestPasswordReset = authApi.requestPasswordReset

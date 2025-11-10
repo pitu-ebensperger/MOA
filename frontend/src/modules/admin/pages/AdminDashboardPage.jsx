@@ -3,6 +3,8 @@ import Button from "../../../components/ui/Button.jsx";
 import { customersDb } from "../../../mocks/database/customers.js";
 import { ordersDb } from "../../../mocks/database/orders.js";
 import { PRODUCTS } from "../../../mocks/database/products.js";
+import { formatCurrencyCLP } from "../../../utils/currency.js";
+import { formatDate_ddMMyyyy } from "../../../utils/date.js";
 
 const STATUS_BADGES = {
   fulfilled: { label: "Completado", badge: "bg-emerald-50 text-emerald-700", dot: "bg-emerald-500" },
@@ -16,22 +18,6 @@ const DEFAULT_STATUS_BADGE = {
   label: "Pendiente",
   badge: "bg-neutral-100 text-neutral-700",
   dot: "bg-neutral-400",
-};
-
-const formatCurrency = (value = 0) => {
-  const cleaned = Number.isFinite(value) ? value : 0;
-  return new Intl.NumberFormat("es-CL", {
-    style: "currency",
-    currency: "CLP",
-    maximumFractionDigits: 0,
-  }).format(cleaned);
-};
-
-const formatDate = (value) => {
-  if (!value) return "-";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleDateString("es-CL", { day: "2-digit", month: "short" });
 };
 
 const getStatusBadge = (status) => STATUS_BADGES[status] ?? DEFAULT_STATUS_BADGE;
@@ -82,9 +68,9 @@ export default function AdminDashboardPage() {
   const summaryMetrics = [
     {
       label: "Ventas totales",
-      value: formatCurrency(totalRevenue),
+      value: formatCurrencyCLP(totalRevenue),
       helper: averageOrderValue
-        ? `Promedio ${formatCurrency(averageOrderValue)}`
+        ? `Promedio ${formatCurrencyCLP(averageOrderValue)}`
         : "Sin datos por ahora",
       icon: <DollarSign className="size-5 text-neutral-500" aria-hidden />,
     },
@@ -123,17 +109,10 @@ export default function AdminDashboardPage() {
       variant: "ghost",
       cta: "Revisar",
     },
-    {
-      label: "Contactar clientes VIP",
-      description: "Enviar comunicación a los contactos destacados.",
-      icon: <Users className="size-4 text-neutral-500" aria-hidden />,
-      variant: "ghost",
-      cta: "Contactar",
-    },
   ];
 
   return (
-    <main className="admin-dashboard-page min-h-full bg-[var(--color-light)] pt-[5.5rem] pb-16">
+    <main className="admin-dashboard-page min-h-screen bg-[var(--color-light)] py-16">
       <div className="mx-auto max-w-7xl space-y-8 px-6">
         <section className="flex flex-col gap-4 rounded-3xl border border-neutral-200 bg-white/70 p-6 shadow-[0_20px_45px_rgba(68,49,20,0.07)] lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -199,12 +178,12 @@ export default function AdminDashboardPage() {
                       <div>
                         <p className="text-sm font-semibold text-neutral-900">{order.number}</p>
                         <p className="text-xs text-neutral-500">
-                          {formatDate(order.createdAt)} · {shipment?.carrier ?? "Logística interna"}
+                          {formatDate_ddMMyyyy(order.createdAt, "-")} · {shipment?.carrier ?? "Logística interna"}
                         </p>
                         <p className="mt-2 text-xs text-neutral-500">{itemLabel}</p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <p className="text-lg font-semibold text-neutral-900">{formatCurrency(order.total)}</p>
+                        <p className="text-lg font-semibold text-neutral-900">{formatCurrencyCLP(order.total)}</p>
                         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.badge}`}>
                           {badge.label}
                         </span>
@@ -218,7 +197,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <p className="mt-4 text-xs uppercase tracking-[0.3em] text-neutral-400">
-              Última sincronización: {formatDate(orders[0]?.updatedAt)}
+              Última sincronización: {formatDate_ddMMyyyy(orders[0]?.updatedAt, "-")}
             </p>
           </article>
 
@@ -271,7 +250,7 @@ export default function AdminDashboardPage() {
                         </p>
                         <p className="text-xs text-neutral-500">{customer.email}</p>
                       </div>
-                      <span className="text-xs text-neutral-400">{formatDate(customer.createdAt)}</span>
+                    <span className="text-xs text-neutral-400">{formatDate_ddMMyyyy(customer.createdAt, "-")}</span>
                     </div>
                   ))
                 ) : (
@@ -301,7 +280,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-semibold text-rose-600">{product.stock} uds</p>
-                    <p className="text-xs text-neutral-400">Actualizado {formatDate(product.updatedAt)}</p>
+                    <p className="text-xs text-neutral-400">Actualizado {formatDate_ddMMyyyy(product.updatedAt, "-")}</p>
                   </div>
                 </li>
               ))}

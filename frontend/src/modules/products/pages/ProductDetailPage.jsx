@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
+import AddToCartButton from "../../cart/components/AddToCartButton.jsx";
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
@@ -297,12 +298,14 @@ export const ProductDetailPage = () => {
                     <Plus className="size-4" aria-hidden />
                   </button>
                 </div>
-                <button
-                  type="button"
-                  className="w-full rounded-full border border-(--color-secondary1) px-6 py-2 text-base font-medium text-(--color-primary1) transition hover:bg-(--color-primary1) hover:text-(--color-light) sm:w-auto hover:text-medium"
+                <AddToCartButton
+                  product={product}
+                  quantity={quantity}
+                  component="button"
+                  className="w-full rounded-full border border-(--color-secondary1) px-6 py-2 text-base font-medium text-(--color-primary1) transition hover:bg-(--color-primary1) hover:text-(--color-light) sm:w-auto"
                 >
                   Agregar al carrito
-                </button>
+                </AddToCartButton>
               </div>
             </div>
           </div>
