@@ -47,10 +47,10 @@ export default function LoginPage() {
     <div className="page">
     <main className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md animate-fade-in-up">
-        <div className="bg-white/75 backdrop-blur rounded-xl shadow-sm p-6 md:p-8">
+        <div className="bg-white/90 backdrop-blur rounded-2xl shadow-md p-6 md:p-8 border border-neutral-200">
           <header className="text-center mb-6">
-            <h1 className="font-serif text-3xl text-(--color-primary1)">Iniciar sesión</h1>
-            <p className="text-sm text-(--color-secondary1) mt-1">Bienvenido de vuelta</p>
+            <h1 className="font-serif text-3xl text-neutral-900">Iniciar sesión</h1>
+            <p className="text-sm text-neutral-500 mt-1">Bienvenido de vuelta</p>
           </header>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -101,11 +101,10 @@ export default function LoginPage() {
             )}
             <div className='flex flex-col items-center justify-center w-full'> 
               <Button
-                type="submit"
-                variant="primary-round"
-                className="font-regular px-5 mt-2 mb-0 mx-0 disabled:opacity-60 disabled:cursor-not-allowed"
-                disabled={submitting}
-              >
+              type="submit"
+              className="btn-primary btn-circle px-5 mt-2 mb-0 mx-0 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={submitting}
+            >
               {submitting ? 'Entrando…' : 'Iniciar sesión'}
             </Button>
 
@@ -113,7 +112,7 @@ export default function LoginPage() {
               <Link
                 type="button"
                 onClick={() => navigate('/forgot-password')}
-                className="text-sm text-muted no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] hover:text-medium transition-colors"
+                className="text-sm text-tertiary no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] transition-colors"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
@@ -123,9 +122,9 @@ export default function LoginPage() {
          </form>
 
           <footer className="text-center mt-6 pt-6 border-t border-neutral-200">
-            <p className="text-sm text-(--color-primary1) opacity-80">
+            <p className="text-sm text-neutral-600">
               ¿No tienes una cuenta?{' '}
-              <Link to="/register" className="underline text-(--color-primary1) hover:opacity-80">
+              <Link to="/register" className="underline text-neutral-900 hover:opacity-80">
                 Regístrate aquí
               </Link>
             </p>

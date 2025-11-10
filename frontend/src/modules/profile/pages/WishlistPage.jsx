@@ -1,14 +1,12 @@
 import Card from "../components/Card.jsx";
 import { useProducts } from "../../products/hooks/useProducts.js";
 
-const WISHLIST_PRODUCT_FILTERS = Object.freeze({ limit: 24 });
-
 export const WishlistPage = () => {
   const {
     products = [],
     isLoading,
     error,
-  } = useProducts(WISHLIST_PRODUCT_FILTERS);
+  } = useProducts({ limit: 24 });
 
   return (
     <main className="px-4 py-10">

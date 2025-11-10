@@ -18,14 +18,9 @@ export function ProtectedRoute() {
 export function AdminRoute() {
   const { isAuthenticated, isAdmin } = useAuthCtx();
   const location = useLocation();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
-  return <Outlet />;
+  return isAuthenticated && isAdmin ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/" replace state={{ from: location }} />
+  );
 }

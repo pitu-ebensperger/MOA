@@ -140,7 +140,7 @@ export default function ProductsPage() {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={`product-skeleton-${index}`}
-                className="h-80 rounded-2xl bg-[#44311417] animate-pulse"
+                className="h-80 rounded-2xl bg-neutral-100 animate-pulse"
               />
             ))}
           </div>

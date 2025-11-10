@@ -3,7 +3,7 @@ const NAVBAR_HEIGHT = 80; // px
 export default function HeroSection() {
   return (
     <section
-      className="relative w-full overflow-hidden bg-[#44311417]"
+      className="relative w-full overflow-hidden"
       style={{ paddingTop: `${NAVBAR_HEIGHT}px`, marginTop: `-${NAVBAR_HEIGHT}px` }}
     >
       <img

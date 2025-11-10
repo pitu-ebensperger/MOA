@@ -1,8 +1,8 @@
 import { ShoppingCart, Menu, User, X, Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
-import { SearchBar } from '../ui/SearchBar.jsx';
 
 const NAV_ITEMS = [
   { label: 'Inicio', href: '/home', match: ['/', '/home'] },
@@ -21,9 +21,12 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef(null);
+  const bodyOverflowRef = useRef("");
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, logout } = useAuth();
+  const portalTarget = typeof document !== "undefined" ? document.body : null;
 
   useEffect(() => {
     if (!location.hash) return;
@@ -64,7 +67,74 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     setIsSearchOpen(false);
   };
 
-  const handleSearchChange = (event) => setSearchQuery(event.target.value);
+  useEffect(() => {
+    if (!isSearchOpen) return undefined;
+    const handler = (event) => {
+      if (event.key === "Escape") {
+        setIsSearchOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    if (isSearchOpen) {
+      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
+      return () => cancelAnimationFrame(id);
+    }
+    return undefined;
+  }, [isSearchOpen]);
+
+  useEffect(() => {
+    if (!portalTarget) return undefined;
+    if (isSearchOpen) {
+      bodyOverflowRef.current = portalTarget.style.overflow;
+      portalTarget.style.overflow = "hidden";
+    } else {
+      portalTarget.style.overflow = bodyOverflowRef.current || "";
+    }
+    return () => {
+      portalTarget.style.overflow = bodyOverflowRef.current || "";
+    };
+  }, [isSearchOpen, portalTarget]);
+
+  const searchOverlay =
+    isSearchOpen && portalTarget
+      ? createPortal(
+          <div className="fixed inset-0 z-60 flex items-start justify-center px-4">
+            <button
+              type="button"
+              aria-label="Cerrar buscador"
+              className="absolute inset-0 z-10 bg-black/30"
+              onClick={() => setIsSearchOpen(false)}
+            />
+
+            <form
+              onSubmit={handleSearchSubmit}
+              className="relative z-20 mt-32 flex w-full max-w-2xl items-center gap-3 rounded-full bg-white px-6 py-3 shadow-2xl"
+            >
+              <Search className="h-5 w-5 text-neutral-400" />
+              <input
+                ref={searchInputRef}
+                type="search"
+                placeholder="¿Qué estás buscando hoy?"
+                className="w-full border-none bg-transparent text-base text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
+              <button
+                type="submit"
+                className="rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800"
+              >
+                Buscar
+              </button>
+            </form>
+          </div>,
+          portalTarget
+        )
+      : null;
 
   return (
     <>
@@ -271,14 +341,8 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
           </div>
         </nav>
       </div>
-    </div>
-    <SearchBar
-      isOpen={isSearchOpen}
-      value={searchQuery}
-      onChange={handleSearchChange}
-      onSubmit={handleSearchSubmit}
-      onClose={() => setIsSearchOpen(false)}
-    />
+      </div>
+      {searchOverlay}
     </>
   );
 }

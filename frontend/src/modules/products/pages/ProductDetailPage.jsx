@@ -1,14 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
-import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
-
 import { productsApi } from "../services/products.api.js";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import { useCategories } from "../hooks/useCategories.js";
-import { Minus, Plus, Recycle, ShieldCheck, Truck } from "lucide-react";
+import {ChevronDown, Minus, Plus,Recycle, ShieldCheck,Truck,} from "lucide-react";
 
 const initialState = {
   product: null,
@@ -42,20 +39,44 @@ const normalizeGallery = (product) => {
   return Array.from(new Set(base));
 };
 
-const ProductMediaGallery = ({ images, selectedImage }) => {
+const ProductMediaGallery = ({ images, selectedImage, onSelectImage }) => {
   if (!images.length) return null;
 
   return (
-    <div className="overflow-hidden rounded-[32px] bg-[#44311417] min-h-[36rem] md:min-h-[42rem]">
+    <div className="overflow-hidden rounded-[32px] bg-neutral-50">
       <img
         src={selectedImage}
         alt=""
-        className="h-full w-full object-cover"
+        className="h-full w-full object-contain"
       />
     </div>
   );
 };
 
+
+const AccordionSection = ({ title, children, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  return (
+    <section className="border-b border-(--color-secondary2)">
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="flex w-full items-center justify-between py-4 text-left text-neutral-900"
+        aria-expanded={isOpen}
+      >
+        <span className="text-base font-medium">{title}</span>
+        <ChevronDown
+          className={[
+            "size-4 text-neutral-500 transition-transform duration-200",
+            isOpen ? "rotate-180" : "",
+          ].join(" ")}
+          aria-hidden
+        />
+      </button>
+      {isOpen && <div className="pb-6 text-sm leading-relaxed text-neutral-600">{children}</div>}
+    </section>
+  );
+};
 
 export const ProductDetailPage = () => {
   const { id } = useParams();
@@ -63,6 +84,7 @@ export const ProductDetailPage = () => {
   const [state, setState] = useState(initialState);
   const [selectedImage, setSelectedImage] = useState(DEFAULT_PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
+  const [activeVariant, setActiveVariant] = useState(null);
 
   const baseBreadcrumbItems = [
     { label: "Inicio", href: "/" },
@@ -95,7 +117,7 @@ export const ProductDetailPage = () => {
   }, [id]);
 
   const product = state.product;
-  const categoryBreadcrumb = useMemo(() => {
+   const categoryBreadcrumb = useMemo(() => {
     if (!product) return null;
     const candidateId =
       product.fk_category_id ?? product.categoryId ?? product.category?.id ?? null;
@@ -127,6 +149,41 @@ export const ProductDetailPage = () => {
     setSelectedImage(galleryImages[0]);
   }, [galleryImages]);
 
+  const variantOptions = useMemo(() => {
+    if (!product) return [];
+    if (Array.isArray(product.variantOptions) && product.variantOptions.length) {
+      return product.variantOptions.map((variant, index) => ({
+        id: variant.id ?? index,
+        label: variant.name ?? `Opción ${index + 1}`,
+        colorHex: variant.colorHex,
+      }));
+    }
+    if (product.color) {
+      return [
+        {
+          id: product.color,
+          label: product.color,
+          colorHex: product.variantOptions?.[0]?.colorHex,
+        },
+      ];
+    }
+    return [];
+  }, [product]);
+
+  useEffect(() => {
+    if (!variantOptions.length) {
+      setActiveVariant(null);
+      return;
+    }
+    setActiveVariant((prev) => {
+      if (prev !== null && variantOptions.some((variant) => variant.id === prev)) {
+        return prev;
+      }
+      return variantOptions[0].id;
+    });
+  }, [variantOptions]);
+
+  const descriptionPreview = product?.shortDescription || product?.description;
   const materialList = useMemo(() => {
     if (!product) return [];
     const materials = Array.isArray(product.materials) ? product.materials : [];
@@ -164,7 +221,6 @@ export const ProductDetailPage = () => {
     {
       title: "Descripción",
       content: product?.description ?? "Producto MOA diseñado para acompañar tus espacios.",
-      defaultOpen: true,
     },
     {
       title: "Materiales y cuidado",
@@ -251,13 +307,14 @@ export const ProductDetailPage = () => {
           <ProductMediaGallery
             images={galleryImages}
             selectedImage={selectedImage}
+            onSelectImage={setSelectedImage}
           />
         </div>
 
         <div className="lg:col-span-1">
           <div className="mt-3">
             <div className="text-neutral-500 pb-6">
-                    <Breadcrumbs items={breadcrumbItems} className="text-sm font-light" />            
+                    <Breadcrumbs items={breadcrumbItems} className="mb-8 text-sm font-light" />            
             </div>
                    <div className="mb-15">
                 <div className="title-sans text-2xl text-(--color-secondary12) sm:text-3xl">
@@ -311,7 +368,15 @@ export const ProductDetailPage = () => {
               <p className="text-xs uppercase tracking-[0.25em] text-(--color-secondary1)">
                 SKU {product.sku}
               </p>
-            <Accordion sections={sections} />
+            {sections.map((section, index) => (
+              <AccordionSection
+                key={section.title}
+                title={section.title}
+                defaultOpen={index === 0}
+              >
+                {section.content}
+              </AccordionSection>
+            ))}
           </section>
 
         </div>
