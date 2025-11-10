@@ -7,7 +7,6 @@
   gap: var(--btn-gap);
   border: 0;
   border-radius: var(--btn-radius);
-  font-weight: 600;
   line-height: 1;
   transition: transform .06s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease, opacity .2s ease;
   text-decoration: none;
@@ -39,6 +38,13 @@
 .btn-primary:hover {    
     background-color: var(--color-primary1);
     filter: brightness(150%); }
+
+.btn-primary-round {
+  border-radius: 9999px;
+}
+.btn-primary-round:hover {
+  filter: brightness(150%);
+}
 
 .btn-secondary {
   background: var(--color-secondary1);

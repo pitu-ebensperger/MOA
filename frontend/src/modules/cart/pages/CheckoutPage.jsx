@@ -31,7 +31,7 @@ export const CheckoutPage = () => {
                   key={item.id}
                   className="bg-secondary2 rounded-2xl p-4 w-64 shadow-md flex flex-col justify-between"
                 >
-                  <div className="h-36 bg-light rounded-xl flex items-center justify-center mb-4">
+                  <div className="h-36 bg-[#44311417] rounded-xl flex items-center justify-center mb-4">
                     {displayImage ? (
                       <img src={displayImage} alt={item.name} className="w-24 h-24 object-contain" />
                     ) : (

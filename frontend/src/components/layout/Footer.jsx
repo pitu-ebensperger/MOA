@@ -1,18 +1,18 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const DEBUG_LINKS = [ //SACAR DSPS
+  { label: "Perfil", href: "/profile" },
+  { label: "Dashboard admin", href: "/admin/dashboard" },
+];
+
 const CUSTOMER_SERVICE_LINKS = [
-  { label: "Centro de ayuda" },
-  { label: "Cómo comprar" },
+  { label: "Contacto", href: "/contact" },
+  { label: "Cambios y devoluciones", href: "/privacy" },
   { label: "Preguntas frecuentes", href: "/faq" },
 ];
 
-const ABOUT_LINKS = [
-  { label: "Contacto", href: "/contact" },
-];
-
 const POLICY_LINKS = [
-  { label: "Cambios y devoluciones", href: "/privacy" },
   { label: "Política de privacidad", href: "/privacy" },
   { label: "Términos y condiciones", href: "/terms" },
 ];
@@ -26,10 +26,40 @@ const SOCIAL_LINKS = [
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
+  const renderColumn = (title, links = []) => (
+    <section>
+      <h3 className="text-base font-semibold text-neutral-800">{title}</h3>
+      <ul className="mt-4 space-y-2 text-sm">
+        {links.map(({ label, href, external }) => (
+          <li key={label}>
+            {href ? (
+              external ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-neutral-500 transition hover:text-primary1 hover:underline"
+                >
+                  {label}
+                </a>
+              ) : (
+                <Link to={href} className="text-neutral-500 transition hover:text-primary1 hover:underline">
+                  {label}
+                </Link>
+              )
+            ) : (
+              <span className="text-neutral-400">{label}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+
   return (
     <footer className="border-t border-neutral-200 bg-white/75 text-sm text-neutral-600 backdrop-blur">
       <div className="mx-auto max-w-7xl px-6 py-12">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.3fr_repeat(3,1fr)]">
           <section>
             <Link to="/home" aria-label="Ir al inicio" className="inline-flex">
               <span className="text-2xl text-serif tracking-tight text-secondary1">MOA</span>
@@ -55,7 +85,8 @@ export const Footer = () => {
             </div>
           </section>
 
-          <FooterColumn title="Servicio al cliente" links={CUSTOMER_SERVICE_LINKS} />
+          {renderColumn("Servicio al cliente", CUSTOMER_SERVICE_LINKS)}
+          {renderColumn("Vista temporal", DEBUG_LINKS)}
 
         </div>
 
@@ -73,33 +104,3 @@ export const Footer = () => {
     </footer>
   );
 };
-
-const FooterColumn = ({ title, links = [] }) => (
-  <section>
-    <h3 className="text-base font-semibold text-neutral-800">{title}</h3>
-    <ul className="mt-4 space-y-2 text-sm">
-      {links.map(({ label, href, external }) => (
-        <li key={label}>
-          {href ? (
-            external ? (
-              <a
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="text-neutral-500 transition hover:text-primary1 hover:underline"
-              >
-                {label}
-              </a>
-            ) : (
-              <Link to={href} className="text-neutral-500 transition hover:text-primary1 hover:underline">
-                {label}
-              </Link>
-            )
-          ) : (
-            <span className="text-neutral-400">{label}</span>
-          )}
-        </li>
-      ))}
-    </ul>
-  </section>
-);

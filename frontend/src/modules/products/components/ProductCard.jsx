@@ -72,7 +72,8 @@ export default function ProductCard({
     <article
       className="
         group relative mx-auto h-[404px] w-full max-w-[270px]
-       overflow-hidden rounded-[9px] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.28)]
+        overflow-hidden rounded-[9px] shadow-[0_8px_18px_-12px_rgba(15,23,42,0.28)]
+        bg-[#44311417]
         transition duration-300 ease-out
         hover:scale-[1.01]
       "
@@ -80,7 +81,7 @@ export default function ProductCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Imagen base */}
-      <div className="absolute inset-0 size-full rounded-[10px] overflow-hidden">
+      <div className="absolute inset-0 size-full rounded-[10px] overflow-hidden bg-[#44311417]">
         {displayImage ? (
           <img
             src={displayImage}

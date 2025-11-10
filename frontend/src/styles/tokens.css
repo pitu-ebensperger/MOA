@@ -7,9 +7,10 @@
     --color-primary4: #ca8148;
     --color-secondary1: #A69F91;
     --color-secondary2: #CCC7BE;
-    --color-light: #E6E0D8;
+    --color-light: #f4efe9;
     --color-dark: #100E08;
-    --color-lightest:#fff;
+    --color-lightest:rgba(248, 247, 245, 1);
+     --color-lightest2:rgba(255, 255, 255, 0.75);
     --color-white:#fff;
     
     /* Interaction */
@@ -21,7 +22,7 @@
     --color-text: #100e08;
     --color-text-secondary: #443114;
     --color-text-tertiary: #453f34;
-    --color-text-muted: rgba(26, 32, 44, 0.6);
+    --color-text-muted: #44311473;
     --color-text-on-dark: #ccc7be;
     
     /* Borders & Dividers */
