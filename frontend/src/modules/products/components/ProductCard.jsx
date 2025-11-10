@@ -5,7 +5,6 @@ import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import Button from "../../../components/ui/Button.jsx";
 import Badge from "../../../components/ui/Badge.jsx";
-import { useCartContext } from "../../cart/context/cartContext.jsx";
 
 export default function ProductCard({
   product = {},
@@ -29,7 +28,6 @@ export default function ProductCard({
   const [isHovered, setIsHovered] = useState(false);
   const [cartButtonPressed, setCartButtonPressed] = useState(false);
   const [detailsButtonPressed, setDetailsButtonPressed] = useState(false);
-  const { addToCart, openDrawer } = useCartContext();
 
   useEffect(() => {
     setIsLiked(Boolean(isInWishlist));
@@ -43,8 +41,6 @@ export default function ProductCard({
 
   const handleAddToCart = (event) => {
     event.preventDefault();
-    addToCart(product);
-    openDrawer();
     onAddToCart(product);
     setCartButtonPressed(true);
   };

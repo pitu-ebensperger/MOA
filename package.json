@@ -7,9 +7,7 @@
   ],
   "scripts": {
     "dev": "npm run -w frontend dev",
-    "build": "npm run -w frontend build && rm -rf dist && cp -R frontend/dist dist",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "build": "npm run -w frontend build",
     "lint": "npm run -w frontend lint",
     "preview": "npm run -w frontend preview",
     "snapshot": "npm run -ws snapshot",
@@ -22,7 +20,6 @@
     "@csstools/css-parser-algorithms": "^3.0.5",
     "cssstyle": "^2.3.0",
     "jsdom": "^27.1.0",
-    "vite-node": "^5.0.0",
-    "gh-pages": "^5.0.0"
+    "vite-node": "^5.0.0"
   }
 }
