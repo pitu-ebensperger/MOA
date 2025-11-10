@@ -31,7 +31,7 @@ export function CategoriesCard({ category, variant = "default" }) {
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-4xl bg-neutral-900 text-white shadow-xl ${styles.container}`}
+      className={`group relative overflow-hidden rounded-4xl bg-[#44311417] text-white shadow-xl ${styles.container}`}
     >
       <img
         src={category.coverImage}

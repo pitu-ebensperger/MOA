@@ -35,20 +35,14 @@ body {
     overflow-x: hidden;
 }
 
-.title-serif, .text-serif{
-  font-family: var(--font-display);
-}
-.title-sans, .title-sans{
-  font-family: var(--font-sans);
-}
 
 h1, h2 {
   font-family: var(--font-display);
 }
 h1 {
-    color: var(--color-dark);
     font-weight: var(--weight-semibold);
     font-size: var(--text-3xl);
+    color: var(--color-primary1); 
 }
 
 h2{
@@ -59,8 +53,16 @@ a:hover, button:hover {
   cursor: pointer;
 }
 
+.title-serif, .text-serif{
+  font-family: var(--font-display);
+}
+.title-sans, .title-sans{
+  font-family: var(--font-sans);
+}
+
 .text-primary { color: var(--color-primary1); }
 .text-secondary { color: var(--color-secondary1); }
+.text-secondary2 { color: var(--color-secondary1); }
 .text-tertiary { color: var(--color-secondary2); }
 .text-muted { color: var(--color-text-muted); }
 .text-on-dark { color: var(--color-text-on-dark); }

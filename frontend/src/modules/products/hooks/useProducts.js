@@ -4,7 +4,7 @@ import { productsApi } from "../services/products.api.js";
 const initialState = {
   items: [],
   total: 0,
-  isLoading: false,
+  isLoading: true,
   error: null,
 };
 

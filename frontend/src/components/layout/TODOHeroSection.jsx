@@ -27,7 +27,7 @@ export default function HeroSection() {
 
         {/* Imagen */}
         <div className="w-full flex justify-center md:justify-end">
-          <div className="aspect-[4/3] w-full md:w-full lg:w-full overflow-hidden rounded-2xl shadow-md">
+          <div className="aspect-[4/3] w-full md:w-full lg:w-full overflow-hidden rounded-2xl shadow-md bg-[#44311417]">
             <img
               src="https://plus.unsplash.com/premium_photo-1676321688606-2f3b026710a5?ixlib=rb-4.1.0&auto=format&fit=crop&q=80&w=1470"
               alt="Muebles MOA"

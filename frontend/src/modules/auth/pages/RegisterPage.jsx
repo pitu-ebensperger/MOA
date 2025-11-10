@@ -61,14 +61,14 @@ export default function RegisterPage({ onRegister }) {
 
   return (
     <div className="page">
-      <div className="min-h-[calc(100vh-100px)] grid place-items-center px-6 py-12 bg-gradient-to-br from-[var(--color-light-beige,#f6efe7)] to-[var(--color-beige,#e9dccb)] animate-[fade-in_var(--transition-base,300ms)_both]">
+      <div className="min-h-[calc(100vh-100px)] grid place-items-center px-6 py-12  animate-[fade-in_var(--transition-base,300ms)_both]">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-xl p-8 animate-[slide-up_var(--transition-slow,500ms)_both]">
-            <h1 className="text-center text-3xl font-semibold text-[var(--color-text-primary,#1f1f1f)] font-[var(--font-display,inherit)]">
+          <div className="bg-white/75 rounded-xl shadow-sm p-8 animate-[slide-up_var(--transition-slow,500ms)_both]">
+            <h1 className="text-center text-3xl font-semibold text-(--color-primary1) font-[var(--font-display,inherit)]">
               Crear Cuenta
             </h1>
-            <p className="mt-1 text-center text-sm text-[var(--color-text-muted,#6b7280)] font-[var(--font-secondary,inherit)]">
-              Únete a nuestra comunidad
+            <p className="mt-1 text-center text-sm text-muted font-[var(--font-secondary,inherit)]">
+               
             </p>
 
             {/* Error simple */}

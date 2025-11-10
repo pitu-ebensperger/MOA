@@ -1,6 +1,6 @@
 export const contentDb = {
   home: {
-    featuredCategoryIds: [1000, 2000, 3000, 4000, 5000],
+    featuredCategoryIds: [1000, 2000, 3000, 4000],
     featuredProductIds: [11001, 21001, 31001, 41001, 20301],
     
     editorialSections: [
