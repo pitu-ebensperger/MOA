@@ -1,13 +1,31 @@
 
 :root {
 /* Colors -----------------------------------------------------------------*/
-    --color-primary1: #443114;
-    --color-primary2: #453F34;
-    --color-primary3: #7f5c28;
-    --color-primary4: #ca8148;
-    --color-secondary1: #A69F91;
-    --color-secondary2: #CCC7BE;
-    --color-light: #f4efe9;
+
+    --color-primary1: #6B5444;      /* Primary brand color, headers*/
+    --color-primary2: #52443A;      /* Body text, dark elements */
+    --color-primary3: #A67B5B;      /* Accents, hover states */
+    --color-primary4: #C9A88A;      /* Secondary accents, borders */
+    
+    --color-secondary1: #9B8F82;    /* secondary text */
+    --color-secondary2: #6B5D52;    /* tertiary text */
+
+
+    --color-neutral: #A69F91;      /* other backround */
+    --color-neutral1: #FAF8F5;      /* Main Background */
+    --color-neutral2: #FEFCFA;      /* Cards, elevated surfaces */         
+    --color-neutral3: #E5DDD1;      /* Dividers & borders */
+    --color-neutral4: #D4C8BC;      /* Subtle backgrounds */
+
+
+    --color-success: #7A8B6F;
+    --color-warning: #B8956A;
+    --color-error: #B8836B;
+    --color-dark: #3A3632;
+    --color-light: #ede7e0;
+
+
+
     --color-dark: #100E08;
     --color-lightest:rgba(248, 247, 245, 1);
      --color-lightest2:rgba(255, 255, 255, 0.75);
@@ -19,24 +37,19 @@
     --color-disabled: rgba(68, 49, 20, 0.3);
     
     /* Text */
-    --color-text: #100e08;
-    --color-text-secondary: #443114;
-    --color-text-tertiary: #453f34;
-    --color-text-muted: #44311473;
+    --color-text: #52443A;
+    --color-text-secondary: #9B8F82;
+    --color-text-tertiary: #6B5D52;
+    --color-text-muted: #A69F91;
     --color-text-on-dark: #ccc7be;
-    
+
     /* Borders & Dividers */
-    --color-border: rgba(68, 49, 20, 0.2);
+    --color-border: #E5DDD1;
     --color-border-light: rgba(204, 199, 190, 0.5);
 
-    /* Feedback Colors REVISAR ESTOS Y HACER ALGO MAS CON NUESTRA PALETA*/               
-    --color-success: #2d7a3e;
-    --color-error: #c53030;
-    --color-warning: #d69e2e;
-    --color-info: #3182ce;
 
 /* Fonts & Text -----------------------------------------------------------------*/
-    --font-display: "Italiana",
+    --font-display: "Cormorant",
     /* fallback */  "Didot","Bodoni 72","Bodoni MT","Libre Bodoni","Playfair Display", "Times New Roman", serif;
     --font-sans:    "Plus Jakarta Sans", 
     /* fallback */  ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;

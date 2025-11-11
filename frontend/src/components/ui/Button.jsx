@@ -4,17 +4,20 @@ import { Link } from "react-router-dom";
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
 // Variantes ------------------------------------------------------------
-const VARIANTS = {
-  primary: "btn-primary",
-  "primary-round": "btn-primary btn-primary-round",
-  secondary: "btn-secondary",
-  ghost: "btn-ghost",
-  link: "btn-link",
-  animated: "btn-animated",
-  "card-solid": "btn-card-solid",
-  "card-outline": "btn-card-outline",
-  "cta-home": "btn-cta-home",
-};
+  const VARIANTS = {
+    primary: "btn-primary",
+    "primary-round": "btn-primary btn-primary-round",
+    secondary: "btn-secondary",
+    ghost: "btn-ghost",
+    round: "btn-round",
+    link: "btn-link",
+    animated: "btn-animated",
+    "card-solid": "btn-card-solid",
+    "card-outline": "btn-card-outline",
+    "cta-home": "btn-cta-home",
+    icon: "btn-icon",
+    "icon-bg": "btn-icon-bg",
+  };
 
 // Tamaños --------------------------------------------------------------
 const SIZES = {

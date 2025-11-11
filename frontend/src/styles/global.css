@@ -35,6 +35,50 @@ body {
     overflow-x: hidden;
 }
 
+.sidebar-collapsible {
+  width: 95px;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+.sidebar-collapsible:hover,
+.sidebar-collapsible:focus-within {
+  width: 200px;
+}
+.sidebar-collapsible .sidebar-label {
+  display: inline-block;
+  opacity: 0;
+  max-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.2s ease, max-width 0.2s ease;
+}
+.sidebar-collapsible:hover .sidebar-label,
+.sidebar-collapsible:focus-within .sidebar-label {
+  opacity: 1;
+  max-width: 200px;
+}
+.sidebar-link {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: var(--radius-xl);
+  border-color: transparent;
+}
+.sidebar-link:hover {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 h1, h2 {
   font-family: var(--font-display);
@@ -66,6 +110,34 @@ a:hover, button:hover {
 .text-tertiary { color: var(--color-secondary2); }
 .text-muted { color: var(--color-text-muted); }
 .text-on-dark { color: var(--color-text-on-dark); }
+
+.text-primary, .color-primary1{ color: var(--color-primary1); }
+.text, .color-primary2{ color: var(--color-primary2); }
+.text-accent, .color-primary3{ color: var(--color-primary3); }
+.text-accent2, .color-primary4{ color: var(--color-primary4); }
+.text-secondary, .color-secondary1{ color: var(--color-secondary1); }
+.text-tertiary, .color-secondary2{ color: var(--color-secondary2); }
+
+.success, .color-success { color: var(--color-success)}
+.warning, .color-warning { color: var(--color-warning)}
+.error, .color-error{ color: var(--color-error);}
+
+.color-dark {color: var(--color-dark)}
+.color-light {color: var(--color-light)}
+
+.bg-primary1 {background-color: var(--color-primary1);}
+.bg-primary2 {background-color: var(--color-primary2);}
+.bg-primary3 {background-color: var(--color-primary3);}
+.bg-primary4 {background-color: var(--color-primary4);}
+.bg-secondary1 {background-color: var(--color-secondary1);}
+.bg-secondary2 {background-color: var(--color-secondary2);}
+.bg-neutral {background-color: var(--color-neutral);}
+.bg-neutral1 {background-color: var(--color-neutral1);}
+.bg-neutral2 {background-color: var(--color-neutral2);}
+.bg-neutral3 {background-color: var(--color-neutral3);}
+.bg-neutral4 {background-color: var(--color-neutral4);}
+.bg-light {background-color: var(--color-light);}
+.bg-dark {background-color: var(--color-dark);}
 
 .divider-vertical {
     width: 1px;

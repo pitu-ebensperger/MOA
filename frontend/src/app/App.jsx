@@ -20,6 +20,10 @@ import ContactPage from '../modules/support/pages/ContactPage.jsx';
 import {PrivacyPage} from '../modules/support/pages/PrivacyPage.jsx'
 import {TermsPage} from '../modules/support/pages/TermsPage.jsx'
 import AdminDashboardPage from '../modules/admin/pages/AdminDashboardPage.jsx'
+import OrdersPage from '../modules/admin/pages/OrdersPage.jsx'
+import AdminProductsPage from '../modules/admin/pages/AdminProductsPage.jsx'
+import CustomersPage from '../modules/admin/pages/CustomersPage.jsx'
+import SettingsPage from '../modules/admin/pages/SettingsPage.jsx'
 import EntornoAdmin from '../modules/admin/components/EntornoAdmin.jsx'
 import { AdminRoute } from '../modules/auth/hooks/useAuth.jsx'
 import { ScrollToTop } from '../components/layout/ScrollToTop.jsx'
@@ -53,12 +57,45 @@ export const App = () => {
           <Route path='/contact' element={<ContactPage />} /> 
           <Route path='/privacy' element={<PrivacyPage />} /> 
           <Route path='/terms' element={<TermsPage/>} /> 
+
           <Route element={<AdminRoute />}>
             <Route
               path="/admin/dashboard"
               element={
                 <EntornoAdmin>
                   <AdminDashboardPage />
+                </EntornoAdmin>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <EntornoAdmin>
+                  <OrdersPage />
+                </EntornoAdmin>
+              }
+            />
+            <Route
+              path="/admin/products"
+              element={
+                <EntornoAdmin>
+                  <AdminProductsPage />
+                </EntornoAdmin>
+              }
+            />
+            <Route
+              path="/admin/customers"
+              element={
+                <EntornoAdmin>
+                  <CustomersPage />
+                </EntornoAdmin>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <EntornoAdmin>
+                  <SettingsPage />
                 </EntornoAdmin>
               }
             />
