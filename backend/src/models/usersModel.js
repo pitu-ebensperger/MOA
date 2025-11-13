@@ -18,3 +18,12 @@ export const createUserModel = async (nombre, email, telefono, password) => {
     const response = await pool.query(sqlQuery)
     return response.rows[0]
 }
+
+export const findUserModel = async (email) => {
+    const sqlQuery = {
+        text: 'SELECT * FROM usuarios WHERE email = $1',
+        values: [email]
+    }
+    const response = await pool.query(sqlQuery)
+    return response.rows[0]
+}
