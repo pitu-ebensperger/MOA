@@ -8,6 +8,7 @@ CREATE TABLE usuarios (
     public_id TEXT UNIQUE NOT NULL,
     nombre TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    telefono TEXT,
     password_hash TEXT NOT NULL,
     creado_en TIMESTAMPTZ DEFAULT now()
 );
