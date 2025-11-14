@@ -90,7 +90,7 @@ export function ProductFiltersDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full bg-(--color-primary-brown,#443114) px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105"
+            className="rounded-full bg-(--color-primary1,#6B5444) px-4 py-2 text-sm font-semibold text-white transition hover:brightness-105"
           >
             Mostrar resultados
           </button>

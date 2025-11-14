@@ -7,7 +7,9 @@
   ],
   "scripts": {
     "dev": "npm run -w frontend dev",
-    "build": "npm run -w frontend build",
+    "build": "npm run -w frontend build && rm -rf dist && cp -R frontend/dist dist",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "lint": "npm run -w frontend lint",
     "preview": "npm run -w frontend preview",
     "snapshot": "npm run -ws snapshot",
@@ -18,8 +20,15 @@
   "devDependencies": {
     "@asamuzakjp/css-color": "^4.0.5",
     "@csstools/css-parser-algorithms": "^3.0.5",
+    "@tanstack/react-query-devtools": "^5.90.2",
     "cssstyle": "^2.3.0",
+    "gh-pages": "^5.0.0",
     "jsdom": "^27.1.0",
-    "vite-node": "^5.0.0"
+    "vite-node": "^5.0.0",
+     "gh-pages": "^5.0.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.7",
+    "@tanstack/react-table": "^8.21.3"
   }
 }

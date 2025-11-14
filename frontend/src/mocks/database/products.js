@@ -8,7 +8,6 @@ export const PRODUCTS = [
     stock: 6,
     description:
       "Módulos combinables, tapizado en lino tono arena; líneas suaves y cojines blandos.",
-    shortDescription: "Módulos combinables tapizados en lino arena con cojines envolventes.",
     imgUrl:
       "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?q=80&w=1600&auto=format&fit=crop",
     gallery: [
@@ -36,7 +35,6 @@ export const PRODUCTS = [
     price: 89990,
     stock: 10,
     description: "Velador compacto en madera envejecida con cajón oculto.",
-    shortDescription: "Velador con cajón oculto y repisa inferior.",
     imgUrl:
       "https://images.unsplash.com/photo-1532372320572-cda25653a26d?q=80&w=1600&auto=format&fit=crop",
     gallery: [
@@ -64,7 +62,6 @@ export const PRODUCTS = [
     price: 74990,
     stock: 16,
     description: "Mesilla lacada en blanco con detalles en roble natural.",
-    shortDescription: "Mesilla con cajón y repisa en blanco mate.",
     imgUrl:
       "https://images.unsplash.com/photo-1499933374294-4584851497cc?q=80&w=1600&auto=format&fit=crop",
     gallery: [
@@ -92,7 +89,6 @@ export const PRODUCTS = [
     price: 149990,
     stock: 12,
     description: "Luminaria colgante con difusor de vidrio opal y herrajes dorados.",
-    shortDescription: "Colgante globo opal con terminación dorada.",
     imgUrl:
       "https://images.unsplash.com/photo-1600421684846-e7ebc943403b?q=80&w=1600&auto=format&fit=crop",
     gallery: [
@@ -122,7 +118,6 @@ export const PRODUCTS = [
     stock: 15,
     description:
       "Base cerámica en tono crema con pantalla plisada de lino. Ideal para veladores o rincones de lectura.",
-    shortDescription: "Lámpara de mesa con pantalla plisada en lino.",
     imgUrl:
       "https://images.unsplash.com/photo-1579656618142-5192f72e2d3d?q=80&w=1600&auto=format&fit=crop",
     gallery: [
@@ -152,7 +147,6 @@ export const PRODUCTS = [
     stock: 8,
     description:
       "Escritorio minimalista en fresno con superficie amplia y líneas limpias para home office.",
-    shortDescription: "Escritorio de fresno con bandeja para cables integrada.",
     imgUrl:
       "https://images.unsplash.com/photo-1646003607550-4b1b62e3a2d4?q=80&w=1600&auto=format&fit=crop",
     gallery: [
@@ -180,7 +174,6 @@ export const PRODUCTS = [
     stock: 9,
     description:
       "Espejo decorativo redondo con marco de madera natural y acabado mate.",
-    shortDescription: "Espejo redondo con marco de madera natural.",
     imgUrl:
       "https://images.unsplash.com/photo-1598116132066-b730a4f8616a?q=80&w=1600&auto=format&fit=crop",
     gallery: [
@@ -210,7 +203,6 @@ export const PRODUCTS = [
     stock: 18,
     description:
       "Bandeja decorativa hecha a mano en fibra natural con trenzado grueso. Ideal para servir o para organizar tazas, velas y accesorios sobre mesas o consolas.",
-    shortDescription: "Bandeja artesanal en fibra natural para organizar o servir.",
     imgUrl:
       "https://images.unsplash.com/photo-1600248384783-293685222ce4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxjb2xsZWN0aW9uLXBhZ2V8NjZ8LXhCM3B6cHoyZzB8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=800",
     gallery: [
@@ -236,7 +228,6 @@ export const PRODUCTS = [
     stock: 7,
     description:
       "Librero abierto de líneas minimalistas en madera clara con repisas amplias para libros, cerámica y objetos decorativos. Ideal para sumar textura y altura en el living o la oficina.",
-    shortDescription: "Librero minimalista en madera clara con repisas amplias.",
     imgUrl:
       "https://images.unsplash.com/photo-1724920190056-8746b87686b3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=685",
     gallery: [
@@ -262,7 +253,6 @@ export const PRODUCTS = [
     stock: 4,
     description:
       "Mesa rectangular en madera maciza con veta visible y acabado mate. Diseño contemporáneo de líneas rectas, ideal para espacios amplios y reuniones familiares.",
-    shortDescription: "Mesa rectangular en madera maciza con acabado mate.",
     imgUrl:
       "https://images.unsplash.com/photo-1611671107731-b7f49a23d416?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=922",
     gallery: [
@@ -288,7 +278,6 @@ export const PRODUCTS = [
     stock: 3,
     description:
       "Mesa de comedor artesanal elaborada en madera reciclada con acabado envejecido. Superficie robusta y patas gruesas que realzan el carácter natural del material.",
-    shortDescription: "Mesa artesanal en madera reciclada con acabado envejecido.",
     imgUrl:
       "https://images.unsplash.com/photo-1628797285815-453c1d0d21e3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=774",
     gallery: [
@@ -314,8 +303,6 @@ export const PRODUCTS = [
   stock: 8,
   description:
     "Silla lounge artesanal fabricada en madera clara con asiento y respaldo en rejilla natural. Su diseño de líneas limpias y estructura abierta la convierte en una pieza versátil, perfecta para espacios cálidos, naturales o estilo japandi.",
-  shortDescription:
-    "Silla lounge de madera clara con asiento y respaldo en rejilla natural.",
   imgUrl:
     "https://images.unsplash.com/photo-1741121893351-934936d1e97c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw1NHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=900",
   gallery: [
@@ -349,7 +336,6 @@ export const PRODUCTS = [
   stock: 10,
   description:
     "Mesa de centro redonda en madera roble natural con base cruzada. Diseño escandinavo de líneas simples que aporta calidez y armonía visual al living. Ideal para acompañar sofás de tonos neutros.",
-  shortDescription: "Mesa de centro redonda en roble natural de estilo escandinavo.",
   imgUrl:
     "https://images.unsplash.com/photo-1721614463453-051bd28367b1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwyN3x8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -375,8 +361,6 @@ export const PRODUCTS = [
   stock: 6,
   description:
     "Cama tapizada en lino beige con cabecera acolchada y estructura de madera. Su diseño minimalista y su paleta neutra aportan calidez y serenidad al dormitorio. Ideal para combinar con textiles suaves y accesorios naturales.",
-  shortDescription:
-    "Cama tapizada en lino beige con cabecera acolchada y base de madera.",
   imgUrl:
     "https://images.unsplash.com/photo-1723468348842-589373089346?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw2OHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -410,8 +394,6 @@ export const PRODUCTS = [
   stock: 7,
   description:
     "Librero abierto con estructura metálica negra y diseño minimalista. Ideal para organizar libros, cerámica o plantas, aportando ligereza visual y funcionalidad en espacios modernos.",
-  shortDescription:
-    "Librero metálico negro de estilo minimalista con cinco repisas abiertas.",
   imgUrl:
     "https://images.unsplash.com/photo-1758098491183-dc0d88e71322?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop",
   gallery: [
@@ -439,8 +421,6 @@ export const PRODUCTS = [
   stock: 5,
   description:
     "Escritorio modular con estructura metálica negra y repisas de madera natural. Su diseño vertical integra almacenamiento abierto y espacio de trabajo, ideal para oficinas modernas y livings funcionales.",
-  shortDescription:
-    "Escritorio modular de metal negro y madera natural con estantería integrada.",
   imgUrl:
     "https://images.unsplash.com/photo-1737233433647-b53b339306f4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop",
   gallery: [
@@ -474,8 +454,6 @@ export const PRODUCTS = [
   stock: 12,
   description:
     "Silla de oficina giratoria tapizada en tela verde oliva con base metálica cromada. Su diseño envolvente ofrece soporte lumbar y estilo contemporáneo, perfecta para espacios de trabajo modernos o estudios en casa.",
-  shortDescription:
-    "Silla giratoria verde oliva con base metálica cromada y diseño moderno.",
   imgUrl:
     "https://images.unsplash.com/photo-1713293309279-40a0451430eb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXw5OXx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -501,8 +479,6 @@ export const PRODUCTS = [
   stock: 14,
   description:
     "Lámpara de mesa con base de cerámica marfil texturizada y pantalla cónica de lino natural. Su diseño elegante y cálido complementa espacios de descanso y lectura con una luz suave y envolvente.",
-  shortDescription:
-    "Lámpara de mesa de cerámica marfil con pantalla textil natural.",
   imgUrl:
     "https://images.unsplash.com/photo-1580130281320-0ef0754f2bf7?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwxMjB8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -535,8 +511,6 @@ export const PRODUCTS = [
   stock: 10,
   description:
     "Lámpara colgante de metal acabado cobre satinado con pantalla semiesférica. Aporta una iluminación cálida y direccional, ideal para comedores, cocinas o espacios de lectura. Su diseño limpio combina elegancia moderna y estilo industrial suave.",
-  shortDescription:
-    "Lámpara colgante metálica color cobre satinado con forma semiesférica.",
   imgUrl:
     "https://images.unsplash.com/photo-1636368208791-17b81ed832d2?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwxMjN8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -561,16 +535,14 @@ export const PRODUCTS = [
   compareAtPrice: null,
 },
 {
-  id: 42002,
+  id: 42005,
   name: "Lámpara de Mesa Cobre Pulido",
   slug: "lampara-mesa-cobre-pulido",
-  sku: "ILU-LAMPCOBP-42002",
+  sku: "ILU-LAMPCOBP-42005",
   price: 89990,
   stock: 18,
   description:
     "Lámpara de mesa metálica con acabado en cobre pulido y brazo flexible orientable. Su diseño funcional y cálido la convierte en una pieza ideal para escritorios, veladores o rincones de lectura con estilo moderno.",
-  shortDescription:
-    "Lámpara de mesa cobre pulido con brazo flexible orientable.",
   imgUrl:
     "https://images.unsplash.com/photo-1542728928-1413d1894ed1?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop",
   gallery: [
@@ -603,8 +575,6 @@ export const PRODUCTS = [
   stock: 9,
   description:
     "Lámpara de pie de metal color cobre envejecido con brazo articulado y pantalla direccional. Ideal para rincones de lectura o livings, combina estética industrial con una calidez moderna.",
-  shortDescription:
-    "Lámpara de pie cobre envejecido con brazo articulado y pantalla direccional.",
   imgUrl:
     "https://images.unsplash.com/photo-1607809714110-e34f71c7b2ed?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop",
   gallery: [
@@ -637,8 +607,6 @@ export const PRODUCTS = [
   stock: 9,
   description:
     "Sillón de estructura en madera curvada con asiento y respaldo tapizados en tela negra. Su diseño ergonómico combina líneas escandinavas con un perfil liviano y contemporáneo, ideal para livings o rincones de lectura.",
-  shortDescription:
-    "Sillón de madera curvada con cojín tapizado negro y diseño ergonómico.",
   imgUrl:
     "https://images.unsplash.com/photo-1617364852223-75f57e78dc96?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwxNTR8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -671,8 +639,6 @@ export const PRODUCTS = [
   stock: 14,
   description:
     "Silla de comedor fabricada en madera maciza con respaldo curvado y acabado natural. Su diseño clásico y atemporal combina la calidez artesanal con el confort moderno, ideal para comedores rústicos o estilo farmhouse.",
-  shortDescription:
-    "Silla de comedor en madera natural con respaldo curvado vintage.",
   imgUrl:
     "https://images.unsplash.com/photo-1583845112239-97ef1341b271?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwxNjR8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -705,8 +671,6 @@ export const PRODUCTS = [
   stock: 12,
   description:
     "Set decorativo de estilo contemporáneo compuesto por velas esculturales en blanco y negro, florero esférico en cerámica negra mate y libro decorativo de mesa. Aporta contraste y elegancia a livings o dormitorios de estética moderna.",
-  shortDescription:
-    "Set decorativo con velas esculturales, florero negro y libro de mesa.",
   imgUrl:
     "https://images.unsplash.com/photo-1663307257459-66c8766baa95?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwxNzJ8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=700",
   gallery: [
@@ -739,8 +703,6 @@ export const PRODUCTS = [
   stock: 20,
   description:
     "Florero de cerámica blanca con diseño acanalado y acabado brillante. Su composición aporta textura y luz a cualquier espacio, ideal para livings, comedores o dormitorios de estilo cálido y orgánico.",
-  shortDescription:
-    "Florero acanalado blanco.",
   imgUrl:
     "https://images.unsplash.com/photo-1597385326493-bc600d15c39c?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop",
   gallery: [
@@ -774,8 +736,6 @@ export const PRODUCTS = [
   stock: 8,
   description:
     "Velador fabricado en madera maciza con acabado natural, cajón superior y espacio abierto inferior para almacenamiento. Su diseño orgánico y cálido se integra fácilmente en dormitorios modernos o de estilo escandinavo.",
-  shortDescription:
-    "Velador de madera maciza con cajón y estante abierto, acabado natural.",
   imgUrl:
     "https://images.unsplash.com/photo-1646161249396-941393453032?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop",
   gallery: [
@@ -809,8 +769,6 @@ export const PRODUCTS = [
   stock: 15,
   description:
     "Lámpara de escritorio articulada con estructura metálica en acabado bronce envejecido. Su diseño funcional y elegante combina estética vintage con practicidad moderna, ideal para escritorios, veladores o espacios de lectura.",
-  shortDescription:
-    "Lámpara articulada de metal en acabado bronce envejecido.",
   imgUrl:
     "https://images.unsplash.com/photo-1733974352470-93abec47a814?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=627",
   gallery: [
@@ -843,8 +801,6 @@ export const PRODUCTS = [
   stock: 12,
   description:
     "Lámpara de mesa con base de cerámica blanca y pantalla esférica de vidrio opalino. Su luz cálida y difusa aporta serenidad y modernidad a cualquier ambiente, ideal para dormitorios o livings de estética minimalista.",
-  shortDescription:
-    "Lámpara de mesa con base blanca y pantalla opalina esférica.",
   imgUrl:
     "https://images.unsplash.com/photo-1733280881567-96f27a9a00ce?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDUyfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900",
   gallery: [
@@ -877,8 +833,6 @@ export const PRODUCTS = [
   stock: 7,
   description:
     "Lámpara de pie con estructura metálica en color negro y pantalla cilíndrica de vidrio transparente. Diseñada para destacar la bombilla tipo Edison, ofrece una iluminación cálida y ambiente contemporáneo con toques industriales.",
-  shortDescription:
-    "Lámpara de pie metálica con pantalla de vidrio transparente estilo industrial.",
   imgUrl:
     "https://images.unsplash.com/photo-1579888028917-47462bb03ca9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwyfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900",
   gallery: [
@@ -911,8 +865,6 @@ export const PRODUCTS = [
   stock: 10,
   description:
     "Aplique mural con acabado dorado cepillado y diseño cónico clásico. Ideal para destacar espacios de lectura, escritorios o dormitorios, aportando un toque cálido y sofisticado gracias a su luz dirigida y estética retro moderna.",
-  shortDescription:
-    "Aplique mural de metal dorado con diseño cónico y luz dirigida.",
   imgUrl:
     "https://images.unsplash.com/photo-1697809462690-57bc1601f665?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwyMXx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=900",
   gallery: [
@@ -944,8 +896,6 @@ export const PRODUCTS = [
   stock: 9,
   description:
     "Silla de oficina tapizada en cuero sintético color caramelo con estructura ergonómica y base giratoria metálica negra. Ofrece comodidad y estilo, perfecta para escritorios modernos o espacios de trabajo en casa.",
-  shortDescription:
-    "Silla giratoria de oficina tapizada en cuero color caramelo con base negra.",
   imgUrl:
     "https://images.unsplash.com/photo-1612372606404-0ab33e7187ee?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwxMTJ8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=900",
   gallery: [
@@ -978,8 +928,6 @@ export const PRODUCTS = [
   stock: 14,
   description:
     "Set de dos macetas decorativas en madera natural. Su diseño minimalista y materiales nobles aportan frescura y equilibrio visual a cualquier espacio.",
-  shortDescription:
-    "Set de dos macetas en madera natural.",
   imgUrl:
     "https://images.unsplash.com/photo-1584589167171-541ce45f1eea?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxib29rbWFya3MtcGFnZXwxNDR8fHxlbnwwfHx8fHw%3D&auto=format&fit=crop&q=60&w=900",
   gallery: [
@@ -1013,8 +961,6 @@ export const PRODUCTS = [
   stock: 5,
   description:
     "Mesa de comedor redonda elaborada en madera natural con acabado mate. Su diseño escandinavo y proporciones equilibradas la hacen ideal para espacios luminosos y ambientes cálidos. Perfecta para reuniones cotidianas o comedores de estilo minimalista.",
-  shortDescription:
-    "Mesa redonda en madera natural de diseño escandinavo y acabado mate.",
   imgUrl:
     "https://images.unsplash.com/photo-1721742145236-d89b27b8ceb0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDUzfHx8ZW58MHx8fHx8&auto=format&fit=crop&q=60&w=900",
   gallery: [

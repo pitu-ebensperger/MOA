@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 const DEBUG_LINKS = [ //SACAR DSPS
   { label: "Perfil", href: "/profile" },
   { label: "Dashboard admin", href: "/admin/dashboard" },
+  { label: "Guía de estilos", href: "/style-guide" },
 ];
 
 const CUSTOMER_SERVICE_LINKS = [
@@ -27,8 +28,8 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const renderColumn = (title, links = []) => (
-    <section>
-      <h3 className="text-base font-semibold text-neutral-800">{title}</h3>
+      <section>
+        <h4 className="text-base font-semibold text-neutral-800">{title}</h4>
       <ul className="mt-4 space-y-2 text-sm">
         {links.map(({ label, href, external }) => (
           <li key={label}>

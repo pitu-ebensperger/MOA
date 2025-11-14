@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Trash2, CreditCart, Banknote, MapPin } from "lucide-react";
 import { useCartContext } from "../context/cartContext.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 
@@ -96,3 +96,5 @@ export const CheckoutPage = () => {
     </div>
   );
 };
+
+

@@ -115,7 +115,7 @@ export function DoubleRangeSlider({
         className="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 rounded-full bg-neutral-200"
       >
         <div
-          className="absolute h-full rounded-full bg-(--color-primary-brown,#443114)"
+          className="absolute h-full rounded-full bg-(--color-primary1,#6B5444)"
           style={{
             left: `${percent(valueMin ?? min)}%`,
             right: `${100 - percent(valueMax ?? max)}%`,

@@ -63,7 +63,7 @@ export default function ProductsPage() {
               <select
                 value={itemsPerPage}
                 onChange={(event) => handleChangeItemsPerPage(event.target.value)}
-                className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
+              className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
               >
                 {pageSizeOptions.map((option) => (
                   <option key={option} value={option}>
@@ -77,7 +77,7 @@ export default function ProductsPage() {
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
-                className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
+              className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
               >
                 <option value="relevance">Relevancia</option>
                 <option value="price-asc">Precio: menor a mayor</option>
@@ -89,7 +89,7 @@ export default function ProductsPage() {
             <button
               type="button"
               onClick={() => setIsMobileFiltersOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full border border-(--color-primary-brown,#443114) px-3 py-2 text-sm font-medium text-(--color-primary-brown,#443114) transition hover:bg-(--color-primary-brown,#443114) hover:text-white lg:hidden"
+            className="inline-flex items-center gap-2 rounded-full border border-(--color-primary1,#6B5444) px-3 py-2 text-sm font-medium text-(--color-primary1,#6B5444) transition hover:bg-(--color-primary1,#6B5444) hover:text-white lg:hidden"
             >
               Filtros
             </button>

@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE } from "../../../utils/constants.js";
 import { ensureNumber } from "../../../utils/number.js";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
-import { matchesProductCategory, resolveProductPrice } from "../utils/product.js";
+import { createCategoryMatcher, resolveProductPrice } from "../utils/products.js";
 
 const buildCategoriesWithAll = (fetchedCategories = []) => {
   const base = Array.isArray(fetchedCategories) ? fetchedCategories : [];
@@ -60,6 +60,7 @@ export const useProductFilters = ({
   const [currentPage, setCurrentPage] = useState(1);
 
   const categories = useMemo(() => buildCategoriesWithAll(fetchedCategories), [fetchedCategories]);
+  const matchCategory = useMemo(() => createCategoryMatcher(categories), [categories]);
   const allProducts = useMemo(
     () => (Array.isArray(fetchedProducts) && fetchedProducts.length ? fetchedProducts : []),
     [fetchedProducts],
@@ -117,10 +118,10 @@ export const useProductFilters = ({
       const safeMin = ensureNumber(min, minPrice);
       const safeMax = ensureNumber(max, maxPrice);
       const withinPriceRange = price >= safeMin && price <= safeMax;
-      const matchesCat = matchesProductCategory(product, category);
+      const matchesCat = matchCategory(product, category);
       return withinPriceRange && matchesCat;
     });
-  }, [allProducts, category, min, max, minPrice, maxPrice]);
+  }, [allProducts, category, min, max, minPrice, maxPrice, matchCategory]);
 
   const sortedProducts = useMemo(() => {
     if (selectedSort === "relevance") return filteredProducts;

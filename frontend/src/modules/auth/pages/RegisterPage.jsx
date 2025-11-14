@@ -94,7 +94,7 @@ export default function RegisterPage({ onRegister }) {
                   placeholder="Juan Pérez"
                   required
                   autoComplete="name" // sugerencia del navegador
-                  className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
                 />
               </div>
 
@@ -113,7 +113,7 @@ export default function RegisterPage({ onRegister }) {
                   placeholder="tu@email.com"
                   required
                   autoComplete="email"
-                  className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
                 />
               </div>
 
@@ -134,7 +134,7 @@ export default function RegisterPage({ onRegister }) {
                   autoComplete="tel"
                   inputMode="tel"
                   pattern="^\+?\d[\d\s\-]{7,}$" // formato flexible: +56 9 1234 5678
-                  className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
                 />
               </div>
 
@@ -154,7 +154,7 @@ export default function RegisterPage({ onRegister }) {
                   required
                   autoComplete="new-password"
                   minLength={6} // ajusta a tu política
-                  className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
                 />
               </div>
 
@@ -174,7 +174,7 @@ export default function RegisterPage({ onRegister }) {
                   required
                   autoComplete="new-password"
                   minLength={6}
-                  className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
                 />
               </div>
 
@@ -183,7 +183,7 @@ export default function RegisterPage({ onRegister }) {
                 type="submit"
                 disabled={submitting}
                 aria-busy={submitting}
-                className="mt-2 inline-flex items-center justify-center rounded-md bg-[var(--color-primary-brown,#443114)] px-4 py-2 font-semibold text-white shadow-sm transition hover:brightness-105 hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60 disabled:cursor-not-allowed"
+          className="mt-2 inline-flex items-center justify-center rounded-md bg-[var(--color-primary1,#6B5444)] px-4 py-2 font-semibold text-white shadow-sm transition hover:brightness-105 hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Creando cuenta…' : 'Registrarse'}
               </button>
@@ -196,7 +196,7 @@ export default function RegisterPage({ onRegister }) {
                 <button
                   type="button"
                   onClick={() => navigate('/login')}
-                  className="font-semibold underline text-[var(--color-primary-brown,#443114)] hover:opacity-90"
+          className="font-semibold underline text-[var(--color-primary1,#6B5444)] hover:opacity-90"
                 >
                   Inicia sesión aquí
                 </button>

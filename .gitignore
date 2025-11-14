@@ -2,8 +2,7 @@
 node_modules
 **/node_modules
 
-dist
-**/dist
+
 .vite
 **/.vite
 
@@ -19,3 +18,5 @@ snapshots/*.json
 .idea
 .vscode/*
 !.vscode/extensions.json
+
+**/styleguide/StyleGuidePage.jsx

@@ -72,7 +72,7 @@ export default function ResetPasswordPage(){
                 id="password" name="password" type="password"
                 value={password} onChange={(e)=>setPassword(e.target.value)}
                 placeholder="••••••••" required
-                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 outline-none focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 outline-none focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
               />
               <p className="text-xs text-[var(--color-text-secondary,#4b5563)]">Mínimo 8 caracteres.</p>
             </div>
@@ -86,13 +86,13 @@ export default function ResetPasswordPage(){
                 id="confirm" name="confirm" type="password"
                 value={confirm} onChange={(e)=>setConfirm(e.target.value)}
                 placeholder="••••••••" required
-                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 outline-none focus:border-[var(--color-primary-brown,#443114)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+                className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 outline-none focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
               />
             </div>
 
             <button
               type="submit" disabled={loading || !token}
-              className="mt-2 inline-flex items-center justify-center rounded-md bg-[var(--color-primary-brown,#443114)] px-4 py-2 font-semibold text-white shadow-sm transition hover:brightness-105 hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60"
+              className="mt-2 inline-flex items-center justify-center rounded-md bg-[var(--color-primary1,#6B5444)] px-4 py-2 font-semibold text-white shadow-sm transition hover:brightness-105 hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60"
             >
               {loading ? 'Guardando...' : 'Guardar nueva contraseña'}
             </button>

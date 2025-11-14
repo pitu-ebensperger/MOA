@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth.jsx';
 import { useRedirectAfterAuth } from '../../auth/hooks/useRedirectAuth.jsx';
-import { validateEmail, validatePassword } from '../../../utils/validators.js';
 import Button from '../../../components/ui/Button.jsx';
 
 
@@ -15,22 +14,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validaciones básicas
-    const ve = validateEmail(email);
-    const vp = validatePassword(password, 6);
-    const nextErrors = {};
-    console.log(ve, vp)
-    if (!ve) nextErrors.email = ve.error || 'Email no válido';
-    if (!vp) nextErrors.password = vp.error || 'Contraseña inválida';
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return;
 
     try {
       setSubmitting(true);
@@ -67,13 +55,10 @@ export default function LoginPage() {
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full rounded-lg border px-3 py-2 outline-none transition
-                  ${errors.email ? 'border-red-400 focus:ring-2 ring-red-200' : 'border-neutral-300 focus:border-neutral-500 focus:ring-2 ring-neutral-200'}
-                `}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-500 focus:ring-2 ring-neutral-200"
                 placeholder="tu@email.com"
                 required
               />
-              {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -88,13 +73,10 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full rounded-lg border px-3 py-2 outline-none transition
-                  ${errors.password ? 'border-red-400 focus:ring-2 ring-red-200' : 'border-neutral-300 focus:border-neutral-500 focus:ring-2 ring-neutral-200'}
-                `}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-500 focus:ring-2 ring-neutral-200"
                 placeholder="••••••••"
                 required
               />
-              {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
             </div>
 
             {serverError && (

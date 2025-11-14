@@ -43,3 +43,5 @@ export const Accordion = ({ sections = [], className }) => (
 );
 
 export const AccordionItem = AccordionSection;
+
+
