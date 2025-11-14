@@ -12,6 +12,7 @@ export function Dropdown({
 }) {
   const [open, setOpen] = useState(false);      
   const ref = useRef(null);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -120,4 +121,3 @@ export function Dropdown({
     </div>
   );
 }
-

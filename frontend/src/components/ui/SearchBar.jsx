@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useEffect, useRef } from 'react';
+import Button from './Button.jsx';
 
 export function SearchBar({
   isOpen,
@@ -72,12 +73,14 @@ export function SearchBar({
           value={value}
           onChange={onChange}
         />
-        <button
+        <Button
           type="submit"
-          className="rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800"
+          variant="primary-round"
+          size="sm"
+          className="font-semibold"
         >
           {buttonLabel}
-        </button>
+        </Button>
       </form>
     </div>,
     portalTarget

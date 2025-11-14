@@ -7,7 +7,7 @@ import { Pagination } from "../../../../components/ui/Pagination.jsx";
 
 import { useAdminProducts } from "../../hooks/useAdminProducts.js";
 import { useCategories } from "../../../products/hooks/useCategories.js";
-import { buildProductColumns } from "../../utils/productsColumns.jsx";
+import { buildProductColumns } from "../../utils/ProductsColumns.jsx";
 
 export default function ProductsAdminPage() {
   const [page, setPage] = React.useState(1);
