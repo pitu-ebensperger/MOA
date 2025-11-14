@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { setOnUnauthorized, setTokenGetter } from "../../../services/api-client.js";
+import { setOnUnauthorized, setTokenGetter } from "../services/api-client.js";
 import { authApi } from "../services/auth.api.js";
 
 // ---- Constantes y utilidades ----------------------------------

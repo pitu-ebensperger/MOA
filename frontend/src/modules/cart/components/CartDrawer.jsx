@@ -4,7 +4,7 @@ import { Plus, Minus, X, Trash2, ShoppingCart } from "lucide-react";
 import Button from "../../../components/ui/Button.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 
-import { useCartContext } from "../context/cartContext.jsx";
+import { useCartContext } from "../../../context/cartContext.jsx";
 
 import { resolveProductPrice } from "../../products/utils/products.js";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";

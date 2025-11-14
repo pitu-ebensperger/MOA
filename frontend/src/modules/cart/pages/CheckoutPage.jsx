@@ -1,5 +1,5 @@
 import { Trash2, CreditCart, Banknote, MapPin } from "lucide-react";
-import { useCartContext } from "../context/cartContext.jsx";
+import { useCartContext } from "../../../context/cartContext.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import { resolveProductPrice } from "../../products/utils/product.js";
 

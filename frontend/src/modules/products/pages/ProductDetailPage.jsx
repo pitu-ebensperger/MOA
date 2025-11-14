@@ -5,7 +5,7 @@ import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 
-import { productsApi } from "../services/products.api.js";
+import { productsApi } from "../../../services/products.api.js";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import { useCategories } from "../hooks/useCategories.js";
 import { Minus, Plus, Recycle, ShieldCheck, Truck } from "lucide-react";

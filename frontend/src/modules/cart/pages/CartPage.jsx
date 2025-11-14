@@ -1,5 +1,5 @@
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
-import { useCartContext } from "../context/cartContext.jsx";
+import { useCartContext } from "../../../context/cartContext.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";

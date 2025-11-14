@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import { Lock } from 'lucide-react'
-import { resetPassword } from '../services/auth.api.js'
+import { resetPassword } from '../../../services/auth.api.js'
 
 export default function ResetPasswordPage(){
   const navigate = useNavigate()
