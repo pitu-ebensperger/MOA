@@ -52,8 +52,6 @@ Campos obligatorios:
 - `stock: number`
 - `createdAt: string` (ISO-8601)
 
-Campos recomendados:
-- `shortDescription: string (≤ 140 chars)`
 - `description: string (2–5 frases)`
 - `collections?: string[]`
 - `badges?: string[]` (`'nuevo'|'eco'|'best-seller'|'envío gratis'|'fabricación local'|'madera certificada'|'edición limitada'|'últimas unidades'`)
@@ -61,7 +59,6 @@ Campos recomendados:
 - `dimensions: { width_cm:number; depth_cm:number; height_cm:number }`
 - `materials: string[]` (p.ej., `["roble","lino","acero"]`)
 - `colors: string[]` (p.ej., `["roble natural","beige"]`)
-- `variants?: Variant[]` (por `color|material|tamaño`)
 - `tags?: string[]` (SEO/colección suave)
 - `seo?: { title:string; description:string }`
 
@@ -69,12 +66,6 @@ Campos recomendados:
 - `url: string` (preferir Unsplash/licencia libre)
 - `alt: string`
 - `view: 'front'|'angle'|'detail'|'in-situ'`
-
-**Variant**
-- `option: 'color'|'material'|'tamaño'`
-- `value: string`
-- `sku: string` (misma regla de SKU)
-- `image?: ProductImage` (ideal: una por variante)
 
 ### 1.2 Category Tree
 - `name: string`
@@ -111,7 +102,7 @@ Campos recomendados:
 - **Imágenes**:
   - Priorizar luz **cálida**, tonos neutros; evitar saturación chillona/HDR.
   - Galerías con 3–6 fotos: al menos 1 `detail` + 1 `in-situ`.
-  - Variantes: **imagen distinta por valor** (no recolor).
+  - Combinaciones de color/material: **imagen distinta por valor** (no recolor).
 - **Descuentos**: `compareAtPrice` > `price`; aplicar badge “oferta” si lo usan.
 - **Stock**: 0 oculta botón comprar; mostrar “sin stock”.
 - **Accesibilidad**: `alt` descriptivo (“Detalle pata de roble en mesa ovalada”).
@@ -123,11 +114,11 @@ Campos recomendados:
 ### 3.1 Esquema minimal (SQL-ish)
 **products**
 - `id` PK, `sku` UNIQUE, `slug` UNIQUE
-- `name`, `short_description`, `description`
+- `name`, `description`
 - `category`
 - `price` INT, `compare_at_price` INT NULL, `currency` CHAR(3)
 - `dimensions_json` JSON, `materials_json` JSON, `colors_json` JSON
-- `images_json` JSON, `variants_json` JSON
+- `images_json` JSON
 - `collections_json` JSON, `badges_json` JSON, `tags_json` JSON
 - `stock` INT, `seo_json` JSON, `created_at` TIMESTAMP
 
@@ -146,7 +137,6 @@ Campos recomendados:
 - `slug`, `sku` únicos.
 - `price >= 0`, `compareAtPrice == null || compareAtPrice > price`.
 - `images.length >= 3` (recomendado).
-- Si hay `variants`, cada `variant.sku` único.
 - `category` existe en taxonomía.
 
 ---
@@ -177,11 +167,6 @@ Ej.: `MUE-MUE-SOF-AB3K-25`
 **Ángulos / sets (múltiples fotos):**
 - Añade: `detail shot`, `angle`, `close-up`, `in situ`, `series`, `set`.
 
-**Variantes (mismo objeto en material/color distinto)**:
-- Madera: `oak`, `walnut`, `ash`, `black stain`
-- Textil: `linen beige`, `linen light gray`
-- Metal: `matte black`, `brushed steel`
-
 **Secciones del sitio (fondos)**:
 - `hero`: `scandinavian living room warm light negative space`
 - `login/register bg`: `minimal interior warm soft light texture`
@@ -202,7 +187,6 @@ Ej.: `MUE-MUE-SOF-AB3K-25`
   "sku":"MUE-MUE-SOF-AB3K-25",
   "name":"Sofá Lino Alba",
   "slug":"sofa-lino-alba",
-  "shortDescription":"Sofá de 3 cuerpos tapizado en lino con patas de roble.",
   "description":"De inspiración nórdica, combina lino texturizado y roble natural.",
   "category":"muebles",
   "collections":["living-nordico","madera-clara"],
@@ -217,10 +201,6 @@ Ej.: `MUE-MUE-SOF-AB3K-25`
     {"url":"(link 1)","alt":"Sofá de lino en luz cálida","view":"in-situ"},
     {"url":"(link 2)","alt":"Detalle pata roble","view":"detail"},
     {"url":"(link 3)","alt":"Vista en ángulo","view":"angle"}
-  ],
-  "variants":[
-    {"option":"color","value":"beige","sku":"MUE-MUE-SOF-9K3P-25"},
-    {"option":"color","value":"gris claro","sku":"MUE-MUE-SOF-Z7Q2-25"}
   ],
   "stock":12,
   "tags":["nordico","luz-calida","textil-natural"],

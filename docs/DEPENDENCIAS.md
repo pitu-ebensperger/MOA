@@ -23,7 +23,8 @@
 ### ⚙️ Funcionalidad
 - ☑️ react-hook-form > `npm i react-hook-form` | manejo eficiente de formularios y validaciones
 - ☑️ zod, @hookform/resolvers > `npm i zod @hookform/resolvers` | validación tipada integrada a RHF
-- ⬜ @tanstack/react-query > `npm i @tanstack/react-query` | manejo de datos con cache, loading y reintentos automáticos
+- ☑️ @tanstack/react-query > `npm i @tanstack/react-query` | manejo de datos con cache, loading y reintentos automáticos
+- ☑️ @tanstack/react-table > `npm i @tanstack/react-table` | 
 - ⬜ zustand > `npm i zustand` | manejo global de estado (carrito, sesión o UI)
 
 ### 💬 Feedback y notificaciones

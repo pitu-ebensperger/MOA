@@ -1,0 +1,77 @@
+import { formatDate_ddMMyyyy } from "../../../utils/date.js";
+import { formatCurrencyCLP } from "../../../utils/currency.js";
+import { StatusPill } from "../../../components/ui/StatusPill.jsx";
+import { EyeIcon } from "@heroicons/react/24/outline";
+
+export const buildOrderColumns = ({ onOpen }) => [
+  {
+    accessorKey: "number",
+    header: "Orden",
+    enableSorting: true,
+    cell: ({ row }) => (
+      <span className="font-medium">{row.original.number || "-"}</span>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Fecha",
+    enableSorting: true,
+    cell: ({ row }) => (
+      <span className="tabular-nums">
+        {row.original.createdAt
+          ? formatDate_ddMMyyyy(row.original.createdAt)
+          : "-"}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "userName",
+    header: "Cliente",
+    enableSorting: true,
+    cell: ({ row }) => (
+      <div className="flex flex-col">
+        <span>{row.original.userName || "-"}</span>
+        {row.original.userEmail && (
+          <span className="text-xs text-(--text-weak)">
+            {row.original.userEmail}
+          </span>
+        )}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "total",
+    header: "Total",
+    enableSorting: true,
+    meta: { align: "right" },
+    cell: ({ row }) => (
+      <span className="tabular-nums">
+        {row.original.total != null
+          ? formatCurrencyCLP(row.original.total)
+          : "-"}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Estado",
+    enableSorting: true,
+    cell: ({ row }) => <StatusPill status={row.original.status} />,
+  },
+  {
+    id: "actions",
+    header: () => <span className="sr-only">Acciones</span>,
+    enableSorting: false,
+    meta: { align: "right" },
+    cell: ({ row }) => (
+      <button
+        type="button"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-(--color-border-subtle) hover:bg-(--surface-subtle)"
+        onClick={() => onOpen?.(row.original)}
+        aria-label="Ver detalle de orden"
+      >
+        <EyeIcon className="h-4 w-4 text-(--color-primary1)" />
+      </button>
+    ),
+  },
+];

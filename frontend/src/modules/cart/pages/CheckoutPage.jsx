@@ -4,7 +4,7 @@ import { useCartContext } from "../context/cartContext.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
-import { resolveProductPrice } from "../../products/utils/product.js";
+import { resolveProductPrice } from "../../products/utils/products.js";
 
 const PAYMENT_METHODS = [
   {
@@ -120,6 +120,23 @@ export const CheckoutPage = () => {
       }),
     [cartItems],
   );
+
+  if (!hasItems) {
+    return (
+      <main className="page container-px mx-auto max-w-4xl py-12">
+        <div className="flex flex-col items-center justify-center gap-6 rounded-3xl border border-dashed border-neutral-200 bg-white/90 p-10 text-center shadow-[0_15px_40px_rgba(15,23,42,0.08)]">
+          <ShoppingBag className="h-14 w-14 text-neutral-400" />
+          <p className="text-lg font-semibold text-neutral-700">No tienes productos para pagar</p>
+          <p className="text-sm text-neutral-500">
+            Explora nuestro catálogo y agrega artículos para completar tu compra.
+          </p>
+          <Button to="/products" variant="primary" size="md">
+            Seguir comprando
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="page container-px mx-auto max-w-7xl py-12">

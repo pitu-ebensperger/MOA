@@ -7,7 +7,6 @@ export const customersDb = {
       email: "camila.lopez@example.com",
       phone: "+56 9 8765 4321",
       createdAt: "2023-08-12T16:25:00Z",
-      marketingOptIn: true,
     },
     {
       id: "usr-002",
@@ -16,7 +15,6 @@ export const customersDb = {
       email: "diego.pizarro@example.com",
       phone: "+56 9 9988 7766",
       createdAt: "2024-01-04T10:12:00Z",
-      marketingOptIn: false,
     },
   ],
   addresses: [

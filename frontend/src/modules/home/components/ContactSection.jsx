@@ -19,25 +19,19 @@ export default function ContactSection() {
           }}
         />
         <div className="absolute inset-0 bg-[rgba(60,45,27,0.5)]" />
-
         <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-6 rounded-3xl px-8 py-12 text-center text-white">
           <p className="text-xs uppercase tracking-[0.5em] text-white">
             Conecta con nosotros
           </p>
-          <h2
-            className="font-italiana text-4xl leading-tight text-white sm:text-5xl"
-            style={{ color: "#ffffff" }}
-          >
+          <h2 className="font-display text-4xl leading-tight text-white sm:text-5xl">
             ¿Listo para tu próximo proyecto?
           </h2>
           <p className="text-sm text-white sm:text-base">
             Cuéntanos qué necesitas: estamos atentos para coordinar una llamada,
             brindar asesoría o preparar una muestra especialmente pensada para ti.
           </p>
-          <Link
-            to="/contact"
-            className="inline-flex items-center rounded-full border border-white/70 bg-white px-8 py-3 text-base font-semibold text-black transition hover:bg-white/90"
-          >
+          <Link to="/contact"
+            className="inline-flex items-center rounded-full border border-white/70 bg-white px-8 py-3 text-base font-semibold text-black transition hover:bg-white/90">
             Escríbenos →
           </Link>
         </div>

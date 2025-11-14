@@ -1,41 +1,29 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { productsApi } from "../services/products.api.js";
 
-const initialState = {
-  items: [],
-  total: 0,
-  isLoading: true,
-  error: null,
+const PRODUCTS_QUERY_KEY = ["products"];
+
+const normalizeFilters = (filters) => {
+  if (!filters || typeof filters !== "object") return {};
+  return filters;
 };
 
 export const useProducts = (filters) => {
-  const [state, setState] = useState(initialState);
-  const normalizedFilters = useMemo(() => filters ?? {}, [filters]);
-
-  const fetchProducts = useCallback(async (params = {}) => {
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
-    try {
-      const response = await productsApi.list(params);
-      setState({
-        items: response.items ?? [],
-        total: response.total ?? response.items?.length ?? 0,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error) {
-      setState((prev) => ({ ...prev, isLoading: false, error }));
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts(normalizedFilters);
-  }, [fetchProducts, normalizedFilters]);
+  const normalizedFilters = useMemo(() => normalizeFilters(filters), [filters]);
+  const query = useQuery({
+    queryKey: [...PRODUCTS_QUERY_KEY, normalizedFilters],
+    queryFn: () => productsApi.list(normalizedFilters),
+    keepPreviousData: true,
+    staleTime: 1000 * 60,
+  });
 
   return {
-    products: state.items,
-    total: state.total,
-    isLoading: state.isLoading,
-    error: state.error,
-    refetch: fetchProducts,
+    products: query.data?.items ?? [],
+    total: query.data?.total ?? query.data?.items?.length ?? 0,
+    isLoading: query.isLoading,
+    error: query.error ?? null,
+    refetch: query.refetch,
+    isFetching: query.isFetching,
   };
 };

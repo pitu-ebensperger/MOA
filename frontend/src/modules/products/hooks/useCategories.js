@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { productsApi } from '../services/products.api.js';
+
+const CATEGORIES_QUERY_KEY = ['categories'];
 
 const normalizeCategories = (payload) => {
   if (Array.isArray(payload)) return payload;
@@ -8,62 +11,19 @@ const normalizeCategories = (payload) => {
 };
 
 export function useCategories({ enabled = true } = {}) {
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(enabled);
-  const [error, setError] = useState(null);
-  const isMountedRef = useRef(false);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  const loadCategories = useCallback(async () => {
-    if (!enabled) {
-      if (isMountedRef.current) {
-        setCategories([]);
-        setIsLoading(false);
-        setError(null);
-      }
-      return [];
-    }
-
-    if (isMountedRef.current) {
-      setIsLoading(true);
-      setError(null);
-    }
-
-    try {
-      const data = await productsApi.listCategories();
-      const next = normalizeCategories(data);
-      if (isMountedRef.current) {
-        setCategories(next);
-      }
-      return next;
-    } catch (err) {
-      if (isMountedRef.current) {
-        setCategories([]);
-        setError(err);
-      }
-      throw err;
-    } finally {
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
-    }
-  }, [enabled]);
-
-  useEffect(() => {
-    loadCategories().catch(() => {
-    });
-  }, [loadCategories]);
+  const normalizedEnabled = useMemo(() => Boolean(enabled), [enabled]);
+  const query = useQuery({
+    queryKey: CATEGORIES_QUERY_KEY,
+    queryFn: async () => normalizeCategories(await productsApi.listCategories()),
+    enabled: normalizedEnabled,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    categories,
-    isLoading,
-    error,
-    refresh: loadCategories,
+    categories: query.data ?? [],
+    isLoading: normalizedEnabled ? query.isLoading : false,
+    error: normalizedEnabled ? query.error ?? null : null,
+    refresh: query.refetch,
+    isFetching: query.isFetching,
   };
 }

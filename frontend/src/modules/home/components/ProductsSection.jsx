@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../../products/components/ProductCard.jsx";
 import Button from "../../../components/ui/Button.jsx";
-import { matchesProductCategory } from "../../products/utils/product.js";
+import { createCategoryMatcher } from "../../products/utils/products.js";
 import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
 
 const normalizeProduct = (product, index) => {
@@ -47,6 +47,10 @@ const buildTabs = (categories) => {
 export default function ProductsSection({ products, categories }) {
   const tabs = useMemo(() => buildTabs(categories), [categories]);
   const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
+  const matchCategory = useMemo(
+    () => createCategoryMatcher(Array.isArray(categories) ? categories : []),
+    [categories],
+  );
 
   useEffect(() => {
     const fallbackValue = tabs[0]?.value ?? ALL_CATEGORY_ID;
@@ -60,10 +64,10 @@ export default function ProductsSection({ products, categories }) {
     const source = Array.isArray(products) ? products : [];
     const normalized = source.map(normalizeProduct);
     const filtered = normalized.filter((product) =>
-      matchesProductCategory(product, activeCategory),
+      matchCategory(product, activeCategory),
     );
     return filtered.slice(0, 4);
-  }, [products, activeCategory]);
+  }, [products, activeCategory, matchCategory]);
 
   return (
     <div className="space-y-8 p-10">
@@ -85,15 +89,15 @@ export default function ProductsSection({ products, categories }) {
               className={`group relative pb-3 font-garamond text-base tracking-wide transition-colors ${
                 isActive
                   ? "text-dark"
-                  : "text-(--color-secondary1,#6b4e2f) hover:text-(--color-primary-brown,#6b4e2f)"
+                  : "text-(--color-secondary1,#6b4e2f) hover:text-(--color-primary1,#6B5444)"
               }`}
             >
               {tab.label}
               <span
                 className={`pointer-events-none absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-colors ${
                   isActive
-                    ? "bg-(--color-primary-brown,#443114)"
-                    : "bg-transparent group-hover:bg-(--color-primary-brown,#c8a889)"
+                    ? "bg-(--color-primary1,#6B5444)"
+                    : "bg-transparent group-hover:bg-(--color-primary1,#c8a889)"
                 }`}
               />
             </button>

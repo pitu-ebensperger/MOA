@@ -70,7 +70,7 @@ export function ProductFiltersContent({
                 className={[
                   "flex w-full items-center justify-between rounded-xl border px-4 py-2 text-sm transition",
                   active
-                    ? "border-(--color-primary-brown,#443114) bg-(--color-primary-brown,#443114) text-white"
+                    ? "border-(--color-primary1,#6B5444) bg-(--color-primary1,#6B5444) text-white"
                     : "border-transparent bg-white text-neutral-700 hover:border-neutral-200",
                 ].join(" ")}
               >
@@ -104,7 +104,7 @@ export function ProductFiltersContent({
                 updateRange(Number.isFinite(parsed) ? parsed : minLimit, selectedMax);
               }}
               placeholder="Mín."
-              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
+              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
             />
             <input
               type="number"
@@ -121,7 +121,7 @@ export function ProductFiltersContent({
                 updateRange(selectedMin, Number.isFinite(parsed) ? parsed : maxLimit);
               }}
               placeholder="Máx."
-              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-(--color-primary-brown,#443114) focus:outline-none"
+              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
             />
           </div>
 

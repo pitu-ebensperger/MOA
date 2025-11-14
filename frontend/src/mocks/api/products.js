@@ -1,148 +1,54 @@
 import { PRODUCTS, CATEGORIES, COLLECTIONS } from "../database/index.js";
 import { delay } from "../../utils/delay.js";
 import { normalizeCategory } from "../../utils/normalizers.js";
-import { buildProductCategoryPool } from "../../modules/products/utils/product.js";
-import { ALL_CATEGORY_ID } from "../../utils/constants.js";
+import { sortProducts } from "../../utils/sort.js";
+import { matchesText, createCategoryMatcher, matchesCollection, matchesPrice, matchesStatus } from "../../modules/products/utils/productsFilter.js";
+import { toNum } from "../../utils/number.js";
 
-const cloneProduct = (product) => ({
-  ...product,
-  gallery: Array.isArray(product.gallery) ? [...product.gallery] : [],
-  badge: Array.isArray(product.badge) ? [...product.badge] : [],
-  tags: Array.isArray(product.tags) ? [...product.tags] : [],
-  materials: Array.isArray(product.materials) ? [...product.materials] : [],
+const cloneProduct = (p) => ({
+  ...p,
+  gallery: Array.isArray(p.gallery) ? [...p.gallery] : [],
+  badge: Array.isArray(p.badge) ? [...p.badge] : [],
+  tags: Array.isArray(p.tags) ? [...p.tags] : [],
+  materials: Array.isArray(p.materials) ? [...p.materials] : [],
+});
+const cloneCollection = (c) => ({
+  ...c,
+  productIds: Array.isArray(c.productIds) ? [...c.productIds] : [],
 });
 
-const cloneCollection = (collection) => ({
-  ...collection,
-  productIds: Array.isArray(collection.productIds) ? [...collection.productIds] : [],
-});
-
-const catalogDb = {
+const db = {
   categories: CATEGORIES.map(normalizeCategory),
   products: PRODUCTS.map(cloneProduct),
   collections: COLLECTIONS.map(cloneCollection),
 };
 
-const CATEGORY_SLUG_TO_ID = new Map(
-  catalogDb.categories
-    .filter((category) => typeof category.slug === "string")
-    .map((category) => [category.slug.toLowerCase(), category.id]),
-);
-
-const toNumber = (value) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const matchesText = (product, text) => {
-  if (!text) return true;
-  const haystack = [
-    product.name,
-    product.shortDescription,
-    product.description,
-    product.tags?.join(" "),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  return haystack.includes(text.toLowerCase());
-};
-
-const resolveCategoryTarget = (value) => {
-  if (value === undefined || value === null || value === ALL_CATEGORY_ID) return null;
-  const numeric = toNumber(value);
-  if (numeric !== null) return numeric;
-  if (typeof value === "string" && value.trim()) {
-    const normalized = value.toLowerCase();
-    if (CATEGORY_SLUG_TO_ID.has(normalized)) {
-      return CATEGORY_SLUG_TO_ID.get(normalized);
-    }
-  }
-  return null;
-};
-
-const matchesCategory = (product, categoryValue) => {
-  if (!categoryValue || categoryValue === ALL_CATEGORY_ID) return true;
-  const pool = buildProductCategoryPool(product);
-  if (!pool.length) return false;
-
-  const targetId = resolveCategoryTarget(categoryValue);
-  if (targetId !== null) {
-    return pool.some((id) => Number(id) === targetId);
-  }
-
-  const normalized = String(categoryValue).toLowerCase();
-  return pool.some((id) => String(id).toLowerCase() === normalized);
-};
-
-const matchesCollection = (product, collectionId) => {
-  if (!collectionId) return true;
-  const productCollection = product?.fk_collection_id;
-  if (productCollection === undefined || productCollection === null) return false;
-
-  const targetNumber = toNumber(collectionId);
-  if (targetNumber !== null) {
-    return Number(productCollection) === targetNumber;
-  }
-  const normalized = String(collectionId).toLowerCase();
-  return String(productCollection).toLowerCase() === normalized;
-};
-
-const matchesPrice = (product, minPrice, maxPrice) => {
-  const price = Number(product.price ?? 0);
-  if (Number.isFinite(minPrice) && price < minPrice) return false;
-  if (Number.isFinite(maxPrice) && price > maxPrice) return false;
-  return true;
-};
-
-const sortProducts = (products, sortBy) => {
-  if (!sortBy) return products;
-  const copy = [...products];
-  switch (sortBy) {
-    case "price-asc":
-      return copy.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
-    case "price-desc":
-      return copy.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
-    case "name-asc":
-      return copy.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
-    case "newest":
-      return copy.sort(
-        (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
-      );
-    default:
-      return products;
-  }
-};
+const s = (v) => (v == null ? "" : String(v));
 
 const normalizeIncomingProduct = (payload = {}) => {
   if (payload.id === undefined || payload.id === null) {
-    throw new Error("product id is required in mock mode");
+    throw new Error("se necesita productId");
   }
   const id = payload.id;
-  const now = new Date().toISOString();
-  const price = Number(payload.price ?? 0);
-  const stock = Number(payload.stock ?? 0);
 
   const gallery =
     Array.isArray(payload.gallery) && payload.gallery.length
       ? payload.gallery
       : payload.imgUrl
-        ? [payload.imgUrl]
-        : [];
+      ? [payload.imgUrl]
+      : [];
 
-  const tags =
-    Array.isArray(payload.tags) && payload.tags.length
-      ? payload.tags
-      : typeof payload.tags === "string"
-        ? payload.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
-        : [];
+  const tags = Array.isArray(payload.tags)
+    ? payload.tags
+    : typeof payload.tags === "string"
+    ? payload.tags.split(",").map((t) => t.trim()).filter(Boolean)
+    : [];
 
-  const materials =
-    Array.isArray(payload.materials) && payload.materials.length
-      ? payload.materials
-      : payload.material
-        ? [payload.material]
-        : [];
+  const materials = Array.isArray(payload.materials)
+    ? payload.materials
+    : payload.material
+    ? [payload.material]
+    : [];
 
   const slugSource = payload.slug ?? payload.name ?? `producto-${id}`;
 
@@ -151,10 +57,9 @@ const normalizeIncomingProduct = (payload = {}) => {
     name: payload.name ?? `Producto ${id}`,
     slug: slugSource ? String(slugSource) : null,
     sku: payload.sku ?? `MOA-${id}`,
-    price: Number.isFinite(price) ? price : 0,
-    stock: Number.isFinite(stock) ? stock : 0,
+    price: Number.isFinite(Number(payload.price)) ? Number(payload.price) : 0,
+    stock: Number.isFinite(Number(payload.stock)) ? Number(payload.stock) : 0,
     description: payload.description ?? "",
-    shortDescription: payload.shortDescription ?? "",
     imgUrl: payload.imgUrl ?? gallery[0] ?? null,
     gallery,
     badge: Array.isArray(payload.badge) ? payload.badge : payload.badge ? [payload.badge] : [],
@@ -166,74 +71,76 @@ const normalizeIncomingProduct = (payload = {}) => {
     dimensions: payload.dimensions ?? null,
     weight: payload.weight ?? null,
     specs: payload.specs ?? null,
-    variantOptions: Array.isArray(payload.variantOptions) ? payload.variantOptions : [],
     fk_category_id: payload.fk_category_id ?? null,
     fk_collection_id: payload.fk_collection_id ?? null,
     collection: payload.collection ?? null,
-    collectionDescription: payload.collectionDescription ?? null,
-    createdAt: now,
-    updatedAt: now,
-    compareAtPrice: payload.compareAtPrice ?? null,
+    createdAt: payload.createdAt ?? null,
+    updatedAt: payload.updatedAt ?? null,
+    compareAtPrice: Number.isFinite(Number(payload.compareAtPrice)) ? Number(payload.compareAtPrice) : null,
   };
 };
 
+/* API ------------------------------------------------------------------------------------------------------------------------ */
 export const mockCatalogApi = {
   async list(params = {}) {
     const {
       q,
+      status,
       categoryId,
       collectionId,
       minPrice,
       maxPrice,
-      offset = 0,
-      limit = null,
-      sort: sortBy,
+      page = 1,
+      pageSize = 20,
+      sortBy = "updatedAt",
+      sortDir = "desc",
     } = params;
 
     await delay();
 
-    const numericMin = toNumber(minPrice);
-    const numericMax = toNumber(maxPrice);
+    const numericMin = toNum(minPrice);
+    const numericMax = toNum(maxPrice);
 
-    const filtered = catalogDb.products.filter(
-      (product) =>
-        matchesText(product, q) &&
-        matchesCategory(product, categoryId) &&
-        matchesCollection(product, collectionId) &&
-        matchesPrice(product, numericMin, numericMax),
+    const categoryMatch = createCategoryMatcher(db.categories);
+
+    const filtered = db.products.filter(
+      (p) =>
+        matchesText(p, q) &&
+        categoryMatch(p, categoryId) &&
+        matchesCollection(p, collectionId) &&
+        matchesPrice(p, numericMin, numericMax) &&
+        matchesStatus(p, status),
     );
 
-    const sorted = sortProducts(filtered, sortBy);
-    const safeOffset = Math.max(0, Number(offset) || 0);
-    const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : null;
-    const items = safeLimit === null ? sorted : sorted.slice(safeOffset, safeOffset + safeLimit);
+    const sorted = sortProducts(filtered, sortBy, sortDir);
+
+    const off = Math.max(0, (Number(page) - 1) * Number(pageSize));
+    const lim = Math.max(1, Number(pageSize));
+    const items = sorted.slice(off, off + lim);
 
     return {
       items,
       total: sorted.length,
-      page: {
-        offset: safeOffset,
-        limit: safeLimit ?? sorted.length,
-      },
+      page: { offset: off, limit: lim }, 
     };
   },
 
   async getById(productId) {
     if (productId === undefined || productId === null) {
-      throw new Error("productId is required");
+      throw new Error("se necesita productId");
     }
     await delay();
-    const numericId = toNumber(productId);
-    const product = catalogDb.products.find((item) => {
+    const numericId = toNum(productId);
+    const product = db.products.find((item) => {
       if (numericId !== null && Number(item.id) === numericId) return true;
-      if (String(item.id) === String(productId)) return true;
+      if (s(item.id) === s(productId)) return true;
       if (typeof productId === "string" && typeof item.slug === "string") {
         return item.slug === productId;
       }
       return false;
     });
     if (!product) {
-      const error = new Error("Product not found");
+      const error = new Error("Producto no encontrado");
       error.status = 404;
       throw error;
     }
@@ -241,11 +148,11 @@ export const mockCatalogApi = {
   },
 
   async getBySlug(slug) {
-    if (!slug) throw new Error("slug is required");
+    if (!slug) throw new Error("se necesita slug");
     await delay();
-    const product = catalogDb.products.find((item) => item.slug === slug);
+    const product = db.products.find((item) => item.slug === slug);
     if (!product) {
-      const error = new Error("Product not found");
+      const error = new Error("Producto no encontrado");
       error.status = 404;
       throw error;
     }
@@ -255,26 +162,21 @@ export const mockCatalogApi = {
   async listCategories({ parentId = null } = {}) {
     await delay();
     if (parentId === undefined || parentId === null) {
-      return catalogDb.categories.map((category) => ({ ...category }));
+      return db.categories.map((c) => ({ ...c }));
     }
-    const normalizedParent = toNumber(parentId);
-    return catalogDb.categories
-      .filter((category) => {
-        if (normalizedParent !== null) return category.parentId === normalizedParent;
-        return String(category.parentId ?? "") === String(parentId);
-      })
-      .map((category) => ({ ...category }));
+    const pid = toNum(parentId);
+    return db.categories
+      .filter((c) => (pid !== null ? c.parentId === pid : s(c.parentId ?? "") === s(parentId)))
+      .map((c) => ({ ...c }));
   },
 
   async listCollections() {
     await delay();
-    return catalogDb.collections.map((collection) => {
-      const productIds = Array.isArray(collection.productIds) ? collection.productIds : [];
+    return db.collections.map((col) => {
+      const ids = Array.isArray(col.productIds) ? col.productIds : [];
       return {
-        ...collection,
-        products: productIds
-          .map((id) => catalogDb.products.find((product) => product.id === id))
-          .filter(Boolean),
+        ...col,
+        products: ids.map((id) => db.products.find((p) => p.id === id)).filter(Boolean),
       };
     });
   },
@@ -282,11 +184,64 @@ export const mockCatalogApi = {
   async create(payload = {}) {
     await delay();
     const product = normalizeIncomingProduct(payload);
-    catalogDb.products.unshift(product);
+    const exists = db.products.some((p) => String(p.id) === String(product.id));
+    if (exists) {
+      const err = new Error("Esa productId ya existe");
+      err.status = 409;
+      throw err;
+    }
+    db.products.unshift(product);
     return product;
+  },
+
+  async update(id, patch = {}) {
+    if (id === undefined || id === null) throw new Error("se necesita product id");
+    await delay();
+    const idx = db.products.findIndex((p) => String(p.id) === String(id));
+    if (idx === -1) {
+      const err = new Error("Producto no encontrado");
+      err.status = 404;
+      throw err;
+    }
+    const current = db.products[idx];
+    const next = cloneProduct({
+      ...current,
+      ...patch,
+      badge: Array.isArray(patch.badge) ? patch.badge : patch.badge ? [patch.badge] : current.badge,
+      tags:
+        Array.isArray(patch.tags)
+          ? patch.tags
+          : typeof patch.tags === "string"
+          ? patch.tags.split(",").map((t) => t.trim()).filter(Boolean)
+          : current.tags,
+      materials:
+        Array.isArray(patch.materials)
+          ? patch.materials
+          : patch.material
+          ? [patch.material]
+          : current.materials,
+    });
+    if ((!next.gallery || next.gallery.length === 0) && next.imgUrl) {
+      next.gallery = [next.imgUrl];
+    }
+    db.products[idx] = next;
+    return next;
+  },
+
+  async remove(id) {
+    if (id === undefined || id === null) throw new Error("se necesita product idd");
+    await delay();
+    const idx = db.products.findIndex((p) => String(p.id) === String(id));
+    if (idx === -1) {
+      const err = new Error("Producto no encontrado");
+      err.status = 404;
+      throw err;
+    }
+    const [removed] = db.products.splice(idx, 1);
+    return { ok: true, removedId: removed.id };
   },
 };
 
 export async function getProducts() {
-  return catalogDb.products;
+  return db.products;
 }

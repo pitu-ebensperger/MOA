@@ -18,7 +18,7 @@ export function ProductSidebar({
           <button
             type="button"
             onClick={onReset}
-            className="text-xs font-medium text-(--color-primary-brown,#443114) underline-offset-2 transition hover:underline"
+            className="text-xs font-medium text-(--color-primary1,#6B5444) underline-offset-2 transition hover:underline"
           >
             Limpiar
           </button>

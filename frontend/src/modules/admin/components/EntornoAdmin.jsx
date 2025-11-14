@@ -13,6 +13,11 @@ const navItems = [
 export default function EntornoAdmin({ children }) {
   const location = useLocation();
   const currentPath = location.pathname;
+  const transparentButtonStyle = {
+    backgroundColor: "transparent",
+    border: "none",
+    boxShadow: "none",
+  };
   return (
     <div className="admin-shell min-h-screen bg-[var(--color-lightest2)] text-neutral-900">
       <header className="flex items-center justify-between px-4 md:px-8 border-b border-neutral-200 py-3 bg-white shadow-sm">
@@ -29,8 +34,8 @@ export default function EntornoAdmin({ children }) {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="sidebar-collapsible group border-r border-neutral-200 bg-white px-5 py-6 w-fit">
-          <nav className="flex flex-col gap-2">
+        <aside className="sidebar-collapsible group border-r border-neutral-200 bg-white px-5 py-6">
+          <nav className="flex flex-col gap-3 items-center group-hover:items-start w-full">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentPath.startsWith(item.to);
@@ -40,10 +45,11 @@ export default function EntornoAdmin({ children }) {
                   variant="round"
                   size="sm"
                   to={item.to}
-                  className={`sidebar-link flex flex-row items-center justify-start gap-3 rounded-2xl px-3 py-3 text-sm font-semibold tracking-wide transition w-fit text-left whitespace-nowrap hover:text-accent ${
+                  style={transparentButtonStyle}
+                  className={`sidebar-link flex flex-row items-center justify-center group-hover:justify-start gap-3 rounded-2xl px-3 py-3 text-sm font-semibold tracking-wide transition w-full text-left whitespace-nowrap hover:text-accent ${
                     isActive
-                      ? "border-r-4 border-indigo-500 text-indigo-600 shadow-[0_0_0_1px_rgba(99,102,241,0.5)]"
-                      : "text-neutral-700 hover:text-indigo-500"
+                      ? "border-r-4 border-primary text-primary shadow-[0_0_0_1px_rgba(99,102,241,0.5)]"
+                      : "text-neutral-700 hover:text-primary "
                   }`}
                 >
                   <span className="flex flex-row items-center justify-flex-start gap-3">
@@ -56,10 +62,11 @@ export default function EntornoAdmin({ children }) {
           </nav>
           <div className="mt-8 border-t  border-neutral-100 pt-6">
             <Button
-              variant="secondary"
+              variant="round"
               size="sm"
               to="/home"
-              className="mt-3 w-fit btn-round sidebar-link flex items-center justify-center gap-2"
+              style={transparentButtonStyle}
+              className="mt-3 w-full sidebar-link flex items-center justify-center group-hover:justify-start gap-2 rounded-2xl px-3 py-3 text-sm font-semibold tracking-wide transition text-neutral-700 whitespace-nowrap hover:text-primary"
             >
               <span className="flex items-center gap-2">
                 <Store className="h-4 w-4 btn-icon-left" aria-hidden />
