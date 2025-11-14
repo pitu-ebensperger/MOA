@@ -1,15 +1,19 @@
-import express from 'express'
-import cors from 'cors'
+import express from "express";
+import cors from "cors";
 
-import userRoutes from './routes/usersRoutes.js'
-import authRoutes from './routes/authRoutes.js'
+import categoriesRouter from "./routes/categoriesRoutes.js";
 
-const PORT = process.env.PORT || 3000
-const app = express()
-app.use(express.json())
-app.use(cors())
+import userRoutes from "./routes/usersRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
-app.use(userRoutes)
-app.use(authRoutes)
+const PORT = process.env.PORT || 3000;
+const app = express();
+app.use(express.json());
+app.use(cors());
 
-app.listen(PORT, console.log(`🔥 Server on http://localhost:${PORT}`))
+app.use("/categories", categoriesRouter);
+
+app.use(userRoutes);
+app.use(authRoutes);
+
+app.listen(PORT, console.log(`🔥 Server on http://localhost:${PORT}`));

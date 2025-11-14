@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json"
+    "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
+    "seed:categories": "node database/seed/seed-categories.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

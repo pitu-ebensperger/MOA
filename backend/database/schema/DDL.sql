@@ -23,7 +23,9 @@ CREATE TABLE roles (
 CREATE TABLE categorias (
     categoria_id SMALLSERIAL PRIMARY KEY,
     nombre TEXT NOT NULL,
-    slug TEXT UNIQUE NOT NULL
+    slug TEXT UNIQUE NOT NULL,
+    descripcion TEXT,
+    cover_image TEXT
 );
 
 CREATE TABLE productos (
@@ -34,6 +36,11 @@ CREATE TABLE productos (
     slug TEXT UNIQUE NOT NULL,
     sku TEXT UNIQUE NOT NULL,
     precio_cents INT NOT NULL,
+    stock INT DEFAULT 0,
+    descripcion TEXT,
+    descripcion_corta TEXT,
+    img_url TEXT,
+    gallery TEXT [],
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );

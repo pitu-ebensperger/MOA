@@ -22,3 +22,5 @@ VALUES (
     );
 
 TRUNCATE TABLE usuarios RESTART IDENTITY;
+
+DROP TABLE categorias

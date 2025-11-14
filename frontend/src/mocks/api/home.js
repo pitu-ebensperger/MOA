@@ -22,7 +22,9 @@ const pickCategories = (ids) => {
 
   const mapped = ids
     .map((categoryId) => {
-      const item = catalogDb.categories.find((category) => category.id === categoryId);
+      const item = catalogDb.categories.find(
+        (category) => category.id === categoryId
+      );
       if (!item) return null;
       return {
         id: item.id,
@@ -49,7 +51,8 @@ const resolveCategoryId = (value) => {
     return numeric;
   }
   const match = catalogDb.categories.find(
-    (category) => category.slug === stringValue || String(category.id) === stringValue,
+    (category) =>
+      category.slug === stringValue || String(category.id) === stringValue
   );
   return match ? match.id : null;
 };
@@ -70,13 +73,19 @@ const normalizeCategoryIds = (ids) => {
 const buildFallbackProducts = (ids) => {
   if (!Array.isArray(ids)) return [];
   return ids
-    .map((productId) => catalogDb.products.find((product) => product.id === productId))
+    .map((productId) =>
+      catalogDb.products.find((product) => product.id === productId)
+    )
     .filter(Boolean);
 };
 
 const PRODUCTS_PER_CATEGORY = 4;
 
-const pickProducts = ({ categoryIds, productIds, perCategoryLimit = PRODUCTS_PER_CATEGORY } = {}) => {
+const pickProducts = ({
+  categoryIds,
+  productIds,
+  perCategoryLimit = PRODUCTS_PER_CATEGORY,
+} = {}) => {
   const limit =
     Number.isFinite(Number(perCategoryLimit)) && Number(perCategoryLimit) > 0
       ? Number(perCategoryLimit)
@@ -122,7 +131,9 @@ const pickProducts = ({ categoryIds, productIds, perCategoryLimit = PRODUCTS_PER
 
   if (!selected.length) {
     const fallbackSource =
-      fallbackProducts.length > 0 ? fallbackProducts : catalogDb.products.slice(0, limit);
+      fallbackProducts.length > 0
+        ? fallbackProducts
+        : catalogDb.products.slice(0, limit);
     fallbackSource.forEach(addProduct);
   }
 
