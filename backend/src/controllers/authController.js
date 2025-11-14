@@ -19,7 +19,7 @@ export const loginUser = async (req, res) => {
             expiresIn: '120s'
         })
 
-        return res.status(200).json({ token , user: {nombre: user.nombre, email: user.email, telefono: user.telefono, rol: '', role_code: ""}})
+        return res.status(200).json({ token , user: {nombre: user.nombre, email: user.email, telefono: user.telefono, rol: user.rol, role_code: user.role_code}})
     } catch (error) {
         res.status(500).json({ error: error.message })
     }

@@ -10,6 +10,8 @@ CREATE TABLE usuarios (
     email TEXT UNIQUE NOT NULL,
     telefono TEXT,
     password_hash TEXT NOT NULL,
+    rol TEXT,
+    rol_code TEXT,
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
