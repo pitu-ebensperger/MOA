@@ -26,8 +26,9 @@ export default function LoginPage() {
     const ve = validateEmail(email);
     const vp = validatePassword(password, 6);
     const nextErrors = {};
-    if (!ve.ok) nextErrors.email = ve.error || 'Email no válido';
-    if (!vp.ok) nextErrors.password = vp.error || 'Contraseña inválida';
+    console.log(ve, vp)
+    if (!ve) nextErrors.email = ve.error || 'Email no válido';
+    if (!vp) nextErrors.password = vp.error || 'Contraseña inválida';
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 

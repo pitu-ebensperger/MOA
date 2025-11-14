@@ -19,5 +19,3 @@ snapshots/*.json
 .idea
 .vscode/*
 !.vscode/extensions.json
-
-backend

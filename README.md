@@ -1,45 +1,50 @@
 # Proyecto Marketplace
 
 ## Estructura del repositorio
-*Cada carpeta gestiona su propio node_modules locales, instalar dependencias antes de ejecutar*
+
+_Cada carpeta gestiona su propio node_modules locales, instalar dependencias antes de ejecutar_
 **`frontend/`**
-    Instalar:   `npm i -w frontend paquete`
-    Ejecutar:   `npm run dev` | `npm run preview` | `npm run test` | `npm run lint`
+Instalar: `npm i -w frontend paquete`
+Ejecutar: `npm run dev` | `npm run preview` | `npm run test` | `npm run lint`
 
 **`backend/`**
-    Instalar:   `npm i -w backend paquete`
-    Ejecutar:   `npm run -w backend dev`
+Instalar: `npm i -w backend paquete`
+Ejecutar: `npm run -w backend dev`
+
+    npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
 
 **`docs/`**
+
 - [Estructura proyecto y Progreso](./docs/STATUS.md)
 - [Listado de dependecias](./docs/DEPENDENCIAS.md)
 
-
 ### Otros
+
 - [Tailwind_Cheatsheet] (https://www.creative-tim.com/twcomponents/cheatsheet/)
 
-
---------------------------------------------------------------------------------------------------
+---
 
 ## Convenciones
 
 ### Github Flow
 
 **Ramas/Branches**
-- feature/ *(desarrollo de nuevas funcionalidades, ej. feature/add-user-authentication)*
-- fix/ *(correción errores, ej. bugfix/issue-123-login-error)*
-- chore/ *(tareas mantenimiento o administración, ej. chore/update-dependencies)*
-- refactor/ *(restructuración código, ej. refactor/sist-modulos)*
+
+- feature/ _(desarrollo de nuevas funcionalidades, ej. feature/add-user-authentication)_
+- fix/ _(correción errores, ej. bugfix/issue-123-login-error)_
+- chore/ _(tareas mantenimiento o administración, ej. chore/update-dependencies)_
+- refactor/ _(restructuración código, ej. refactor/sist-modulos)_
 
 **Organización Proyecto**
+
 - Dejar en componentes si es un elemento genérico o si aparece en 2+ páginas.
 
-
---------------------------------------------------------------------------------------------------
+---
 
 ## Requerimientos
 
 ### Hito 1: Diseño y Prototipo
+
 1. Diseñar un boceto de las vista del proyecto.
 2. Definir la navegación entre las vistas marcando las públicas y las privadas.
 3. Enlistar las dependencias a utilizar en el proyecto.
@@ -54,11 +59,13 @@
 **5. Utilizar Context para el manejo del estado global.**
 
 ### Hito 3: Desarrollo Backend
+
 1. Crear un nuevo nuevo de npm e instalar todas las dependencias necesarias.
 2. Utilizar el paquete pg para gestionar la comunicación con la base de datos PostgreSQL.
 3. Implementar la ....
 
 ### Hito 4: Integración y Despliegue
+
 1. Realizar el deploy de la aplicación cliente.
 2. Realizar el deploy de la aplicación backend.
 3. Realizar el deploy de la base de datos.
