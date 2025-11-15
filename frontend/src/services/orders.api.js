@@ -1,8 +1,10 @@
+//path: src/services/orders.api.js
 import { env } from "../config/env.js";
 import { API_PATHS } from "../config/api-paths.js";
 import { apiClient } from "./api-client.js";
 import { delay } from "../utils/delay.js";
 
+// Importamos EXACTO tu archivo real
 import { customersDb } from "../mocks/database/customers.js";
 import { ordersDb } from "../mocks/database/orders.js";
 
@@ -74,6 +76,7 @@ function buildMockOrderView(order) {
     : null;
   const userEmail = user?.email ?? null;
 
+  // Si quieres luego conectar con usersDb
   const extra = {
     items,
     payment,
@@ -91,7 +94,7 @@ const mockOrdersApi = {
 
     let list = [...ordersDb.orders];
 
-    /* Filtro x status */
+    /* Filtrar por status */
     if (status) {
       const s = String(status).toLowerCase();
       list = list.filter((o) => String(o.status).toLowerCase() === s);
@@ -123,7 +126,7 @@ const mockOrdersApi = {
         new Date(a.createdAt ?? 0).getTime()
     );
 
-    /* Paginación s*/
+    /* Paginación estilo estándar */
     const safeLimit = Number(limit) || 20;
     const safePage = Math.max(1, Number(page) || 1);
     const offset = (safePage - 1) * safeLimit;
