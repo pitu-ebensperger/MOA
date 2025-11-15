@@ -2,7 +2,6 @@ import React from "react";
 import { Plus, RefreshCw } from "lucide-react";
 
 import { TanstackDataTable } from "../../../../components/data-display/DataTable.jsx";
-import { Pagination } from "../../../../components/ui/Pagination.jsx";
 
 import { useAdminOrders } from "../../hooks/useAdminOrders.js";
 import { buildOrderColumns } from "../../utils/ordersColumns.jsx";
@@ -16,7 +15,7 @@ export default function OrdersPage() {
 
   const limit = 20;
 
-  const { items, total, totalPages, isLoading, refetch } = useAdminOrders({
+  const { items, total, isLoading, refetch } = useAdminOrders({
     page,
     limit,
     status,
@@ -90,6 +89,7 @@ export default function OrdersPage() {
             <option value="">Todos los estados</option>
             <option value="fulfilled">Completada</option>
             <option value="pending">Pendiente</option>
+            <option value="processing">En proceso</option>
             <option value="cancelled">Cancelada</option>
           </select>
         </div>
@@ -105,16 +105,6 @@ export default function OrdersPage() {
         total={total}
         onPageChange={setPage}
       />
-
-      {/* Paginación */}
-      <div className="mt-3">
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          totalItems={total}
-          onPageChange={setPage}
-        />
-      </div>
 
       {/* Drawer detalle */}
       <OrdersDrawer
