@@ -45,7 +45,7 @@ export const App = () => {
   const isAdminRoute = location.pathname.startsWith('/admin')
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-(--color-light)">
+    <div className="min-h-screen w-full overflow-x-hidden bg-[var(--color-light)]">
       {!isAdminRoute && <Navbar />}
       {!isAdminRoute && <CartDrawer />}
       <ScrollToTop />
@@ -68,6 +68,7 @@ export const App = () => {
           <Route path='/privacy'    element={<PrivacyPage />} /> 
           <Route path='/terms'      element={<TermsPage/>} /> 
           <Route path='/faq'        element={<FAQPage />} /> 
+          <Route path='/style-guide/*' element={<StyleGuidePage />} />
           <Route path='*' element={<NotFoundPage />} />
 
           <Route element={<AdminRoute />}>
@@ -78,10 +79,6 @@ export const App = () => {
             <Route path="/admin/settings"   element={<EntornoAdmin> <AdminSettingsPage /> </EntornoAdmin>}  />
           </Route>
         </Routes>
-
-        {/* BORRAR ANTES DE ENTREGA*/}
-        <Route path='/style-guide/*' element={<StyleGuidePage />} /> 
-
       </main>
       {!isAdminRoute && <Footer />}
     </div>

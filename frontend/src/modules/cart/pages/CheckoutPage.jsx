@@ -1,44 +1,6 @@
-import { Trash2, CreditCart, Banknote, MapPin } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useCartContext } from "../../../context/cartContext.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
-import { resolveProductPrice } from "../../products/utils/product.js";
-
-const PAYMENT_METHODS = [
-  {
-    id: "card",
-    label: "Tarjeta de crédito o débito",
-    description: "Pagos seguros con VISA, Mastercard y AMEX.",
-    icon: CreditCard,
-  },
-  {
-    id: "transfer",
-    label: "Transferencia bancaria",
-    description: "Recibirás los datos de la cuenta automáticamente.",
-    icon: Banknote,
-  },
-  {
-    id: "pickup",
-    label: "Retiro en tienda",
-    description: "Retira tu pedido en nuestro showroom en Santiago.",
-    icon: MapPin,
-  },
-];
-
-const buildItemImage = (item) =>
-  item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
-
-const getItemKey = (item, index) =>
-  item?.id ?? item?.slug ?? item?.name ?? `checkout-item-${index}`;
-
-const INITIAL_FORM_STATE = {
-  fullName: "",
-  email: "",
-  phone: "",
-  address: "",
-  city: "",
-  region: "",
-  postalCode: "",
-};
 
 export const CheckoutPage = () => {
   const { cartItems, total, removeFromCart, updateQuantity, clearCart } = useCartContext();
@@ -52,27 +14,6 @@ export const CheckoutPage = () => {
     clearCart();
     alert("¡Gracias por tu compra! 🛍️");
   };
-
-  const subtotalLabel = useMemo(
-    () => (hasItems ? `${cartItems.length} producto${cartItems.length === 1 ? "" : "s"}` : "0 productos"),
-    [cartItems.length, hasItems],
-  );
-
-  const summaryItems = useMemo(
-    () =>
-      cartItems.map((item) => {
-        const price = resolveProductPrice(item) ?? 0;
-        return {
-          label: item.name ?? "Producto",
-          quantity: item.quantity ?? 1,
-          price,
-          total: price * (Number(item.quantity) || 1),
-          image: buildItemImage(item),
-          id: getItemKey(item, item.id ?? 0),
-        };
-      }),
-    [cartItems],
-  );
 
   return (
     <div className="min-h-screen bg-light px-8 py-10">
