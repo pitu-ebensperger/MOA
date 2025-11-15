@@ -1,13 +1,15 @@
--- Crear usuario administrador (ejecutar una sola vez o después de limpiar la tabla).
-INSERT INTO usuarios (
-    public_id,
-    nombre,
-    email,
-    telefono,
-    password_hash,
-    rol,
-    rol_code
-)
+SELECT * FROM usuarios;
+-- Crear usuario administrador
+INSERT INTO
+    usuarios (
+        public_id,
+        nombre,
+        email,
+        telefono,
+        password_hash,
+        rol,
+        rol_code
+    )
 VALUES (
     'abc123xyz',
     'Administrador MOA',
@@ -17,3 +19,6 @@ VALUES (
     'admin',
     'ADMIN'
 );
+TRUNCATE TABLE usuarios RESTART IDENTITY;
+
+DROP TABLE categorias;

@@ -7,7 +7,7 @@ const ADMIN_PROFILE = {
   nombre: "Administrador MOA",
   email: "admin@moa.cl",
   telefono: "+56900000000",
-  password: process.env.ADMIN_PASSWORD ?? "admin123",
+  password: process.env.ADMIN_PASSWORD,
   rol: "admin",
   rol_code: "ADMIN",
 };
