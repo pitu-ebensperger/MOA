@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { productsApi } from "../../products/services/products.api.js";
+import { productsApi } from "../../../services/products.api.js";
 
 const ADMIN_PRODUCTS_QUERY_KEY = ["admin-products"];
 

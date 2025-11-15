@@ -10,7 +10,7 @@ export function useRedirectAfterAuth() {
 
   const go = () => {
     if (isAdmin) navigate(ROUTES.admin.dashboard, { replace: true });
-    else navigate(from || ROUTES.profile, { replace: true });
+    else navigate(from || ROUTES.auth.profile, { replace: true });
   };
 
   return go;

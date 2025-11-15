@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User as UserIcon, Phone } from 'lucide-react';
-import { useAuth } from '../../auth/context/AuthContext.jsx';
+import { useAuth } from '../../../context/AuthContext.jsx';
 
 export default function RegisterPage({ onRegister }) {
   const navigate = useNavigate();

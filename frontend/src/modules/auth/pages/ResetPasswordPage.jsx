@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import { Lock } from 'lucide-react'
-import { resetPassword } from '../services/auth.api.js'
+import { resetPassword } from '../../../services/auth.api.js'
+import { API_PATHS } from '../../../config/api-paths.js'
 
 export default function ResetPasswordPage(){
   const navigate = useNavigate()
@@ -16,7 +17,7 @@ export default function ResetPasswordPage(){
   useEffect(() => {
     if (!token) {
       Swal.fire({ icon: 'error', title: 'Token faltante', text: 'Link inválido o incompleto.' })
-        .then(()=> navigate('/forgot-password'))
+        .then(()=> navigate(API_PATHS.auth.forgot))
     }
   }, [token, navigate])
 

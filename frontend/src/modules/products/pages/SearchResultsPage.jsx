@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import ProductCard from "../components/ProductCard.jsx";
+import { API_PATHS } from "../../../config/api-paths.js";
 
 const SAMPLE_PRODUCT = {
   id: "sample-1",
@@ -15,7 +16,7 @@ const SearchResultsPage = () => (
       className="mb-6"
       items={[
         { label: "Inicio", href: "/" },
-        { label: "Productos", href: "/products" },
+        { label: "Productos", href: API_PATHS.products.products },
         { label: "Búsqueda" },
       ]}
     />

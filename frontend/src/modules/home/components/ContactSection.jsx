@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { API_PATHS } from "../../../config/api-paths.js";
 
 const backgroundImageUrl =
   "https://images.unsplash.com/photo-1650370363832-c6a735a7abf0?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop";
@@ -30,7 +31,7 @@ export default function ContactSection() {
             Cuéntanos qué necesitas: estamos atentos para coordinar una llamada,
             brindar asesoría o preparar una muestra especialmente pensada para ti.
           </p>
-          <Link to="/contact"
+          <Link to={API_PATHS.support.contact}
             className="inline-flex items-center rounded-full border border-white/70 bg-white px-8 py-3 text-base font-semibold text-black transition hover:bg-white/90">
             Escríbenos →
           </Link>

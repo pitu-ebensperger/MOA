@@ -12,6 +12,7 @@ import ProductCard from "../../products/components/ProductCard.jsx";
 import { TanstackDataTable } from "../../../components/data-display/DataTable.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
+import { API_PATHS } from "../../../config/api-paths.js";
 
 const colorTokens = [
   {
@@ -174,7 +175,7 @@ const USAGE_REFERENCES = {
     "SearchBar: botón lupa del Navbar abre el overlay",
   ],
   pageComponents: [
-    "CategoriesCard: hero y tarjetas destacadas en `/categories` y home",
+    "CategoriesCard: hero y tarjetas destacadas en `/categorias` y home",
     "ProductCard: listados de productos en home, catálogo y búsquedas",
   ],
 };
@@ -236,7 +237,7 @@ const HOVER_PREVIEWS = [
 
 const SAMPLE_BREADCRUMBS = [
   { label: "Inicio", href: "/" },
-  { label: "Productos", href: "/products" },
+  { label: "Productos", href: API_PATHS.products.products },
   { label: "Guía de estilos", isCurrent: true },
 ];
 
