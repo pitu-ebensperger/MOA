@@ -1,26 +1,19 @@
-SELECT * FROM usuarios;
-
--- Crear usuario administrador
-INSERT INTO
-    usuarios (
-        public_id,
-        nombre,
-        email,
-        telefono,
-        password_hash,
-        rol,
-        rol_code
-    )
+-- Crear usuario administrador (ejecutar una sola vez o después de limpiar la tabla).
+INSERT INTO usuarios (
+    public_id,
+    nombre,
+    email,
+    telefono,
+    password_hash,
+    rol,
+    rol_code
+)
 VALUES (
-        'abc123xyz',
-        'admin',
-        'admin@moa.cl',
-        '123456789',
-        '$2b$10$VJebpB12zPzZaLf7bc3DLebhZUK8cN.HHzKKCxZl1B6ojY/FCRC7W',
-        'admin',
-        'ADMIN'
-    );
-
-TRUNCATE TABLE usuarios RESTART IDENTITY;
-
-DROP TABLE categorias
+    'abc123xyz',
+    'Administrador MOA',
+    'admin@moa.cl',
+    '123456789',
+    '$2b$10$vejGQR/60wieq.KFRWDGdeOlpkpvV1rwMoK0ewU1CmZP91JCuDRKS',
+    'admin',
+    'ADMIN'
+);

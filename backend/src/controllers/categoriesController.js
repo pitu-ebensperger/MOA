@@ -1,4 +1,3 @@
-// backend/src/controllers/categories.controller.js
 import pool from "../../database/config.js";
 
 export async function getCategories(req, res) {

@@ -4,6 +4,6 @@ import { checkRegisterCredentials } from '../src/middleware/verifyCredentials.mi
 
 const router = Router()
 
-router.post('/register', checkRegisterCredentials, registerUser)
+router.post('/registro', checkRegisterCredentials, registerUser)
 
 export default router

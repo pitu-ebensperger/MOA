@@ -33,13 +33,14 @@ export function TanstackDataTable({
     ? { pageIndex: Math.max(0, page - 1), pageSize }
     : undefined;
 
+  const tableState = manualPaginationEnabled
+    ? { sorting, pagination: paginationState }
+    : { sorting };
+
   const table = useReactTable({
     data,
     columns,
-    state: {
-      sorting,
-      pagination: paginationState,
-    },
+    state: tableState,
     // sorting client-side (simple) + notificamos al padre
     onSortingChange: (updater) => {
       setSorting((prev) => {

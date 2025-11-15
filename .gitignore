@@ -20,3 +20,6 @@ snapshots/*.json
 !.vscode/extensions.json
 
 **/styleguide/StyleGuidePage.jsx
+
+scripts/*.jsx
+scripts/*.js

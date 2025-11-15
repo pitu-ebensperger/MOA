@@ -15,7 +15,7 @@ pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.log('Error al conectar la base de datos', err)
   } else {
-    console.log('✅ Base de datos conectada con éxito', res.rows[0])
+    console.log('Base de datos conectada con éxito', res.rows[0])
   }
 })
 

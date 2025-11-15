@@ -1,12 +1,3 @@
-#!/usr/bin/env node
-
-/**
- * Usage: node scripts/list-merge-conflicts.js <branch-a> <branch-b>
- *
- * Prints the list of files that would have textual merge conflicts when
- * combining <branch-a> into <branch-b> (or vice versa).
- */
-
 const { execSync } = require('node:child_process');
 
 const [branchA, branchB] = process.argv.slice(2);
