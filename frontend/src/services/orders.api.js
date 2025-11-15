@@ -1,10 +1,8 @@
-//path: src/services/orders.api.js
 import { env } from "../config/env.js";
 import { API_PATHS } from "../config/api-paths.js";
 import { apiClient } from "./api-client.js";
 import { delay } from "../utils/delay.js";
 
-// Importamos EXACTO tu archivo real
 import { customersDb } from "../mocks/database/customers.js";
 import { ordersDb } from "../mocks/database/orders.js";
 
@@ -50,7 +48,6 @@ const normalizeOrder = (raw = {}, extra = {}) => {
     paymentId: raw.paymentId ?? null,
     shipmentId: raw.shipmentId ?? null,
 
-    // Información enriquecida desde mocks
     items: extra.items ?? [],
     payment: extra.payment ?? null,
     shipment: extra.shipment ?? null,

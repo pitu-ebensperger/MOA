@@ -24,7 +24,8 @@
     "cssstyle": "^2.3.0",
     "gh-pages": "^5.0.0",
     "jsdom": "^27.1.0",
-    "vite-node": "^5.0.0"
+    "vite-node": "^5.0.0",
+     "gh-pages": "^5.0.0"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.7",

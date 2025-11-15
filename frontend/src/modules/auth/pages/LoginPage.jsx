@@ -20,6 +20,15 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+/* // Validaciones básicas
+    const ve = validateEmail(email);
+    const vp = validatePassword(password, 6);
+    const nextErrors = {};
+    console.log(ve, vp)
+    if (!ve) nextErrors.email = ve.error || 'Email no válido';
+    if (!vp) nextErrors.password = vp.error || 'Contraseña inválida';
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) return; */
     try {
       setSubmitting(true);
       setServerError('');

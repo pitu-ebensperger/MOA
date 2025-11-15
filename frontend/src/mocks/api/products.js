@@ -12,9 +12,10 @@ const cloneProduct = (p) => ({
   tags: Array.isArray(p.tags) ? [...p.tags] : [],
   materials: Array.isArray(p.materials) ? [...p.materials] : [],
 });
-const cloneCollection = (c) => ({
-  ...c,
-  productIds: Array.isArray(c.productIds) ? [...c.productIds] : [],
+
+const cloneCollection = (collection) => ({
+  ...collection,
+  productIds: Array.isArray(collection.productIds) ? [...collection.productIds] : [],
 });
 
 const db = {
@@ -23,7 +24,96 @@ const db = {
   collections: COLLECTIONS.map(cloneCollection),
 };
 
-const s = (v) => (v == null ? "" : String(v));
+const CATEGORY_SLUG_TO_ID = new Map(
+  catalogDb.categories
+    .filter((category) => typeof category.slug === "string")
+    .map((category) => [category.slug.toLowerCase(), category.id]),
+);
+
+const toNumber = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const matchesText = (product, text) => {
+  if (!text) return true;
+  const haystack = [
+    product.name,
+    product.shortDescription,
+    product.description,
+    product.tags?.join(" "),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return haystack.includes(text.toLowerCase());
+};
+
+const resolveCategoryTarget = (value) => {
+  if (value === undefined || value === null || value === ALL_CATEGORY_ID) return null;
+  const numeric = toNumber(value);
+  if (numeric !== null) return numeric;
+  if (typeof value === "string" && value.trim()) {
+    const normalized = value.toLowerCase();
+    if (CATEGORY_SLUG_TO_ID.has(normalized)) {
+      return CATEGORY_SLUG_TO_ID.get(normalized);
+    }
+  }
+  return null;
+};
+
+const matchesCategory = (product, categoryValue) => {
+  if (!categoryValue || categoryValue === ALL_CATEGORY_ID) return true;
+  const pool = buildProductCategoryPool(product);
+  if (!pool.length) return false;
+
+  const targetId = resolveCategoryTarget(categoryValue);
+  if (targetId !== null) {
+    return pool.some((id) => Number(id) === targetId);
+  }
+
+  const normalized = String(categoryValue).toLowerCase();
+  return pool.some((id) => String(id).toLowerCase() === normalized);
+};
+
+const matchesCollection = (product, collectionId) => {
+  if (!collectionId) return true;
+  const productCollection = product?.fk_collection_id;
+  if (productCollection === undefined || productCollection === null) return false;
+
+  const targetNumber = toNumber(collectionId);
+  if (targetNumber !== null) {
+    return Number(productCollection) === targetNumber;
+  }
+  const normalized = String(collectionId).toLowerCase();
+  return String(productCollection).toLowerCase() === normalized;
+};
+
+const matchesPrice = (product, minPrice, maxPrice) => {
+  const price = Number(product.price ?? 0);
+  if (Number.isFinite(minPrice) && price < minPrice) return false;
+  if (Number.isFinite(maxPrice) && price > maxPrice) return false;
+  return true;
+};
+
+const sortProducts = (products, sortBy) => {
+  if (!sortBy) return products;
+  const copy = [...products];
+  switch (sortBy) {
+    case "price-asc":
+      return copy.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+    case "price-desc":
+      return copy.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+    case "name-asc":
+      return copy.sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    case "newest":
+      return copy.sort(
+        (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
+      );
+    default:
+      return products;
+  }
+};
 
 const normalizeIncomingProduct = (payload = {}) => {
   if (payload.id === undefined || payload.id === null) {
@@ -38,11 +128,12 @@ const normalizeIncomingProduct = (payload = {}) => {
       ? [payload.imgUrl]
       : [];
 
-  const tags = Array.isArray(payload.tags)
-    ? payload.tags
-    : typeof payload.tags === "string"
-    ? payload.tags.split(",").map((t) => t.trim()).filter(Boolean)
-    : [];
+  const tags =
+    Array.isArray(payload.tags) && payload.tags.length
+      ? payload.tags
+      : typeof payload.tags === "string"
+        ? payload.tags.split(",").map((tag) => tag.trim()).filter(Boolean)
+        : [];
 
   const materials = Array.isArray(payload.materials)
     ? payload.materials
@@ -62,7 +153,11 @@ const normalizeIncomingProduct = (payload = {}) => {
     description: payload.description ?? "",
     imgUrl: payload.imgUrl ?? gallery[0] ?? null,
     gallery,
-    badge: Array.isArray(payload.badge) ? payload.badge : payload.badge ? [payload.badge] : [],
+    badge: Array.isArray(payload.badge)
+      ? payload.badge
+      : payload.badge
+        ? [payload.badge]
+        : [],
     status: payload.status ?? "activo",
     tags,
     material: payload.material ?? materials[0] ?? null,
@@ -71,6 +166,7 @@ const normalizeIncomingProduct = (payload = {}) => {
     dimensions: payload.dimensions ?? null,
     weight: payload.weight ?? null,
     specs: payload.specs ?? null,
+    variantOptions: Array.isArray(payload.variantOptions) ? payload.variantOptions : [],
     fk_category_id: payload.fk_category_id ?? null,
     fk_collection_id: payload.fk_collection_id ?? null,
     collection: payload.collection ?? null,
@@ -101,22 +197,18 @@ export const mockCatalogApi = {
     const numericMin = toNum(minPrice);
     const numericMax = toNum(maxPrice);
 
-    const categoryMatch = createCategoryMatcher(db.categories);
-
-    const filtered = db.products.filter(
-      (p) =>
-        matchesText(p, q) &&
-        categoryMatch(p, categoryId) &&
-        matchesCollection(p, collectionId) &&
-        matchesPrice(p, numericMin, numericMax) &&
-        matchesStatus(p, status),
+    const filtered = catalogDb.products.filter(
+      (product) =>
+        matchesText(product, q) &&
+        matchesCategory(product, categoryId) &&
+        matchesCollection(product, collectionId) &&
+        matchesPrice(product, numericMin, numericMax),
     );
 
-    const sorted = sortProducts(filtered, sortBy, sortDir);
-
-    const off = Math.max(0, (Number(page) - 1) * Number(pageSize));
-    const lim = Math.max(1, Number(pageSize));
-    const items = sorted.slice(off, off + lim);
+    const sorted = sortProducts(filtered, sortBy);
+    const safeOffset = Math.max(0, Number(offset) || 0);
+    const safeLimit = Number.isFinite(Number(limit)) && Number(limit) > 0 ? Number(limit) : null;
+    const items = safeLimit === null ? sorted : sorted.slice(safeOffset, safeOffset + safeLimit);
 
     return {
       items,
@@ -164,16 +256,19 @@ export const mockCatalogApi = {
     if (parentId === undefined || parentId === null) {
       return db.categories.map((c) => ({ ...c }));
     }
-    const pid = toNum(parentId);
-    return db.categories
-      .filter((c) => (pid !== null ? c.parentId === pid : s(c.parentId ?? "") === s(parentId)))
-      .map((c) => ({ ...c }));
+    const normalizedParent = toNumber(parentId);
+    return catalogDb.categories
+      .filter((category) => {
+        if (normalizedParent !== null) return category.parentId === normalizedParent;
+        return String(category.parentId ?? "") === String(parentId);
+      })
+      .map((category) => ({ ...category }));
   },
 
   async listCollections() {
     await delay();
-    return db.collections.map((col) => {
-      const ids = Array.isArray(col.productIds) ? col.productIds : [];
+    return catalogDb.collections.map((collection) => {
+      const productIds = Array.isArray(collection.productIds) ? collection.productIds : [];
       return {
         ...col,
         products: ids.map((id) => db.products.find((p) => p.id === id)).filter(Boolean),

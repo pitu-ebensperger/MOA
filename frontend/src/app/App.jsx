@@ -80,7 +80,7 @@ export const App = () => {
           </Route>
         </Routes>
       </main>
-      {!isAdminRoute && <Footer />}
+      <Footer />
     </div>
   )
 }
