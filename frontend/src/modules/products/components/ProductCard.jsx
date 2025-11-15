@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
+import { API_PATHS } from "../../../config/api-paths.js";
 
 import Button from "../../../components/ui/Button.jsx";
 import Badge from "../../../components/ui/Badge.jsx";
@@ -23,7 +24,8 @@ export default function ProductCard({
   const displayImage = imgUrl ?? gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
   const displayPrice = price ?? 50000;
   const productSlug = slug ?? (id ? String(id) : null);
-  const href = productSlug ? `/products/${productSlug}` : "/products";
+  const baseProductsPath = API_PATHS.products.products;
+  const href = productSlug ? API_PATHS.products.productDetail(productSlug) : baseProductsPath;
 
   const [isLiked, setIsLiked] = useState(Boolean(isInWishlist));
   const [isHovered, setIsHovered] = useState(false);

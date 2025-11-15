@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { MoveRight } from "lucide-react";
+import { API_PATHS } from "../../../config/api-paths.js";
 
 const VARIANT_STYLES = {
   hero: {
@@ -25,9 +26,10 @@ export function CategoriesCard({ category, variant = "default" }) {
 
   const resolvedCategoryParam =
     category?.slug ?? (category?.id !== undefined ? String(category.id) : null);
+  const baseProductsPath = API_PATHS.products.products;
   const targetHref = resolvedCategoryParam
-    ? `/products?category=${encodeURIComponent(resolvedCategoryParam)}`
-    : "/products";
+    ? `${baseProductsPath}?category=${encodeURIComponent(resolvedCategoryParam)}`
+    : baseProductsPath;
 
   return (
     <article

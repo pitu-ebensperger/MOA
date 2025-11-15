@@ -2,6 +2,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 
 import { Navbar } from '../components/layout/Navbar.jsx'
 import { Footer } from '../components/layout/Footer.jsx'
+import { API_PATHS } from '../config/api-paths.js'
 
 import { HomePage } from '../modules/home/pages/HomePage.jsx'
 import { CategoriesPage } from '../modules/categories/pages/CategoriesPage.jsx'
@@ -43,41 +44,43 @@ import '../styles/components/buttons.css'
 export const App = () => {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const { home, auth, products, support, admin } = API_PATHS
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-[var(--color-light)]">
+    <div className="min-h-screen w-full overflow-x-hidden bg-(--color-light)">
       {!isAdminRoute && <Navbar />}
       {!isAdminRoute && <CartDrawer />}
       <ScrollToTop />
       <main className='main w-full'>
         <Routes>
-          <Route path='/'           element={<HomePage />} />
-          <Route path='/home'       element={<HomePage />} />
-          <Route path='/cart'       element={<CartPage />} />
-          <Route path='/checkout'   element={<CheckoutPage />} />
-          <Route path='/categories' element={<CategoriesPage />} />
-          <Route path='/products' element={<ProductsPage />} />
-          <Route path='/products/:id' element={<ProductDetailPage />} />
-          <Route path='/login' element={<LoginPage />} />
-          <Route path='/register' element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/' element={<HomePage />} />
+          <Route path={home.landing} element={<HomePage />} />
+          <Route path='/cart' element={<CartPage />} />
+          <Route path='/checkout' element={<CheckoutPage />} />
+          <Route path={products.categories} element={<CategoriesPage />} />
+          <Route path={products.products} element={<ProductsPage />} />
+          <Route path={products.productDetail(':id')} element={<ProductDetailPage />} />
+          <Route path={auth.login} element={<LoginPage />} />
+          <Route path={auth.register} element={<RegisterPage />} />
+          <Route path={auth.forgot} element={<ForgotPasswordPage />} />
+          <Route path={auth.reset} element={<ResetPasswordPage />} />
+          <Route path={auth.profile} element={<ProfilePage />} />
           <Route path='/wishlist' element={<WishlistPage />} />         
-          <Route path='/contact'    element={<ContactPage />} /> 
-          <Route path='/privacy'    element={<PrivacyPage />} /> 
-          <Route path='/terms'      element={<TermsPage/>} /> 
-          <Route path='/faq'        element={<FAQPage />} /> 
-          <Route path='/style-guide/*' element={<StyleGuidePage />} />
+          <Route path={support.contact} element={<ContactPage />} /> 
+          <Route path={support.privacy} element={<PrivacyPage />} /> 
+          <Route path={support.terms} element={<TermsPage />} /> 
+          <Route path={support.faq} element={<FAQPage />} /> 
           <Route path='*' element={<NotFoundPage />} />
 
           <Route element={<AdminRoute />}>
-            <Route path="/admin/dashboard"  element={<EntornoAdmin> <AdminDashboardPage /> </EntornoAdmin>} />
-            <Route path="/admin/orders"     element={<EntornoAdmin> <OrdersPage /> </EntornoAdmin>} />
-            <Route path="/admin/products"   element={<EntornoAdmin> <AdminProductsPage /> </EntornoAdmin>}  />
-            <Route path="/admin/customers"  element={<EntornoAdmin> <CustomersPage /> </EntornoAdmin>} />
-            <Route path="/admin/settings"   element={<EntornoAdmin> <AdminSettingsPage /> </EntornoAdmin>}  />
+            <Route path={admin.dashboard} element={<EntornoAdmin> <AdminDashboardPage /> </EntornoAdmin>} />
+            <Route path={admin.orders} element={<EntornoAdmin> <OrdersPage /> </EntornoAdmin>} />
+            <Route path={admin.products} element={<EntornoAdmin> <AdminProductsPage /> </EntornoAdmin>} />
+            <Route path={admin.customers} element={<EntornoAdmin> <CustomersPage /> </EntornoAdmin>} />
+            <Route path={admin.settings} element={<EntornoAdmin> <AdminSettingsPage /> </EntornoAdmin>} />
           </Route>
+
+          <Route path='/style-guide/*' element={<StyleGuidePage />} />
         </Routes>
       </main>
       <Footer />
