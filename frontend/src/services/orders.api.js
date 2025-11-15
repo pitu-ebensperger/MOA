@@ -177,7 +177,7 @@ const remoteOrdersApi = {
   async list(params = {}) {
     const query = buildQueryString(params);
     const data = await apiClient.private.get(
-      `${API_PATHS.orders.root}${query}`
+      `${API_PATHS.admin.orders}${query}`
     );
 
     const rawItems = Array.isArray(data.items) ? data.items : [];
@@ -195,7 +195,7 @@ const remoteOrdersApi = {
     if (!id) throw new Error("order id is required");
 
     const data = await apiClient.private.get(
-      API_PATHS.orders.detail(id)
+      `${API_PATHS.admin.orders}/${id}`
     );
 
     return normalizeOrder(data, data);

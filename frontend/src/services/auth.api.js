@@ -1,6 +1,11 @@
 import { apiClient } from './api-client.js'
 import { API_PATHS } from '../config/api-paths.js'
 
+const buildProfilePath = (userId) =>
+  userId
+    ? API_PATHS.profile.root(userId)
+    : API_PATHS.auth.profile ?? '/auth/perfil'
+
 // Auth API agrupada
 export const authApi = {
   // POST /auth/login
@@ -16,8 +21,9 @@ export const authApi = {
   },
 
   // GET /auth/profile (requiere token)
-  profile: async () => {
-    const res = await apiClient.private.get(API_PATHS.auth.profile)
+  profile: async (userId) => {
+    const endpoint = buildProfilePath(userId)
+    const res = await apiClient.private.get(endpoint)
     return res?.data ?? res
   },
 
