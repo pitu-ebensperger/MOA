@@ -1,5 +1,5 @@
 import pool from "../config.js";
-import { CATEGORIES } from "./categories.seed.js";
+import { CATEGORIES } from "./categoriesSeed.js";
 
 async function seedCategorias() {
   try {
