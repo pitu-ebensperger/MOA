@@ -1,7 +1,7 @@
 //path/frontend/src/modules/admin/utils/productsColumns.jsx
 import { AlertTriangle, Edit3, Eye, Trash2 } from "lucide-react";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
-import Button from "../../../components/ui/Button.jsx";
+import { IconButton } from "../../../components/ui/Button.jsx";
 
 const LOW_STOCK_THRESHOLD = 8;
 
@@ -118,33 +118,27 @@ export function buildProductColumns({ onView, onEdit, onDelete, categoryMap }) {
         const product = row.original;
         return (
           <div className="flex items-center justify-end gap-2 px-1 py-2">
-            <Button
-              variant="icon"
+            <IconButton
               size="sm"
-              className="text-secondary focus-visible:ring-2"
-              onClick={() => onView?.(product)}
+              intent="neutral"
               aria-label={`Ver ${product.name}`}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="icon"
+              icon={<Eye className="h-4 w-4" />}
+              onClick={() => onView?.(product)}
+            />
+            <IconButton
               size="sm"
-              className="text-(--text-weak) hover:text-(--text-strong)"
-              onClick={() => onEdit?.(product)}
+              intent="accent"
               aria-label={`Editar ${product.name}`}
-            >
-              <Edit3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="icon"
+              icon={<Edit3 className="h-4 w-4" />}
+              onClick={() => onEdit?.(product)}
+            />
+            <IconButton
               size="sm"
-              className="text-rose-500 hover:text-rose-700"
-              onClick={() => onDelete?.(product)}
+              intent="danger"
               aria-label={`Eliminar ${product.name}`}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+              icon={<Trash2 className="h-4 w-4" />}
+              onClick={() => onDelete?.(product)}
+            />
           </div>
         );
       },

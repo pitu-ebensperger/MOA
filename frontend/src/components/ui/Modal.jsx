@@ -16,6 +16,7 @@ export function Modal({
   footer,
 }) {
   const panelRef = useRef(null);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
@@ -23,8 +24,34 @@ export function Modal({
       if (event.key === "Escape") onClose?.();
     };
     window.addEventListener("keydown", handleKeyDown);
+
+    // Smooth enter animation
+    const panel = panelRef.current;
+    const overlay = overlayRef.current;
+    if (panel) {
+      const baseTransition = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease-out";
+      panel.style.transition = baseTransition;
+      panel.style.opacity = 0;
+      if (placement === "right") {
+        panel.style.transform = "translateX(24px)";
+      } else {
+        panel.style.transform = "translateY(8px) scale(0.98)";
+      }
+      requestAnimationFrame(() => {
+        panel.style.opacity = 1;
+        panel.style.transform = "translateX(0) translateY(0) scale(1)";
+      });
+    }
+    if (overlay) {
+      overlay.style.transition = "opacity 200ms ease-out";
+      overlay.style.opacity = 0;
+      requestAnimationFrame(() => {
+        overlay.style.opacity = 1;
+      });
+    }
+
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, onClose]);
+  }, [open, onClose, placement]);
 
   if (!open) return null;
 
@@ -54,7 +81,7 @@ export function Modal({
 
   return (
     <div className={containerClass} aria-modal="true" role="dialog">
-      <div className="absolute inset-0 bg-black/20" onClick={handleOverlayClick} />
+      <div ref={overlayRef} className="absolute inset-0 bg-black/20" onClick={handleOverlayClick} />
       <div ref={panelRef} className={panelClasses} onClick={handlePanelClick}>
         {(title || showCloseButton) && (
           <div

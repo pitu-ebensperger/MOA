@@ -1,19 +1,27 @@
 import express from "express";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-import categoriesRouter from "./routes/categoriesRoutes.js";
+dotenv.config();
 
-import userRoutes from "./routes/usersRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-
-const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use("/categories", categoriesRouter);
 
+let PORT = process.env.PORT || 4000;
+app.listen(PORT, () => { console.log(`Servidor corriendo en puerto ${PORT}`);
+});
+
+
+/* ----------------------------------------------------------------------------------------------------------- */
+
+import categoriesRouter from "./routes/categoriesRoutes.js";
+import userRoutes from "./routes/usersRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+
+app.use("/categories", categoriesRouter);
 app.use(userRoutes);
 app.use(authRoutes);
 
-app.listen(PORT, console.log(`🔥 Server on http://localhost:${PORT}`));

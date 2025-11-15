@@ -8,8 +8,11 @@ const USER_KEY  = "moa.user";
 const STATUS = { IDLE: "idle", LOADING: "loading", AUTH: "authenticated" };
 
 // Permite que el backend cambie nombre/campo del rol sin romper front
-const isAdminRole = (user) =>
-  user?.role === "admin" || user?.rol === "admin" || user?.role_code === "ADMIN";
+export const isAdminRole = (user) =>
+  user?.role === "admin" ||
+  user?.rol === "admin" ||
+  user?.role_code === "ADMIN" ||
+  user?.rol_code === "ADMIN";
 
 const safeParseJson = (value) => {
   try { return JSON.parse(value); } catch { return null; }
@@ -87,10 +90,17 @@ export const AuthProvider = ({ children }) => {
     async (credentials) => {
       setStatus(STATUS.LOADING);
       setError(null);
-      const { token: nextToken, user: profile } = await authApi.login(credentials);
-      syncToken(nextToken);
-      syncUser(profile);
-      setStatus(STATUS.AUTH);
+      try {
+        const { token: nextToken, user: profile } = await authApi.login(credentials);
+        syncToken(nextToken);
+        syncUser(profile);
+        setStatus(STATUS.AUTH);
+        return profile;
+      } catch (err) {
+        setError(err);
+        setStatus(STATUS.IDLE);
+        throw err;
+      }
     },
     [syncToken, syncUser],
   );
@@ -99,10 +109,19 @@ export const AuthProvider = ({ children }) => {
     async (payload) => {
       setStatus(STATUS.LOADING);
       setError(null);
-      const { token: nextToken, user: profile } = await authApi.register(payload);
-      syncToken(nextToken);
-      syncUser(profile);
-      setStatus(STATUS.AUTH);
+      try {
+        const response = await authApi.register(payload);
+        const nextToken = response?.token ?? null;
+        const profile = response?.user ?? null;
+        syncToken(nextToken);
+        syncUser(nextToken ? profile : null);
+        setStatus(nextToken ? STATUS.AUTH : STATUS.IDLE);
+        return response;
+      } catch (err) {
+        setError(err);
+        setStatus(STATUS.IDLE);
+        throw err;
+      }
     },
     [syncToken, syncUser],
   );

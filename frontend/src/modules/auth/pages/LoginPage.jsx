@@ -3,8 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth.jsx';
 import { useRedirectAfterAuth } from '../../auth/hooks/useRedirectAuth.jsx';
-import Button from '../../../components/ui/Button.jsx';
+import { Button } from '../../../components/ui/Button.jsx';
 import { API_PATHS } from '../../../config/api-paths.js';
+import { isAdminRole } from '../../../context/AuthContext.jsx';
 
 
 export default function LoginPage() {
@@ -33,8 +34,8 @@ export default function LoginPage() {
     try {
       setSubmitting(true);
       setServerError('');
-      await login({ email, password }); // AuthContext guarda token+user
-      redirect();                        // redirige por rol
+      const profile = await login({ email, password }); // AuthContext guarda token+user
+      redirect({ adminOverride: isAdminRole(profile) });                        // redirige por rol
     } catch (err) {
       setServerError(err?.data?.message || 'Credenciales inválidas');
     } finally {
@@ -95,7 +96,8 @@ export default function LoginPage() {
             <div className='flex flex-col items-center justify-center w-full'> 
               <Button
                 type="submit"
-                variant="primary-round"
+                shape="pill"
+                motion="lift"
                 className="font-regular px-5 mt-2 mb-0 mx-0 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={submitting}
               >

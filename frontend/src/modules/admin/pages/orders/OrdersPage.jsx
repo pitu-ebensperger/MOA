@@ -53,13 +53,6 @@ export default function OrdersPage() {
           >
             <RefreshCw className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-full bg-(--color-primary1) px-3 py-2 text-sm text-white hover:opacity-90"
-          >
-            <Plus className="h-4 w-4" />
-            Nueva orden
-          </button>
         </div>
       </div>
 

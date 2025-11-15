@@ -63,10 +63,13 @@ html:focus-within { scroll-behavior: smooth; }
 
 /* INPUT */
 input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, transparent); }
+input:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary1,#6B5444) 40%, transparent); outline-offset: 2px; }
+
 
 /* SLIDER */
 .slider-handle { height: 18px; width: 18px; border-radius: 9999px; background: var(--color-primary1, #6B5444);  border: 2px solid #fffefb;  box-shadow: 0 2px 6px rgba(17, 24, 39, 0.25);   cursor: pointer; }
 .slider-handle:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary1,#6B5444) 40%, transparent); outline-offset: 2px; }
+
 
 
 
@@ -106,7 +109,6 @@ input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, tra
 
 .nav-icon-bg{ border-radius: 9999px; padding: calc(var(--spacing) * 2); }
 .nav-icon-bg:hover{ background-color: var(--color-light); }
-
 .nav-icon { height: 20px; width: 20px; color: var(--color-secondary1);}
 
 .cart-badge{
@@ -187,7 +189,6 @@ input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, tra
 .bg-image { background-image: var(--bg-image);}
 
 
-
 /* BORDERS */
 
 .border-primary1 { border-color: var(--color-primary1); }
@@ -204,11 +205,19 @@ input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, tra
 .border-success { border-color: var(--color-success); }
 .border-warning { border-color: var(--color-warning); }
 
+.border-radius-sm { border-radius: var(--radius-sm); }
+.border-radius-md { border-radius: var(--radius-md); }
+.border-radius-lg { border-radius: var(--radius-lg); }
+.border-radius-xl { border-radius: var(--radius-xl); }
+.border-radius-full { border-radius: 9999px; }
+
 
 /* FOCUS RINGS */
 .focus-ring-primary:focus-visible { box-shadow: 0 0 0 0.25rem rgba(174, 133, 80, 0.35); }
 
 .focus-ring-secondary:focus-visible { box-shadow: 0 0 0 0.25rem rgba(88, 64, 46, 0.35); }
+.focus-ring-dark:focus-visible { box-shadow: 0 0 0 0.25rem rgba(17, 24, 39, 0.35); }
+
 
 
 /* OVERLAY  & GRADIENTS*/
@@ -221,6 +230,9 @@ input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, tra
 .overlay-soft { background-color: var(--overlay-soft); }
 
 .card-gradient-overlay { background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent); }
+
+
+
 
 
 /* LAYOUT & SPACING*/
@@ -314,3 +326,4 @@ input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, tra
   cursor: not-allowed;
   opacity: 0.4;
 }
+

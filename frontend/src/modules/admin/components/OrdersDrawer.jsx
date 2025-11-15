@@ -2,10 +2,14 @@ import React from "react";
 import { Modal } from "../../../components/ui/Modal.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { StatusPill } from "../../../components/ui/StatusPill.jsx";
+import { Accordion } from "../../../components/ui/Accordion.jsx";
+import { Pill } from "../../../components/ui/Pill.jsx";
 import { formatDate_ddMMyyyy } from "../../../utils/date.js";
+import { CalendarDays, PackageCheck, Truck } from "lucide-react";
 
 // Helpers pequeños para no ensuciar el JSX
-const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "-");
+const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
+const safeText = (v) => (v == null || v === "" ? "–" : v);
 
 export default function OrdersDrawer({ open, order, onClose }) {
   // Si no hay orden seleccionada, no mostramos nada
@@ -18,6 +22,7 @@ export default function OrdersDrawer({ open, order, onClose }) {
     items = [],
     payment,
     shipment,
+    address,
     userName,
     userEmail,
     userPhone,
@@ -30,6 +35,34 @@ export default function OrdersDrawer({ open, order, onClose }) {
   const paymentMethod = payment?.provider ?? payment?.method ?? "—";
   const deliveryService = shipment?.carrier ?? "—";
   const shippingStatus = shipment?.status ?? "—";
+  const deliveredAt = shipment?.deliveredAt ?? null;
+  const shippedAt = shipment?.shippedAt ?? null;
+  const tracking = shipment?.trackingNumero ?? shipment?.trackingNumber ?? null;
+  // Link de tracking se removió por solicitud; mantenemos sólo el número.
+  const fullAddress = address
+    ? [
+        address.street,
+        [address.commune, address.city].filter(Boolean).join(", "),
+        [address.region, address.country].filter(Boolean).join(", "),
+        address.postalCode,
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : null;
+
+  // Stepper helpers -----------------------------------------------------------------------------------------------
+  const shippingCurrentStep = (() => {
+    if (shipment?.status === "cancelled" || status === "cancelled") return 0;
+    if (deliveredAt) return 2;
+    if (shippedAt || shipment?.status === "in_transit" || shipment?.status === "processing" || shipment?.status === "preparing") return 1;
+    return 0; // creada
+  })();
+
+  const steps = [
+    { key: "created", label: "Creada", date: createdAt, icon: CalendarDays },
+    { key: "shipped", label: "Enviada", date: shippedAt, icon: Truck },
+    { key: "delivered", label: "Entregada", date: deliveredAt, icon: PackageCheck },
+  ];
 
   return (
     <Modal
@@ -38,216 +71,205 @@ export default function OrdersDrawer({ open, order, onClose }) {
       variant="drawer"          // usamos modo drawer
       placement="right"         // anclado a la derecha
       ariaLabel="Detalle de orden"
-      className="w-full max-w-2xl" // ancho similar al ejemplo
+      className="w-full max-w-[720px]" // un poco más ancho para respirar
     >
-      <div className="flex h-full flex-col bg-[var(--color-neutral2)] text-[color:var(--color-text)]">
-        {/* Header */}
-        <header className="flex items-start justify-between border-b border-[color:var(--color-border)] px-6 py-4">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-[color:var(--color-text-muted)]">
-              Detalle de orden
+  <div className="flex h-full flex-col bg-(--color-neutral2) text-(--color-text)">
+        {/* Header (sticky) */}
+  <header className="sticky top-0 z-10 flex items-center justify-between border-b border-(--color-border) bg-white/90 px-6 py-4 backdrop-blur">
+          <div className="min-w-0">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-(--color-text-muted)">
+              Orden
             </p>
-            <h2 className="mt-1 font-mono text-lg font-semibold tracking-tight">
+            <h2 className="mt-0.5 truncate font-mono text-lg font-semibold tracking-tight">
               {number ?? "Orden"}
             </h2>
           </div>
 
-          <div className="flex flex-col items-end gap-1 text-right">
-            <span className="text-xs text-[color:var(--color-text-muted)]">Estado</span>
-            <StatusPill status={status} />
+          <div className="flex items-center gap-4">
+            {/* Delivery date quick glance */}
+            <div className="hidden sm:flex items-center gap-2 rounded-full border border-(--color-border) bg-(--surface-subtle) px-3 py-1.5 text-sm text-(--color-text)">
+              <CalendarDays className="h-4 w-4 text-(--color-text-muted)" />
+              <span className="whitespace-nowrap">
+                {deliveredAt ? `Entrega: ${safeDate(deliveredAt)}` : shippedAt ? `Envío: ${safeDate(shippedAt)}` : "Sin fecha"}
+              </span>
+            </div>
+            <div className="flex flex-col items-end gap-1 text-right">
+              <span className="text-xs text-(--color-text-muted)">Estado</span>
+              <StatusPill status={status} />
+            </div>
           </div>
         </header>
 
         {/* Contenido scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          {/* Items + meta principal */}
-          <section className="grid gap-6 md:grid-cols-2">
-            {/* Items */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-[color:var(--color-text)]">
-                Ítems
-              </h3>
+  <div className="flex-1 overflow-y-auto px-6 py-4">
+          {/* Encabezado compacto con fechas */}
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-(--color-border) bg-white px-4 py-3 shadow-sm">
+              <p className="text-xs uppercase tracking-wide text-(--color-text-muted)">Creada</p>
+              <p className="mt-0.5 text-sm">{safeDate(createdAt)}</p>
+            </div>
+            <div className="rounded-xl border border-(--color-border) bg-white px-4 py-3 shadow-sm">
+              <p className="text-xs uppercase tracking-wide text-(--color-text-muted)">Entrega</p>
+              <p className="mt-0.5 text-sm">
+                {deliveredAt ? safeDate(deliveredAt) : shippedAt ? `${safeDate(shippedAt)} (en tránsito)` : "Pendiente"}
+              </p>
+            </div>
+          </div>
 
-              <div className="divide-y divide-[color:var(--color-border)] rounded-xl border border-[color:var(--color-border)] bg-[var(--color-neutral4)]">
-                {items.length === 0 && (
-                  <div className="px-4 py-3 text-sm text-[color:var(--color-text-muted)]">
-                    Esta orden no tiene ítems registrados.
+          {/* Secciones en acordeón */}
+          <Accordion
+            className="divide-y divide-(--color-border) rounded-2xl border border-(--color-border) bg-white shadow-sm"
+            sections={[
+              {
+                key: "summary",
+                title: "Resumen de la orden",
+                defaultOpen: true,
+                render: () => (
+                  <div className="space-y-3">
+                    <div className="divide-y divide-(--color-border) rounded-lg border border-(--color-border)">
+                      {items.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-(--color-text-muted)">Esta orden no tiene ítems.</div>
+                      )}
+                      {items.map((item, idx) => (
+                        <div key={idx} className="flex items-center gap-3 px-4 py-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-neutral3) text-xs text-(--color-text-muted)">
+                            {item.name?.[0] ?? "?"}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
+                            <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
+                          </div>
+                          <div className="text-right text-sm font-medium tabular-nums">
+                            <Price value={item.unitPrice ?? 0} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Totales */}
+                    <div className="mt-2 space-y-1 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-(--color-text-muted)">Subtotal</span>
+                        <span className="tabular-nums"><Price value={subtotal ?? 0} /></span>
+                      </div>
+                      {!!order.tax && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-(--color-text-muted)">Impuestos</span>
+                          <span className="tabular-nums"><Price value={order.tax} /></span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-(--color-text-muted)">Envío</span>
+                        <span className="tabular-nums"><Price value={shipping ?? 0} /></span>
+                      </div>
+                      <div className="mt-2 flex items-center justify-between border-t border-(--color-border) pt-2 font-medium">
+                        <span>Total</span>
+                        <span className="tabular-nums"><Price value={total ?? payment?.amount ?? 0} /></span>
+                      </div>
+                    </div>
                   </div>
-                )}
-
-                {items.map((item, index) => (
-                  <div key={index} className="flex items-center gap-3 px-4 py-3">
-                    {/* Mini “thumbnail” cuadrado */}
-                    <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[var(--color-neutral3)] text-xs text-[color:var(--color-text-muted)]">
-                      {item.name?.[0] ?? "?"}
-                    </div>
-
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate text-sm font-medium">
-                        {item.name ?? "Producto"}
-                      </span>
-                      <span className="text-xs text-[color:var(--color-text-muted)]">
-                        {item.quantity ?? 1} pcs
-                      </span>
-                    </div>
-
-                    <div className="text-right text-sm font-medium tabular-nums">
-                      <Price value={item.unitPrice ?? 0} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Meta de la orden */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-[color:var(--color-text)]">
-                Información de la orden
-              </h3>
-
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
-                <div className="space-y-0.5">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-text-muted)]">
-                    Creada
-                  </p>
-                  <p>{safeDate(createdAt)}</p>
-                </div>
-
-                <div className="space-y-0.5">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-text-muted)]">
-                    Entrega
-                  </p>
-                  <p>{deliveryService}</p>
-                  <p className="text-xs text-[color:var(--color-text-muted)]">Estado: {shippingStatus}</p>
-                </div>
-
-                <div className="space-y-0.5">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-text-muted)]">
-                    Método de pago
-                  </p>
-                  <p>{paymentMethod}</p>
-                </div>
-
-                <div className="space-y-0.5">
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-text-muted)]">
-                    Monto pagado
-                  </p>
-                  <p className="tabular-nums">
-                    <Price value={payment?.amount ?? total ?? 0} />
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Cliente + Timeline + Resumen de pago */}
-          <section className="mt-6 grid gap-6 md:grid-cols-2">
-            {/* Cliente */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-[color:var(--color-text)]">
-                Cliente
-              </h3>
-
-              <div className="space-y-2 rounded-xl border border-[color:var(--color-border)] bg-[var(--color-neutral4)] px-4 py-3 text-sm">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-text-muted)]">
-                    Nombre
-                  </p>
-                  <p>{userName ?? "—"}</p>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-text-muted)]">
-                    Email
-                  </p>
-                  <p className="break-all text-[color:var(--color-primary1)]">
-                    {userEmail ?? "—"}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-[color:var(--color-text-muted)]">
-                    Teléfono
-                  </p>
-                  <p>{userPhone ?? "—"}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Timeline + resumen pago */}
-            <div className="space-y-4">
-              {/* Timeline simple */}
-              <div>
-              <h3 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">
-                Timeline
-              </h3>
-              <ol className="space-y-3 text-sm">
-                <li className="flex gap-3">
-                    <span className="mt-1 inline-flex h-3 w-3 flex-shrink-0 rounded-full bg-[var(--color-primary1)]" />
+                ),
+              },
+              {
+                key: "customer",
+                title: "Cliente",
+                render: () => (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div>
-                      <p className="font-medium">Orden procesada</p>
-                      <p className="text-xs text-[color:var(--color-text-muted)]">
-                        La orden está siendo preparada.
-                      </p>
+                      <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Nombre</p>
+                      <p className="mt-0.5 text-sm">{safeText(userName)}</p>
                     </div>
-                  </li>
-                  <li className="flex gap-3 opacity-70">
-                    <span className="mt-1 inline-flex h-3 w-3 flex-shrink-0 rounded-full border border-[color:var(--color-border)]" />
                     <div>
-                      <p className="font-medium">Pago confirmado</p>
-                      <p className="text-xs text-[color:var(--color-text-muted)]">
-                        El pago fue procesado y verificado.
-                      </p>
+                      <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Email</p>
+                      <p className="mt-0.5 break-all text-sm text-(--color-primary1)">{safeText(userEmail)}</p>
                     </div>
-                  </li>
-                  <li className="flex gap-3 opacity-70">
-                    <span className="mt-1 inline-flex h-3 w-3 flex-shrink-0 rounded-full border border-[color:var(--color-border)]" />
                     <div>
-                      <p className="font-medium">Orden creada</p>
-                      <p className="text-xs text-[color:var(--color-text-muted)]">
-                        El cliente completó el checkout.
-                      </p>
+                      <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Teléfono</p>
+                      <p className="mt-0.5 text-sm">{safeText(userPhone)}</p>
                     </div>
-                  </li>
-                </ol>
-              </div>
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Método de pago</p>
+                      <p className="mt-0.5 text-sm">{safeText(paymentMethod)}</p>
+                    </div>
+                  </div>
+                ),
+              },
+              {
+                key: "delivery",
+                title: "Envío y entrega",
+                render: () => (
+                  <div className="space-y-4 text-sm">
+                    {/* Stepper */}
+                    <div className="relative">
+                      <ol className="flex items-center justify-between gap-2">
+                        {steps.map((s, idx) => {
+                          const active = idx <= shippingCurrentStep;
+                          const Icon = s.icon;
+                          return (
+                            <li key={s.key} className="flex min-w-0 flex-1 flex-col items-center">
+                              <div className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium ${active ? "bg-(--color-primary1) text-white border-(--color-primary1)" : "bg-white text-(--color-text-muted) border-(--color-border)"}`}>
+                                <Icon className={`h-4 w-4 ${active ? "text-white" : "text-(--color-text-muted)"}`} />
+                              </div>
+                              <span className={`mt-1 text-[12px] ${active ? "text-(--color-primary1)" : "text-(--color-text-muted)"}`}>{s.label}</span>
+                              <span className="mt-0.5 text-[10px] text-(--color-text-muted)">{safeDate(s.date)}</span>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                      {/* progress line */}
+                      <div className="pointer-events-none absolute left-[calc(2rem-2px)] right-[calc(2rem-2px)] top-4 h-[2px] bg-(--color-border)">
+                        <div
+                          className="h-full bg-(--color-primary1) transition-all"
+                          style={{ width: `${(shippingCurrentStep / (steps.length - 1)) * 100}%` }}
+                        />
+                      </div>
+                    </div>
 
-              {/* Resumen de pago */}
-              <div className="rounded-xl border border-[color:var(--color-border)] bg-[var(--color-neutral4)] px-4 py-3 text-sm">
-                <h3 className="mb-2 text-sm font-semibold text-[color:var(--color-text)]">
-                  Pago
-                </h3>
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[color:var(--color-text-muted)]">Subtotal</span>
-                    <span className="tabular-nums">
-                      <Price value={subtotal ?? 0} />
-                    </span>
+                    {/* Panel resumen de envío */}
+                    <div className="rounded-lg border border-(--color-border) bg-white/70 p-3">
+                      <div className="flex items-start gap-3">
+                        <Truck className="mt-0.5 h-4 w-4 text-(--color-text-muted)" />
+                        <div className="min-w-0">
+                          <p className="font-medium">{safeText(deliveryService)}</p>
+                          <div className="mt-0.5">
+                            <Pill variant={deliveredAt ? "success" : shippingStatus === "cancelled" ? "error" : "info"}>
+                              {safeText(shippingStatus)}
+                            </Pill>
+                          </div>
+                          {tracking && (
+                            <p className="mt-1 text-xs text-(--color-text-muted)">Tracking: <span className="font-mono">{tracking}</span></p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
+                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de envío</p>
+                          <p className="mt-0.5">{safeDate(shippedAt)}</p>
+                        </div>
+                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
+                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de entrega</p>
+                          <p className="mt-0.5">{safeDate(deliveredAt)}</p>
+                        </div>
+                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2 sm:col-span-2">
+                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Dirección de envío {address?.label ? `(${address.label})` : ""}</p>
+                          <p className="mt-0.5 break-words">{fullAddress ?? "–"}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[color:var(--color-text-muted)]">Envío</span>
-                    <span className="tabular-nums">
-                      <Price value={shipping ?? 0} />
-                    </span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between border-t border-[color:var(--color-border)] pt-2 font-medium">
-                    <span>Total</span>
-                    <span className="tabular-nums">
-                      <Price value={total ?? payment?.amount ?? 0} />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+                ),
+              },
+            ]}
+          />
         </div>
 
         {/* Footer con botón cerrar (por si el modal no tiene X propia) */}
-        <footer className="flex items-center justify-end border-t border-[color:var(--color-border)] px-6 py-3">
+        <footer className="flex items-center justify-end border-t border-(--color-border) bg-white px-6 py-3">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-[color:var(--color-border)] px-4 py-1.5 text-sm text-[color:var(--color-text)] hover:bg-[var(--color-neutral4)]"
+            className="rounded-full border border-(--color-border) bg-white px-4 py-1.5 text-sm text-(--color-text) hover:bg-(--surface-subtle)"
           >
             Cerrar
           </button>

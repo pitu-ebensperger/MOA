@@ -5,7 +5,7 @@ import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import { API_PATHS } from "../../../config/api-paths.js";
 
-import Button from "../../../components/ui/Button.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
 import Badge from "../../../components/ui/Badge.jsx";
 
 export default function ProductCard({
@@ -157,32 +157,37 @@ export default function ProductCard({
       >
         <Button
           type="button"
-          variant="card-solid"
+          appearance="soft"
+          intent="primary"
+          elevation="md"
           size="md"
+          motion="lift"
           onClick={handleAddToCart}
-          className={`w-[160px] gap-3 transition-all ${
-            cartButtonPressed ? "scale-95 btn-card-solid-pressed" : ""
-          }`}
+          leadingIcon={
+            <ShoppingCart
+              size={18}
+              className={cartButtonPressed ? "text-white" : "text-[var(--color-primary3)]"}
+            />
+          }
+          className={`w-[160px] gap-3 transition-all ${cartButtonPressed ? "scale-95" : ""}`}
         >
-          <ShoppingCart
-            size={18} className={`text-current btn-icon-left ${
-              cartButtonPressed ? "text-white" : "text-[#9e7e67]"}`}
-          />
-          <span>Agregar</span>
+          Agregar
         </Button>
 
         <Button
           type="button"
-          variant="card-outline"
+          appearance="outline"
+          intent="inverse"
           size="md"
+          motion="lift"
           onClick={handleViewDetails}
           disabled={!href}
+          leadingIcon={<Eye size={18} className="text-current" />}
           className={`w-[160px] gap-3 transition-all ${
-            detailsButtonPressed ? "scale-95 btn-card-outline-pressed" : "hover:bg-white/10"
+            detailsButtonPressed ? "scale-95" : "hover:bg-white/10"
           } ${!href ? "pointer-events-none opacity-40" : ""}`}
         >
-          <Eye size={18} className="text-current btn-icon-left" />
-          <span>Ver detalles</span>
+          Ver detalles
         </Button>
       </div>
 
