@@ -13,6 +13,7 @@ Ejecutar: `npm run -w backend dev`
 
 - npm run seed:users --workspace backend (asegura la cuenta `admin@moa.cl/admin123`)
 - npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
+  -npm run seed:products --workspace backend (correr para agregar productos iniciales)
 
 **`docs/`**
 
