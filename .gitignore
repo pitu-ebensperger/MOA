@@ -24,3 +24,6 @@ snapshots/*.json
 scripts/*.jsx
 scripts/*.js
 .env copy
+
+# Test files
+**/test-sidebar.html

@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./components/buttons.css";
+@import "./components/sidemenu.css";
 
 /* --------------------------------------------------------*/
 
