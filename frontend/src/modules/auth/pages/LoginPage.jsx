@@ -4,6 +4,7 @@ import { Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../auth/hooks/useAuth.jsx';
 import { useRedirectAfterAuth } from '../../auth/hooks/useRedirectAuth.jsx';
 import Button from '../../../components/ui/Button.jsx';
+import { API_PATHS } from '../../../config/api-paths.js';
 
 
 export default function LoginPage() {
@@ -102,11 +103,11 @@ export default function LoginPage() {
             </Button>
 
                  <div className="mt-3 text-center">
-              <Link
-                type="button"
-                onClick={() => navigate('/forgot-password')}
-                className="text-sm text-muted no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] hover:text-medium transition-colors"
-              >
+                <Link
+                  type="button"
+                  onClick={() => navigate(API_PATHS.auth.forgot)}
+                  className="text-sm text-muted no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] hover:text-medium transition-colors"
+                >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -117,7 +118,7 @@ export default function LoginPage() {
           <footer className="text-center mt-6 pt-6 border-t border-neutral-200">
             <p className="text-sm text-(--color-primary1) opacity-80">
               ¿No tienes una cuenta?{' '}
-              <Link to="/register" className="underline text-(--color-primary1) hover:opacity-80">
+                <Link to={API_PATHS.auth.register} className="underline text-(--color-primary1) hover:opacity-80">
                 Regístrate aquí
               </Link>
             </p>

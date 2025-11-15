@@ -1,3 +1,5 @@
+import { API_PATHS } from "../../../config/api-paths.js";
+
 const NAVBAR_HEIGHT = 80; // px
 
 export default function HeroSection() {
@@ -30,14 +32,14 @@ export default function HeroSection() {
 
       <div className="relative mx-auto grid w-full max-w-6xl gap-10 px-6 pt-80 pb-16 lg:grid-cols-[1.1fr_0.9fr] lg:px-12">
         <div className="flex flex-col gap-6">
-          <h1 className="title-serif text-4xl leading-tight text-(--color-secondary2) sm:text-5xl">
+          <h1 className="title-display text-4xl text-white sm:text-5xl leading-none">
             Diseño hecho a medida para espacios conscientes
           </h1>
         
 
           <div className="flex flex-wrap gap-4 pt-2">
             <a
-              href="/products?collection=coleccion-atelier"
+              href={`${API_PATHS.products.products}?collection=coleccion-atelier`}
               className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 font-garamond text-base tracking-wide text-neutral-900 transition hover:bg-neutral-100"
             >
               Explorar nueva colección

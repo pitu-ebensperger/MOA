@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { productsApi } from "../modules/products/services/products.api.js";
+import { productsApi } from "../services/products.api.js";
 
 const CategoriesContext = createContext([]);
 

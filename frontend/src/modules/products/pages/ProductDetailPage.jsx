@@ -5,9 +5,10 @@ import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 
-import { productsApi } from "../services/products.api.js";
+import { productsApi } from "../../../services/products.api.js";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import { useCategories } from "../hooks/useCategories.js";
+import { API_PATHS } from "../../../config/api-paths.js";
 import { Minus, Plus, Recycle, ShieldCheck, Truck } from "lucide-react";
 
 const initialState = {
@@ -63,10 +64,11 @@ export const ProductDetailPage = () => {
   const [state, setState] = useState(initialState);
   const [selectedImage, setSelectedImage] = useState(DEFAULT_PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
+  const productsBasePath = API_PATHS.products.products;
 
   const baseBreadcrumbItems = [
     { label: "Inicio", href: "/" },
-    { label: "Productos", href: "/products" },
+    { label: "Productos", href: productsBasePath },
   ];
 
   useEffect(() => {
@@ -105,7 +107,9 @@ export const ProductDetailPage = () => {
         : null;
     if (match) {
       const param = match.slug ?? match.id ?? candidateId;
-      const href = param ? `/products?category=${encodeURIComponent(param)}` : "/products";
+      const href = param
+        ? `${productsBasePath}?category=${encodeURIComponent(param)}`
+        : productsBasePath;
       return {
         label: match.name ?? "Categoría",
         href,
@@ -114,7 +118,7 @@ export const ProductDetailPage = () => {
     if (product.collection) {
       return {
         label: product.collection,
-        href: "/products",
+        href: productsBasePath,
       };
     }
     return null;

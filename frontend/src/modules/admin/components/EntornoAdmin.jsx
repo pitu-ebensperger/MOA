@@ -1,13 +1,14 @@
 import { useLocation } from "react-router-dom";
 import Button from "../../../components/ui/Button.jsx";
 import { LayoutDashboard, Package, Warehouse, Users, Settings, LogOut, Store } from "lucide-react";
+import { API_PATHS } from "../../../config/api-paths.js";
 
 const navItems = [
-  { label: "Resumen", to: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Pedidos", to: "/admin/orders", icon: Package },
-  { label: "Productos", to: "/admin/products", icon: Warehouse },
-  { label: "Clientes", to: "/admin/customers", icon: Users },
-  { label: "Ajustes", to: "/admin/settings", icon: Settings },
+  { label: "Resumen", to: API_PATHS.admin.dashboard, icon: LayoutDashboard },
+  { label: "Pedidos", to: API_PATHS.admin.orders, icon: Package },
+  { label: "Productos", to: API_PATHS.admin.products, icon: Warehouse },
+  { label: "Clientes", to: API_PATHS.admin.customers, icon: Users },
+  { label: "Ajustes", to: API_PATHS.admin.settings, icon: Settings },
 ];
 
 export default function EntornoAdmin({ children }) {
@@ -21,7 +22,7 @@ export default function EntornoAdmin({ children }) {
   return (
     <div className="admin-shell min-h-screen bg-[var(--color-lightest2)] text-neutral-900">
       <header className="flex items-center justify-between px-4 md:px-8 border-b border-neutral-200 py-3 bg-white shadow-sm">
-        <a href="/admin/" className="flex items-center gap-3">
+        <a href={API_PATHS.admin.dashboard} className="flex items-center gap-3">
           <div className="title-serif text-primary text-2xl ">MOA</div>
           <span className="text-sm font-regular text-secondary uppercase tracking-[0.3em]">Admin</span>
         </a>
@@ -64,7 +65,7 @@ export default function EntornoAdmin({ children }) {
             <Button
               variant="round"
               size="sm"
-              to="/home"
+              to={API_PATHS.home.landing}
               style={transparentButtonStyle}
               className="mt-3 w-full sidebar-link flex items-center justify-center group-hover:justify-start gap-2 rounded-2xl px-3 py-3 text-sm font-semibold tracking-wide transition text-neutral-700 whitespace-nowrap hover:text-primary"
             >

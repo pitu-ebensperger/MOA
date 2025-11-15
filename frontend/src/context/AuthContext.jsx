@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { setOnUnauthorized, setTokenGetter } from "../../../services/api-client.js";
+import { setOnUnauthorized, setTokenGetter } from "../services/api-client.js";
 import { authApi } from "../services/auth.api.js";
 
 // ---- Constantes y utilidades ----------------------------------
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
 
     (async () => {
       try {
-        const profile = await authApi.profile();
+        const profile = await authApi.profile(user?.id);
         if (cancelled) return;
         syncUser(profile);
         setStatus(STATUS.AUTH);
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     setStatus(STATUS.LOADING);
     setError(null);
     try {
-      const profile = await authApi.profile();
+      const profile = await authApi.profile(user?.id);
       syncUser(profile);
       setStatus(STATUS.AUTH);
       return profile;
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
       logout();
       throw err;
     }
-  }, [syncUser, logout]);
+  }, [syncUser, logout, user]);
 
   const value = useMemo(
     () => ({

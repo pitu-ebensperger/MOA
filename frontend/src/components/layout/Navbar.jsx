@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
 import { SearchBar } from '../ui/SearchBar.jsx';
+import { API_PATHS } from '../../config/api-paths.js';
 
 const NAV_ITEMS = [
-  { label: 'Inicio', href: '/home', match: ['/', '/home'] },
-  { label: 'Categorías', href: '/categories' },
-  { label: 'Productos', href: '/products' },
-  { label: 'Contacto', href: '/contact' },
+  { label: 'Inicio', href: API_PATHS.home.landing, match: ['/', API_PATHS.home.landing] },
+  { label: 'Categorías', href: API_PATHS.products.categories },
+  { label: 'Productos', href: API_PATHS.products.products },
+  { label: 'Contacto', href: API_PATHS.support.contact },
 ];
 
 const getPathname = (href = "") => {
@@ -59,7 +60,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     event.preventDefault();
     const trimmed = searchQuery.trim();
     if (!trimmed) return;
-    navigate(`/products?search=${encodeURIComponent(trimmed)}`);
+    navigate(`${API_PATHS.products.products}?search=${encodeURIComponent(trimmed)}`);
     handleNavigate("products");
     setIsSearchOpen(false);
   };
@@ -73,7 +74,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
           <div className="flex items-center justify-between">
           {/* Brand */}
           <Link
-            to="/home"
+            to={API_PATHS.home.landing}
             className="cursor-pointer transition-transform hover:scale-105"
             aria-label="Ir al inicio"
             onClick={() => handleNavigate('home')}
@@ -109,8 +110,8 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
             {/* No logeado (desktop) */}
             {!isAuthenticated && (
               <div className="hidden md:flex items-center gap-2">
-                <Link to="/register" className="nav-items nav-btn">Registrarme</Link>
-                <Link to="/login" className="nav-items nav-btn nav-btn-primary">Iniciar sesión</Link>
+                <Link to={API_PATHS.auth.register} className="nav-items nav-btn">Registrarme</Link>
+                <Link to={API_PATHS.auth.login} className="nav-items nav-btn nav-btn-primary">Iniciar sesión</Link>
               </div>
             )}
 
@@ -121,7 +122,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                   // ADMIN: acceso directo al dashboard
                   <Link
                     aria-label="Dashboard admin"
-                    to="/admin/dashboard"
+                    to={API_PATHS.admin.dashboard}
                     className="nav-btn nav-btn-primary"
                   >
                     Dashboard
@@ -130,8 +131,8 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                   // USER: Perfil + Carrito
                   <>
                     <Link
-                      aria-label="Perfil"
-                      to="/profile"
+                    aria-label="Perfil"
+                      to={API_PATHS.auth.profile}
                       className="nav-icon-bg transition-all hover:scale-105 active:scale-95 relative"
                     >
                       <User className="nav-icon" />
@@ -208,14 +209,14 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                 <div className="divider-horizontal my-2" />
                 <div className="grid grid-cols-2 gap-3 w-full">
                   <Link
-                    to="/register"
+                    to={API_PATHS.auth.register}
                     className="nav-btn text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Registrarme
                   </Link>
                   <Link
-                    to="/login"
+                    to={API_PATHS.auth.login}
                     className="nav-btn nav-btn-primary text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -228,7 +229,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
               <div className="flex items-center justify-between gap-3 animate-fade-in-up">
                 {isAdmin ? (
                   <Link
-                    to="/admin/dashboard"
+                    to={API_PATHS.admin.dashboard}
                     className="nav-btn nav-btn-primary w-full text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
@@ -237,7 +238,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                 ) : (
                   <>
                     <Link
-                      to="/profile"
+                    to={API_PATHS.auth.profile}
                       className="nav-icon-bg"
                       onClick={() => setIsMenuOpen(false)}
                       aria-label="Perfil"

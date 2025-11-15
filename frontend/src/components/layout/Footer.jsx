@@ -1,21 +1,22 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
+import { API_PATHS } from "../../config/api-paths.js";
 
 const DEBUG_LINKS = [ //SACAR DSPS
-  { label: "Perfil", href: "/profile" },
-  { label: "Dashboard admin", href: "/admin/dashboard" },
+  { label: "Perfil", href: API_PATHS.auth.profile },
+  { label: "Dashboard admin", href: API_PATHS.admin.dashboard },
   { label: "Guía de estilos", href: "/style-guide" },
 ];
 
 const CUSTOMER_SERVICE_LINKS = [
-  { label: "Contacto", href: "/contact" },
-  { label: "Cambios y devoluciones", href: "/privacy" },
-  { label: "Preguntas frecuentes", href: "/faq" },
+  { label: "Contacto", href: API_PATHS.support.contact },
+  { label: "Cambios y devoluciones", href: API_PATHS.support.privacy },
+  { label: "Preguntas frecuentes", href: API_PATHS.support.faq },
 ];
 
 const POLICY_LINKS = [
-  { label: "Política de privacidad", href: "/privacy" },
-  { label: "Términos y condiciones", href: "/terms" },
+  { label: "Política de privacidad", href: API_PATHS.support.privacy },
+  { label: "Términos y condiciones", href: API_PATHS.support.terms },
 ];
 
 const SOCIAL_LINKS = [
@@ -62,7 +63,7 @@ export const Footer = () => {
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.3fr_repeat(3,1fr)]">
           <section>
-            <Link to="/home" aria-label="Ir al inicio" className="inline-flex">
+            <Link to={API_PATHS.home.landing} aria-label="Ir al inicio" className="inline-flex">
               <span className="text-2xl text-serif tracking-tight text-secondary1">MOA</span>
             </Link>
 
