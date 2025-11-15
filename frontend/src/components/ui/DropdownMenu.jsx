@@ -50,7 +50,8 @@ export function Dropdown({
     >
       {/* Botón de disparo del dropdown */}
       <Button
-        variant="outline"
+        appearance="outline"
+        intent="neutral"
         size="md"
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -77,7 +78,7 @@ export function Dropdown({
         <div
           className={cx(
             "absolute z-40 mt-2 min-w-[180px]",
-            "rounded-[var(--radius-lg)] border border-[var(--color-neutral3)]",
+            "rounded-(--radius-lg) border borde(--color-neutral3)",
             "bg-surface shadow-md",
             menuAlignClass
           )}

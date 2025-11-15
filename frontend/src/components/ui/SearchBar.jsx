@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useEffect, useRef } from 'react';
-import Button from './Button.jsx';
+import { Button } from './Button.jsx';
 
 export function SearchBar({
   isOpen,
@@ -75,8 +75,9 @@ export function SearchBar({
         />
         <Button
           type="submit"
-          variant="primary-round"
+          shape="pill"
           size="sm"
+          motion="lift"
           className="font-semibold"
         >
           {buttonLabel}

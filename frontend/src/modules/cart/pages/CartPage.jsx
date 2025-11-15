@@ -1,6 +1,6 @@
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useCartContext } from "../../../context/cartContext.jsx";
-import Button from "../../../components/ui/Button.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
 import { resolveProductPrice } from "../../products/utils/products.js";
@@ -126,7 +126,7 @@ export const CartPage = () => {
               <span>Total</span>
               <Price value={total} />
             </div>
-            <Button to="/checkout" variant="primary" size="md" fullWidth>
+            <Button to="/checkout" width="full">
               Continuar al checkout
             </Button>
             <button
@@ -145,7 +145,13 @@ export const CartPage = () => {
           <p className="text-sm text-neutral-500">
             Encuentra piezas únicas creadas para tus espacios y agrégalas cuando lo desees.
           </p>
-          <Button to={API_PATHS.products.products} variant="ghost" size="md" className="text-sm font-semibold text-[var(--color-primary1)]">
+          <Button
+            to={API_PATHS.products.products}
+            appearance="ghost"
+            intent="primary"
+            size="md"
+            className="text-sm font-semibold text-[var(--color-primary1)]"
+          >
             Seguir comprando
           </Button>
         </div>

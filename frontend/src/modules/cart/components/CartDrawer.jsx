@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Minus, X, Trash2, ShoppingCart } from "lucide-react";
-import Button from "../../../components/ui/Button.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 
 import { useCartContext } from "../../../context/cartContext.jsx";
@@ -164,18 +164,18 @@ export const CartDrawer = () => {
           <div className="flex flex-col gap-3">
             <Button
               to="/cart"
-              variant="ghost"
+              appearance="ghost"
+              intent="primary"
               size="md"
-              fullWidth
+              width="full"
               onClick={closeDrawer}
             >
               Ver carrito completo
             </Button>
             <Button
               to="/checkout"
-              variant="primary"
               size="md"
-              fullWidth
+              width="full"
               onClick={closeDrawer}
             >
               Ir al checkout

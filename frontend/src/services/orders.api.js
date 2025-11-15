@@ -51,6 +51,7 @@ const normalizeOrder = (raw = {}, extra = {}) => {
     items: extra.items ?? [],
     payment: extra.payment ?? null,
     shipment: extra.shipment ?? null,
+    address: extra.address ?? null,
 
     userName: extra.userName ?? raw.userName ?? null,
     userEmail: extra.userEmail ?? raw.userEmail ?? null,
@@ -67,6 +68,12 @@ function buildMockOrderView(order) {
     (customersDb?.users ?? []).find(
       (u) => String(u.id) === String(order.userId ?? ""),
     ) ?? null;
+  const addressDirect = (customersDb?.addresses ?? []).find(
+    (a) => String(a.id) === String(order.addressId ?? ""),
+  ) ?? null;
+  const userDefaultAddress = (customersDb?.addresses ?? []).find(
+    (a) => String(a.userId) === String(order.userId ?? "") && a.isDefault,
+  ) ?? null;
 
   const userName = user
     ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || null
@@ -78,6 +85,7 @@ function buildMockOrderView(order) {
     items,
     payment,
     shipment,
+    address: addressDirect ?? userDefaultAddress ?? null,
     userName,
     userEmail,
   };

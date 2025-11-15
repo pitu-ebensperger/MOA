@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Info, ShoppingBag, ShoppingCart, Star } from "lucide-react";
-import Button from "../../../components/ui/Button.jsx";
+import { Info, ShoppingCart, Star } from "lucide-react";
+import { Button, IconButton, AnimatedCTAButton } from "../../../components/ui/Button.jsx";
 import Badge from "../../../components/ui/Badge.jsx";
 import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Pagination } from "../../../components/ui/Pagination.jsx";
@@ -79,16 +79,13 @@ const typographySamples = [
 ];
 
 const buttonVariants = [
-  { label: "Primaria", variant: "primary" },
-  { label: "Primaria ronda", variant: "primary-round" },
-  { label: "Secundaria", variant: "secondary" },
-  { label: "Ghost", variant: "ghost" },
-  { label: "Card sólido", variant: "card-solid" },
-  { label: "Card borde", variant: "card-outline" },
-  { label: "CTA home", variant: "cta-home" },
-  { label: "Ícono", variant: "icon" },
-  { label: "Fondo de ícono", variant: "icon-bg" },
-  { label: "Animado", variant: "animated" },
+  { label: "Sólido primario", appearance: "solid", intent: "primary" },
+  { label: "Sólido secundario", appearance: "solid", intent: "secondary" },
+  { label: "Ghost neutro", appearance: "ghost", intent: "neutral" },
+  { label: "Soft acento", appearance: "soft", intent: "accent" },
+  { label: "Outline primario", appearance: "outline", intent: "primary" },
+  { label: "Link destacado", appearance: "link", intent: "primary" },
+  { label: "Tinted inverse", appearance: "tinted", intent: "inverse", shape: "pill" },
 ];
 
 const badgeVariants = ["primary", "secondary", "neutral", "destacado", "nuevo"];
@@ -218,7 +215,8 @@ const GRADIENT_SAMPLES = [
 const HOVER_PREVIEWS = [
   {
     name: "Botón hover",
-    className: "btn btn-primary btn-md transition hover:scale-105",
+    className:
+      "bg-[var(--color-primary1)] text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
     hint: "Escala y brillo ligero",
   },
   {
@@ -680,24 +678,32 @@ export function StyleGuidePage() {
             </div>
             {usagePanel === "buttons" && <UsagePanel items={USAGE_REFERENCES.buttons} />}
             <div className="flex flex-wrap gap-3">
-              {buttonVariants.map(({ label, variant }) => (
-                <Button key={variant} variant={variant} size="md">
+              {buttonVariants.map(({ label, appearance, intent, shape }) => (
+                <Button
+                  key={`${label}-${appearance}-${intent}-${shape ?? "default"}`}
+                  appearance={appearance}
+                  intent={intent}
+                  shape={shape}
+                  motion="lift"
+                >
                   {label}
                 </Button>
               ))}
-              <Button variant="icon" aria-label="Icono" leftIcon={<ShoppingCart />}>
-                Icono
-              </Button>
-              <Button variant="animated" leftIcon={<Star />} rightIcon={<ShoppingBag />}>
-                Animado
-              </Button>
+              <IconButton
+                icon={<ShoppingCart />}
+                aria-label="Icono"
+                intent="primary"
+              />
+              <AnimatedCTAButton icon={<Star />} label="Descubrir" className="mt-2">
+                CTA animado
+              </AnimatedCTAButton>
             </div>
             <div className="flex flex-wrap items-center gap-3 pt-3">
               <div className="text-sm font-semibold uppercase tracking-[0.4rem] text-[var(--color-secondary2)]">Tamaños</div>
               <Button size="sm">Small</Button>
               <Button size="md">Medium</Button>
               <Button size="lg">Large</Button>
-              <Button isLoading>Loading</Button>
+              <Button loading>Loading</Button>
               <Button disabled>Disabled</Button>
             </div>
           </section>
@@ -976,7 +982,18 @@ export function StyleGuidePage() {
         </section>
       </div>
     );
-  }, [activeTab, computedValues.colors, computedValues.spacings, isSearchOpen, paginationPage, searchValue, usagePanel]);
+  }, [
+    activeTab,
+    computedValues.colors,
+    computedValues.spacings,
+    isSearchOpen,
+    paginationPage,
+    searchValue,
+    usagePanel,
+    sectionClass,
+    tableColumns,
+    tableData,
+  ]);
 
   return (
     <div className="page px-6 pb-20 pt-[110px]">

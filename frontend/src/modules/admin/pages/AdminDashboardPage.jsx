@@ -4,7 +4,7 @@ import { Activity, Layers, Package, Settings, TrendingUp, Users } from "lucide-r
 import { useAdminOrders } from "../hooks/useAdminOrders.js";
 import { useAdminProducts } from "../hooks/useAdminProducts.js";
 
-import Button from "../../../components/ui/Button.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
 import { StatusPill } from "../../../components/ui/StatusPill.jsx";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
 import { formatDate_ddMMyyyy, relativeTime } from "../../../utils/date.js";
@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
       {hasError && (
         <div className="rounded-3xl border border-error/30 bg-error/[0.06] p-5 text-sm text-error">
           <p>No se pudo cargar la información del panel.</p>
-          <Button variant="ghost" size="sm" className="mt-3" onClick={handleRefresh}>
+          <Button appearance="ghost" intent="neutral" size="sm" className="mt-3" onClick={handleRefresh}>
             Reintentar
           </Button>
         </div>
@@ -155,7 +155,7 @@ export default function AdminDashboardPage() {
               <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Pedidos</p>
               <h2 className="text-xl font-semibold text-(--text-strong)">Últimos pedidos</h2>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleRefresh}>
+            <Button appearance="ghost" intent="neutral" size="sm" onClick={handleRefresh}>
               Actualizar
             </Button>
           </header>
@@ -231,10 +231,11 @@ export default function AdminDashboardPage() {
               return (
                 <Button
                   key={action.label}
-                  variant="ghost"
+                  appearance="ghost"
+                  intent="primary"
                   size="sm"
                   to={action.to}
-                  leftIcon={<Icon className="h-4 w-4" aria-hidden />}
+                  leadingIcon={<Icon className="h-4 w-4" aria-hidden />}
                 >
                   {action.label}
                 </Button>

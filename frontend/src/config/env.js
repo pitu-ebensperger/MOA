@@ -8,7 +8,7 @@ const rawEnv = importMetaEnv || processEnv || {};
 const mode = rawEnv.MODE ?? rawEnv.NODE_ENV ?? "development";
 
 export const env = {
-  API_BASE_URL: (rawEnv.VITE_API_URL ?? processEnv?.VITE_API_URL ?? "http://localhost:3000").trim(),
+  API_BASE_URL: (rawEnv.VITE_API_URL ?? processEnv?.VITE_API_URL ?? "http://localhost:4000").trim(),
   API_TIMEOUT: Number(rawEnv.VITE_API_TIMEOUT ?? processEnv?.VITE_API_TIMEOUT) || undefined,
   USE_MOCKS:
     String(rawEnv.VITE_USE_MOCKS ?? processEnv?.VITE_USE_MOCKS ?? "true").trim().toLowerCase() ===

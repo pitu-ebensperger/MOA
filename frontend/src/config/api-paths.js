@@ -41,5 +41,6 @@ export const API_PATHS = {
     orders: "/admin/pedidos",
     customers: "/admin/clientes",
     settings: "/admin/configuraciones",
+    collections: "/admin/colecciones",
   },
 };

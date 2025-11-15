@@ -12,4 +12,5 @@ export const OrderProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useOrderContext = () => useContext(OrderContext);

@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../../../components/ui/Button'
+import { Button } from '../../../components/ui/Button'
 import Swal from 'sweetalert2';
 
 export default function ContactPage() {
@@ -78,7 +78,9 @@ export default function ContactPage() {
             </div>
             <Button
               type="submit"
-              className="bg-[#5c4526] hover:bg-[#7a5b38] text-white px-8 py-3 btn-primary-round transition-all"
+              shape="pill"
+              size="lg"
+              motion="lift"
             >
               Enviar mensaje
             </Button>

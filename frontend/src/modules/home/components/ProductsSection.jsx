@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../../products/components/ProductCard.jsx";
-import Button from "../../../components/ui/Button.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
 import { createCategoryMatcher } from "../../products/utils/products.js";
 import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
 import { API_PATHS } from "../../../config/api-paths.js";
@@ -121,9 +121,12 @@ export default function ProductsSection({ products, categories }) {
       <div className="flex justify-center pt-1">
         <Button
           to={API_PATHS.products.products}
-          variant="cta-outline"
+          appearance="outline"
+          intent="primary"
+          shape="pill"
+          motion={["lift", "icon-slide"]}
           size="md"
-          className="btn-cta-outline inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-dark hover:text-light"
+          className="gap-2 text-sm font-medium"
         >
           Ver más productos
           <span aria-hidden className="text-base leading-none btn-icon-right">&rarr;</span>
