@@ -7,8 +7,8 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
-    "seed:categories": "node database/seed/seed-categories.js",
-    "seed:users": "node database/seed/seed-users.js"
+    "seed:categories": "node database/seed/categoriesSeed.js",
+    "seed:users": "node database/seed/usersSeed.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

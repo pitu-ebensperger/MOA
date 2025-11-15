@@ -15,11 +15,6 @@ CREATE TABLE usuarios (
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE roles (
-    rol_id SMALLSERIAL PRIMARY KEY,
-    code TEXT UNIQUE NOT NULL --> 'ADMIN' | 'USER'
-);
-
 CREATE TABLE categorias (
     categoria_id SMALLSERIAL PRIMARY KEY,
     nombre TEXT NOT NULL,

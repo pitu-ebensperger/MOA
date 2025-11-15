@@ -23,7 +23,7 @@ export const PRODUCTS = [
     weight: { value: 48, unit: "kg" },
     createdAt: "2024-01-05T10:00:00Z",
     updatedAt: "2024-02-12T10:00:00Z",
-    fk_category_id: 1000,
+    fk_category_id: 1,
     fk_collection_id: 1100,
     compareAtPrice: null,
   },
@@ -49,7 +49,7 @@ export const PRODUCTS = [
     weight: { value: 14, unit: "kg" },
     createdAt: "2024-01-26T10:00:00Z",
     updatedAt: "2024-02-03T10:00:00Z",
-    fk_category_id: 3000,
+    fk_category_id: 3,
     fk_collection_id: 3101,
     collection: "Dormitorio Cálido",
     compareAtPrice: null,
@@ -76,7 +76,7 @@ export const PRODUCTS = [
     weight: { value: 12, unit: "kg" },
     createdAt: "2024-01-27T10:00:00Z",
     updatedAt: "2024-02-02T10:00:00Z",
-    fk_category_id: 3000,
+    fk_category_id: 3,
     fk_collection_id: 3102,
     collection: "Dormitorio Cálido",
     compareAtPrice: null,
@@ -104,7 +104,7 @@ export const PRODUCTS = [
     weight: { value: 4, unit: "kg" },
     createdAt: "2024-01-29T10:00:00Z",
     updatedAt: "2024-02-01T10:00:00Z",
-    fk_category_id: 4000,
+    fk_category_id: 4,
     fk_collection_id: 4100,
     collection: "Iluminación Escultórica",
     compareAtPrice: null,
@@ -133,7 +133,7 @@ export const PRODUCTS = [
     weight: { value: 3, unit: "kg" },
     createdAt: "2024-01-30T10:00:00Z",
     updatedAt: "2024-02-05T10:00:00Z",
-    fk_category_id: 4000,
+    fk_category_id: 4,
     fk_collection_id: 4101,
     collection: "Iluminación Escultórica",
     compareAtPrice: null,
@@ -162,7 +162,7 @@ export const PRODUCTS = [
     weight: { value: 34, unit: "kg" },
     createdAt: "2024-02-01T10:00:00Z",
     updatedAt: "2024-02-10T10:00:00Z",
-    fk_category_id: 5000,
+    fk_category_id: 5,
     fk_collection_id: 5100,
     compareAtPrice: null,
   },
@@ -189,7 +189,7 @@ export const PRODUCTS = [
     weight: { value: 8, unit: "kg" },
     createdAt: "2024-02-02T10:00:00Z",
     updatedAt: "2024-02-08T10:00:00Z",
-    fk_category_id: 6000,
+    fk_category_id: 6,
     fk_collection_id: 6100,
     collection: "Decoración Curada",
     compareAtPrice: null,
@@ -216,7 +216,7 @@ export const PRODUCTS = [
     color: "fibra natural",
     createdAt: "2024-02-05T10:00:00Z",
     updatedAt: "2024-02-10T10:00:00Z",
-    fk_category_id: 6000,
+    fk_category_id: 6,
     fk_collection_id: 6300,
     compareAtPrice: null,
   },
@@ -241,7 +241,7 @@ export const PRODUCTS = [
     color: "madera clara",
     createdAt: "2024-02-07T10:00:00Z",
     updatedAt: "2024-02-14T10:00:00Z",
-    fk_category_id: 5000,
+    fk_category_id: 5,
     fk_collection_id: 5300,
     compareAtPrice: null,
   },
@@ -266,7 +266,7 @@ export const PRODUCTS = [
     color: "madera natural",
     createdAt: "2024-02-08T10:00:00Z",
     updatedAt: "2024-02-12T10:00:00Z",
-    fk_category_id: 2000,
+    fk_category_id: 2,
     fk_collection_id: 2100,
     compareAtPrice: null,
   },
@@ -291,7 +291,7 @@ export const PRODUCTS = [
     color: "madera envejecida",
     createdAt: "2024-02-09T10:00:00Z",
     updatedAt: "2024-02-13T10:00:00Z",
-    fk_category_id: 2000,
+    fk_category_id: 2,
     fk_collection_id: 2100,
     compareAtPrice: null,
   },
@@ -324,8 +324,8 @@ export const PRODUCTS = [
     color: "madera clara y beige natural",
     createdAt: "2024-02-11T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 1000, // Living
-    fk_collection_id: 1200, // Sillones / asientos
+    fk_category_id: 1,
+    fk_collection_id: 1200,
     compareAtPrice: null,
   },
   {
@@ -349,7 +349,7 @@ export const PRODUCTS = [
     color: "madera clara natural",
     createdAt: "2024-02-20T10:00:00Z",
     updatedAt: "2024-02-25T10:00:00Z",
-    fk_category_id: 1000, // Living
+    fk_category_id: 1,
     fk_collection_id: 1300, // Mesas de centro
     compareAtPrice: null,
   },
@@ -382,7 +382,7 @@ export const PRODUCTS = [
     color: "beige lino",
     createdAt: "2024-02-21T10:00:00Z",
     updatedAt: "2024-02-26T10:00:00Z",
-    fk_category_id: 3000, // Dormitorio
+    fk_category_id: 3,
     fk_collection_id: 3100, // Camas
     compareAtPrice: null,
   },
@@ -409,7 +409,7 @@ export const PRODUCTS = [
     color: "negro mate",
     createdAt: "2024-02-24T10:00:00Z",
     updatedAt: "2024-02-28T10:00:00Z",
-    fk_category_id: 1000, // Living
+    fk_category_id: 1,
     fk_collection_id: 1500, // Almacenamiento / libreros
     compareAtPrice: null,
   },
@@ -442,7 +442,7 @@ export const PRODUCTS = [
     color: "madera clara y negro",
     createdAt: "2024-02-25T10:00:00Z",
     updatedAt: "2024-02-29T10:00:00Z",
-    fk_category_id: 5000, // Oficina
+    fk_category_id: 5,
     fk_collection_id: 5100, // Escritorios
     compareAtPrice: null,
   },
@@ -474,7 +474,7 @@ export const PRODUCTS = [
     color: "verde oliva",
     createdAt: "2024-02-26T10:00:00Z",
     updatedAt: "2024-02-29T10:00:00Z",
-    fk_category_id: 5000, // Oficina
+    fk_category_id: 5,
     fk_collection_id: 5200, // Sillas de oficina
     compareAtPrice: null,
   },
@@ -506,7 +506,7 @@ export const PRODUCTS = [
     color: "marfil claro",
     createdAt: "2024-02-27T10:00:00Z",
     updatedAt: "2024-03-01T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
@@ -538,7 +538,7 @@ export const PRODUCTS = [
     color: "cobre satinado",
     createdAt: "2024-02-27T10:00:00Z",
     updatedAt: "2024-03-01T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4100, // Lámparas de techo
     compareAtPrice: null,
   },
@@ -570,7 +570,7 @@ export const PRODUCTS = [
     color: "cobre brillante",
     createdAt: "2024-02-27T10:00:00Z",
     updatedAt: "2024-03-01T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
@@ -602,7 +602,7 @@ export const PRODUCTS = [
     color: "cobre envejecido",
     createdAt: "2024-02-28T10:00:00Z",
     updatedAt: "2024-03-02T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4300, // Lámparas de pie
     compareAtPrice: null,
   },
@@ -634,7 +634,7 @@ export const PRODUCTS = [
     color: "madera natural y negro",
     createdAt: "2024-02-28T10:00:00Z",
     updatedAt: "2024-03-02T10:00:00Z",
-    fk_category_id: 1000, // Living
+    fk_category_id: 1,
     fk_collection_id: 1200, // Sillones / asientos
     compareAtPrice: null,
   },
@@ -666,7 +666,7 @@ export const PRODUCTS = [
     color: "madera envejecida",
     createdAt: "2024-02-28T10:00:00Z",
     updatedAt: "2024-03-03T10:00:00Z",
-    fk_category_id: 2000, // Comedor
+    fk_category_id: 2,
     fk_collection_id: 2200, // Sillas de comedor
     compareAtPrice: null,
   },
@@ -698,7 +698,7 @@ export const PRODUCTS = [
     color: "blanco y negro",
     createdAt: "2024-02-29T10:00:00Z",
     updatedAt: "2024-03-03T10:00:00Z",
-    fk_category_id: 6000, // Decoración
+    fk_category_id: 6,
     fk_collection_id: 6200, // Accesorios decorativos
     compareAtPrice: null,
   },
@@ -731,7 +731,7 @@ export const PRODUCTS = [
     color: "blanco y dorado trigo",
     createdAt: "2024-03-02T10:00:00Z",
     updatedAt: "2024-03-06T10:00:00Z",
-    fk_category_id: 6000, // Decoración
+    fk_category_id: 6,
     fk_collection_id: 6200, // Accesorios decorativos
     compareAtPrice: null,
   },
@@ -764,7 +764,7 @@ export const PRODUCTS = [
     color: "madera clara",
     createdAt: "2024-03-03T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 3000, // Dormitorio
+    fk_category_id: 3,
     fk_collection_id: 3200, // Veladores
     compareAtPrice: null,
   },
@@ -796,7 +796,7 @@ export const PRODUCTS = [
     color: "bronce oscuro",
     createdAt: "2024-03-04T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
@@ -828,7 +828,7 @@ export const PRODUCTS = [
     color: "blanco cálido",
     createdAt: "2024-03-05T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
@@ -860,7 +860,7 @@ export const PRODUCTS = [
     color: "negro con pantalla transparente",
     createdAt: "2024-03-05T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4300, // Lámparas de piso
     compareAtPrice: null,
   },
@@ -891,7 +891,7 @@ export const PRODUCTS = [
     color: "dorado cálido",
     createdAt: "2024-03-05T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 4000, // Iluminación
+    fk_category_id: 4,
     fk_collection_id: 4400, // Apliques murales
     compareAtPrice: null,
   },
@@ -923,7 +923,7 @@ export const PRODUCTS = [
     color: "caramelo y negro",
     createdAt: "2024-03-05T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 5000, // Oficina
+    fk_category_id: 5,
     fk_collection_id: 5200, // Sillas de oficina
     compareAtPrice: null,
   },
@@ -956,7 +956,7 @@ export const PRODUCTS = [
     color: "madera clara y verde hoja",
     createdAt: "2024-03-05T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 6000, // Decoración
+    fk_category_id: 6,
     fk_collection_id: 6100, // Plantas
     compareAtPrice: null,
   },
@@ -988,7 +988,7 @@ export const PRODUCTS = [
     color: "madera clara",
     createdAt: "2024-03-05T10:00:00Z",
     updatedAt: "2024-03-07T10:00:00Z",
-    fk_category_id: 2000, // Comedor
+    fk_category_id: 2,
     fk_collection_id: 2100, // Mesas de comedor
     compareAtPrice: null,
   },
