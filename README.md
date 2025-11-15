@@ -87,7 +87,7 @@ estados de diferentes escenarios
       sesión de la tutoría, específicamente en el documento con nombre “Hito 5 -
       Presentación del proyecto”.
 
-2. Grabación asincrónica (video proyecto) (INDIVIDUAL)
+2. Grabación asincrónica (video proyecto) (INDIVIDUAL) |
       -  Graba una presentación de entre 3 y 5 minutos, de forma individual, respondiendo las siguientes preguntas: 
         (a) Qué problemática fue detectada o te fue planteada para el desarrollo del proyecto? Para responder, considera qué necesidades existen y quién las tiene.
         (b) ¿Cómo tu proyecto satisface esa problemática o necesidad? Para responder, describe tu aplicación y señala cómo lo que realizaste logra satisfacer la necesidad detectada.
@@ -96,3 +96,4 @@ estados de diferentes escenarios
         (a) ¿Qué dificultades tuviste para desarrollar la aplicación y cómo lo resolviste? Para responder, recuerda aquellos tropiezos y frustraciones, piensa qué estrategias o apoyos te permitieron salir adelante.
         (b) ¿Qué fue lo que más disfrutaste de desarrollar tu proyecto? Ya sea del proceso, del resultado o de aquello que te haya entregado mayor satisfacción. 
         (c) ¿De qué manera crees que la metodología de aprendizaje fue un aporte para el resultado obtenido? Para responder, mira hacia atrás y reflexiona sobre tu aprendizaje, la metodología de estudio, el trabajo colaborativo, entre otras cosas.
+      - Cada estudiante debe subir su propio video, esta debe subirse en la sesión de la tutoría, específicamente en el documento con nombre “Video Proyecto”.
