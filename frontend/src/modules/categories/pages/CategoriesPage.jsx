@@ -28,7 +28,7 @@ export const CategoriesPage = () => {
       <section className="container-px mx-auto max-w-5xl text-center">
         <p className="text-xs uppercase tracking-[0.4em] text-secondary2">Categorías</p>
         <h1 className="title-serif mt-4 text-4xl text-dark sm:text-5xl">Encuentra lo que buscas</h1>
-        <p className="mx-auto mt-4 max-w-2xl text-base text-secondary1 sm:text-lg">
+        <p className="mx-auto mt-4 max-w-4xl text-base text-secondary1 sm:text-lg">
           Explora nuestras líneas de muebles y decoración según el ambiente o estilo que más te inspire.
         </p>
         {error && (

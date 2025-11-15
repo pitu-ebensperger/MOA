@@ -4,18 +4,18 @@ import { MoveRight } from "lucide-react";
 const VARIANT_STYLES = {
   hero: {
     container: "min-h-[360px] sm:min-h-[480px]",
-    title: "text-2xl sm:text-3xl",
-    overlay: "from-[rgba(32,24,16,0.75)] to-[rgba(100,78,47,0.35)]",
+    title: "text-2xl sm:text-2xl",
+    overlay: "from-[rgba(32,24,16,0.85)] to-[rgba(100,78,47,0.35)]",
   },
   featured: {
     container: "min-h-[260px]",
-    title: "text-xl",
-    overlay: "from-[rgba(36,27,18,0.65)] to-[rgba(97,76,46,0.3)]",
+    title: "text-2xl",
+    overlay: "from-[rgba(36,27,18,0.85)] to-[rgba(97,76,46,0.3)]",
   },
   default: {
     container: "min-h-[320px]",
-    title: "text-lg",
-    overlay: "from-[rgba(47,37,21,0.6)] to-[rgba(127,104,69,0.20)]",
+    title: "text-2xl",
+    overlay: "from-[rgba(47,37,21,0.85)] to-[rgba(127,104,69,0.20)]",
   },
 };
 
@@ -50,7 +50,7 @@ export function CategoriesCard({ category, variant = "default" }) {
 
       <div className="relative flex h-full flex-col justify-end p-6 sm:p-8">
         <div className="flex items-end justify-between gap-4">
-          <h3 className={`title-serif text-white ${styles.title}`}>{category.name}</h3>
+          <div className={`font-display text-white ${styles.title}`}>{category.name}</div>
           <Link
             to={targetHref}
             className="group inline-flex h-[38px] items-center overflow-hidden rounded-full border border-white/60 px-2 py-2 text-sm font-normal text-white transition-all duration-500 ease-out hover:border-white hover:bg-white/5"
