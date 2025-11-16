@@ -20,8 +20,16 @@ app.listen(PORT, () => { console.log(`Servidor corriendo en puerto ${PORT}`);
 import categoriesRouter from "./routes/categoriesRoutes.js";
 import userRoutes from "./routes/usersRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import productsRoutes from "./routes/productsRoutes.js";
+import homeRoutes from "./routes/homeRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
-app.use("/categories", categoriesRouter);
-app.use(userRoutes);
-app.use(authRoutes);
+// Rutas montadas sin prefijos para alinearse con los paths del frontend
+// (frontend espera /categorias, /login, /registro, /auth/perfil, etc.)
+app.use(categoriesRouter); // GET /categorias
+app.use(productsRoutes);   // GET /productos, GET /producto/:id (stubs)
+app.use(homeRoutes);       // GET /home (stub)
+app.use(adminRoutes);      // GET /admin/pedidos*, protegido (stubs)
+app.use(userRoutes);       // POST /registro
+app.use(authRoutes);       // POST /login, GET /auth/perfil, GET /usuarios
 

@@ -1,13 +1,7 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import { cx } from "../../utils/ui-helpers.js";
 
-
-const POSITION_CLASSES = {
-  top:    "bottom-full left-1/2 -translate-x-1/2 mb-2",
-  bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
-  left:   "right-full top-1/2 -translate-y-1/2 mr-2",
-  right:  "left-full top-1/2 -translate-y-1/2 ml-2",
-};
 
 const VARIANT_CLASSES = {
   neutral: "bg-[color:var(--color-dark)] text-[color:var(--color-text-on-dark)]",
@@ -18,56 +12,116 @@ const VARIANT_CLASSES = {
 export function Tooltip({
   label,           
   children,  
-  position = "top", 
+  position = "right", 
   variant = "neutral", 
 }) {
+  const [isVisible, setIsVisible] = React.useState(false);
+  const [coords, setCoords] = React.useState({ top: 0, left: 0 });
+  const triggerRef = React.useRef(null);
 
-    const positionClass = POSITION_CLASSES[position] ?? POSITION_CLASSES.top;
   const variantClass = VARIANT_CLASSES[variant] ?? VARIANT_CLASSES.neutral;
-
   const tooltipId = React.useId();
   const isValidElement = React.isValidElement(children);
 
+  const updatePosition = React.useCallback(() => {
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    let top = 0;
+    let left = 0;
+
+    switch (position) {
+      case "top":
+        top = rect.top - 8;
+        left = rect.left + rect.width / 2;
+        break;
+      case "bottom":
+        top = rect.bottom + 8;
+        left = rect.left + rect.width / 2;
+        break;
+      case "left":
+        top = rect.top + rect.height / 2;
+        left = rect.left - 8;
+        break;
+      case "right":
+      default:
+        top = rect.top + rect.height / 2;
+        left = rect.right + 8;
+        break;
+    }
+
+    setCoords({ top, left });
+  }, [position]);
+
+  const handleMouseEnter = React.useCallback(() => {
+    setIsVisible(true);
+    updatePosition();
+  }, [updatePosition]);
+
+  const handleMouseLeave = React.useCallback(() => {
+    setIsVisible(false);
+  }, []);
+
+  const handleFocus = React.useCallback(() => {
+    setIsVisible(true);
+    updatePosition();
+  }, [updatePosition]);
+
+  const handleBlur = React.useCallback(() => {
+    setIsVisible(false);
+  }, []);
+
+  React.useEffect(() => {
+    if (isVisible) {
+      updatePosition();
+      window.addEventListener("scroll", updatePosition, true);
+      window.addEventListener("resize", updatePosition);
+      return () => {
+        window.removeEventListener("scroll", updatePosition, true);
+        window.removeEventListener("resize", updatePosition);
+      };
+    }
+  }, [isVisible, updatePosition]);
+
   const trigger = isValidElement
     ? React.cloneElement(children, {
+        ref: triggerRef,
+        onMouseEnter: handleMouseEnter,
+        onMouseLeave: handleMouseLeave,
+        onFocus: handleFocus,
+        onBlur: handleBlur,
         "aria-describedby": cx(children.props?.["aria-describedby"], tooltipId),
       })
     : children;
 
-  return (
+  const tooltipContent = isVisible && typeof document !== "undefined" ? ReactDOM.createPortal(
     <span
-      className="relative inline-flex group"
+      id={tooltipId}
+      role="tooltip"
+      style={{
+        position: "fixed",
+        top: `${coords.top}px`,
+        left: `${coords.left}px`,
+        transform: position === "top" || position === "bottom" ? "translateX(-50%)" : position === "left" ? "translate(-100%, -50%)" : "translateY(-50%)",
+      }}
+      className={cx(
+        "pointer-events-none z-[var(--z-tooltip)] whitespace-nowrap",
+        "rounded-md px-3 py-2 text-[0.75rem] leading-snug shadow-lg",
+        "opacity-0 invisible",
+        "transition-all duration-150 ease-out",
+        isVisible && "opacity-100 visible",
+        variantClass,
+      )}
     >
-      {/* Elemento que dispara el tooltip */}
-      <span className="inline-flex">
-        {trigger}
-      </span>
+      {label}
+    </span>,
+    document.body
+  ) : null;
 
-      {/* Capa del tooltip */}
-      <span
-        id={tooltipId}
-        role="tooltip"
-        className={cx(
-          // layout container
-          "pointer-events-none absolute z-[var(--z-tooltip)] whitespace-nowrap",
-          "rounded-md px-3 py-2 text-[0.75rem] leading-snug shadow-sm",
-
-          // animación de entrada / salida
-          "opacity-0 invisible translate-y-1",
-          "transition-all duration-150 ease-out",
-          "group-hover:opacity-100 group-hover:visible group-hover:translate-y-0",
-          "group-focus-within:opacity-100 group-focus-within:visible group-focus-within:translate-y-0",
-
-          // variantes visuales
-          variantClass,
-
-          // posición
-          positionClass,
-        )}
-      >
-        {label}
-      </span>
-    </span>
+  return (
+    <>
+      {trigger}
+      {tooltipContent}
+    </>
   );
 }
 
