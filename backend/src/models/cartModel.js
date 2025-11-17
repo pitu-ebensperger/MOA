@@ -73,6 +73,25 @@ export const removeItemFromCart = async (userId, productId) => {
   return rows[0];
 };
 
+export const updateCartItemQuantity = async (userId, productId, cantidad) => {
+  const cart = await getOrCreateCart(userId);
+
+  const query = `
+    UPDATE carrito_items
+    SET cantidad = $3
+    WHERE carrito_id = $1 AND producto_id = $2
+    RETURNING *;
+  `;
+
+  const { rows } = await pool.query(query, [
+    cart.carrito_id,
+    productId,
+    cantidad,
+  ]);
+
+  return rows[0];
+};
+
 export const clearCart = async (userId) => {
   const cart = await getOrCreateCart(userId);
 

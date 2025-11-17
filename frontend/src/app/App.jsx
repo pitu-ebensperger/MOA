@@ -16,6 +16,7 @@ import RegisterPage from '../modules/auth/pages/RegisterPage.jsx'
 import LoginPage from '../modules/auth/pages/LoginPage.jsx'
 import ForgotPasswordPage from '../modules/auth/pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from '../modules/auth/pages/ResetPasswordPage.jsx'
+import DebugLoginPage from '../modules/auth/pages/DebugLoginPage.jsx'
 
 import { ProfilePage } from '../modules/profile/pages/ProfilePage.jsx'
 import { WishlistPage } from '../modules/profile/pages/WishlistPage.jsx'
@@ -66,6 +67,7 @@ export const App = () => {
           <Route path={auth.register} element={<RegisterPage />} />
           <Route path={auth.forgot} element={<ForgotPasswordPage />} />
           <Route path={auth.reset} element={<ResetPasswordPage />} />
+          <Route path="/debug-login" element={<DebugLoginPage />} />
           <Route path={auth.profile} element={<ProfilePage />} />
           <Route path='/wishlist' element={<WishlistPage />} />         
           <Route path={support.contact} element={<ContactPage />} /> 

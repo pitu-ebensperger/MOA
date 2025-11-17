@@ -7,8 +7,12 @@ export const normalizeProduct = (p = {}) => {
   const slug = p.slug != null ? String(p.slug) : null;
   const sku = p.sku ?? null;
 
-  const price = toNum(p.price);
-  const compareAtPrice = toNum(p.compareAtPrice);
+  // Convert prices from cents to CLP pesos (divide by 100)
+  const rawPrice = toNum(p.price) ?? toNum(p.priceCents);
+  const price = rawPrice ? rawPrice / 100 : null;
+  
+  const rawCompareAtPrice = toNum(p.compareAtPrice) ?? toNum(p.compareAtPriceCents);
+  const compareAtPrice = rawCompareAtPrice ? rawCompareAtPrice / 100 : null;
 
   const imgUrl = p.imgUrl ?? null;
   const gallery = Array.isArray(p.gallery) && p.gallery.length ? p.gallery : (imgUrl ? [imgUrl] : []);

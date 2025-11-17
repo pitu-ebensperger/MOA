@@ -61,7 +61,8 @@ export const AuthProvider = ({ children }) => {
 
     (async () => {
       try {
-        const profile = await authApi.profile(user?.id);
+        // No pasar user?.id porque user es null, usar endpoint /usuario que obtiene por token
+        const profile = await authApi.profile();
         if (cancelled) return;
         syncUser(profile);
         setStatus(STATUS.AUTH);
@@ -121,7 +122,8 @@ export const AuthProvider = ({ children }) => {
     setStatus(STATUS.LOADING);
     setError(null);
     try {
-      const profile = await authApi.profile(user?.id);
+      // No pasar user?.id, usar endpoint que obtiene perfil por token
+      const profile = await authApi.profile();
       syncUser(profile);
       setStatus(STATUS.AUTH);
       return profile;
@@ -130,7 +132,7 @@ export const AuthProvider = ({ children }) => {
       logout();
       throw err;
     }
-  }, [syncUser, logout, user]);
+  }, [syncUser, logout]);
 
   const value = useMemo(
     () => ({

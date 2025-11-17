@@ -48,17 +48,18 @@ export const loginUser = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
-    const email = req.user;
-    if (!email) {
+    const userFromToken = req.user;
+    if (!userFromToken || !userFromToken.email) {
       throw new UnauthorizedError("No autorizado");
     }
-    const user = await findUserModel(email);
+    const user = await findUserModel(userFromToken.email);
 
     if (!user) {
       throw new NotFoundError("Usuario");
     }
 
     const profile = {
+      id: user.usuario_id,
       nombre: user.nombre,
       email: user.email,
       telefono: user.telefono,

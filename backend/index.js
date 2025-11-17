@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -29,8 +28,8 @@ app.use(categoriesRouter);
 app.use(productsRouter);
 app.use(userRoutes);
 app.use(authRoutes);
-
-app.use(errorHandler);
-app.use(home);
 app.use(wishlistRoutes);
 app.use(cartRoutes);
+app.use(home);
+
+app.use(errorHandler);

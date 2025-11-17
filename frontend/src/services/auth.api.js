@@ -20,9 +20,12 @@ export const authApi = {
     return res?.data ?? res
   },
 
-  // GET /auth/profile (requiere token)
+  // GET /auth/profile o /usuario (requiere token)
   profile: async (userId) => {
-    const endpoint = buildProfilePath(userId)
+    // Si no se especifica userId, usa endpoint /usuario que obtiene por token
+    const endpoint = userId 
+      ? buildProfilePath(userId)
+      : '/usuario';
     const res = await apiClient.private.get(endpoint)
     return res?.data ?? res
   },
