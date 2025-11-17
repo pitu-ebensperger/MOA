@@ -1,11 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import PropTypes from "prop-types";
-<<<<<<< Updated upstream
-import { Button } from "../../../components/ui/Button.jsx";
-=======
 import { Button } from "@components/ui/Button.jsx";
 import { TooltipNeutral } from "@components/ui/Tooltip.jsx";
->>>>>>> Stashed changes
 import { LayoutDashboard, Package, Warehouse, Users, Settings, LogOut, Store, Layers, ChevronLeft, ChevronRight } from "lucide-react";
 import { API_PATHS } from "@config/api-paths.js";
 import { usePersistentState } from "@hooks/usePersistentState.js";
@@ -23,30 +19,11 @@ const navItems = [
 export default function EntornoAdmin({ children }) {
   const location = useLocation();
   const currentPath = location.pathname;
-<<<<<<< Updated upstream
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // Cargar preferencia desde localStorage
-  useEffect(() => {
-    if (typeof globalThis !== "undefined" && globalThis.localStorage) {
-      const raw = globalThis.localStorage.getItem("moa.admin.sidebarExpanded");
-      if (raw != null) setIsExpanded(raw === "true");
-    }
-  }, []);
-
-  // Persistir preferencia
-  useEffect(() => {
-    if (typeof globalThis !== "undefined" && globalThis.localStorage) {
-      globalThis.localStorage.setItem("moa.admin.sidebarExpanded", String(isExpanded));
-    }
-  }, [isExpanded]);
-=======
   const [isExpanded, setIsExpanded] = usePersistentState("moa.admin.sidebarExpanded", {
     initialValue: true,
     parser: (value) => value === "true",
     serializer: (value) => String(Boolean(value)),
   });
->>>>>>> Stashed changes
 
  
 
@@ -54,37 +31,10 @@ export default function EntornoAdmin({ children }) {
   <div className="admin-shell min-h-screen bg-(--background) text-body">
       <header className="h-0" />
 
-<<<<<<< Updated upstream
-      <div className="flex min-h-screen overflow-hidden">
-=======
       <div className="flex min-h-screen relative">
->>>>>>> Stashed changes
         <aside
-          className={`${isExpanded ? "w-56" : "w-16"} sticky top-0 h-screen overflow-y-auto flex flex-col items-center bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
+          className={`${isExpanded ? "w-56" : "w-20"} sticky top-0 h-screen flex flex-col items-center bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
         >
-<<<<<<< Updated upstream
-          {/* Brand y toggle */}
-          <div className="mb-5 w-full flex items-center justify-between">
-            <a href={API_PATHS.admin.dashboard} className="flex items-center gap-2">
-              <span className="title-serif text-primary text-lg font-normal tracking-tight">MOA</span>
-              {isExpanded && (
-                <span className="text-[0.625rem] uppercase tracking-[0.25em] text-secondary">Admin</span>
-              )}
-            </a>
-            <Button
-              appearance="ghost"
-              size="sm"
-              onClick={() => setIsExpanded((v) => !v)}
-              title={isExpanded ? "Contraer" : "Expandir"}
-              className="rounded-lg p-1.5 hover:bg-neutral-100"
-            >
-              {isExpanded ? (
-                <ChevronLeft className="h-3.5 w-3.5 text-primary" />
-              ) : (
-                <ChevronRight className="h-3.5 w-3.5 text-primary" />
-              )}
-            </Button>
-=======
           <div className="mb-5 w-full grid grid-cols-3 items-center">
             <div />
 
@@ -114,30 +64,40 @@ export default function EntornoAdmin({ children }) {
                 </Button>
               </div>
             )}
->>>>>>> Stashed changes
           </div>
 
+          {/* Botón toggle fuera del sidebar en modo compacto */}
+          {!isExpanded && (
+            <div className="absolute top-5 -right-3 z-10">
+              <TooltipNeutral label="Expandir" position="right">
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded((v) => !v)}
+                  className="rounded-full p-1.5 bg-white border border-neutral-200 shadow-md hover:bg-neutral-100 hover:border-primary transition-colors"
+                  aria-label="Expandir"
+                >
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                </Button>
+              </TooltipNeutral>
+            </div>
+          )}
+
+          {/* Contenedor scroll interno para que el aside no recorte los tooltips */}
+          <div className="flex-1 w-full overflow-y-auto overflow-x-visible">
           {/* Navegación principal */}
           <nav className="flex flex-col gap-2 mb-4 items-stretch w-full">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPath.startsWith(item.to);
-              return (
+              const isDashboard = item.to === API_PATHS.admin.dashboard;
+              const isActive = isDashboard ? currentPath === item.to : currentPath.startsWith(item.to);
+              const buttonNode = (
                 <Button
                   key={item.to}
                   appearance="ghost"
                   size="sm"
                   as={Link}
                   to={item.to}
-<<<<<<< Updated upstream
-                  className={`sidebar-link w-full rounded-lg ${isExpanded ? "px-3 py-2.5 flex-row justify-start gap-3" : "px-2 py-2.5 flex-col justify-center items-center"} text-xs font-medium transition-all duration-200 ${isActive ? "text-white bg-primary hover:bg-primary/90 shadow-sm" : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"}`}
-                  title={item.label}
-                >
-                  {Icon && (
-                    <Icon className={`h-4 w-4 stroke-[1.5] shrink-0 ${isActive ? "text-white" : "text-primary"}`} aria-hidden />
-                  )}
-                  {isExpanded ? <span className="text-xs font-medium">{item.label}</span> : null}
-=======
                   className={`sidebar-link rounded-lg ${isExpanded ? "w-full pl-3 pr-2 py-2.5" : "w-full px-2.5 py-2.5"} text-xs font-medium transition-colors duration-200 ${isActive ? "bg-neutral-100 text-primary border-r-4 border-primary" : "text-neutral-700 hover:text-primary hover:bg-neutral-50"}`}
                   aria-label={!isExpanded ? item.label : undefined}
                 >
@@ -157,8 +117,15 @@ export default function EntornoAdmin({ children }) {
                       </span>
                     )
                   )}
->>>>>>> Stashed changes
                 </Button>
+              );
+
+              return isExpanded ? (
+                buttonNode
+              ) : (
+                <TooltipNeutral key={item.to} label={item.label} position="right">
+                  {buttonNode}
+                </TooltipNeutral>
               );
             })}
           </nav>
@@ -166,39 +133,6 @@ export default function EntornoAdmin({ children }) {
           <div className="my-4 h-px w-full bg-neutral-200" />
 
           {/* Acciones secundarias */}
-<<<<<<< Updated upstream
-          <div className="mt-auto w-full flex flex-col gap-1 pb-3">
-            <Button
-              appearance="ghost"
-              size="sm"
-              as={Link}
-              to={API_PATHS.home.landing}
-              className={`sidebar-link w-full rounded-lg ${isExpanded ? "px-3 py-2.5 flex-row justify-start gap-3" : "px-2 py-2.5 flex-col justify-center items-center"} text-xs font-medium transition-all duration-200 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50`}
-              title="Visitar tienda"
-            >
-              <Store className="h-4 w-4 stroke-[1.5] shrink-0 text-neutral-500" aria-hidden />
-              {isExpanded ? <span className="text-xs font-medium">Visitar tienda</span> : null}
-            </Button>
-
-            <div className="my-2 h-px w-full bg-neutral-200" />
-
-            <Button
-              appearance="ghost"
-              size="sm"
-              className={`sidebar-link w-full rounded-lg ${isExpanded ? "px-3 py-2.5 flex-row justify-start gap-3" : "px-2 py-2.5 flex-col justify-center items-center"} text-xs font-medium transition-all duration-200 text-neutral-600 hover:text-red-600 hover:bg-red-50`}
-              title="Cerrar sesión"
-              onClick={() => {
-                if (typeof globalThis !== "undefined" && globalThis.localStorage) {
-                  globalThis.localStorage.removeItem('moa.accessToken');
-                  globalThis.localStorage.removeItem('moa.user');
-                  globalThis.location.href = API_PATHS.auth.login;
-                }
-              }}
-            >
-              <LogOut className="h-4 w-4 stroke-[1.5] shrink-0 text-neutral-500" aria-hidden />
-              {isExpanded ? <span className="text-xs font-medium">Cerrar sesión</span> : null}
-            </Button>
-=======
           <div className="mt-auto w-full flex flex-col justify-around gap-1 pb-5">
             {isExpanded ? (
               <Button
@@ -276,7 +210,6 @@ export default function EntornoAdmin({ children }) {
               </TooltipNeutral>
             )}
           </div>
->>>>>>> Stashed changes
           </div>
         </aside>
   <main className="flex-1 overflow-auto p-8 bg-(--background)">{children}</main>

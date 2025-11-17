@@ -927,7 +927,7 @@ export function StyleGuidePage() {
       />
       <div className="ml-auto flex items-center gap-2">
         <FilterMenuButton onClick={() => setFiltersModalOpen(true)} />
-        <ColumnsMenuButton table={table} />
+        {table ? <ColumnsMenuButton table={table} /> : null}
         <ClearFiltersButton onClear={clearAll} />
         <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
         <Button appearance="ghost">Exportar</Button>
@@ -1473,8 +1473,9 @@ export function StyleGuidePage() {
                 <DataTableV2 columns={tableColumns} data={tableData} loading={false} toolbar={DATA_DISPLAY_TOOLBAR} condensed={condensed} variant="card" />
               </div>
               <div className="rounded-2xl border border-[var(--color-border)] bg-white/95 p-4">
-                <p className="mb-3 text-xs text-[var(--color-secondary2)]">Tabla sin Card (toolbar arriba)</p>
-                <DataTableV2 columns={tableColumns} data={tableData} loading={false} toolbar={DATA_DISPLAY_TOOLBAR} condensed={condensed} variant="plain" />
+                <p className="mb-3 text-xs text-[var(--color-secondary2)]">Toolbar separada + tabla sin Card</p>
+                <div className="mb-2">{DATA_DISPLAY_TOOLBAR()}</div>
+                <DataTableV2 columns={tableColumns} data={tableData} loading={false} condensed={condensed} variant="plain" />
               </div>
               <div className="rounded-2xl border border-[var(--color-border)] bg-white/95 p-4">
                 <p className="mb-3 text-xs text-[var(--color-secondary2)]">Tabla con paginación manual</p>

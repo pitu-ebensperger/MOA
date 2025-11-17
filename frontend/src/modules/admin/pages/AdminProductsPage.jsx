@@ -1,9 +1,20 @@
 //path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { Plus, RefreshCw } from "lucide-react";
 
-import { TanstackDataTable } from "../../../components/data-display/DataTable.jsx";
-import { Pagination } from "../../../components/ui/Pagination.jsx";
+import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
+import {
+  TableToolbar,
+  TableSearch,
+  FilterSelect,
+  FilterTags,
+  ToolbarSpacer,
+  QuickFilterPill,
+  ColumnsMenuButton,
+  ClearFiltersButton,
+  LayoutToggleButton,
+} from "../../../components/data-display/TableToolbar.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
 
 import { useAdminProducts } from "../hooks/useAdminProducts.js";
 import { useCategories } from "../../products/hooks/useCategories.js";
@@ -12,14 +23,16 @@ import { DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
 import { PRODUCT_STATUS_OPTIONS } from "../../../config/status-options.js";
 
 export default function ProductsAdminPage() {
-  const [page, setPage] = React.useState(1);
-  const [search, setSearch] = React.useState("");
-  const [status, setStatus] = React.useState("");
-  const [onlyLowStock, setOnlyLowStock] = React.useState(false);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const [onlyLowStock, setOnlyLowStock] = useState(false);
+  const [activeTags, setActiveTags] = useState([]);
+  const [condensed, setCondensed] = useState(false);
 
   const limit = DEFAULT_PAGE_SIZE;
 
-  const { items, total, totalPages, isLoading, refetch } = useAdminProducts({
+  const { items, total, isLoading, refetch } = useAdminProducts({
     page,
     limit,
     search,
@@ -28,12 +41,12 @@ export default function ProductsAdminPage() {
   });
 
   const { categories } = useCategories();
-  const categoryMap = React.useMemo(
+  const categoryMap = useMemo(
     () => Object.fromEntries((categories ?? []).map((c) => [c.id, c.name])),
     [categories],
   );
 
-  const columns = React.useMemo(
+  const columns = useMemo(
     () =>
       buildProductColumns({
         categoryMap,
@@ -50,6 +63,88 @@ export default function ProductsAdminPage() {
     [categoryMap],
   );
 
+  const clearAll = () => {
+    setSearch("");
+    setStatus("");
+    setOnlyLowStock(false);
+    setActiveTags([]);
+    setPage(1);
+  };
+
+  const toolbar = useMemo(
+    () => (table) => (
+      <TableToolbar>
+        <TableSearch
+          value={search}
+          onChange={(v) => {
+            setSearch(v);
+            setPage(1);
+          }}
+          placeholder="Buscar por nombre, SKU…"
+        />
+        <ToolbarSpacer />
+        <FilterSelect
+          label="Estado"
+          value={status}
+          onChange={(v) => {
+            setStatus(v);
+            setPage(1);
+            if (v) {
+              setActiveTags((tags) => [
+                { key: "status", value: v, label: `Estado: ${PRODUCT_STATUS_OPTIONS.find((o) => o.value === v)?.label ?? v}` },
+                ...tags.filter((t) => t.key !== "status"),
+              ]);
+            } else {
+              setActiveTags((tags) => tags.filter((t) => t.key !== "status"));
+            }
+          }}
+          options={PRODUCT_STATUS_OPTIONS}
+        />
+        <ToolbarSpacer />
+        <QuickFilterPill
+          active={onlyLowStock}
+          onClick={() => {
+            setOnlyLowStock((v) => !v);
+            setPage(1);
+          }}
+        >
+          Stock crítico
+        </QuickFilterPill>
+        <ToolbarSpacer />
+        <FilterTags
+          tags={activeTags}
+          onRemove={(tag) => {
+            setActiveTags((tags) => tags.filter((t) => !(t.key === tag.key && t.value === tag.value)));
+            if (tag.key === "status") setStatus("");
+          }}
+        />
+        <div className="ml-auto flex items-center gap-2">
+          <ColumnsMenuButton table={table} />
+          <ClearFiltersButton onClear={clearAll} />
+          <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
+          <Button
+            appearance="ghost"
+            intent="neutral"
+            size="sm"
+            onClick={() => refetch()}
+            leadingIcon={<RefreshCw className="h-4 w-4" />}
+          >
+            Refrescar
+          </Button>
+          <Button
+            appearance="solid"
+            intent="primary"
+            size="sm"
+            leadingIcon={<Plus className="h-4 w-4" />}
+          >
+            Nuevo producto
+          </Button>
+        </div>
+      </TableToolbar>
+    ),
+    [search, status, onlyLowStock, activeTags, condensed, refetch],
+  );
+
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
@@ -62,74 +157,10 @@ export default function ProductsAdminPage() {
             Administra el catálogo y el inventario de la tienda MOA.
           </p>
         </div>
-
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-(--color-secondary1) text-(--color-secondary1) hover:bg-(--surface-subtle)"
-            aria-label="Refrescar"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-full bg-(--color-primary1) px-3 py-2 text-sm text-white hover:opacity-90"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo producto
-          </button>
-        </div>
       </div>
 
-      {/* Filtros */}
-      <div className="flex flex-wrap gap-3 rounded-2xl border border-(--border-subtle) bg-(--surface-subtle) px-4 py-3">
-        <div className="min-w-[200px] flex-1">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Buscar por nombre, SKU…"
-            className="w-full rounded-full border border-(--border-subtle) bg-white px-3 py-1.5 text-sm"
-          />
-        </div>
-
-        <div className="w-full sm:w-[180px]">
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-            className="w-full rounded-full border border-(--border-subtle) bg-white px-3 py-1.5 text-sm"
-          >
-            {PRODUCT_STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <label className="flex items-center gap-2 text-sm text-(--text-weak)">
-          <input
-            type="checkbox"
-            checked={onlyLowStock}
-            onChange={(e) => {
-              setOnlyLowStock(e.target.checked);
-              setPage(1);
-            }}
-            className="h-4 w-4 rounded border-(--border-subtle)"
-          />
-          <span>Solo stock crítico</span>
-        </label>
-      </div>
-
-      {/* Tabla TanStack */}
-      <TanstackDataTable
+      {/* Tabla con toolbar integrado */}
+      <DataTableV2
         columns={columns}
         data={items}
         loading={isLoading}
@@ -137,17 +168,10 @@ export default function ProductsAdminPage() {
         pageSize={limit}
         total={total}
         onPageChange={setPage}
+        toolbar={toolbar}
+        condensed={condensed}
+        variant="card"
       />
-
-      {/* Paginación */}
-      <div className="mt-3">
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          totalItems={total}
-          onPageChange={setPage}
-        />
-      </div>
     </div>
   );
 }

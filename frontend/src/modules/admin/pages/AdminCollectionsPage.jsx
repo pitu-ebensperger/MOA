@@ -37,7 +37,7 @@ export default function AdminCollectionsPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
           <h2 className="mb-3 text-lg font-semibold text-primary">Categorías principales</h2>
           {isLoading && <p className="text-sm text-neutral-500">Cargando categorías…</p>}
@@ -73,19 +73,6 @@ export default function AdminCollectionsPage() {
               Guardar cambios
             </Button>
           </div>
-        </div>
-
-        <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold text-primary">Colecciones</h2>
-          <p className="text-sm text-neutral-600">
-            Próximamente podrás crear colecciones personalizadas combinando
-            categorías y productos.
-          </p>
-          <ul className="mt-4 list-disc pl-6 text-sm text-neutral-700">
-            <li>Crear, renombrar y ordenar colecciones</li>
-            <li>Añadir/quitar categorías o productos</li>
-            <li>Definir colección destacada</li>
-          </ul>
         </div>
       </div>
     </section>
