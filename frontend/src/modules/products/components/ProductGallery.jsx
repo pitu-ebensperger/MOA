@@ -1,7 +1,7 @@
 import ProductCard from "./ProductCard.jsx";
-import { useWishlist } from "../../profile/hooks/useWishlist.js"
+import { useWishlist } from "../../profile/hooks/useWishlist.js";
 
-export default function ProductGallery({ products = [] }) {
+export default function ProductGallery({ products = [], onAddToCart }) {
   const { wishlist, toggleWishlist } = useWishlist();
 
   if (!Array.isArray(products) || products.length === 0) {
@@ -26,9 +26,13 @@ export default function ProductGallery({ products = [] }) {
             product={product}
             isInWishlist={isSaved}
             onToggleWishlist={toggleWishlist}
+
+            onAddToCart={() => onAddToCart(product)}
           />
         );
       })}
     </section>
   );
 }
+
+

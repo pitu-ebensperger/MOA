@@ -42,12 +42,6 @@ export default function ProductCard({
     onToggleWishlist(product);
   };
 
-  const handleAddToCart = (event) => {
-    event.preventDefault();
-    onAddToCart(product);
-    setCartButtonPressed(true);
-  };
-
   useEffect(() => {
     if (!cartButtonPressed) return undefined;
     const timer = setTimeout(() => setCartButtonPressed(false), 280);
@@ -162,7 +156,7 @@ export default function ProductCard({
           elevation="md"
           size="md"
           motion="lift"
-          onClick={handleAddToCart}
+          onClick={() => onAddToCart(product)}
           leadingIcon={
             <ShoppingCart
               size={18}
