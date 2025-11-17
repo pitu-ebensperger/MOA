@@ -20,6 +20,7 @@ import categoriesRouter from "./routes/categoriesRoutes.js";
 import productsRouter from "./routes/productsRoutes.js";
 import userRoutes from "./routes/usersRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import wishlistRoutes from "./routes/wishlistRoutes.js";
 import { errorHandler } from "./src/utils/error.utils.js";
 import home from "./routes/homeRoutes.js";
 
@@ -30,3 +31,4 @@ app.use(authRoutes);
 
 app.use(errorHandler);
 app.use(home);
+app.use(wishlistRoutes);

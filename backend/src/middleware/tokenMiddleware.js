@@ -19,7 +19,10 @@ export const verifyToken = async (req, res, next) => {
       throw new UnauthorizedError("El token debe estar presente");
     }
     const decoded = jwt.verify(extractToken, JWT_SECRET);
-    req.user = decoded.email;
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+    };
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {

@@ -74,8 +74,8 @@ CREATE TABLE wishlists (
 
 CREATE TABLE wishlist_items (
     wishlist_item_id BIGSERIAL PRIMARY KEY,
-    wishlist_id BIGINT REFERENCES wishlists (wishlist_id) ON DELETE CASCADE,
-    producto_id BIGINT REFERENCES productos (producto_id),
+    wishlist_id BIGINT NOT NULL REFERENCES wishlists (wishlist_id) ON DELETE CASCADE,
+    producto_id BIGINT NOT NULL REFERENCES productos (producto_id) ON DELETE CASCADE,
     UNIQUE (wishlist_id, producto_id)
 );
 
