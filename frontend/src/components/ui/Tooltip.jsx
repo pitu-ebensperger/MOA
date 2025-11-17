@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { cx } from "../../utils/ui-helpers.js";
+import { cx } from "@/utils/ui-helpers.js"
 
 
 const VARIANT_CLASSES = {

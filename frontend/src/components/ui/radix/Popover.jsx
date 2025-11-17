@@ -1,5 +1,5 @@
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { cx } from "../../../utils/ui-helpers.js";
+import { cx } from "@/utils/ui-helpers.js"
 
 export function Popover({ children, open, onOpenChange }) {
   return (

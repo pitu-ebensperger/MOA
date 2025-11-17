@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { setOnUnauthorized, setTokenGetter } from "../services/api-client.js";
-import { authApi } from "../services/auth.api.js";
-import { AuthContext, isAdminRole } from "./auth-context.js";
-import { usePersistentState } from "../hooks/usePersistentState.js";
+import { setOnUnauthorized, setTokenGetter } from "@/services/api-client.js"
+import { authApi } from "@/services/auth.api.js"
+import { AuthContext, isAdminRole } from "@/context/auth-context.js"
+import { usePersistentState } from "@/hooks/usePersistentState.js"
+import { useNavigate } from "react-router-dom";
 
 // ---- Constantes y utilidades ----------------------------------
 const TOKEN_KEY = "moa.accessToken";
@@ -30,6 +31,7 @@ export const AuthProvider = ({ children }) => {
   });
   const [status, setStatus] = useState(() => (token ? STATUS.LOADING : STATUS.IDLE));
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // --- Sync helpers (token/user <-> storage + api-client) -------
   const syncToken = useCallback((nextToken) => {
@@ -46,7 +48,8 @@ export const AuthProvider = ({ children }) => {
     syncUser(null);
     setStatus(STATUS.IDLE);
     setError(null);
-  }, [syncToken, syncUser]);
+    navigate("/", { replace: true });
+  }, [syncToken, syncUser, navigate]);
 
   // api-client: define cómo actuar ante 401 global y cómo obtener token
   useEffect(() => {

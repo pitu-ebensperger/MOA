@@ -1,15 +1,14 @@
 import React from "react";
-import { Dialog, DialogContent } from "../../../components/ui/radix/Dialog.jsx";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { Accordion } from "../../../components/ui/Accordion.jsx";
-import { Badge } from "../../../components/ui/Badge.jsx";
-import { formatDate_ddMMyyyy } from "../../../utils/date.js";
+import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx"
+import { Price } from "@/components/data-display/Price.jsx"
+import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import { Accordion } from "@/components/ui/Accordion.jsx"
+import { Badge } from "@/components/ui/Badge.jsx"
+import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { Package, Tag, Layers, Calendar, TrendingUp, AlertCircle } from "lucide-react";
 
 // Helpers
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
-const safeText = (v) => (v == null || v === "" ? "–" : v);
 const safeNumber = (v, defaultValue = 0) => (Number.isFinite(Number(v)) ? Number(v) : defaultValue);
 
 export default function ProductDetailDrawer({ open, product, onClose, categoryMap = {} }) {

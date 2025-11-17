@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
-import { useAuth, isAdminRole } from '../../../context/auth-context.js';
-import { useRedirectAfterAuth } from '../../auth/hooks/useRedirectAuth.jsx';
-import { Button } from '../../../components/ui/Button.jsx';
-import { API_PATHS } from '../../../config/api-paths.js';
+import { useAuth, isAdminRole } from '@/context/auth-context.js'
+import { useRedirectAfterAuth } from '@/modules/auth/hooks/useRedirectAuth.jsx'
+import { Button } from '@/components/ui/Button.jsx'
+import { API_PATHS } from '@/config/api-paths.js'
 
 
 export default function LoginPage() {

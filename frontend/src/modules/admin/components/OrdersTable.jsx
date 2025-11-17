@@ -1,5 +1,5 @@
-import { TanstackDataTable } from "../../../components/data-display/DataTable.jsx";
-import { Pagination } from "../../../components/ui/Pagination.jsx";
+import { TanstackDataTable } from "@/components/data-display/DataTable.jsx"
+import { Pagination } from "@/components/ui/Pagination.jsx"
 
 export function OrdersTable({
   data,

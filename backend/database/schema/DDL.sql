@@ -27,7 +27,6 @@ CREATE TABLE productos (
     producto_id BIGSERIAL PRIMARY KEY,
     public_id TEXT UNIQUE NOT NULL,
     categoria_id INT REFERENCES categorias (categoria_id),
-    collection_id INT,
     nombre TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
     sku TEXT UNIQUE NOT NULL,

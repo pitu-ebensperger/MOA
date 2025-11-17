@@ -13,7 +13,6 @@ export const API_PATHS = {
     products: "/productos",
     productDetail: (id) => `/producto/${id}`,
     categories: "/categorias",
-    collections: "/colecciones",
   },
   cart: {
     root: (userId) => `/${userId}/cart`,
@@ -34,14 +33,19 @@ export const API_PATHS = {
     faq: "/preguntas-frecuentes",
     privacy: "/politica-de-privacidad",
     terms: "/terminos-y-condiciones",
+    returns: "/cambios-y-devoluciones",
   },
   admin: {
     dashboard: "/admin",
     products: "/admin/productos",
+    categories: "/admin/categorias",
+    categoryDetail: (id) => `/admin/categorias/${id}`,
+    categoryProductsCount: (id) => `/admin/categorias/${id}/productos/count`,
     orders: "/admin/pedidos",
-    customers: "/admin/clientes",
+    customers: "/admin/usuarios",
+    createCustomer: "/admin/clientes",
+    updateCustomer: (id) => `/admin/clientes/${id}`,
     settings: "/admin/configuraciones",
-    collections: "/admin/colecciones",
     uiDemo: "/admin", // TODO: quitar alias temporal cuando UI demo tenga ruta propia
     // Ruta de pruebas de componentes
     test: "/admin/test",

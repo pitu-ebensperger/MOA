@@ -1,13 +1,13 @@
-import { env } from "../config/env.js";
-import { API_PATHS } from "../config/api-paths.js";
-import { apiClient } from "./api-client.js";
-import { delay } from "../utils/delay.js";
-import { buildQueryString } from "../utils/https.js";
-import { toNum } from "../utils/number.js";
-import { paginate } from "../utils/pagination.js";
+import { env } from "@/config/env.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { apiClient } from "@/services/api-client.js"
+import { delay } from "@/utils/delay.js"
+import { buildQueryString } from "@/utils/https.js"
+import { toNum } from "@/utils/number.js"
+import { paginate } from "@/utils/pagination.js"
 
-import { customersDb } from "../mocks/database/customers.js";
-import { ordersDb } from "../mocks/database/orders.js";
+import { customersDb } from "@/mocks/database/customers.js"
+import { ordersDb } from "@/mocks/database/orders.js"
 
 
 
@@ -179,6 +179,34 @@ const mockOrdersApi = {
 
     return buildMockOrderView(updated);
   },
+
+  async updateStatus(id, status) {
+    if (!id) throw new Error("order id is required");
+    if (!status) throw new Error("status is required");
+
+    await delay();
+
+    const idx = ordersDb.orders.findIndex(
+      (o) => String(o.id) === String(id) || String(o.number) === String(id),
+    );
+
+    if (idx === -1) {
+      const err = new Error("Order not found");
+      err.status = 404;
+      throw err;
+    }
+
+    const updated = {
+      ...ordersDb.orders[idx],
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+
+    ordersDb.orders[idx] = updated;
+
+    return buildMockOrderView(updated);
+  },
+
 };
 
 /* Remote implementation --------------------------------------------------------------------------------------------- */
@@ -186,7 +214,7 @@ const mockOrdersApi = {
 const remoteOrdersApi = {
   async list(params = {}) {
     const query = buildQueryString(params);
-    const data = await apiClient.private.get(
+    const data = await apiClient.get(
       `${API_PATHS.admin.orders}${query}`
     );
 
@@ -204,7 +232,7 @@ const remoteOrdersApi = {
   async getById(id) {
     if (!id) throw new Error("order id is required");
 
-    const data = await apiClient.private.get(
+    const data = await apiClient.get(
       `${API_PATHS.admin.orders}/${id}`
     );
 
@@ -214,12 +242,27 @@ const remoteOrdersApi = {
   async cancel(id) {
     if (!id) throw new Error("order id is required");
 
-    const data = await apiClient.private.post(
+    const data = await apiClient.post(
       `${API_PATHS.admin.orders}/${id}/cancel`,
     );
 
     return data ? normalizeOrder(data, data) : null;
   },
+
+  async updateStatus(id, updates = {}) {
+    if (!id) throw new Error("order id is required");
+    const status = updates?.status;
+    if (!status) throw new Error("status is required");
+
+    const payload = await apiClient.patch(
+      `${API_PATHS.admin.orders}/${id}/estado`,
+      { estado_envio: status }
+    );
+
+    const orderData = payload?.data ?? payload;
+    return orderData ? normalizeOrder(orderData, orderData) : null;
+  },
+
 };
 
 /* Export ------------------------------------------------------------------------------------------------------------ */

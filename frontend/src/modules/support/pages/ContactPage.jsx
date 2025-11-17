@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '../../../components/ui/Button'
+import { Button } from '@/components/ui/Button'
 import Swal from 'sweetalert2';
 
 export default function ContactPage() {

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ProductFiltersContent } from "./ProductFiltersContent.jsx";
+import { ProductFiltersContent } from "@/modules/products/components/ProductFiltersContent.jsx"
 
 export function ProductFiltersDrawer({
   open,

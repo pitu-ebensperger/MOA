@@ -1,4 +1,4 @@
-import { createStrictContext } from "./createStrictContext.js";
+import { createStrictContext } from "@/context/createStrictContext.js"
 
 export const [UserContext, useUserContext] = createStrictContext("User", {
   displayName: "UserContext",

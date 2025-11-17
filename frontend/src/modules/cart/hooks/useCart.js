@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from "react";
-import { usePersistentState } from "../../../hooks/usePersistentState.js";
-import { useAuth } from "../../../context/auth-context.js";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePersistentState } from "@/hooks/usePersistentState.js"
+import { useAuth } from "@/context/auth-context.js"
 
 const CART_STORAGE_KEY = "cart";
 
@@ -10,6 +10,7 @@ export const useCart = () => {
   const [cartItems, setCartItems] = usePersistentState(CART_STORAGE_KEY, {
     initialValue: [],
   });
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -145,15 +146,19 @@ export const useCart = () => {
     }
   };
 
+  const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
+  const toggleDrawer = useCallback(() => setIsDrawerOpen((prev) => !prev), []);
+
   const total = useMemo(
     () =>
       cartItems.reduce(
         (acc, item) =>
           acc +
           (Number(item.price) || Number(item.precio_unit) || 0) * item.quantity,
-        0
+        0,
       ),
-    [cartItems]
+    [cartItems],
   );
 
   return {
@@ -163,5 +168,9 @@ export const useCart = () => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    isDrawerOpen,
+    openDrawer,
+    closeDrawer,
+    toggleDrawer,
   };
 };

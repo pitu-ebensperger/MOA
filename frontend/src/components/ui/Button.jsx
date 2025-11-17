@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react";
-import { cx } from "../../utils/ui-helpers.js";
+import { cx } from "@/utils/ui-helpers.js"
 import {
   BUTTON_APPEARANCES,
   BUTTON_INTENTS,

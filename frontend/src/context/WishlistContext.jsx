@@ -1,5 +1,5 @@
-import { useWishlist } from "../hooks/state/useWishlist";
-import { WishlistContext } from "./wishlist-context.js";
+import { useWishlist } from "@/hooks/state/useWishlist"
+import { WishlistContext } from "@/context/wishlist-context.js"
 
 export const WishlistProvider = ({ children }) => {
   const wishlistState = useWishlist();

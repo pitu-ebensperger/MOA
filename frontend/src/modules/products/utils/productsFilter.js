@@ -1,6 +1,6 @@
-import { buildProductCategoryPool } from "./productCategory.js";
-import { toNum } from "../../../utils/number.js";
-import { ALL_CATEGORY_ID } from "../../../config/constants.js";
+import { buildProductCategoryPool } from "@/modules/products/utils/productCategory.js"
+import { toNum } from "@/utils/number.js"
+import { ALL_CATEGORY_ID } from "@/config/constants.js"
 
 const s = (v) => (v == null ? "" : String(v));
 
@@ -43,15 +43,6 @@ export const createCategoryMatcher = (categories = []) => {
     const normalized = s(categoryValue).toLowerCase();
     return pool.some((id) => s(id).toLowerCase() === normalized);
   };
-};
-
-export const matchesCollection = (p, collectionId) => {
-  if (!collectionId) return true;
-  const pid = p?.fk_collection_id;
-  if (pid == null) return false;
-  const target = toNum(collectionId);
-  if (target !== null) return Number(pid) === target;
-  return s(pid).toLowerCase() === s(collectionId).toLowerCase();
 };
 
 export const matchesPrice = (p, minPrice, maxPrice) => {

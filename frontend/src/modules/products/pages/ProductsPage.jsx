@@ -1,19 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
-import { Pagination } from "../../../components/ui/Pagination.jsx";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs.jsx"
+import { Pagination } from "@/components/ui/Pagination.jsx"
+import { API_PATHS } from "@/config/api-paths.js"
 
-import ProductGallery from "../components/ProductGallery.jsx";
-import { ProductsFiltersPanel } from "../components/ProductsFiltersPanel.jsx";
+import ProductGallery from "@/modules/products/components/ProductGallery.jsx"
+import { ProductsFiltersPanel } from "@/modules/products/components/ProductsFiltersPanel.jsx"
+import { Skeleton } from "@/components/ui/Skeleton.jsx"
 
-import { useCategories } from "../hooks/useCategories.js";
-import { useProducts } from "../hooks/useProducts.js";
-import { useProductFilters } from "../hooks/useProductFilters.js";
-import { useCatalogControls } from "../hooks/useCatalogControls.js";
-import { useCart } from "../../cart/hooks/useCart.js";
+import { useCategories } from "@/modules/products/hooks/useCategories.js"
+import { useProducts } from "@/modules/products/hooks/useProducts.js"
+import { useProductFilters } from "@/modules/products/hooks/useProductFilters.js"
+import { useCatalogControls } from "@/modules/products/hooks/useCatalogControls.js"
+import { useCart } from "@/modules/cart/hooks/useCart.js"
 
 export default function ProductsPage() {
-  const { products: fetchedProducts, isLoading, error } = useProducts();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const searchQuery = (searchParams.get("search") ?? searchParams.get("q") ?? "").trim();
+  const productQueryFilters = useMemo(
+    () => (searchQuery ? { q: searchQuery } : undefined),
+    [searchQuery],
+  );
+  const handleClearSearch = () => {
+    if (!searchQuery) return;
+    navigate(API_PATHS.products.products, { replace: true });
+  };
+
+  const { products: fetchedProducts, isLoading, error } = useProducts(productQueryFilters);
   const { categories: fetchedCategories } = useCategories();
 
   const { addToCart } = useCart();
@@ -104,6 +119,21 @@ export default function ProductsPage() {
         </div>
       </header>
 
+      {searchQuery && (
+        <div className="mb-8 flex flex-col gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-neutral1)] px-5 py-4 text-sm text-[var(--color-secondary2)] sm:flex-row sm:items-center sm:justify-between">
+          <p className="font-medium text-neutral-700">
+            Mostrando resultados para <strong className="text-(--color-primary1)">{searchQuery}</strong>.
+          </p>
+          <button
+            type="button"
+            onClick={handleClearSearch}
+            className="text-sm font-semibold text-(--color-primary1) underline underline-offset-4"
+          >
+            Borrar búsqueda
+          </button>
+        </div>
+      )}
+
       {appliedFilters.length > 0 && (
         <div className="mb-8 flex flex-wrap items-center gap-2 rounded-2xl bg-(--color-light-beige,#f6efe7) px-5 py-3 lg:hidden">
           <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
@@ -147,8 +177,18 @@ export default function ProductsPage() {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={`product-skeleton-${index}`}
-                className="h-80 rounded-2xl bg-[#44311417] animate-pulse"
-              />
+                className="flex flex-col gap-3 rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral2)] p-4 shadow-[var(--shadow-sm)]"
+              >
+                <Skeleton className="aspect-[4/3] w-full rounded-[1.25rem]" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-10" />
+                  <Skeleton className="h-10 w-1/2 rounded-full" />
+                </div>
+              </div>
             ))}
           </div>
         ) : (

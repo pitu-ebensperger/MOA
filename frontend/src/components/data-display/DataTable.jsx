@@ -7,7 +7,7 @@ import {
   getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
-import { Pagination } from "../ui/Pagination.jsx";
+import { Pagination } from "@/components/ui/Pagination.jsx"
 
 export function TanstackDataTable({
   columns,

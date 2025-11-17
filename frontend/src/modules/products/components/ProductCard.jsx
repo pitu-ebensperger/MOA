@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
-import { API_PATHS } from "../../../config/api-paths.js";
+import { Price } from "@/components/data-display/Price.jsx"
+import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { useAuth } from "@/context/auth-context.js"
 
-import { Button } from "../../../components/ui/Button.jsx";
-import Badge from "../../../components/ui/Badge.jsx";
+import { Button } from "@/components/ui/Button.jsx"
+import Badge from "@/components/ui/Badge.jsx"
 
 export default function ProductCard({
   product = {},
@@ -20,6 +21,7 @@ export default function ProductCard({
   const { id, slug, price, name, imgUrl, gallery } = product;
 
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const displayTitle = name ?? slug ?? "Nombre Producto";
   const displayImage = imgUrl ?? gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
   const displayPrice = price ?? 50000;
@@ -38,6 +40,10 @@ export default function ProductCard({
 
   const handleWishlistToggle = (event) => {
     event.preventDefault();
+    if (!isAuthenticated) {
+      navigate(API_PATHS.auth.login);
+      return;
+    }
     setIsLiked((prev) => !prev);
     onToggleWishlist(product);
   };
@@ -156,7 +162,13 @@ export default function ProductCard({
           elevation="md"
           size="md"
           motion="lift"
-          onClick={() => onAddToCart(product)}
+          onClick={() => {
+            if (!isAuthenticated) {
+              navigate(API_PATHS.auth.login);
+              return;
+            }
+            onAddToCart(product);
+          }}
           leadingIcon={
             <ShoppingCart
               size={18}

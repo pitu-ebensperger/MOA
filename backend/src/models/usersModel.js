@@ -65,3 +65,76 @@ export const updateUserModel = async ({ id, nombre, telefono }) => {
   const response = await pool.query(sqlQuery);
   return response.rows[0];
 };
+
+export const createAdminCustomerModel = async ({
+  nombre,
+  email,
+  telefono = null,
+  rol = "cliente",
+  password,
+}) => {
+  const publicId = nanoid();
+  const rawPassword = password || nanoid(12);
+  const hashedPassword = bcrypt.hashSync(rawPassword, 10);
+
+  const sqlQuery = {
+    text: `
+      INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING usuario_id AS id, public_id AS "publicId", nombre, email, telefono, rol, rol_code AS "rolCode", creado_en AS "createdAt"
+    `,
+    values: [publicId, nombre, email, telefono, hashedPassword, rol, rol],
+  };
+
+  const response = await pool.query(sqlQuery);
+  return response.rows[0];
+};
+
+export const updateAdminCustomerModel = async ({
+  id,
+  nombre,
+  email,
+  telefono,
+  rol,
+}) => {
+  const sets = [];
+  const values = [];
+
+  if (nombre !== undefined) {
+    sets.push(`nombre = $${values.length + 1}`);
+    values.push(nombre);
+  }
+
+  if (email !== undefined) {
+    sets.push(`email = $${values.length + 1}`);
+    values.push(email);
+  }
+
+  if (telefono !== undefined) {
+    sets.push(`telefono = $${values.length + 1}`);
+    values.push(telefono);
+  }
+
+  if (rol !== undefined) {
+    sets.push(`rol = $${values.length + 1}`);
+    sets.push(`rol_code = $${values.length + 2}`);
+    values.push(rol, rol);
+  }
+
+  if (!sets.length) {
+    return null;
+  }
+
+  const query = {
+    text: `
+      UPDATE usuarios
+      SET ${sets.join(", ")}
+      WHERE usuario_id = $${values.length + 1}
+      RETURNING usuario_id AS id, public_id AS "publicId", nombre, email, telefono, rol, rol_code AS "rolCode", creado_en AS "createdAt"
+    `,
+    values: [...values, id],
+  };
+
+  const response = await pool.query(query);
+  return response.rows[0];
+};

@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
-import { DoubleRangeSlider } from "./DoubleRangeSlider.jsx";
-import { normalizeCategoryFilterOptions } from "../../../utils/normalizers.js";
-import { clamp } from "../../../utils/math.js";
+import { DoubleRangeSlider } from "@/modules/products/components/DoubleRangeSlider.jsx"
+import { normalizeCategoryFilterOptions } from "@/utils/normalizers.js"
+import { clamp } from "@/utils/math.js"
 
 export function ProductFiltersContent({
   categories,
@@ -44,7 +44,7 @@ export function ProductFiltersContent({
         </header>
         <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
           {normalizedCategories.map((cat) => {
-            const active = filters.category === cat.id;
+            const active = String(filters.category ?? "") === String(cat.id ?? "");
             return (
               <button
                 key={cat.id}
