@@ -2,6 +2,7 @@
 node_modules
 **/node_modules
 
+package-lock.json
 
 .vite
 **/.vite
@@ -10,7 +11,9 @@ node_modules
 **/.env
 .env.*.local
 **/.env.*.local
+.env copy
 
+snapshots/**
 snapshots/*.txt
 snapshots/*.json
 
@@ -19,15 +22,13 @@ snapshots/*.json
 .vscode/*
 !.vscode/extensions.json
 
-**/styleguide/StyleGuidePage.jsx
-
 scripts/*.jsx
 scripts/*.js
-.env copy
+
+
+**/styleguide/StyleGuidePage.jsx
 
 .copilot-temp
 docs/**.md
 docs/misDOCS/
-snapshots/**
-# Local-only UI sandboxes
-frontend/src/modules/admin/pages/AdminTestPage.local.jsx
+
