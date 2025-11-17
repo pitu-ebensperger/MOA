@@ -167,25 +167,40 @@ export default function AdminDashboardPage() {
     refetch: refetchProducts,
   } = useAdminProducts({ page: 1, limit: 1 });
 
-  // Usar datos del dashboard principal o fallback
-  const metrics = dashboardData?.metrics || {
-    totalProducts: Number.isFinite(Number(totalProductsRaw)) ? Number(totalProductsRaw) : 0,
-    totalOrders: Number.isFinite(Number(totalOrdersRaw)) ? Number(totalOrdersRaw) : fallbackOrders.length,
-    totalRevenue: fallbackOrders.reduce((sum, order) => sum + Number(order.total ?? 0), 0),
-    totalCustomers: new Set(fallbackOrders.map(o => o.userId || o.userEmail)).size,
-    monthlyRevenue: 0,
-    previousMonthRevenue: 0,
-    growthPercentage: 0,
-  };
+  // Usar datos del dashboard principal o fallback con validaciones seguras
+  const metrics = useMemo(() => {
+    if (dashboardData?.metrics) return dashboardData.metrics;
+    
+    return {
+      totalProducts: Number.isFinite(Number(totalProductsRaw)) ? Number(totalProductsRaw) : 0,
+      totalOrders: Number.isFinite(Number(totalOrdersRaw)) ? Number(totalOrdersRaw) : (Array.isArray(fallbackOrders) ? fallbackOrders.length : 0),
+      totalRevenue: Array.isArray(fallbackOrders) ? fallbackOrders.reduce((sum, order) => sum + Number(order.total ?? 0), 0) : 0,
+      totalCustomers: Array.isArray(fallbackOrders) ? new Set(fallbackOrders.map(o => o.userId || o.userEmail)).size : 0,
+      monthlyRevenue: 0,
+      previousMonthRevenue: 0,
+      growthPercentage: 0,
+    };
+  }, [dashboardData, totalProductsRaw, totalOrdersRaw, fallbackOrders]);
 
-  const stockData = dashboardData?.stock || {
-    lowStockItems: 8,
-    outOfStockItems: 3,
-  };
+  const stockData = useMemo(() => {
+    return dashboardData?.stock || {
+      lowStockItems: 0,
+      outOfStockItems: 0,
+    };
+  }, [dashboardData]);
 
-  const topProducts = dashboardData?.topProducts || [];
-  const categories = dashboardData?.categories || [];
-  const recentOrders = dashboardData?.recentOrders || fallbackOrders.slice(0, 4);
+  const topProducts = useMemo(() => {
+    return Array.isArray(dashboardData?.topProducts) ? dashboardData.topProducts : [];
+  }, [dashboardData]);
+
+  const categories = useMemo(() => {
+    return Array.isArray(dashboardData?.categories) ? dashboardData.categories : [];
+  }, [dashboardData]);
+
+  const recentOrders = useMemo(() => {
+    if (Array.isArray(dashboardData?.recentOrders)) return dashboardData.recentOrders;
+    return Array.isArray(fallbackOrders) ? fallbackOrders.slice(0, 4) : [];
+  }, [dashboardData, fallbackOrders]);
 
   const handleRefresh = () => {
     refetch?.();
@@ -198,43 +213,17 @@ export default function AdminDashboardPage() {
 
   const quickActions = [
     { 
-      label: "Gestión de Productos", 
-      description: "Catálogo, precios y stock",
-      to: API_PATHS.admin.products, 
-      icon: Layers 
-    },
-    { 
-      label: "Pedidos y Envíos", 
+      label: "Pedidos", 
       description: "Seguimiento de órdenes",
       to: API_PATHS.admin.orders, 
       icon: Truck 
-    },
-    { 
-      label: "Inventario", 
-      description: "Control de stock",
-      to: API_PATHS.admin.products, 
-      icon: Warehouse,
-      variant: stockData.lowStockItems > 5 ? "warning" : "default"
-    },
-    { 
-      label: "Configuración", 
-      description: "Ajustes de tienda",
-      to: API_PATHS.admin.settings, 
-      icon: Settings 
     },
   ];
 
   return (
     <section className="space-y-8">
       <header className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-neutral-400">
-          MOA Administración
-        </p>
-        <h1 className="text-3xl font-bold text-primary1 mb-2">Centro de Control</h1>
-        <p className="text-neutral-600 max-w-2xl">
-          Gestión integral de tu tienda de muebles. Monitor en tiempo real las ventas, 
-          inventario y operaciones de MOA.
-        </p>
+        <h1 className="text-3xl font-bold text-primary1 mb-2">Dashboard</h1>
       </header>
 
       {hasError && (
@@ -259,17 +248,17 @@ export default function AdminDashboardPage() {
         <MetricCard
           title="Ingresos del mes"
           subtitle="Ventas completadas"
-          value={loading ? <Skeleton className="h-8 w-32" /> : formatCurrencyCLP(metrics.monthlyRevenue)}
+          value={loading ? <Skeleton className="h-8 w-32" /> : formatCurrencyCLP(metrics?.monthlyRevenue || 0)}
           icon={DollarSign}
-          trend={metrics.growthPercentage >= 0 ? "up" : "down"}
-          trendValue={`${Math.abs(metrics.growthPercentage).toFixed(1)}%`}
+          trend={(metrics?.growthPercentage || 0) >= 0 ? "up" : "down"}
+          trendValue={`${Math.abs(metrics?.growthPercentage || 0).toFixed(1)}%`}
           accentColor="var(--color-success)"
         />
         
         <MetricCard
           title="Pedidos totales"
           subtitle="Órdenes procesadas"
-          value={loading ? <Skeleton className="h-8 w-20" /> : formatCount(metrics.totalOrders)}
+          value={loading ? <Skeleton className="h-8 w-20" /> : formatCount(metrics?.totalOrders || 0)}
           icon={Package}
           accentColor="var(--color-primary1)"
         />
@@ -277,7 +266,7 @@ export default function AdminDashboardPage() {
         <MetricCard
           title="Productos activos"
           subtitle="En catálogo"
-          value={loading ? <Skeleton className="h-8 w-20" /> : formatCount(metrics.totalProducts)}
+          value={loading ? <Skeleton className="h-8 w-20" /> : formatCount(metrics?.totalProducts || 0)}
           icon={Layers}
           accentColor="var(--color-secondary1)"
         />
@@ -285,9 +274,9 @@ export default function AdminDashboardPage() {
         <MetricCard
           title="Stock bajo"
           subtitle="Requieren reposición"
-          value={loading ? <Skeleton className="h-8 w-16" /> : formatCount(stockData.lowStockItems)}
+          value={loading ? <Skeleton className="h-8 w-16" /> : formatCount(stockData?.lowStockItems || 0)}
           icon={AlertTriangle}
-          accentColor={stockData.lowStockItems > 5 ? "var(--color-warning)" : "var(--color-success)"}
+          accentColor={(stockData?.lowStockItems || 0) > 5 ? "var(--color-warning)" : "var(--color-success)"}
         />
       </div>
 
@@ -329,14 +318,8 @@ export default function AdminDashboardPage() {
                   <div className="flex-1 space-y-3">
                     <h4 className="font-semibold text-warning">Atención requerida</h4>
                     <div className="space-y-2 text-sm text-warning/80">
-                      <p>• {stockData.outOfStockItems} productos sin stock</p>
-                      <p>• {stockData.lowStockItems} productos con stock bajo</p>
-                      <p>• 2 productos requieren reposición urgente</p>
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <Button appearance="ghost" intent="warning" size="sm">
-                        Ver inventario
-                      </Button>
+                      <p>• {stockData?.outOfStockItems || 0} productos sin stock</p>
+                      <p>• {stockData?.lowStockItems || 0} productos con stock bajo</p>
                     </div>
                   </div>
                 </div>
@@ -411,27 +394,33 @@ export default function AdminDashboardPage() {
                 {/* Top categorías */}
                 <div>
                   <h4 className="font-semibold text-neutral-700 mb-4">Categorías más vendidas</h4>
-                  <div className="space-y-3">
-                    {categories.slice(0, 4).map((category, index) => (
-                      <div
-                        key={category.id}
-                        className="flex items-center justify-between rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral4)] p-4"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary1 text-xs font-semibold text-white">
-                            {index + 1}
-                          </span>
-                          <div>
-                            <p className="font-medium text-neutral-800">{category.name}</p>
-                            <p className="text-xs text-neutral-500">{category.orders} pedidos</p>
+                  {categories.length > 0 ? (
+                    <div className="space-y-3">
+                      {categories.slice(0, 4).map((category, index) => (
+                        <div
+                          key={category.id || index}
+                          className="flex items-center justify-between rounded-2xl border border-(--color-border) bg-(--color-neutral4) p-4"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary1 text-xs font-semibold text-white">
+                              {index + 1}
+                            </span>
+                            <div>
+                              <p className="font-medium text-neutral-800">{category.name || 'Sin nombre'}</p>
+                              <p className="text-xs text-neutral-500">{category.orders || 0} pedidos</p>
+                            </div>
                           </div>
+                          <p className="font-semibold text-neutral-800">
+                            {formatCurrencyCLP(category.revenue || 0)}
+                          </p>
                         </div>
-                        <p className="font-semibold text-neutral-800">
-                          {formatCurrencyCLP(category.revenue)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="text-sm text-neutral-500">No hay datos de categorías</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -449,8 +438,8 @@ export default function AdminDashboardPage() {
                 title="Ticket promedio"
                 subtitle="Por pedido"
                 value={
-                  metrics.totalOrders > 0 
-                    ? formatCurrencyCLP(Math.round(metrics.totalRevenue / metrics.totalOrders)) 
+                  (metrics?.totalOrders || 0) > 0 
+                    ? formatCurrencyCLP(Math.round((metrics?.totalRevenue || 0) / (metrics?.totalOrders || 1))) 
                     : "$0"
                 }
                 icon={DollarSign}
@@ -469,7 +458,7 @@ export default function AdminDashboardPage() {
                 />
                 <MetricCard
                   title="Clientes"
-                  value={formatCount(metrics.totalCustomers)}
+                  value={formatCount(metrics?.totalCustomers || 0)}
                   subtitle="Únicos"
                   icon={Users}
                   size="small"
@@ -504,74 +493,90 @@ export default function AdminDashboardPage() {
               </Button>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {topProducts.map((product, index) => (
-                <div
-                  key={product.id}
-                  className="group relative overflow-hidden rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] transition-all hover:shadow-[var(--shadow-lg)]"
-                >
-                  <div className="relative aspect-4/3 overflow-hidden bg-neutral-100">
-                    <img 
-                      src={product.image} 
-                      alt={product.name}
-                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-sm font-semibold text-neutral-800">
-                        <Star className="h-3 w-3" />
-                        #{index + 1}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-6 space-y-4">
-                    <div>
-                      <h3 className="font-semibold text-lg text-neutral-800 line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <p className="text-sm text-neutral-500 mt-1">{product.sku}</p>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-primary1">
-                        {formatCurrencyCLP(product.price)}
-                      </span>
-                      <span className="text-success font-semibold">
-                        {product.conversionRate}% conv.
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2 text-neutral-600">
-                        <Eye className="h-4 w-4" />
-                        <span>{product.views} vistas</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-neutral-600">
-                        <ShoppingCart className="h-4 w-4" />
-                        <span>{product.sales} ventas</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-neutral-500">Rendimiento</span>
-                        <span className="font-semibold text-neutral-700">
-                          {Math.round((product.sales / product.views) * 100)}%
+            {topProducts.length > 0 ? (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {topProducts.map((product, index) => (
+                  <div
+                    key={product.id || index}
+                    className="group relative overflow-hidden rounded-3xl border border-(--color-border) bg-(--color-neutral1) transition-all hover:shadow-(--shadow-lg)"
+                  >
+                    <div className="relative aspect-4/3 overflow-hidden bg-neutral-100">
+                      {product.image ? (
+                        <img 
+                          src={product.image} 
+                          alt={product.name || 'Producto'}
+                          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-neutral-200">
+                          <Package className="h-12 w-12 text-neutral-400" />
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-sm font-semibold text-neutral-800">
+                          <Star className="h-3 w-3" />
+                          #{index + 1}
                         </span>
                       </div>
-                      <div className="h-2 rounded-full bg-neutral-200">
-                        <div
-                          className="h-full rounded-full bg-linear-to-r from-primary1 to-primary3"
-                          style={{
-                            width: `${Math.min(100, (product.sales / product.views) * 100 * 20)}%`,
-                          }}
-                        />
+                    </div>
+
+                    <div className="p-6 space-y-4">
+                      <div>
+                        <h3 className="font-semibold text-lg text-neutral-800 line-clamp-2">
+                          {product.name || 'Sin nombre'}
+                        </h3>
+                        <p className="text-sm text-neutral-500 mt-1">{product.sku || 'N/A'}</p>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-bold text-primary1">
+                          {formatCurrencyCLP(product.price || 0)}
+                        </span>
+                        <span className="text-success font-semibold">
+                          {product.conversionRate || 0}% conv.
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center gap-2 text-neutral-600">
+                          <Eye className="h-4 w-4" />
+                          <span>{product.views || 0} vistas</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-neutral-600">
+                          <ShoppingCart className="h-4 w-4" />
+                          <span>{product.sales || 0} ventas</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-neutral-500">Rendimiento</span>
+                          <span className="font-semibold text-neutral-700">
+                            {(product.views || 0) > 0 
+                              ? Math.round(((product.sales || 0) / (product.views || 1)) * 100)
+                              : 0}%
+                          </span>
+                        </div>
+                        <div className="h-2 rounded-full bg-neutral-200">
+                          <div
+                            className="h-full rounded-full bg-linear-to-r from-primary1 to-primary3"
+                            style={{
+                              width: `${Math.min(100, ((product.sales || 0) / (product.views || 1)) * 100 * 20)}%`,
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Package className="h-16 w-16 text-neutral-300 mx-auto mb-4" />
+                <p className="text-lg text-neutral-600">No hay productos destacados</p>
+                <p className="text-sm text-neutral-500">Los productos más vendidos aparecerán aquí</p>
+              </div>
+            )}
           </div>
         </TabsContent>
 
@@ -609,23 +614,23 @@ export default function AdminDashboardPage() {
                 </div>
               ) : recentOrders.length ? (
                 <div className="space-y-4">
-                  {recentOrders.map((order) => (
+                  {recentOrders.map((order, index) => (
                     <div
-                      key={order.id ?? order.number}
-                      className="flex items-center gap-4 rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral2)] p-4 transition-colors hover:bg-[color:var(--color-neutral3)]"
+                      key={order.id ?? order.number ?? index}
+                      className="flex items-center gap-4 rounded-2xl border border-(--color-border) bg-(--color-neutral2) p-4 transition-colors hover:bg-(--color-neutral3)"
                     >
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary4">
                         <Package className="h-5 w-5 text-primary1" />
                       </div>
                       <div className="flex-1">
                         <p className="font-semibold text-neutral-800">
-                          Pedido #{order.number}
+                          Pedido #{order.number || order.id || 'N/A'}
                         </p>
                         <p className="text-sm text-neutral-500">
-                          {formatDate_ddMMyyyy(order.createdAt, "—")} · {formatCurrencyCLP(order.total)}
+                          {formatDate_ddMMyyyy(order.createdAt, "—")} · {formatCurrencyCLP(order.total || 0)}
                         </p>
                       </div>
-                      <StatusPill status={order.status} domain="order" />
+                      <StatusPill status={order.status || 'pending'} domain="order" />
                     </div>
                   ))}
                 </div>
@@ -644,7 +649,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-4">
                   <MetricCard
                     title="Pedidos activos"
-                    value={formatCount(metrics.totalOrders)}
+                    value={formatCount(metrics?.totalOrders || 0)}
                     icon={Activity}
                     size="small"
                   />
@@ -657,7 +662,7 @@ export default function AdminDashboardPage() {
                   />
                   <MetricCard
                     title="Stock crítico"
-                    value={formatCount(stockData.lowStockItems)}
+                    value={formatCount(stockData?.lowStockItems || 0)}
                     icon={AlertTriangle}
                     size="small"
                     accentColor="var(--color-error)"
@@ -665,41 +670,6 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] p-6">
-                <h3 className="text-lg font-semibold text-primary1 mb-4">Acciones Rápidas</h3>
-                <div className="space-y-3">
-                  <Button 
-                    appearance="ghost" 
-                    intent="primary" 
-                    size="sm" 
-                    className="w-full justify-start"
-                    to={API_PATHS.admin.orders}
-                  >
-                    <Package className="h-4 w-4 mr-3" />
-                    Gestionar pedidos
-                  </Button>
-                  <Button 
-                    appearance="ghost" 
-                    intent="primary" 
-                    size="sm" 
-                    className="w-full justify-start"
-                    to={API_PATHS.admin.products}
-                  >
-                    <Warehouse className="h-4 w-4 mr-3" />
-                    Revisar inventario
-                  </Button>
-                  <Button 
-                    appearance="ghost" 
-                    intent="primary" 
-                    size="sm" 
-                    className="w-full justify-start"
-                    to={API_PATHS.admin.settings}
-                  >
-                    <Settings className="h-4 w-4 mr-3" />
-                    Configuración
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
         </TabsContent>

@@ -34,7 +34,7 @@ import { AdminRoute } from '@/modules/auth/hooks/useAuth.jsx'
 import EntornoAdmin from '@/modules/admin/components/EntornoAdmin.jsx'
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage.jsx'
 // import AdminTestPage from '@/modules/admin/pages/AdminTestPage.jsx'
-import OrdersPage from '@/modules/admin/pages/orders/OrdersPage.jsx'
+import OrdersAdminPage from '@/modules/admin/pages/OrdersAdminPage.jsx'
 import AdminProductsPage from '@/modules/admin/pages/AdminProductsPage.jsx'
 import AdminCategoriesPage from '@/modules/admin/pages/AdminCategoriesPage.jsx'
 import CustomersPage from '@/modules/admin/pages/CustomersPage.jsx'
@@ -83,7 +83,7 @@ export const App = () => {
           <Route element={<AdminRoute />}>
             <Route path={admin.dashboard} element={<EntornoAdmin> <AdminDashboardPage /> </EntornoAdmin>} />
             {/* <Route path={admin.test} element={<EntornoAdmin> <AdminTestPage /> </EntornoAdmin>} /> */}
-            <Route path={admin.orders} element={<EntornoAdmin> <OrdersPage /> </EntornoAdmin>} />
+            <Route path={admin.orders} element={<EntornoAdmin> <OrdersAdminPage /> </EntornoAdmin>} />
             <Route path={admin.products} element={<EntornoAdmin> <AdminProductsPage /> </EntornoAdmin>} />
             <Route path={admin.categories} element={<EntornoAdmin> <AdminCategoriesPage /> </EntornoAdmin>} />
             <Route path={admin.customers} element={<EntornoAdmin> <CustomersPage /> </EntornoAdmin>} />

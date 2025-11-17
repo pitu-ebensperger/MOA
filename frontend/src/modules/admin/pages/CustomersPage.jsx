@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/radix/Dialog.jsx";
 import { Input } from "@/components/ui/Input.jsx";
+import { Pagination } from "@/components/ui/Pagination.jsx";
 
 const USER_STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -383,7 +384,7 @@ export default function CustomersPage() {
   }, [statusFilter]);
 
   const toolbar = useMemo(
-    () => (table) => (
+    () => () => (
       <TableToolbar>
         <TableSearch
           value={search}
@@ -392,8 +393,8 @@ export default function CustomersPage() {
             setPage(1);
           }}
           placeholder="Buscar por nombre, email…"
+          className="flex-1 max-w-md"
         />
-        <ToolbarSpacer />
         <FilterTags tags={activeStatusTags} onRemove={() => handleStatusFilter("")} />
         <div className="ml-auto flex items-center gap-2">
           <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
