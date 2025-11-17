@@ -5,6 +5,9 @@ import { useHomeLanding } from "../hooks/useHomeLanding.js";
 
 export const HomePage = () => {
   const { home, isLoading, error } = useHomeLanding();
+  console.log('--------');
+  console.log(home)
+  console.log('--------');
 
   const categories = home?.categories ?? undefined;
   const featuredProducts = home?.featuredProducts ?? undefined;

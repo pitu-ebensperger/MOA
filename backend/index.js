@@ -9,19 +9,21 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-
 let PORT = process.env.PORT || 4000;
-app.listen(PORT, () => { console.log(`Servidor corriendo en puerto ${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
 });
-
 
 /* ----------------------------------------------------------------------------------------------------------- */
 
 import categoriesRouter from "./routes/categoriesRoutes.js";
+import productsRouter from "./routes/productsRoutes.js";
 import userRoutes from "./routes/usersRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import home from "./routes/homeRoutes.js";
 
-app.use("/categories", categoriesRouter);
+app.use(categoriesRouter);
+app.use(productsRouter);
 app.use(userRoutes);
 app.use(authRoutes);
-
+app.use(home);
