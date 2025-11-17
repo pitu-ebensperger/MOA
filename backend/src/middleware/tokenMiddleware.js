@@ -1,23 +1,33 @@
 import jwt from "jsonwebtoken";
 
 import "dotenv/config";
+import { AppError, UnauthorizedError } from "../utils/error.utils.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const verifyToken = async (req, res, next) => {
   try {
     if (!JWT_SECRET) {
-      return res.status(500).json({ message: "Configuración JWT incompleta" });
+      throw new AppError("Configuración JWT incompleta", 500);
     }
     const token = req.header("Authorization");
     if (!token) {
-      return res.status(400).json({ message: "El token debe estar presente" });
+      throw new UnauthorizedError("El token debe estar presente");
     }
     const extractToken = token.split(" ")[1];
+    if (!extractToken) {
+      throw new UnauthorizedError("El token debe estar presente");
+    }
     const decoded = jwt.verify(extractToken, JWT_SECRET);
     req.user = decoded.email;
     next();
   } catch (error) {
-    return res.status(400).json({ message: "El token no es válido" });
+    if (error.name === "TokenExpiredError") {
+      return next(new UnauthorizedError("Token expirado"));
+    }
+    if (error.name === "JsonWebTokenError") {
+      return next(new UnauthorizedError("El token no es válido"));
+    }
+    next(error);
   }
 };

@@ -20,8 +20,10 @@ app.listen(PORT, () => { console.log(`Servidor corriendo en puerto ${PORT}`);
 import categoriesRouter from "./routes/categoriesRoutes.js";
 import userRoutes from "./routes/usersRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import { errorHandler } from "./src/utils/error.utils.js";
 
 app.use("/categories", categoriesRouter);
 app.use(userRoutes);
 app.use(authRoutes);
 
+app.use(errorHandler);
