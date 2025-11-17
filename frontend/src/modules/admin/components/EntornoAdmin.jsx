@@ -1,10 +1,10 @@
+import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button } from "@components/ui/Button.jsx";
 import { TooltipNeutral } from "@components/ui/Tooltip.jsx";
 import { LayoutDashboard, Package, Warehouse, Users, Settings, LogOut, Store, Layers, ChevronLeft, ChevronRight } from "lucide-react";
 import { API_PATHS } from "@config/api-paths.js";
-import { usePersistentState } from "@hooks/usePersistentState.js";
 
 const navItems = [
   { label: "Resumen", to: API_PATHS.admin.dashboard, icon: LayoutDashboard },
