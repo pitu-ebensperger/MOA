@@ -52,12 +52,16 @@ export const getUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
-    const filteredUser = {
+
+    const profile = {
       nombre: user.nombre,
       email: user.email,
       telefono: user.telefono,
+      rol: user.rol,
+      role_code: user.role_code,
     };
-    res.status(200).json([filteredUser]);
+
+    res.status(200).json(profile);
   } catch (error) {
     res.status(500).json({ message: "Error al obtener el usuario" });
   }

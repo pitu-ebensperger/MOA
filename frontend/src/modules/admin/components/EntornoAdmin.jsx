@@ -2,6 +2,7 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Button } from "../../../components/ui/Button.jsx";
+import { TooltipNeutral } from "../../../components/ui/Tooltip.jsx";
 import { LayoutDashboard, Package, Warehouse, Users, Settings, LogOut, Store, Layers, ChevronLeft, ChevronRight } from "lucide-react";
 import { API_PATHS } from "../../../config/api-paths.js";
 
@@ -18,7 +19,7 @@ const navItems = [
 export default function EntornoAdmin({ children }) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Cargar preferencia desde localStorage
   useEffect(() => {
@@ -41,53 +42,94 @@ export default function EntornoAdmin({ children }) {
   <div className="admin-shell min-h-screen bg-white text-body">
       <header className="h-0" />
 
-      <div className="flex min-h-screen overflow-hidden">
+      {/* Quitamos overflow-hidden para permitir que los tooltips salgan del sidebar */}
+      <div className="flex min-h-screen relative">
         <aside
-          className={`${isExpanded ? "w-56" : "w-16"} sticky top-0 h-screen overflow-y-auto flex flex-col items-center bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
+          className={`${isExpanded ? "w-56" : "w-20"} sticky top-0 h-screen flex flex-col items-center bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
         >
-          {/* Brand y toggle */}
-          <div className="mb-5 w-full flex items-center justify-between">
-            <a href={API_PATHS.admin.dashboard} className="flex items-center gap-2">
-              <span className="title-serif text-primary text-lg font-normal tracking-tight">MOA</span>
-              {isExpanded && (
-                <span className="text-[0.625rem] uppercase tracking-[0.25em] text-secondary">Admin</span>
+          {/* Brand centrado + toggle siempre visible (sin solaparse) */}
+          <div className="mb-5 w-full grid grid-cols-3 items-center">
+            {/* Col izquierda como espacio */}
+            <div />
+            {/* Marca centrada */}
+            <a href={API_PATHS.admin.dashboard} className="justify-self-center flex items-center gap-2" title="MOA Admin">
+              {isExpanded ? (
+                <>
+                  <span className="title-serif text-primary text-xl font-semibold tracking-tight">MOA</span>
+                  <span className="text-xs uppercase tracking-[0.25em] text-secondary">Admin</span>
+                </>
+              ) : (
+                <span className="flex h-10 w-10 items-center justify-center title-serif text-primary text-xl font-semibold tracking-tight">
+                  M
+                </span>
               )}
             </a>
-            <Button
-              appearance="ghost"
-              size="sm"
-              onClick={() => setIsExpanded((v) => !v)}
-              title={isExpanded ? "Contraer" : "Expandir"}
-              className="rounded-lg p-1.5 hover:bg-neutral-100"
-            >
-              {isExpanded ? (
-                <ChevronLeft className="h-3.5 w-3.5 text-primary" />
-              ) : (
-                <ChevronRight className="h-3.5 w-3.5 text-primary" />
-              )}
-            </Button>
+            {/* Toggle a la derecha en expandido */}
+            {isExpanded && (
+              <div className="justify-self-end">
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded((v) => !v)}
+                  className="rounded-md p-0.5 hover:bg-neutral-100 transition-colors"
+                  aria-label="Contraer"
+                >
+                  <ChevronLeft className="h-4 w-4 text-primary" />
+                </Button>
+              </div>
+            )}
           </div>
 
+          {/* Botón toggle fuera del sidebar en modo compacto */}
+          {!isExpanded && (
+            <div className="absolute top-5 -right-3 z-10">
+              <TooltipNeutral label="Expandir" position="right">
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  onClick={() => setIsExpanded((v) => !v)}
+                  className="rounded-full p-1.5 bg-white border border-neutral-200 shadow-md hover:bg-neutral-100 hover:border-primary transition-colors"
+                  aria-label="Expandir"
+                >
+                  <ChevronRight className="h-4 w-4 text-primary" />
+                </Button>
+              </TooltipNeutral>
+            </div>
+          )}
+
+          {/* Contenedor scroll interno para que el aside no recorte los tooltips */}
+          <div className="flex-1 w-full overflow-y-auto overflow-x-visible">
           {/* Navegación principal */}
           <nav className="flex flex-col gap-1 mb-3 items-stretch w-full">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = currentPath.startsWith(item.to);
-              return (
+              const isDashboard = item.to === API_PATHS.admin.dashboard;
+              const isActive = isDashboard ? currentPath === item.to : currentPath.startsWith(item.to);
+              const buttonNode = (
                 <Button
                   key={item.to}
                   appearance="ghost"
                   size="sm"
                   as={Link}
                   to={item.to}
-                  className={`sidebar-link w-full rounded-lg ${isExpanded ? "px-3 py-2.5 flex-row justify-start gap-3" : "px-2 py-2.5 flex-col justify-center items-center"} text-xs font-medium transition-all duration-200 ${isActive ? "text-white bg-primary hover:bg-primary/90 shadow-sm" : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"}`}
-                  title={item.label}
+                  className={`sidebar-link rounded-lg ${isExpanded ? "w-full pl-3 pr-2 py-2.5 flex items-center gap-5" : "w-full px-2.5 py-2.5 flex flex-col justify-center items-center"} text-xs font-medium transition-colors duration-200 ${isActive ? "bg-neutral-100 text-primary border-r-4 border-primary" : "text-neutral-700 hover:text-primary hover:bg-neutral-50"}`}
+                  aria-label={!isExpanded ? item.label : undefined}
                 >
                   {Icon && (
-                    <Icon className={`h-4 w-4 stroke-[1.5] shrink-0 ${isActive ? "text-white" : "text-primary"}`} aria-hidden />
+                    <span className="flex items-center justify-center w-5 shrink-0">
+                      <Icon className="h-5 w-5 stroke-[1.5] text-primary" aria-hidden />
+                    </span>
                   )}
-                  {isExpanded ? <span className="text-xs font-medium">{item.label}</span> : null}
+                  {isExpanded ? <span className="text-xs text-left flex-1">{item.label}</span> : null}
                 </Button>
+              );
+
+              return isExpanded ? (
+                buttonNode
+              ) : (
+                <TooltipNeutral key={item.to} label={item.label} position="right">
+                  {buttonNode}
+                </TooltipNeutral>
               );
             })}
           </nav>
@@ -95,37 +137,75 @@ export default function EntornoAdmin({ children }) {
           <div className="my-4 h-px w-full bg-neutral-200" />
 
           {/* Acciones secundarias */}
-          <div className="mt-auto w-full flex flex-col gap-1 pb-3">
-            <Button
-              appearance="ghost"
-              size="sm"
-              as={Link}
-              to={API_PATHS.home.landing}
-              className={`sidebar-link w-full rounded-lg ${isExpanded ? "px-3 py-2.5 flex-row justify-start gap-3" : "px-2 py-2.5 flex-col justify-center items-center"} text-xs font-medium transition-all duration-200 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50`}
-              title="Visitar tienda"
-            >
-              <Store className="h-4 w-4 stroke-[1.5] shrink-0 text-neutral-500" aria-hidden />
-              {isExpanded ? <span className="text-xs font-medium">Visitar tienda</span> : null}
-            </Button>
+          <div className="mt-auto w-full flex flex-col justify-around gap-1 pb-5">
+            {isExpanded ? (
+              <Button
+                appearance="ghost"
+                size="sm"
+                as={Link}
+                to={API_PATHS.home.landing}
+                className={`sidebar-link rounded-lg ${isExpanded ? "w-full pl-3 pr-2 py-2.5 flex items-center gap-5" : "w-full px-2.5 py-2.5 flex flex-col justify-center items-center"} text-xs font-medium transition-colors duration-200 text-neutral-700 hover:text-primary hover:bg-neutral-50`}
+              >
+                <span className="flex items-center justify-center w-5 shrink-0">
+                  <Store className="h-5 w-5 stroke-[1.5] text-primary" aria-hidden />
+                </span>
+                <span className="text-xs text-left flex-1">Visitar tienda</span>
+              </Button>
+            ) : (
+              <TooltipNeutral label="Visitar tienda" position="right">
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  as={Link}
+                  to={API_PATHS.home.landing}
+                  className={`sidebar-link rounded-lg ${isExpanded ? "w-full pl-3 pr-2 py-2.5 flex items-center gap-5" : "w-full px-2.5 py-2.5 flex flex-col justify-center items-center"} text-xs font-medium transition-colors duration-200 text-neutral-700 hover:text-primary hover:bg-neutral-50`}
+                  aria-label="Visitar tienda"
+                >
+                  <Store className="h-5 w-5 stroke-[1.5] text-primary" aria-hidden />
+                </Button>
+              </TooltipNeutral>
+            )}
 
             <div className="my-2 h-px w-full bg-neutral-200" />
 
-            <Button
-              appearance="ghost"
-              size="sm"
-              className={`sidebar-link w-full rounded-lg ${isExpanded ? "px-3 py-2.5 flex-row justify-start gap-3" : "px-2 py-2.5 flex-col justify-center items-center"} text-xs font-medium transition-all duration-200 text-neutral-600 hover:text-red-600 hover:bg-red-50`}
-              title="Cerrar sesión"
-              onClick={() => {
-                if (typeof globalThis !== "undefined" && globalThis.localStorage) {
-                  globalThis.localStorage.removeItem('moa.accessToken');
-                  globalThis.localStorage.removeItem('moa.user');
-                  globalThis.location.href = API_PATHS.auth.login;
-                }
-              }}
-            >
-              <LogOut className="h-4 w-4 stroke-[1.5] shrink-0 text-neutral-500" aria-hidden />
-              {isExpanded ? <span className="text-xs font-medium">Cerrar sesión</span> : null}
-            </Button>
+            {isExpanded ? (
+              <Button
+                appearance="ghost"
+                size="sm"
+                className={`sidebar-link rounded-lg ${isExpanded ? "w-full pl-3 pr-2 py-2.5 flex items-center gap-5" : "w-full px-2.5 py-2.5 flex flex-col justify-center items-center"} text-xs font-medium transition-colors duration-200 text-neutral-700 hover:text-primary hover:bg-neutral-50`}
+                onClick={() => {
+                  if (typeof globalThis !== "undefined" && globalThis.localStorage) {
+                    globalThis.localStorage.removeItem('moa.accessToken');
+                    globalThis.localStorage.removeItem('moa.user');
+                    globalThis.location.href = API_PATHS.auth.login;
+                  }
+                }}
+              >
+                <span className="flex items-center justify-center w-5 shrink-0">
+                  <LogOut className="h-5 w-5 stroke-[1.5] text-primary" aria-hidden />
+                </span>
+                <span className="text-xs text-left flex-1">Cerrar sesión</span>
+              </Button>
+            ) : (
+              <TooltipNeutral label="Cerrar sesión" position="right">
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  className={`sidebar-link rounded-lg ${isExpanded ? "w-full pl-3 pr-2 py-2.5 flex items-center gap-5" : "w-full px-2.5 py-2.5 flex flex-col justify-center items-center"} text-xs font-medium transition-colors duration-200 text-neutral-700 hover:text-primary hover:bg-neutral-50`}
+                  aria-label="Cerrar sesión"
+                  onClick={() => {
+                    if (typeof globalThis !== "undefined" && globalThis.localStorage) {
+                      globalThis.localStorage.removeItem('moa.accessToken');
+                      globalThis.localStorage.removeItem('moa.user');
+                      globalThis.location.href = API_PATHS.auth.login;
+                    }
+                  }}
+                >
+                  <LogOut className="h-5 w-5 stroke-[1.5] text-primary" aria-hidden />
+                </Button>
+              </TooltipNeutral>
+            )}
+          </div>
           </div>
         </aside>
         <main className="flex-1 overflow-auto p-8 bg-neutral-50">{children}</main>
