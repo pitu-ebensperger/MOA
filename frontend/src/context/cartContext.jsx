@@ -1,9 +1,5 @@
-import { createContext, useContext } from "react";
 import { useCart } from "../modules/cart/hooks/useCart";
-
-
-
-const CartContext = createContext();
+import { CartContext } from "./cart-context.js";
 
 export const CartProvider = ({ children }) => {
   const cartState = useCart();
@@ -14,5 +10,6 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useCartContext = () => useContext(CartContext);
+// Re-export hook para mantener compatibilidad con imports existentes
+// Nota: para usar el hook importa desde "./cart-context.js"
+// export { useCartContext } from "./cart-context.js";

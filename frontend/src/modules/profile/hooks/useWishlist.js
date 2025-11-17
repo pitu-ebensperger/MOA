@@ -1,41 +1,29 @@
-import { useState, useEffect } from "react";
+import { usePersistentState } from "../../../hooks/usePersistentState.js";
+
+const WISHLIST_STORAGE_KEY = "wishlist";
 
 export const useWishlist = () => {
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem("wishlist");
-    return saved ? JSON.parse(saved) : [];
+  const [wishlist, setWishlist] = usePersistentState(WISHLIST_STORAGE_KEY, {
+    initialValue: [],
   });
-
 
   const addToWishlist = (product) => {
     setWishlist((prev) => {
       const exists = prev.some((item) => item.id === product.id);
       if (exists) return prev; // evita duplicados
 
-      const updated = [...prev, product];
-      localStorage.setItem("wishlist", JSON.stringify(updated));
-      return updated;
+      return [...prev, product];
     });
   };
 
 
   const removeFromWishlist = (productId) => {
-    setWishlist((prev) => {
-      const updated = prev.filter((item) => item.id !== productId);
-      localStorage.setItem("wishlist", JSON.stringify(updated));
-      return updated;
-    });
+    setWishlist((prev) => prev.filter((item) => item.id !== productId));
   };
 
   const clearWishlist = () => {
-    localStorage.removeItem("wishlist");
     setWishlist([]);
   };
-
-
-  useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
 
   return { wishlist, addToWishlist, removeFromWishlist, clearWishlist };
 };

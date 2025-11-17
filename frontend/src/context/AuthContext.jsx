@@ -1,55 +1,45 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { setOnUnauthorized, setTokenGetter } from "../services/api-client.js";
 import { authApi } from "../services/auth.api.js";
+import { AuthContext, isAdminRole } from "./auth-context.js";
+import { usePersistentState } from "../hooks/usePersistentState.js";
 
 // ---- Constantes y utilidades ----------------------------------
 const TOKEN_KEY = "moa.accessToken";
 const USER_KEY  = "moa.user";
 const STATUS = { IDLE: "idle", LOADING: "loading", AUTH: "authenticated" };
 
-// Permite que el backend cambie nombre/campo del rol sin romper front
-export const isAdminRole = (user) =>
-  user?.role === "admin" ||
-  user?.rol === "admin" ||
-  user?.role_code === "ADMIN" ||
-  user?.rol_code === "ADMIN";
-
 const safeParseJson = (value) => {
   try { return JSON.parse(value); } catch { return null; }
 };
 
-const storage = {
-  get: (key) => (typeof window === "undefined" ? null : window.localStorage.getItem(key)),
-  set: (key, value) => { if (typeof window !== "undefined") window.localStorage.setItem(key, value); },
-  remove: (key) => { if (typeof window !== "undefined") window.localStorage.removeItem(key); },
-};
+const identity = (value) => value;
 
 // ---- Contexto --------------------------------------------------
-const AuthContext = createContext(null);
-
 export const AuthProvider = ({ children }) => {
   // Estado inicial: si hay token guardado, intentamos cargar perfil
-  const [token, setToken] = useState(() => storage.get(TOKEN_KEY));
-  const [user, setUser]   = useState(() => {
-    const raw = storage.get(USER_KEY);
-    return raw ? safeParseJson(raw) : null;
+  const [token, setToken] = usePersistentState(TOKEN_KEY, {
+    initialValue: null,
+    parser: identity,
+    serializer: identity,
   });
-  const [status, setStatus] = useState(() => (storage.get(TOKEN_KEY) ? STATUS.LOADING : STATUS.IDLE));
+  const [user, setUser] = usePersistentState(USER_KEY, {
+    initialValue: null,
+    parser: safeParseJson,
+    serializer: (value) => JSON.stringify(value),
+  });
+  const [status, setStatus] = useState(() => (token ? STATUS.LOADING : STATUS.IDLE));
   const [error, setError] = useState(null);
 
   // --- Sync helpers (token/user <-> storage + api-client) -------
   const syncToken = useCallback((nextToken) => {
     setTokenGetter(() => nextToken);           // api-client leerá el token actual
-    if (nextToken) storage.set(TOKEN_KEY, nextToken);
-    else storage.remove(TOKEN_KEY);
-    setToken(nextToken);
-  }, []);
+    setToken(nextToken ?? null);
+  }, [setToken]);
 
   const syncUser = useCallback((nextUser) => {
-    if (nextUser) storage.set(USER_KEY, JSON.stringify(nextUser));
-    else storage.remove(USER_KEY);
-    setUser(nextUser);
-  }, []);
+    setUser(nextUser ?? null);
+  }, [setUser]);
 
   const logout = useCallback(() => {
     syncToken(null);
@@ -161,9 +151,6 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth debe usarse dentro de AuthProvider");
-  return ctx;
-};
+// Re-export hooks/utilities to avoid breaking existing imports
+// Nota: para usar hooks/utilidades importa desde "./auth-context.js"
+// export { useAuth, isAdminRole } from "./auth-context.js";

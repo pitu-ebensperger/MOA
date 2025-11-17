@@ -116,7 +116,7 @@ export default function AdminDashboardPage() {
     <section className="space-y-6">
       <header className="space-y-1">
         <p className="text-xs font-semibold uppercase tracking-[0.4em] text-neutral-400">Administración</p>
-        <h1 className="text-3xl font-semibold text-(--text-strong)">Panel central</h1>
+        <h1 className="text-3xl font-semibold text-primary">Panel central</h1>
         <p className="text-sm text-neutral-500">Visión general de pedidos, clientes y catálogo.</p>
       </header>
 
@@ -153,7 +153,7 @@ export default function AdminDashboardPage() {
           <header className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Pedidos</p>
-              <h2 className="text-xl font-semibold text-(--text-strong)">Últimos pedidos</h2>
+              <h2 className="text-xl font-semibold text-primary">Últimos pedidos</h2>
             </div>
             <Button appearance="ghost" intent="neutral" size="sm" onClick={handleRefresh}>
               Actualizar
@@ -194,7 +194,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Estados</p>
-              <h2 className="text-xl font-semibold text-(--text-strong)">Distribución</h2>
+              <h2 className="text-xl font-semibold text-primary">Distribución</h2>
             </div>
             <span className="text-xs font-semibold text-neutral-500">
               {totalStatusCount ? `${totalStatusCount} pedidos` : "Sin datos"}

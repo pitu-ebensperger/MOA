@@ -1,19 +1,28 @@
-import clsx from "clsx";
+import React from "react";
+import { cx } from "../../utils/ui-helpers.js";
+import { BADGE_VARIANTS, BADGE_SIZES } from "../../config/ui-tokens.js";
 
-const VARIANTS = {
-  primary: "bg-[#d1ab84] text-white",
-  secondary: "border-white text-white",
-  neutral: "bg-white text-[#443114]",
-  destacado: "bg-[#d1ab84] text-white",
-  nuevo: "bg-[#d1ab84] text-white",
-};
+/* Badge Component  -------------------------------------------------------------------------- */
 
-function Badge({ children, variant = "primary", className, ...props }) {
+export function Badge({ 
+  children, 
+  variant = "primary", 
+  size = "md",
+  className, 
+  ...props 
+}) {
+  const variantClass = BADGE_VARIANTS[variant] ?? BADGE_VARIANTS.primary;
+  const sizeClass = BADGE_SIZES[size] ?? BADGE_SIZES.md;
+
   return (
     <span
-      className={clsx(
-        "w-fit inline-flex items-center justify-center rounded-3xl px-[9.523px] py-1 text-xs font-sans font-medium leading-[11.13px] tracking-[1.5871px] uppercase",
-        VARIANTS[variant] ?? VARIANTS.primary,
+      className={cx(
+        "w-fit inline-flex items-center justify-center",
+        "rounded-3xl",
+        "font-sans font-medium tracking-[1.5871px] uppercase",
+        "transition-colors duration-150",
+        sizeClass,
+        variantClass,
         className
       )}
       {...props}

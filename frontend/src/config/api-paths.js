@@ -42,5 +42,8 @@ export const API_PATHS = {
     customers: "/admin/clientes",
     settings: "/admin/configuraciones",
     collections: "/admin/colecciones",
+    uiDemo: "/admin", // TODO: quitar alias temporal cuando UI demo tenga ruta propia
+    // Ruta de pruebas de componentes
+    test: "/admin/test",
   },
 };

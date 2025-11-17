@@ -1,20 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { usePersistentState } from "../../../hooks/usePersistentState.js";
+
+const CART_STORAGE_KEY = "cart";
 
 export const useCart = () => {
-  //  Inicializar el carrito desde localStorage 
-  const [cartItems, setCartItems] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem("cart");
-      return savedCart ? JSON.parse(savedCart) : [];
-    } catch {
-      return [];
-    }
+  const [cartItems, setCartItems] = usePersistentState(CART_STORAGE_KEY, {
+    initialValue: [],
   });
-
-  //  Persistir carrito cada vez que cambie
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cartItems));
-  }, [cartItems]);
 
   //  Agregar un producto
   const addToCart = (product) => {
@@ -49,7 +41,6 @@ export const useCart = () => {
   //  Vaciar carrito
   const clearCart = () => {
     setCartItems([]);
-    localStorage.removeItem("cart");
   };
 
   const total = useMemo(

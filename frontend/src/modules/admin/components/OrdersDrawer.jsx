@@ -1,8 +1,7 @@
 import React from "react";
-import { Modal } from "../../../components/ui/Modal.jsx";
+import { Dialog, DialogContent } from "../../../components/ui/radix/Dialog.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Pill } from "../../../components/ui/Pill.jsx";
 import { formatDate_ddMMyyyy } from "../../../utils/date.js";
 import { CalendarDays, PackageCheck, Truck } from "lucide-react";
@@ -64,23 +63,33 @@ export default function OrdersDrawer({ open, order, onClose }) {
     { key: "delivered", label: "Entregada", date: deliveredAt, icon: PackageCheck },
   ];
 
+  // Micro description list rows (menos cajas, mejor legibilidad)
+  const Dl = ({ children, className = "" }) => (
+    <dl className={`divide-(--color-border) ${className}`}>{children}</dl>
+  );
+  const DlRow = ({ label, children }) => (
+    <div className="grid grid-cols-3 gap-3 py-2">
+      <dt className="col-span-1 text-[11px] uppercase tracking-wide text-(--color-text-muted)">{label}</dt>
+      <dd className="col-span-2 text-sm leading-6">{children}</dd>
+    </div>
+  );
+
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      variant="drawer"          // usamos modo drawer
-      placement="right"         // anclado a la derecha
-      ariaLabel="Detalle de orden"
-      className="w-full max-w-[720px]" // un poco más ancho para respirar
-    >
-  <div className="flex h-full flex-col bg-(--color-neutral2) text-(--color-text)">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent
+        variant="drawer"
+        placement="right"
+        className="w-full max-w-[720px]"
+        showClose={true}
+      >
+        <div className="flex h-full flex-col bg-(--color-neutral2) text-(--color-text)">
         {/* Header (sticky) */}
-  <header className="sticky top-0 z-10 flex items-center justify-between border-b border-(--color-border) bg-white/90 px-6 py-4 backdrop-blur">
+  <header className="sticky top-0 z-10 flex items-center justify-between border-b border-(--color-border) bg-white/90 px-7 py-5 backdrop-blur">
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wide text-(--color-text-muted)">
               Orden
             </p>
-            <h2 className="mt-0.5 truncate font-mono text-lg font-semibold tracking-tight">
+            <h2 className="mt-0.5 truncate font-mono text-lg font-semibold tracking-tight text-primary">
               {number ?? "Orden"}
             </h2>
           </div>
@@ -101,21 +110,7 @@ export default function OrdersDrawer({ open, order, onClose }) {
         </header>
 
         {/* Contenido scrollable */}
-  <div className="flex-1 overflow-y-auto px-6 py-4">
-          {/* Encabezado compacto con fechas */}
-          <div className="mb-4 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-(--color-border) bg-white px-4 py-3 shadow-sm">
-              <p className="text-xs uppercase tracking-wide text-(--color-text-muted)">Creada</p>
-              <p className="mt-0.5 text-sm">{safeDate(createdAt)}</p>
-            </div>
-            <div className="rounded-xl border border-(--color-border) bg-white px-4 py-3 shadow-sm">
-              <p className="text-xs uppercase tracking-wide text-(--color-text-muted)">Entrega</p>
-              <p className="mt-0.5 text-sm">
-                {deliveredAt ? safeDate(deliveredAt) : shippedAt ? `${safeDate(shippedAt)} (en tránsito)` : "Pendiente"}
-              </p>
-            </div>
-          </div>
-
+        <div className="flex-1 overflow-y-auto px-6 py-4">
           {/* Secciones en acordeón */}
           <Accordion
             className="divide-y divide-(--color-border) rounded-2xl border border-(--color-border) bg-white shadow-sm"
@@ -130,34 +125,22 @@ export default function OrdersDrawer({ open, order, onClose }) {
                       {items.length === 0 && (
                         <div className="px-4 py-3 text-sm text-(--color-text-muted)">Esta orden no tiene ítems.</div>
                       )}
-                      {items.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-3 px-4 py-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-neutral3) text-xs text-(--color-text-muted)">
-                            {item.name?.[0] ?? "?"}
+                      {items.map((item, idx) => {
+                        return (
+                          <div key={idx} className="flex items-center gap-3 px-4 py-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-neutral3) text-xs text-(--color-text-muted)">
+                              {item.name?.[0] ?? "?"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
+                              <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
+                            </div>
+                            <div className="text-right text-sm font-medium tabular-nums">
+                              <Price value={item.unitPrice ?? 0} />
+                            </div>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
-                            <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
-                          </div>
-                          <div className="text-right text-sm font-medium tabular-nums">
-                            <Price value={item.unitPrice ?? 0} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Totales */}
-                    <div className="mt-2 space-y-1 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-(--color-text-muted)">Subtotal</span>
-                        <span className="tabular-nums"><Price value={subtotal ?? 0} /></span>
-                      </div>
-                      {!!order.tax && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-(--color-text-muted)">Impuestos</span>
-                          <span className="tabular-nums"><Price value={order.tax} /></span>
-                        </div>
-                      )}
+                        );
+                      })}
                       <div className="flex items-center justify-between">
                         <span className="text-(--color-text-muted)">Envío</span>
                         <span className="tabular-nums"><Price value={shipping ?? 0} /></span>
@@ -217,7 +200,7 @@ export default function OrdersDrawer({ open, order, onClose }) {
                         })}
                       </ol>
                       {/* progress line */}
-                      <div className="pointer-events-none absolute left-[calc(2rem-2px)] right-[calc(2rem-2px)] top-4 h-[2px] bg-(--color-border)">
+                      <div className="pointer-events-none absolute left-[calc(2rem-2px)] right-[calc(2rem-2px)] top-4 h-0.5 bg-(--color-border)">
                         <div
                           className="h-full bg-(--color-primary1) transition-all"
                           style={{ width: `${(shippingCurrentStep / (steps.length - 1)) * 100}%` }}
@@ -241,20 +224,20 @@ export default function OrdersDrawer({ open, order, onClose }) {
                           )}
                         </div>
                       </div>
+                    </div>
 
-                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de envío</p>
-                          <p className="mt-0.5">{safeDate(shippedAt)}</p>
-                        </div>
-                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de entrega</p>
-                          <p className="mt-0.5">{safeDate(deliveredAt)}</p>
-                        </div>
-                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2 sm:col-span-2">
-                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Dirección de envío {address?.label ? `(${address.label})` : ""}</p>
-                          <p className="mt-0.5 break-words">{fullAddress ?? "–"}</p>
-                        </div>
+                    <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de envío</p>
+                        <p className="mt-0.5">{safeDate(shippedAt)}</p>
+                      </div>
+                      <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de entrega</p>
+                        <p className="mt-0.5">{safeDate(deliveredAt)}</p>
+                      </div>
+                      <div className="rounded-md border border-(--color-border) bg-white px-3 py-2 sm:col-span-2">
+                        <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Dirección de envío {address?.label ? `(${address.label})` : ""}</p>
+                        <p className="mt-0.5 wrap-break-word">{fullAddress ?? "–"}</p>
                       </div>
                     </div>
                   </div>
@@ -262,19 +245,78 @@ export default function OrdersDrawer({ open, order, onClose }) {
               },
             ]}
           />
+
+            {/* Col derecha: Meta (envío / cliente / pago) */}
+            <aside className="md:col-span-4">
+              {/* Envío y entrega */}
+              <section className="mb-8">
+                <h3 className="mb-3 text-sm font-semibold">Envío y entrega</h3>
+                {/* Stepper */}
+                <div className="relative">
+                  <ol className="flex items-center justify-between gap-2">
+                    {steps.map((s, idx) => {
+                      const active = idx <= shippingCurrentStep;
+                      const Icon = s.icon;
+                      return (
+                        <li key={s.key} className="flex min-w-0 flex-1 flex-col items-center">
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-full border text-[11px] ${active ? "bg-(--color-primary1) text-white border-(--color-primary1)" : "bg-white text-(--color-text-muted) border-(--color-border)"}`}>
+                            <Icon className={`h-4 w-4 ${active ? "text-white" : "text-(--color-text-muted)"}`} />
+                          </div>
+                          <span className={`mt-1 text-[11px] ${active ? "text-(--color-primary1)" : "text-(--color-text-muted)"}`}>{s.label}</span>
+                          <span className="mt-0.5 text-[10px] text-(--color-text-muted)">{safeDate(s.date)}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <div className="pointer-events-none absolute left-[calc(1.75rem)] right-[calc(1.75rem)] top-3 h-px bg-(--color-border)">
+                    <div className="h-full bg-(--color-primary1) transition-all" style={{ width: `${(shippingCurrentStep / (steps.length - 1)) * 100}%` }} />
+                  </div>
+                </div>
+
+                {/* Datos de envío (lista simple) */}
+                <Dl className="mt-4">
+                  <DlRow label="Carrier">
+                    <span className="font-medium">{safeText(deliveryService)}</span>
+                    <span className="ml-2 align-middle"><Pill variant={deliveredAt ? "success" : shippingStatus === "cancelled" ? "error" : "info"}>{safeText(shippingStatus)}</Pill></span>
+                  </DlRow>
+                  {tracking && (
+                    <DlRow label="Tracking"><span className="font-mono text-[13px] text-(--color-text-muted)">{tracking}</span></DlRow>
+                  )}
+                  <DlRow label="Fecha de envío">{safeDate(shippedAt)}</DlRow>
+                  <DlRow label="Fecha de entrega">{safeDate(deliveredAt)}</DlRow>
+                  <DlRow label={`Dirección${address?.label ? ` (${address.label})` : ""}`}>
+                    <span className="break-words">{fullAddress ?? "–"}</span>
+                  </DlRow>
+                </Dl>
+              </section>
+
+              {/* Cliente */}
+              <section className="mb-8">
+                <h3 className="mb-3 text-sm font-semibold">Cliente</h3>
+                <Dl>
+                  <DlRow label="Nombre">{safeText(userName)}</DlRow>
+                  <DlRow label="Email"><span className="text-(--color-primary1)">{safeText(userEmail)}</span></DlRow>
+                  <DlRow label="Teléfono">{safeText(userPhone)}</DlRow>
+                </Dl>
+              </section>
+
+              {/* Pago */}
+              <section>
+                <h3 className="mb-3 text-sm font-semibold">Pago</h3>
+                <Dl>
+                  <DlRow label="Método">{safeText(paymentMethod)}</DlRow>
+                  {payment?.status && (
+                    <DlRow label="Estado">
+                      <Pill variant={payment.status === "captured" ? "success" : payment.status === "failed" ? "error" : "info"}>{payment.status}</Pill>
+                    </DlRow>
+                  )}
+                </Dl>
+              </section>
+            </aside>
+          </div>
         </div>
 
-        {/* Footer con botón cerrar (por si el modal no tiene X propia) */}
-        <footer className="flex items-center justify-end border-t border-(--color-border) bg-white px-6 py-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-(--color-border) bg-white px-4 py-1.5 text-sm text-(--color-text) hover:bg-(--surface-subtle)"
-          >
-            Cerrar
-          </button>
-        </footer>
-      </div>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 }

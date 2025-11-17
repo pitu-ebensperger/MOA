@@ -24,3 +24,10 @@ snapshots/*.json
 scripts/*.jsx
 scripts/*.js
 .env copy
+
+.copilot-temp
+docs/**.md
+docs/misDOCS/
+snapshots/**
+# Local-only UI sandboxes
+frontend/src/modules/admin/pages/AdminTestPage.local.jsx
