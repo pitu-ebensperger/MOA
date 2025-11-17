@@ -1,6 +1,6 @@
 import pool from "../../database/config.js";
 
-export async function getCategories(req, res) {
+export async function getCategories(req, res, next) {
   try {
     const query = `
       SELECT 
@@ -17,9 +17,6 @@ export async function getCategories(req, res) {
     // El frontend normaliza directamente arrays con estos campos camelCase
     res.json(rows);
   } catch (error) {
-    console.error("Error al obtener categorías:", error);
-    res.status(500).json({
-      error: "Error al obtener categorías",
-    });
+    next(error);
   }
 }

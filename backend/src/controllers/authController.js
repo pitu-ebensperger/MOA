@@ -3,22 +3,24 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import "dotenv/config";
+import { AppError, NotFoundError, UnauthorizedError } from "../utils/error.utils.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await findUserModel(email);
     if (!user) {
-      return res.status(401).json({ message: "no autorizado" });
+      throw new UnauthorizedError("No autorizado");
     }
     const isPasswordValid = bcrypt.compareSync(password, user.password_hash);
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "no autorizado" });
+      throw new UnauthorizedError("No autorizado");
     }
     if (!JWT_SECRET) {
-      throw new Error("JWT secret no configurado");
+      throw new AppError("JWT secret no configurado", 500);
     }
     const token = jwt.sign(
       { id: user.usuario_id, email: user.email },
@@ -40,17 +42,20 @@ export const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    next(error);
   }
 };
 
-export const getUser = async (req, res) => {
+export const getUser = async (req, res, next) => {
   try {
     const email = req.user;
+    if (!email) {
+      throw new UnauthorizedError("No autorizado");
+    }
     const user = await findUserModel(email);
 
     if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      throw new NotFoundError("Usuario");
     }
 
     const profile = {
@@ -63,6 +68,6 @@ export const getUser = async (req, res) => {
 
     res.status(200).json(profile);
   } catch (error) {
-    res.status(500).json({ message: "Error al obtener el usuario" });
+    next(error);
   }
 };

@@ -2,12 +2,6 @@ import { Facebook, Instagram, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 import { API_PATHS } from "../../config/api-paths.js";
 
-const DEBUG_LINKS = [ //SACAR DSPS
-  { label: "Perfil", href: API_PATHS.auth.profile },
-  { label: "Dashboard admin", href: API_PATHS.admin.dashboard },
-  { label: "Guía de estilos", href: "/style-guide" },
-];
-
 const CUSTOMER_SERVICE_LINKS = [
   { label: "Contacto", href: API_PATHS.support.contact },
   { label: "Cambios y devoluciones", href: API_PATHS.support.privacy },
@@ -88,8 +82,6 @@ export const Footer = () => {
           </section>
 
           {renderColumn("Servicio al cliente", CUSTOMER_SERVICE_LINKS)}
-          {renderColumn("Vista temporal", DEBUG_LINKS)}
-
         </div>
 
         <div className="mt-12 border-t border-neutral-200 flex flex-col gap-4 pt-6 text-xs text-neutral-500 md:flex-row md:items-center md:justify-between">
@@ -100,7 +92,13 @@ export const Footer = () => {
               </Link>
             ))}
           </div>
-          <p>© {currentYear} MOA Studio · Todos los derechos reservados.</p>
+          <p>
+            © {currentYear}{" "}
+            <Link to="/style-guide" className="text-current no-underline focus-visible:underline">
+              MOA Studio
+            </Link>{" "}
+            · Todos los derechos reservados.
+          </p>
         </div>
       </div>
     </footer>

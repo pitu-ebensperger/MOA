@@ -1,4 +1,4 @@
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
 
 const Card = ({ data = {} }) => {

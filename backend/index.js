@@ -20,10 +20,13 @@ import categoriesRouter from "./routes/categoriesRoutes.js";
 import productsRouter from "./routes/productsRoutes.js";
 import userRoutes from "./routes/usersRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import { errorHandler } from "./src/utils/error.utils.js";
 import home from "./routes/homeRoutes.js";
 
 app.use(categoriesRouter);
 app.use(productsRouter);
 app.use(userRoutes);
 app.use(authRoutes);
+
+app.use(errorHandler);
 app.use(home);

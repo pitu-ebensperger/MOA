@@ -25,14 +25,13 @@ body {
 
 /* TEXT */
 h1, h2 { font-family: var(--font-display); }
-h1 { font-weight: var(--weight-semibold); font-size: var(--text-3xl); color: var(--color-primary1); letter-spacing: -0.03em;}
-h2{ color: var(--color-primary1) }
+h1 { font-weight: var(--weight-semibold); font-size: var(--text-3xl); letter-spacing: -0.03em;}
 h1.text-white, h2.text-white { color: white; }
 
-h3 { font-family: var(--font-sans); font-weight: var(--weight-regular); font-size: var(--text-lg); color: var(--color-white); }
-h4 { font-family: var(--font-display); font-weight: var(--weight-medium); font-size: var(--text-xl); color: var(--color-primary1); }
-h5 { font-family: var(--font-display); font-weight: var(--weight-semibold); font-size: var(--text-xl); color: var(--color-primary1); }
-h6 { font-family: var(--font-sans); font-weight: var(--weight-regular); text-transform: uppercase; font-size: var(--text-sm); color: var(--color-secondary1); letter-spacing: 0.05em; }
+h3 { font-family: var(--font-sans); font-weight: var(--weight-regular); font-size: var(--text-lg); }
+h4 { font-family: var(--font-display); font-weight: var(--weight-medium); font-size: var(--text-xl); }
+h5 { font-family: var(--font-display); font-weight: var(--weight-semibold); font-size: var(--text-xl); }
+h6 { font-family: var(--font-sans); font-weight: var(--weight-regular); text-transform: uppercase; font-size: var(--text-sm); letter-spacing: 0.05em; }
 
 .text-body { color: var(--color-primary2); font-family: var(--font-sans); font-size: var(--text-base); }
 
@@ -159,6 +158,16 @@ input:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary1
 .text-tertiary, .color-secondary2{ color: var(--color-secondary2); }
 
 .success, .color-success, .text-success { color: var(--color-success)}
+
+/* ADMIN -----------------------------------------------------------------------*/
+
+.admin-table-surface table {
+  background-color: var(--color-neutral2);
+}
+
+.admin-table-surface thead {
+  background-color: var(--color-light);
+}
 .warning, .color-warning, .text-warning  { color: var(--color-warning)}
 .error, .color-error, .text-error { color: var(--color-error);}
 
@@ -326,4 +335,3 @@ input:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary1
   cursor: not-allowed;
   opacity: 0.4;
 }
-

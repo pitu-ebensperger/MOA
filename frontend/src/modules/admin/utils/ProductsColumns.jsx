@@ -1,17 +1,20 @@
 //path/frontend/src/modules/admin/utils/productsColumns.jsx
-import { AlertTriangle, Edit3, Eye, Trash2 } from "lucide-react";
+import { AlertTriangle, MoreHorizontal, Eye, Edit3, Copy, Trash2 } from "lucide-react";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
-import { IconButton } from "../../../components/ui/Button.jsx";
+import { StatusPill } from "../../../components/ui/StatusPill.jsx";
+import { LOW_STOCK_THRESHOLD } from "../../../config/constants.js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../../../components/ui/radix/DropdownMenu.jsx";
+import { Button } from "../../../components/ui/Button.jsx";
 
-const LOW_STOCK_THRESHOLD = 8;
 
-const PUBLICATION_BADGES = {
-  activo: { label: "Activo", classes: "bg-emerald-50 text-emerald-700" },
-  borrador: { label: "Borrador", classes: "bg-amber-50 text-amber-700" },
-  archivado: { label: "Archivado", classes: "bg-neutral-100 text-neutral-500" },
-};
 
-export function buildProductColumns({ onView, onEdit, onDelete, categoryMap }) {
+export function buildProductColumns({ onView, onEdit, onDuplicate, onDelete, categoryMap }) {
   return [
     {
       id: "image",
@@ -87,15 +90,11 @@ export function buildProductColumns({ onView, onEdit, onDelete, categoryMap }) {
       header: "Estado",
       cell: ({ row }) => {
         const product = row.original;
-        const key = (product.status ?? "activo").toLowerCase();
-        const badge = PUBLICATION_BADGES[key] ?? PUBLICATION_BADGES.activo;
-
+        const status = (product.status ?? "activo").toLowerCase();
         return (
-          <span
-            className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ${badge.classes}`}
-          >
-            {badge.label}
-          </span>
+          <div className="px-1 py-2">
+            <StatusPill status={status} domain="product" />
+          </div>
         );
       },
     },
@@ -116,29 +115,45 @@ export function buildProductColumns({ onView, onEdit, onDelete, categoryMap }) {
       header: "",
       cell: ({ row }) => {
         const product = row.original;
+        const canDelete = product.status?.toLowerCase() !== "activo";
+
         return (
-          <div className="flex items-center justify-end gap-2 px-1 py-2">
-            <IconButton
-              size="sm"
-              intent="neutral"
-              aria-label={`Ver ${product.name}`}
-              icon={<Eye className="h-4 w-4" />}
-              onClick={() => onView?.(product)}
-            />
-            <IconButton
-              size="sm"
-              intent="accent"
-              aria-label={`Editar ${product.name}`}
-              icon={<Edit3 className="h-4 w-4" />}
-              onClick={() => onEdit?.(product)}
-            />
-            <IconButton
-              size="sm"
-              intent="danger"
-              aria-label={`Eliminar ${product.name}`}
-              icon={<Trash2 className="h-4 w-4" />}
-              onClick={() => onDelete?.(product)}
-            />
+          <div className="flex items-center justify-end px-1 py-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0"
+                  aria-label={`Acciones para ${product.name}`}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onSelect={() => onView?.(product)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Ver detalle
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => onEdit?.(product)}>
+                  <Edit3 className="mr-2 h-4 w-4" />
+                  Editar producto
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => onDuplicate?.(product)}>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Duplicar
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={() => onDelete?.(product)}
+                  disabled={!canDelete}
+                  className="text-(--color-error)"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       },

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
-import { PAGE_SIZE_OPTIONS } from "../../../utils/constants.js";
+import { PAGE_SIZE_OPTIONS } from "../../../config/constants.js";
 import { ensureNumber } from "../../../utils/number.js";
 
 export const useCatalogControls = ({

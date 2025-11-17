@@ -3,6 +3,7 @@ export const PRODUCT_STATUS_MAP = {
   activo:      { variant: "success", label: "Activo" },
   sin_stock:   { variant: "warning", label: "Sin stock" },
   borrador:    { variant: "neutral", label: "Borrador" },
+  archivado:   { variant: "neutral", label: "Archivado" },
 };
 
 /* PEDIDOS */
@@ -27,6 +28,8 @@ export const SHIPMENT_STATUS_MAP = {
   in_transit:  { variant: "info",    label: "En tránsito" },
   delayed:     { variant: "warning", label: "Retrasado" },
   cancelled:   { variant: "error",   label: "Cancelado" },
+  processing:  { variant: "info",    label: "Procesando" },
+  preparing:   { variant: "info",    label: "Preparando" },
 };
 
 /* USUARIOS */

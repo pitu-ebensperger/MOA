@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "../../auth/hooks/useAuth";
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../../../context/auth-context.js'
 
 const UserInfoSection = () => {
   const { user, token } = useAuth();  
@@ -156,4 +157,4 @@ const UserInfoSection = () => {
   );
 };
 
-export default UserInfoSection;
+export default UserInfoSection

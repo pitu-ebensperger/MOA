@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE } from "../../../utils/constants.js";
+import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
 import { ensureNumber } from "../../../utils/number.js";
+import { clamp } from "../../../utils/math.js";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
+import { buildCategoriesWithAll } from "../../../utils/normalizers.js";
 import { createCategoryMatcher, resolveProductPrice } from "../utils/products.js";
-
-const buildCategoriesWithAll = (fetchedCategories = []) => {
-  const base = Array.isArray(fetchedCategories) ? fetchedCategories : [];
-  const hasAll = base.some((category) => category && String(category.id) === String(ALL_CATEGORY_ID));
-  return hasAll ? base : [{ id: ALL_CATEGORY_ID, name: "Todos" }, ...base];
-};
 
 const resolveCategoryFromQuery = (categoryQuery, categories) => {
   if (!categoryQuery) return ALL_CATEGORY_ID;
@@ -150,7 +146,7 @@ export const useProductFilters = ({
     );
     const totalItems = totalResults;
     const totalPages = Math.max(1, Math.ceil(totalItems / safeLimit));
-    const safePage = Math.min(Math.max(1, ensureNumber(currentPage, 1)), totalPages);
+    const safePage = clamp(ensureNumber(currentPage, 1), 1, totalPages);
     const startIndex = (safePage - 1) * safeLimit;
     const endIndex = Math.min(startIndex + safeLimit, totalItems);
 

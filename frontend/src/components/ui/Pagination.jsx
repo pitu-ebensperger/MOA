@@ -1,3 +1,6 @@
+import React from "react";
+import { cx } from "../../utils/ui-helpers.js";
+
 const Pages = (currentPage, totalPages) => {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -52,14 +55,23 @@ export function Pagination({ page, totalPages, totalItems, onPageChange }) {
   };
 
   return (
-    <nav aria-label="Paginación" className="flex items-center justify-center text-(--text-weak)">
+    <nav 
+      aria-label="Paginación" 
+      className="flex items-center justify-center text-[color:var(--color-text-secondary)]"
+    >
       <button
         type="button"
         onClick={handlePrev}
         disabled={!canGoPrev}
-        className={["group p-2 rounded-full text-inherit transition duration-200 ease-in-out disabled:opacity-40", canGoPrev ? "cursor-pointer hover:text-(--color-primary1)" : "cursor-not-allowed"].join(" ")}
+        className={cx(
+          "group p-2 rounded-full text-inherit",
+          "transition-colors duration-200",
+          "disabled:opacity-40",
+          canGoPrev
+            ? "cursor-pointer hover:text-[color:var(--color-primary1)]"
+            : "cursor-not-allowed"
+        )}
         aria-label="Página anterior"
-        style={{ cursor: canGoPrev ? "pointer" : "auto" }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -75,11 +87,14 @@ export function Pagination({ page, totalPages, totalItems, onPageChange }) {
         </svg>
       </button>
 
-      <div className="mx-2 flex items-center gap-1 rounded-full bg-transparent px-1 py-0.5 text-sm font-normal text-(--text-weak)">
+      <div className="mx-2 flex items-center gap-1 rounded-full bg-transparent px-1 py-0.5 text-sm font-normal text-[color:var(--color-text-secondary)]">
         {pageItems.map((item) => {
           if (typeof item === "string") {
             return (
-              <span key={item} className="px-3 py-1 text-base text-neutral-400">
+              <span 
+                key={item} 
+                className="px-3 py-1 text-base text-[color:var(--color-text-muted)]"
+              >
                 …
               </span>
             );
@@ -91,12 +106,16 @@ export function Pagination({ page, totalPages, totalItems, onPageChange }) {
               key={item}
               type="button"
               onClick={() => onPageChange?.(item)}
-              className={[
-                "px-3 py-1 rounded-full transition duration-200 ease-in-out font-normal hover:text-(--color-primary1) hover:underline underline-offset-8",
+              className={cx(
+                "px-3 py-1 rounded-full",
+                "transition-colors duration-200",
+                "font-normal",
+                "hover:text-[color:var(--color-primary1)]",
+                "hover:underline underline-offset-8",
                 isActive
-                  ? "text-(--color-primary1)"
-                  : "text-(--color-secondary1)",
-              ].join(" ")}
+                  ? "text-[color:var(--color-primary1)] font-medium"
+                  : "text-[color:var(--color-secondary1)]"
+              )}
               aria-current={isActive ? "page" : undefined}
             >
               {item}
@@ -109,9 +128,15 @@ export function Pagination({ page, totalPages, totalItems, onPageChange }) {
         type="button"
         onClick={handleNext}
         disabled={!canGoNext}
-        className={["group p-2 rounded-full text-inherit transition duration-200 ease-in-out disabled:opacity-40", canGoNext ? "cursor-pointer hover:text-(--color-primary1)" : "cursor-not-allowed"].join(" ")}
+        className={cx(
+          "group p-2 rounded-full text-inherit",
+          "transition-colors duration-200",
+          "disabled:opacity-40",
+          canGoNext
+            ? "cursor-pointer hover:text-[color:var(--color-primary1)]"
+            : "cursor-not-allowed"
+        )}
         aria-label="Página siguiente"
-        style={{ cursor: canGoNext ? "pointer" : "auto" }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

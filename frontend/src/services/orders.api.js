@@ -2,28 +2,14 @@ import { env } from "../config/env.js";
 import { API_PATHS } from "../config/api-paths.js";
 import { apiClient } from "./api-client.js";
 import { delay } from "../utils/delay.js";
+import { buildQueryString } from "../utils/https.js";
+import { toNum } from "../utils/number.js";
+import { paginate } from "../utils/pagination.js";
 
 import { customersDb } from "../mocks/database/customers.js";
 import { ordersDb } from "../mocks/database/orders.js";
 
-/* Helpers ----------------------------------------------------------------------------------------------------------- */
 
-const toNum = (value) => {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : null;
-};
-
-const buildQueryString = (params = {}) => {
-  const search = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") return;
-    search.append(key, value);
-  });
-  const q = search.toString();
-  return q ? `?${q}` : "";
-};
-
-/* Normalización ----------------------------------------------------------------------------------------------------- */
 
 const normalizeOrder = (raw = {}, extra = {}) => {
   const id = raw.id ?? null;
@@ -58,7 +44,7 @@ const normalizeOrder = (raw = {}, extra = {}) => {
   };
 };
 
-/* Mock implementation ----------------------------------------------------------------------------------------------- */
+/* Implentacion Mock ----------------------------------------------------------------------------------------------- */
 
 function buildMockOrderView(order) {
   const items = ordersDb.orderItems.filter((it) => it.orderId === order.id);
@@ -131,27 +117,20 @@ const mockOrdersApi = {
         new Date(a.createdAt ?? 0).getTime()
     );
 
-    /* Paginación estilo estándar */
-    const safeLimit = Number(limit) || 20;
-    const safePage = Math.max(1, Number(page) || 1);
-    const offset = (safePage - 1) * safeLimit;
-
-    const pageItems = list.slice(offset, offset + safeLimit);
+    const {
+      items: pageItems,
+      total,
+      totalPages,
+      page: pageInfo,
+    } = paginate(list, { page, limit });
 
     const items = pageItems.map(buildMockOrderView);
-    const total = list.length;
-    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
 
     return {
       items,
       total,
       totalPages,
-
-      page: {
-        index: safePage,
-        limit: safeLimit,
-        offset,
-      },
+      page: pageInfo,
     };
   },
 
@@ -173,6 +152,32 @@ const mockOrdersApi = {
     }
 
     return buildMockOrderView(found);
+  },
+
+  async cancel(id) {
+    if (!id) throw new Error("order id is required");
+
+    await delay();
+
+    const idx = ordersDb.orders.findIndex(
+      (o) => String(o.id) === String(id) || String(o.number) === String(id),
+    );
+
+    if (idx === -1) {
+      const err = new Error("Order not found");
+      err.status = 404;
+      throw err;
+    }
+
+    const updated = {
+      ...ordersDb.orders[idx],
+      status: "cancelled",
+      updatedAt: new Date().toISOString(),
+    };
+
+    ordersDb.orders[idx] = updated;
+
+    return buildMockOrderView(updated);
   },
 };
 
@@ -204,6 +209,16 @@ const remoteOrdersApi = {
     );
 
     return normalizeOrder(data, data);
+  },
+
+  async cancel(id) {
+    if (!id) throw new Error("order id is required");
+
+    const data = await apiClient.private.post(
+      `${API_PATHS.admin.orders}/${id}/cancel`,
+    );
+
+    return data ? normalizeOrder(data, data) : null;
   },
 };
 

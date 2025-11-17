@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
 import { Price } from "../../../components/data-display/Price.jsx";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 import { API_PATHS } from "../../../config/api-paths.js";
 
 import { Button } from "../../../components/ui/Button.jsx";
