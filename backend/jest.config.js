@@ -1,12 +1,11 @@
 export default {
-  testEnvironment: 'node',
+  testEnvironment: "node",
   transform: {},
-  extensionsToTreatAsEsm: ['.js'],
-  testMatch: ['**/__tests__/**/*.test.js'],
-  coveragePathIgnorePatterns: ['/node_modules/'],
+  testMatch: ["**/__tests__/**/*.test.js"],
+  coveragePathIgnorePatterns: ["/node_modules/"],
   collectCoverageFrom: [
-    'src/**/*.js',
-    'routes/**/*.js',
-    '!**/node_modules/**'
+    "src/**/*.js",
+    "routes/**/*.js",
+    "!**/node_modules/**"
   ]
 };

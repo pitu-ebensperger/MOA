@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon index.js",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest",
     "start": "node index.js",
     "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
     "seed:categories": "node database/seed/categoriesSeed.js",
@@ -23,6 +24,8 @@
     "pg-format": "^1.0.4"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.5",
+    "babel-jest": "^30.2.0",
     "backend": "^0.0.0",
     "cross-env": "^10.1.0",
     "jest": "^30.2.0",
