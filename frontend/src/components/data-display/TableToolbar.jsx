@@ -3,12 +3,12 @@ import { InputSm } from "../ui/Input.jsx";
 import { SelectSm, SelectGhost } from "../ui/Select.jsx";
 import { Button, IconButton } from "../ui/Button.jsx";
 import { cx } from "@utils/ui-helpers.js";
-import { Search, Filter, LayoutGrid, Rows, ChevronDown, Columns as ColumnsIcon, X } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../ui/radix/DropdownMenu.jsx";
+import { Search, ListFilter, LayoutGrid, Rows, ChevronDown, Columns as ColumnsIcon, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/radix/DropdownMenu.jsx";
 
 export function TableToolbar({ children, className }) {
   return (
-    <div className={cx("flex w-full flex-wrap items-center gap-2", className)}>
+    <div className={cx("flex w-full flex-wrap items-center gap-2 text-sm", className)}>
       {children}
     </div>
   );
@@ -17,12 +17,16 @@ export function TableToolbar({ children, className }) {
 export function TableSearch({ value, onChange, placeholder = "Buscar...", className }) {
   return (
     <div className={cx("flex items-center gap-2", className)}>
-      <InputSm
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange?.(e.target.value)}
-        leftIcon={<Search size={16} />}
-      />
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--color-text-muted)" />
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          className="h-8 w-full rounded-full border border-(--color-border) bg-white pl-9 pr-4 text-sm text-(--text-strong) placeholder:text-(--color-text-muted) focus:border-(--color-primary1) focus:outline-none focus:ring-2 focus:ring-(--color-primary1)/20"
+        />
+      </div>
     </div>
   );
 }
@@ -37,7 +41,7 @@ export function FilterSelect({
 }) {
   return (
     <div className={cx("flex items-center gap-2", className)}>
-  {label && <span className="text-xs text-(--color-secondary2)">{label}</span>}
+      {label && <span className="text-xs text-(--color-secondary2)">{label}</span>}
       <SelectGhost size="sm" value={value} onChange={(e) => onChange?.(e.target.value)} options={options} placeholder={placeholder} />
     </div>
   );
@@ -105,7 +109,7 @@ export function FilterTabs({ tabs = [], value, onChange, className }) {
 
 export function FilterMenuButton({ onClick, label = "Filtros" }) {
   return (
-    <Button appearance="ghost" iconLeft={<Filter size={16} />} onClick={onClick}>
+    <Button appearance="ghost" iconLeft={<ListFilter size={16} />} onClick={onClick}>
       {label}
     </Button>
   );
@@ -127,16 +131,30 @@ export function ColumnsMenuButton({ table, label = "Columnas" }) {
   const columns = table.getAllLeafColumns?.() ?? [];
   const hideable = columns.filter((col) => col?.getCanHide?.());
   if (!hideable.length) return null;
+  const resolveLabel = (col) => {
+    const header = col.columnDef?.header;
+    if (typeof header === "string" && header.trim()) return header.trim();
+    const metaLabel = col.columnDef?.meta?.label;
+    if (typeof metaLabel === "string" && metaLabel.trim()) return metaLabel.trim();
+    if (typeof col.columnDef?.accessorKey === "string") return col.columnDef.accessorKey;
+    return col.id ?? "col";
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button appearance="ghost" iconLeft={<ColumnsIcon size={16} />}>{label}</Button>
+        <IconButton
+          icon={<ColumnsIcon size={16} />}
+          aria-label={label}
+          title={label}
+          appearance="ghost"
+          intent="neutral"
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {hideable.map((col) => {
           const id = col.id;
           const visible = col.getIsVisible?.();
-          const name = col.columnDef?.header ?? id;
+          const name = resolveLabel(col);
           return (
             <DropdownMenuItem
               key={id}
@@ -146,7 +164,7 @@ export function ColumnsMenuButton({ table, label = "Columnas" }) {
               }}
               className="justify-between"
             >
-              <span className="truncate text-(--color-secondary2)">{typeof name === "string" ? name : id}</span>
+              <span className="truncate text-(--color-secondary2)">{name}</span>
               <input type="checkbox" aria-label={`Mostrar ${id}`} checked={!!visible} onChange={() => col.toggleVisibility?.(!visible)} />
             </DropdownMenuItem>
           );

@@ -9,7 +9,6 @@ import { Package, Tag, Layers, Calendar, TrendingUp, AlertCircle } from "lucide-
 
 // Helpers
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
-const safeText = (v) => (v == null || v === "" ? "–" : v);
 const safeNumber = (v, defaultValue = 0) => (Number.isFinite(Number(v)) ? Number(v) : defaultValue);
 
 export default function ProductDetailDrawer({ open, product, onClose, categoryMap = {} }) {

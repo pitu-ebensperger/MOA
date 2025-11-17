@@ -39,10 +39,10 @@ export default function HeroSection() {
 
           <div className="flex flex-wrap gap-4 pt-2">
             <a
-              href={`${API_PATHS.products.products}?collection=coleccion-atelier`}
+              href={API_PATHS.products.products}
               className="inline-flex items-center justify-center rounded-full bg-white px-6 py-2.5 font-garamond text-base tracking-wide text-neutral-900 transition hover:bg-neutral-100"
             >
-              Explorar nueva colección
+              Explorar novedades
             </a>
             
           </div>

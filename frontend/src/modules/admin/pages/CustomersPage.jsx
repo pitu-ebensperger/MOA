@@ -1,19 +1,17 @@
 import React, { useState, useMemo } from "react";
-import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, Ban } from "lucide-react";
+import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, Ban, ShoppingBag, LayoutGrid, Rows } from "lucide-react";
+import CustomerDrawer from "../components/CustomerDrawer.jsx";
+import OrdersDrawer from "../components/OrdersDrawer.jsx";
 import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
 import {
   TableToolbar,
   TableSearch,
-  FilterSelect,
   FilterTags,
   ToolbarSpacer,
-  QuickFilterPill,
   ColumnsMenuButton,
   ClearFiltersButton,
-  LayoutToggleButton,
 } from "../../../components/data-display/TableToolbar.jsx";
-import { Button } from "../../../components/ui/Button.jsx";
-import { Badge } from "../../../components/ui/Badge.jsx";
+import { Button, IconButton } from "../../../components/ui/Button.jsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,28 +20,65 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/radix/DropdownMenu.jsx";
 import { customersDb } from "../../../mocks/database/customers.js";
+import { ordersDb } from "../../../mocks/database/orders.js";
 import { formatDate_ddMMyyyy } from "../../../utils/date.js";
+import { StatusPill } from "../../../components/ui/StatusPill.jsx";
 
-const CUSTOMER_STATUS_OPTIONS = [
-  { label: "Todos los estados", value: "" },
-  { label: "Activo", value: "active" },
-  { label: "Inactivo", value: "inactive" },
+const USER_STATUS_OPTIONS = [
+  { value: "", label: "Todos los estados" },
+  { value: "active", label: "Activo" },
+  { value: "inactive", label: "Inactivo" },
+  { value: "suspended", label: "Suspendido" },
 ];
 
 export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [onlyOptIn, setOnlyOptIn] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
-  const [condensed, setCondensed] = useState(false);
+  const [condensed] = useState(false);
+  const [viewMode, setViewMode] = useState("list"); // "list" o "grid"
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [breadcrumb, setBreadcrumb] = useState(null); // Para mostrar de dónde viene la orden
 
-  const limit = 20;
-  const customers = customersDb?.users ?? [];
+  const limit = 10; // Reducir a 10 para mejor visualización
+
+  // Helper para cargar una orden completa con sus relaciones
+  const loadFullOrder = (order) => {
+    const items = ordersDb.orderItems.filter((item) => item.orderId === order.id);
+    const payment = ordersDb.payments.find((p) => p.id === order.paymentId);
+    const shipment = ordersDb.shipping.find((s) => s.id === order.shipmentId);
+    const address = customersDb.addresses.find((a) => a.id === order.addressId);
+    const user = customersDb.users.find((u) => u.id === order.userId);
+
+    return {
+      ...order,
+      items,
+      payment,
+      shipment,
+      address,
+      userName: user ? `${user.firstName} ${user.lastName}` : "—",
+      userEmail: user?.email ?? "—",
+      userPhone: user?.phone ?? "—",
+    };
+  };
+
+  const handleViewOrder = (order) => {
+    const fullOrder = loadFullOrder(order);
+    const customer = selectedCustomer;
+    setBreadcrumb(customer ? `${customer.firstName} ${customer.lastName}` : null);
+    setSelectedOrder(fullOrder);
+  };
+
+  const handleCloseOrder = () => {
+    setSelectedOrder(null);
+    setBreadcrumb(null);
+  };
 
   // Filtrado de datos
   const filteredData = useMemo(() => {
-    let filtered = [...customers];
+    const customersList = customersDb?.users ?? [];
+    let filtered = [...customersList];
 
     // Búsqueda por nombre o email
     if (search) {
@@ -55,23 +90,8 @@ export default function CustomersPage() {
       );
     }
 
-    // Filtro de opt-in
-    if (onlyOptIn) {
-      filtered = filtered.filter((c) => c.marketingOptIn);
-    }
-
-    // Filtro por estado (simulado)
-    if (statusFilter) {
-      // Como no tenemos campo status real, usamos marketingOptIn como proxy
-      if (statusFilter === "active") {
-        filtered = filtered.filter((c) => c.marketingOptIn);
-      } else if (statusFilter === "inactive") {
-        filtered = filtered.filter((c) => !c.marketingOptIn);
-      }
-    }
-
     return filtered;
-  }, [customers, search, onlyOptIn, statusFilter]);
+  }, [search]);
 
   // Paginación
   const total = filteredData.length;
@@ -81,12 +101,32 @@ export default function CustomersPage() {
     return filteredData.slice(start, end);
   }, [filteredData, page, limit]);
 
+  // Calcular pedidos por cliente
+  const customerOrders = useMemo(() => {
+    const ordersMap = {};
+    for (const order of ordersDb.orders) {
+      if (!ordersMap[order.userId]) {
+        ordersMap[order.userId] = 0;
+      }
+      ordersMap[order.userId]++;
+    }
+    return ordersMap;
+  }, []);
+
+  // Handler para cambiar status de cliente
+  const handleStatusChange = (customerId, newStatus) => {
+    console.log("Cambiar status de", customerId, "a", newStatus);
+    // TODO: Implementar actualización de status en backend
+    // Por ahora solo lo mostramos en consola
+  };
+
   // Definición de columnas
   const columns = useMemo(
     () => [
       {
         accessorKey: "fullName",
         header: "Cliente",
+        enableSorting: true,
         cell: ({ row }) => {
           const customer = row.original;
           return (
@@ -105,6 +145,7 @@ export default function CustomersPage() {
       {
         accessorKey: "phone",
         header: "Teléfono",
+        enableSorting: false,
         cell: ({ row }) => {
           const customer = row.original;
           return customer.phone ? (
@@ -118,17 +159,48 @@ export default function CustomersPage() {
         },
       },
       {
-        id: "marketing",
-        header: "Marketing",
+        accessorKey: "orders",
+        header: "Pedidos",
+        enableSorting: true,
+        cell: ({ row }) => {
+          const customer = row.original;
+          const orderCount = customerOrders[customer.id] || 0;
+          return (
+            <div className="flex items-center gap-1 px-1 py-2 text-sm">
+              <ShoppingBag className="h-3.5 w-3.5 text-(--text-weak)" />
+              <span className="font-medium tabular-nums">{orderCount}</span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Estado",
+        enableSorting: true,
         cell: ({ row }) => {
           const customer = row.original;
           return (
             <div className="px-1 py-2">
-              {customer.marketingOptIn ? (
-                <Badge variant="success" size="sm">Opt-in</Badge>
-              ) : (
-                <Badge variant="neutral" size="sm">Sin permiso</Badge>
-              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="cursor-pointer transition-opacity hover:opacity-80"
+                    aria-label="Cambiar estado"
+                  >
+                    <StatusPill status={customer.status} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  {USER_STATUS_OPTIONS.filter((opt) => opt.value).map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onSelect={() => handleStatusChange(customer.id, option.value)}
+                    >
+                      {option.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           );
         },
@@ -136,6 +208,7 @@ export default function CustomersPage() {
       {
         accessorKey: "createdAt",
         header: "Registro",
+        enableSorting: true,
         cell: ({ row }) => {
           const customer = row.original;
           return (
@@ -149,6 +222,7 @@ export default function CustomersPage() {
       {
         id: "actions",
         header: "",
+        enableSorting: false,
         cell: ({ row }) => {
           const customer = row.original;
           return (
@@ -156,7 +230,8 @@ export default function CustomersPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
+                    appearance="ghost"
+                    intent="neutral"
                     size="sm"
                     className="h-8 w-8 p-0"
                     aria-label={`Acciones para ${customer.firstName}`}
@@ -167,8 +242,7 @@ export default function CustomersPage() {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem
                     onSelect={() => {
-                      console.log("Ver perfil:", customer);
-                      // TODO: Abrir modal o navegar a detalle
+                      setSelectedCustomer(customer);
                     }}
                   >
                     <Eye className="mr-2 h-4 w-4" />
@@ -203,13 +277,11 @@ export default function CustomersPage() {
         },
       },
     ],
-    []
+    [customerOrders]
   );
 
   const clearAll = () => {
     setSearch("");
-    setStatusFilter("");
-    setOnlyOptIn(false);
     setActiveTags([]);
     setPage(1);
   };
@@ -226,54 +298,40 @@ export default function CustomersPage() {
           placeholder="Buscar por nombre, email…"
         />
         <ToolbarSpacer />
-        <FilterSelect
-          label="Estado"
-          value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v);
-            setPage(1);
-            if (v) {
-              setActiveTags((tags) => [
-                {
-                  key: "status",
-                  value: v,
-                  label: `Estado: ${CUSTOMER_STATUS_OPTIONS.find((o) => o.value === v)?.label ?? v}`,
-                },
-                ...tags.filter((t) => t.key !== "status"),
-              ]);
-            } else {
-              setActiveTags((tags) => tags.filter((t) => t.key !== "status"));
-            }
-          }}
-          options={CUSTOMER_STATUS_OPTIONS}
-        />
-        <ToolbarSpacer />
-        <QuickFilterPill
-          active={onlyOptIn}
-          onClick={() => {
-            setOnlyOptIn((v) => !v);
-            setPage(1);
-          }}
-        >
-          Solo Opt-in
-        </QuickFilterPill>
-        <ToolbarSpacer />
         <FilterTags
           tags={activeTags}
           onRemove={(tag) => {
             setActiveTags((tags) =>
               tags.filter((t) => !(t.key === tag.key && t.value === tag.value))
             );
-            if (tag.key === "status") setStatusFilter("");
           }}
         />
         <div className="ml-auto flex items-center gap-2">
           <ColumnsMenuButton table={table} />
           <ClearFiltersButton onClear={clearAll} />
-          <LayoutToggleButton
-            condensed={condensed}
-            onToggle={() => setCondensed((v) => !v)}
-          />
+          
+          {/* Botones de Layout List/Grid */}
+          <div className="flex items-center gap-0.5 rounded-md border border-(--color-border) p-0.5">
+            <IconButton
+              appearance="ghost"
+              intent={viewMode === "list" ? "primary" : "neutral"}
+              size="sm"
+              icon={<Rows className="h-4 w-4" />}
+              onClick={() => setViewMode("list")}
+              aria-label="Vista lista"
+              className={viewMode === "list" ? "bg-(--color-primary1)/10" : ""}
+            />
+            <IconButton
+              appearance="ghost"
+              intent={viewMode === "grid" ? "primary" : "neutral"}
+              size="sm"
+              icon={<LayoutGrid className="h-4 w-4" />}
+              onClick={() => setViewMode("grid")}
+              aria-label="Vista grid"
+              className={viewMode === "grid" ? "bg-(--color-primary1)/10" : ""}
+            />
+          </div>
+          
           <Button
             appearance="ghost"
             intent="neutral"
@@ -301,7 +359,7 @@ export default function CustomersPage() {
         </div>
       </TableToolbar>
     ),
-    [search, statusFilter, onlyOptIn, activeTags, condensed]
+    [search, activeTags, viewMode]
   );
 
   return (
@@ -319,17 +377,122 @@ export default function CustomersPage() {
       </div>
 
       {/* Tabla con toolbar integrado */}
-      <DataTableV2
-        columns={columns}
-        data={paginatedData}
-        loading={false}
-        page={page}
-        pageSize={limit}
-        total={total}
-        onPageChange={setPage}
-        toolbar={toolbar}
-        condensed={condensed}
-        variant="card"
+      {viewMode === "list" ? (
+        <DataTableV2
+          columns={columns}
+          data={paginatedData}
+          loading={false}
+          page={page}
+          pageSize={limit}
+          total={total}
+          onPageChange={setPage}
+          toolbar={toolbar}
+          condensed={condensed}
+          variant="card"
+        />
+      ) : (
+        <div>
+          {/* Toolbar */}
+          {toolbar(null)}
+          
+          {/* Grid View */}
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {paginatedData.map((customer) => {
+              const orderCount = customerOrders[customer.id] || 0;
+              return (
+                <div
+                  key={customer.id}
+                  className="rounded-lg border border-(--color-border) bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-(--text-strong)">
+                        {customer.firstName} {customer.lastName}
+                      </h3>
+                      <p className="mt-0.5 text-xs text-(--text-muted)">{customer.email}</p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="rounded p-1 hover:bg-(--surface-subtle)">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onSelect={() => setSelectedCustomer(customer)}>
+                          <Eye className="mr-2 h-4 w-4" />
+                          Ver perfil
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  
+                  <div className="mt-3 space-y-2 text-sm">
+                    {customer.phone && (
+                      <div className="flex items-center gap-2 text-(--text-weak)">
+                        <Phone className="h-3.5 w-3.5" />
+                        <span>{customer.phone}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-(--text-weak)">
+                      <ShoppingBag className="h-3.5 w-3.5" />
+                      <span>{orderCount} pedidos</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-(--text-weak)">
+                      <Calendar className="h-3.5 w-3.5" />
+                      <span>{formatDate_ddMMyyyy(customer.createdAt)}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-3 pt-3 border-t border-(--color-border)">
+                    <StatusPill status={customer.status} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Pagination for grid */}
+          {total > limit && (
+            <div className="mt-4 flex justify-center">
+              <div className="flex items-center gap-2">
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                >
+                  Anterior
+                </Button>
+                <span className="text-sm text-(--text-weak)">
+                  Página {page} de {Math.ceil(total / limit)}
+                </span>
+                <Button
+                  appearance="ghost"
+                  size="sm"
+                  disabled={page >= Math.ceil(total / limit)}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Siguiente
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Drawers */}
+      <CustomerDrawer
+        open={!!selectedCustomer && !selectedOrder}
+        customer={selectedCustomer}
+        onClose={() => setSelectedCustomer(null)}
+        onViewOrder={handleViewOrder}
+      />
+
+      <OrdersDrawer
+        open={!!selectedOrder}
+        order={selectedOrder}
+        onClose={handleCloseOrder}
+        breadcrumb={breadcrumb}
       />
     </div>
   );

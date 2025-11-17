@@ -10,7 +10,6 @@ export { buildProductCategoryPool } from "./productCategory.js";
 export {
   matchesText,
   createCategoryMatcher,
-  matchesCollection,
   matchesPrice,
   matchesStatus,
 } from "./productsFilter.js";

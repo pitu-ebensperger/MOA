@@ -13,7 +13,6 @@ export const API_PATHS = {
     products: "/productos",
     productDetail: (id) => `/producto/${id}`,
     categories: "/categorias",
-    collections: "/colecciones",
   },
   cart: {
     root: (userId) => `/${userId}/cart`,
@@ -41,7 +40,6 @@ export const API_PATHS = {
     orders: "/admin/pedidos",
     customers: "/admin/clientes",
     settings: "/admin/configuraciones",
-    collections: "/admin/colecciones",
     uiDemo: "/admin", // TODO: quitar alias temporal cuando UI demo tenga ruta propia
     // Ruta de pruebas de componentes
     test: "/admin/test",

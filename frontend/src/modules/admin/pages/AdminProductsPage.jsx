@@ -1,22 +1,14 @@
 //path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
-import React, { useState, useMemo } from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import React, { useState, useMemo, useCallback } from "react";
+import { Plus } from "lucide-react";
 import ProductDetailDrawer from "../components/ProductDetailDrawer.jsx";
 import ProductDrawer from "../components/ProductDrawer.jsx";
 
 import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
-import {
-  TableToolbar,
-  TableSearch,
-  FilterSelect,
-  FilterTags,
-  ToolbarSpacer,
-  QuickFilterPill,
-  ColumnsMenuButton,
-  ClearFiltersButton,
-  LayoutToggleButton,
-} from "../../../components/data-display/TableToolbar.jsx";
+// Toolbar pieces used in separate ProductsToolbar component
+import ProductsToolbar from "./ProductsToolbar.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
+import { productsApi } from "../../../services/products.api.js";
 
 import { useAdminProducts } from "../hooks/useAdminProducts.js";
 import { useCategories } from "../../products/hooks/useCategories.js";
@@ -28,11 +20,13 @@ export default function ProductsAdminPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const [onlyLowStock, setOnlyLowStock] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
-  const [condensed, setCondensed] = useState(false);
+  const condensed = false;
   const [selectedProductView, setSelectedProductView] = useState(null);
-  const [selectedProductEdit, setSelectedProductEdit] = useState(null);
+  const [selectedProductEdit, setSelectedProductEdit] = useState(null); // holds product being edited
+  const [creatingNewProduct, setCreatingNewProduct] = useState(false); // flag for create drawer
 
   const limit = DEFAULT_PAGE_SIZE;
 
@@ -41,6 +35,7 @@ export default function ProductsAdminPage() {
     limit,
     search,
     status,
+    categoryId,
     onlyLowStock,
   });
 
@@ -49,115 +44,121 @@ export default function ProductsAdminPage() {
     () => Object.fromEntries((categories ?? []).map((c) => [c.id, c.name])),
     [categories],
   );
-
-  const columns = useMemo(
-    () =>
-      buildProductColumns({
-        categoryMap,
-        onView: (product) => {
-          setSelectedProductView(product);
-        },
-        onEdit: (product) => {
-          setSelectedProductEdit(product);
-        },
-        onDuplicate: (product) => {
-          console.log("duplicate product", product);
-          // TODO: Implement duplicate logic
-          // Create a copy with new SKU and set to draft status
-          refetch();
-        },
-        onDelete: (product) => {
-          if (confirm(`¿Estás seguro de eliminar "${product.name}"?`)) {
-            console.log("delete product", product);
-            // TODO: Call API to delete product
-            refetch();
-          }
-        },
-      }),
-    [categoryMap, refetch],
+  const statusFilterOptions = useMemo(
+    () => PRODUCT_STATUS_OPTIONS.filter((option) => option.value),
+    [],
   );
+  const categoryOptions = useMemo(() => {
+    const entries = (categories ?? [])
+      .filter((category) => category?.id != null)
+      .map((category) => ({
+        value: String(category.id),
+        label: category.name ?? "Sin categoría",
+      }));
+    return entries.sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
+  }, [categories]);
 
-  const clearAll = () => {
-    setSearch("");
-    setStatus("");
-    setOnlyLowStock(false);
-    setActiveTags([]);
+  const handleStatusFilterChange = useCallback((value) => {
+    setStatus(value);
     setPage(1);
-  };
+    if (value) {
+      const label = PRODUCT_STATUS_OPTIONS.find((o) => o.value === value)?.label ?? value;
+      setActiveTags((tags) => [
+        { key: "status", value, label: `Estado: ${label}` },
+        ...tags.filter((t) => t.key !== "status"),
+      ]);
+    } else {
+      setActiveTags((tags) => tags.filter((t) => t.key !== "status"));
+    }
+  }, []);
 
-  const toolbar = useMemo(
-    () => (table) => (
-      <TableToolbar>
-        <TableSearch
-          value={search}
-          onChange={(v) => {
-            setSearch(v);
-            setPage(1);
-          }}
-          placeholder="Buscar por nombre, SKU…"
-        />
-        <ToolbarSpacer />
-        <FilterSelect
-          label="Estado"
-          value={status}
-          onChange={(v) => {
-            setStatus(v);
-            setPage(1);
-            if (v) {
-              setActiveTags((tags) => [
-                { key: "status", value: v, label: `Estado: ${PRODUCT_STATUS_OPTIONS.find((o) => o.value === v)?.label ?? v}` },
-                ...tags.filter((t) => t.key !== "status"),
-              ]);
-            } else {
-              setActiveTags((tags) => tags.filter((t) => t.key !== "status"));
-            }
-          }}
-          options={PRODUCT_STATUS_OPTIONS}
-        />
-        <ToolbarSpacer />
-        <QuickFilterPill
-          active={onlyLowStock}
-          onClick={() => {
-            setOnlyLowStock((v) => !v);
-            setPage(1);
-          }}
-        >
-          Stock crítico
-        </QuickFilterPill>
-        <ToolbarSpacer />
-        <FilterTags
-          tags={activeTags}
-          onRemove={(tag) => {
-            setActiveTags((tags) => tags.filter((t) => !(t.key === tag.key && t.value === tag.value)));
-            if (tag.key === "status") setStatus("");
-          }}
-        />
-        <div className="ml-auto flex items-center gap-2">
-          <ColumnsMenuButton table={table} />
-          <ClearFiltersButton onClear={clearAll} />
-          <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={() => refetch()}
-            leadingIcon={<RefreshCw className="h-4 w-4" />}
-          >
-            Refrescar
-          </Button>
-          <Button
-            appearance="solid"
-            intent="primary"
-            size="sm"
-            leadingIcon={<Plus className="h-4 w-4" />}
-          >
-            Nuevo producto
-          </Button>
-        </div>
-      </TableToolbar>
+  const handleCategoryFilterChange = useCallback((value) => {
+    const normalizedValue = value ? String(value) : "";
+    setCategoryId(normalizedValue);
+    setPage(1);
+    if (normalizedValue) {
+      const label = categoryOptions.find((option) => option.value === normalizedValue)?.label ?? normalizedValue;
+      setActiveTags((tags) => [
+        { key: "category", value: normalizedValue, label: `Categoría: ${label}` },
+        ...tags.filter((tag) => tag.key !== "category"),
+      ]);
+    } else {
+      setActiveTags((tags) => tags.filter((tag) => tag.key !== "category"));
+    }
+  }, [categoryOptions]);
+
+  const handleDuplicateProduct = useCallback((product) => {
+    console.log("Duplicar producto", product);
+    refetch();
+  }, [refetch]);
+
+  const handleDeleteProduct = useCallback((product) => {
+    if (confirm(`¿Estás seguro de eliminar "${product.name}"?`)) {
+      console.log("Eliminar producto", product);
+      refetch();
+    }
+  }, [refetch]);
+
+  const columns = useMemo(() => buildProductColumns({
+    categoryMap,
+    onView: setSelectedProductView,
+    onEdit: setSelectedProductEdit,
+    onDuplicate: handleDuplicateProduct,
+    onDelete: handleDeleteProduct,
+    statusFilterValue: status,
+    statusFilterOptions,
+    onStatusFilterChange: handleStatusFilterChange,
+    categoryFilterValue: categoryId,
+    categoryFilterOptions: categoryOptions,
+    onCategoryFilterChange: handleCategoryFilterChange,
+  }), [
+    categoryMap,
+    handleDuplicateProduct,
+    handleDeleteProduct,
+    status,
+    statusFilterOptions,
+    handleStatusFilterChange,
+    categoryId,
+    categoryOptions,
+    handleCategoryFilterChange,
+  ]);
+
+  // Tag removal logic extracted for lint (avoid deep nesting)
+  const handleRemoveTag = useCallback((tag) => {
+    if (tag.key === "status") {
+      handleStatusFilterChange("");
+      return;
+    }
+    if (tag.key === "category") {
+      handleCategoryFilterChange("");
+      return;
+    }
+    setActiveTags((tags) => tags.filter((t) => !(t.key === tag.key && t.value === tag.value)));
+  }, [handleStatusFilterChange, handleCategoryFilterChange]);
+
+  // Render toolbar (external component) with stable reference for lint compliance
+  const renderToolbar = useCallback(
+    (table) => (
+      <ProductsToolbar
+        table={table}
+        search={search}
+        onSearchChange={(v) => {
+          setSearch(v);
+          setPage(1);
+        }}
+        onlyLowStock={onlyLowStock}
+        onToggleLowStock={() => {
+          setOnlyLowStock((v) => !v);
+          setPage(1);
+        }}
+        activeTags={activeTags}
+        onRemoveTag={handleRemoveTag}
+      />
     ),
-    [search, status, onlyLowStock, activeTags, condensed, refetch],
+    [search, onlyLowStock, activeTags, handleRemoveTag],
   );
+
+  // (toolbar inline version removed for lint compliance)
 
   return (
     <div className="flex flex-col gap-4">
@@ -171,6 +172,23 @@ export default function ProductsAdminPage() {
             Administra el catálogo y el inventario de la tienda MOA.
           </p>
         </div>
+        <div className="flex items-center gap-2">
+          <Button
+            appearance="solid"
+            intent="primary"
+            size="sm"
+            leadingIcon={<Plus className="h-4 w-4" />}
+            style={{
+              "--btn-gap": "0.35rem",
+              "--btn-icon-gap-left": "0.35rem",
+            }}
+            onClick={() => {
+              setCreatingNewProduct(true);
+            }}
+          >
+            Nuevo producto
+          </Button>
+        </div>
       </div>
 
       {/* Tabla con toolbar integrado */}
@@ -182,7 +200,8 @@ export default function ProductsAdminPage() {
         pageSize={limit}
         total={total}
         onPageChange={setPage}
-        toolbar={toolbar}
+        toolbar={renderToolbar}
+        maxHeight="calc(100vh - 260px)"
         condensed={condensed}
         variant="card"
       />
@@ -195,15 +214,51 @@ export default function ProductsAdminPage() {
         categoryMap={categoryMap}
       />
 
+      {/* Drawer: Crear nuevo producto */}
+      <ProductDrawer
+        open={creatingNewProduct}
+        initial={null}
+        categories={categories ?? []}
+        onClose={() => setCreatingNewProduct(false)}
+        onSubmit={async (payload) => {
+          try {
+            await productsApi.create(payload);
+            setCreatingNewProduct(false);
+            refetch();
+          } catch (error) {
+            console.error("Error al crear producto:", error);
+            alert("Error al crear el producto. Por favor, intenta nuevamente.");
+          }
+        }}
+      />
+
+      {/* Drawer: Editar producto existente */}
       <ProductDrawer
         open={!!selectedProductEdit}
-        product={selectedProductEdit}
+        initial={selectedProductEdit}
+        categories={categories ?? []}
         onClose={() => setSelectedProductEdit(null)}
-        onSave={(data) => {
-          console.log("Save product:", data);
-          // TODO: Implement save logic
-          setSelectedProductEdit(null);
-          refetch();
+        onSubmit={async (payload) => {
+          try {
+            await productsApi.update(payload.id, payload);
+            setSelectedProductEdit(null);
+            refetch();
+          } catch (error) {
+            console.error("Error al actualizar producto:", error);
+            alert("Error al actualizar el producto. Por favor, intenta nuevamente.");
+          }
+        }}
+        onDelete={async (product) => {
+          if (confirm(`¿Eliminar producto "${product.name}"?`)) {
+            try {
+              await productsApi.remove(product.id);
+              setSelectedProductEdit(null);
+              refetch();
+            } catch (error) {
+              console.error("Error al eliminar producto:", error);
+              alert("Error al eliminar el producto. Por favor, intenta nuevamente.");
+            }
+          }
         }}
       />
     </div>

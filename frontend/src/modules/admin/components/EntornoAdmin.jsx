@@ -3,14 +3,13 @@ import { useLocation, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button } from "@components/ui/Button.jsx";
 import { TooltipNeutral } from "@components/ui/Tooltip.jsx";
-import { LayoutDashboard, Package, Warehouse, Users, Settings, LogOut, Store, Layers, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Package, Warehouse, Users, Settings, LogOut, Store, ChevronLeft, ChevronRight } from "lucide-react";
 import { API_PATHS } from "@config/api-paths.js";
 
 const navItems = [
   { label: "Resumen", to: API_PATHS.admin.dashboard, icon: LayoutDashboard },
   { label: "Pedidos", to: API_PATHS.admin.orders, icon: Package },
   { label: "Productos", to: API_PATHS.admin.products, icon: Warehouse },
-  { label: "Colecciones", to: API_PATHS.admin.collections, icon: Layers },
   { label: "Clientes", to: API_PATHS.admin.customers, icon: Users },
   { label: "Ajustes", to: API_PATHS.admin.settings, icon: Settings },
 ];
@@ -36,15 +35,18 @@ export default function EntornoAdmin({ children }) {
     }
   }, [isExpanded]);
 
- 
+  // Importar estilos de admin
+  useEffect(() => {
+    import("../../../styles/admin.css");
+  }, []);
 
   return (
-  <div className="admin-shell min-h-screen bg-(--background) text-body">
+    <div className="admin-shell admin-page min-h-screen bg-(--background) text-body" data-admin-context>
       <header className="h-0" />
 
-      <div className="flex min-h-screen relative">
+      <div className="flex min-h-screen relative items-stretch">
         <aside
-          className={`${isExpanded ? "w-56" : "w-20"} sticky top-0 h-screen flex flex-col items-center bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
+          className={`${isExpanded ? "w-56" : "w-20"} flex flex-col items-center self-stretch min-h-screen bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
         >
           <div className="mb-5 w-full grid grid-cols-3 items-center">
             <div />

@@ -1,8 +1,8 @@
-import { PRODUCTS, CATEGORIES, COLLECTIONS } from "../database/index.js";
+import { PRODUCTS, CATEGORIES } from "../database/index.js";
 import { delay } from "../../utils/delay.js";
 import { normalizeCategory } from "../../utils/normalizers.js";
 import { sortProducts } from "../../utils/sort.js";
-import { matchesText, createCategoryMatcher, matchesCollection, matchesPrice, matchesStatus } from "../../modules/products/utils/productsFilter.js";
+import { matchesText, createCategoryMatcher, matchesPrice, matchesStatus } from "../../modules/products/utils/productsFilter.js";
 import { toNum } from "../../utils/number.js";
 
 const cloneProduct = (p) => ({
@@ -12,15 +12,9 @@ const cloneProduct = (p) => ({
   tags: Array.isArray(p.tags) ? [...p.tags] : [],
   materials: Array.isArray(p.materials) ? [...p.materials] : [],
 });
-const cloneCollection = (c) => ({
-  ...c,
-  productIds: Array.isArray(c.productIds) ? [...c.productIds] : [],
-});
-
 const db = {
   categories: CATEGORIES.map(normalizeCategory),
   products: PRODUCTS.map(cloneProduct),
-  collections: COLLECTIONS.map(cloneCollection),
 };
 
 const s = (v) => (v == null ? "" : String(v));
@@ -72,8 +66,6 @@ const normalizeIncomingProduct = (payload = {}) => {
     weight: payload.weight ?? null,
     specs: payload.specs ?? null,
     fk_category_id: payload.fk_category_id ?? null,
-    fk_collection_id: payload.fk_collection_id ?? null,
-    collection: payload.collection ?? null,
     createdAt: payload.createdAt ?? null,
     updatedAt: payload.updatedAt ?? null,
     compareAtPrice: Number.isFinite(Number(payload.compareAtPrice)) ? Number(payload.compareAtPrice) : null,
@@ -87,7 +79,6 @@ export const mockCatalogApi = {
       q,
       status,
       categoryId,
-      collectionId,
       minPrice,
       maxPrice,
       page = 1,
@@ -107,7 +98,6 @@ export const mockCatalogApi = {
       (p) =>
         matchesText(p, q) &&
         categoryMatch(p, categoryId) &&
-        matchesCollection(p, collectionId) &&
         matchesPrice(p, numericMin, numericMax) &&
         matchesStatus(p, status),
     );
@@ -168,17 +158,6 @@ export const mockCatalogApi = {
     return db.categories
       .filter((c) => (pid !== null ? c.parentId === pid : s(c.parentId ?? "") === s(parentId)))
       .map((c) => ({ ...c }));
-  },
-
-  async listCollections() {
-    await delay();
-    return db.collections.map((col) => {
-      const ids = Array.isArray(col.productIds) ? col.productIds : [];
-      return {
-        ...col,
-        products: ids.map((id) => db.products.find((p) => p.id === id)).filter(Boolean),
-      };
-    });
   },
 
   async create(payload = {}) {

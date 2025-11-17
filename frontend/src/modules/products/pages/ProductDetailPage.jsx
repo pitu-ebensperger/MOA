@@ -152,12 +152,6 @@ export const ProductDetailPage = () => {
         href,
       };
     }
-    if (product.collection) {
-      return {
-        label: product.collection,
-        href: productsBasePath,
-      };
-    }
     return null;
   }, [product, categories, productsBasePath]);
 
