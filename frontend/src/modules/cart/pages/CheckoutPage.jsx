@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart } from "lucide-react";
@@ -484,3 +485,5 @@ export const CheckoutPage = () => {
     </main>
   );
 };
+
+CheckoutPage.propTypes = {};

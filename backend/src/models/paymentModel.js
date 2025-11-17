@@ -12,6 +12,10 @@ const getByUserId = async (usuarioId) => {
       ultimos_digitos,
       nombre_titular,
       fecha_expiracion,
+      marca,
+      proveedor_pago,
+      token_pago,
+      metadata,
       predeterminado,
       creado_en,
       actualizado_en
@@ -36,6 +40,10 @@ const getById = async (metodoPagoId, usuarioId) => {
       ultimos_digitos,
       nombre_titular,
       fecha_expiracion,
+      marca,
+      proveedor_pago,
+      token_pago,
+      metadata,
       predeterminado,
       creado_en,
       actualizado_en
@@ -44,6 +52,34 @@ const getById = async (metodoPagoId, usuarioId) => {
   `;
 
   const { rows } = await pool.query(query, [metodoPagoId, usuarioId]);
+  return rows[0];
+};
+
+/**
+ * Buscar un método por token dentro del usuario
+ */
+const getByToken = async (tokenPago, usuarioId) => {
+  const query = `
+    SELECT 
+      metodo_pago_id,
+      usuario_id,
+      tipo_metodo,
+      ultimos_digitos,
+      nombre_titular,
+      fecha_expiracion,
+      marca,
+      proveedor_pago,
+      token_pago,
+      metadata,
+      predeterminado,
+      creado_en,
+      actualizado_en
+    FROM metodos_pago
+    WHERE token_pago = $1 AND usuario_id = $2
+    LIMIT 1
+  `;
+
+  const { rows } = await pool.query(query, [tokenPago, usuarioId]);
   return rows[0];
 };
 
@@ -81,7 +117,10 @@ const create = async (metodoPagoData) => {
     nombre_titular,
     fecha_expiracion,
     token_pago, // Token tokenizado del procesador de pagos (Transbank, Stripe, etc.)
-    predeterminado = false
+    predeterminado = false,
+    marca = null,
+    proveedor_pago = null,
+    metadata = null
   } = metodoPagoData;
 
   // Si es el primer método de pago, forzar como predeterminado
@@ -105,8 +144,11 @@ const create = async (metodoPagoData) => {
       nombre_titular,
       fecha_expiracion,
       token_pago,
-      predeterminado
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      predeterminado,
+      marca,
+      proveedor_pago,
+      metadata
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     RETURNING 
       metodo_pago_id,
       usuario_id,
@@ -115,6 +157,10 @@ const create = async (metodoPagoData) => {
       nombre_titular,
       fecha_expiracion,
       predeterminado,
+      marca,
+      proveedor_pago,
+      token_pago,
+      metadata,
       creado_en,
       actualizado_en
   `;
@@ -126,7 +172,10 @@ const create = async (metodoPagoData) => {
     nombre_titular,
     fecha_expiracion,
     token_pago,
-    predeterminado || isFirstMethod
+    predeterminado || isFirstMethod,
+    marca,
+    proveedor_pago,
+    metadata
   ]);
 
   return rows[0];
@@ -234,6 +283,7 @@ const countByUserId = async (usuarioId) => {
 const paymentModel = {
   getByUserId,
   getById,
+  getByToken,
   getDefault,
   create,
   update,

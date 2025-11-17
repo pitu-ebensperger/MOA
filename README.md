@@ -4,6 +4,20 @@
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
 - **demo@moa.cl** (contraseña: demo o admin o 123456) 
 - **cliente@mail.com** (contraseña: demo o admin o 123456)
+ 
+### Tarjetas de prueba Webpay (integración)
+Usa estas tarjetas ficticias mientras trabajas con el ambiente de integración. No requieren fecha de expiración válida: puedes ingresar cualquier combinación razonable.
+
+| Tipo | Tarjeta | CVV | Resultado esperado |
+| --- | --- | --- | --- |
+| VISA | 4051 8856 0044 6623 | 123 | Aprobada |
+| AMEX | 3700 0000 0002 032 | 1234 | Aprobada |
+| MASTERCARD | 5186 0595 5959 0568 | 123 | Rechazada |
+| Redcompra | 4051 8842 3993 7763 | 123 | Aprobada (si se permite débito) |
+| Redcompra | 4511 3466 6003 7060 | 123 | Aprobada (si se permite débito) |
+| Redcompra | 5186 0085 4123 3829 | 123 | Rechazada (si se permite débito) |
+| Prepago VISA | 4051 8860 0005 6590 | 123 | Aprobada |
+| Prepago MASTERCARD | 5186 1741 1062 9480 | 123 | Rechazada |
 
 > Los mocks están habilitados por defecto en `frontend/.env`  
 > Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
@@ -23,6 +37,12 @@ Ejecutar: `npm run -w backend dev`
 - npm run seed:users --workspace backend (asegura la cuenta `admin@moa.cl/admin123`)
 - npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
   -npm run seed:products --workspace backend (correr para agregar productos iniciales)
+
+### Stripe (pasarela de pago)
+
+- Define las variables de entorno `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` para habilitar la pasarela de Stripe en modo sandbox o producción.
+- La API expone el endpoint `/webhooks/stripe`, que Stripe usará para enviar confirmaciones asincrónicas.
+- Puedes usar las credenciales de prueba de Stripe y los números de tarjeta `4242 4242 4242 4242` para simular cobros sin mover dinero real; recuerda cambiar a claves reales para producción.
 
 **`docs/`**
 

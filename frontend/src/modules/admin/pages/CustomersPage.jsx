@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, Ban, ShoppingBag, LayoutGrid, Rows, ListFilter } from "lucide-react";
 import CustomerDrawer from "@/modules/admin/components/CustomerDrawer.jsx"
 import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/radix/Dialog.jsx";
 import { Input } from "@/components/ui/Input.jsx";
 import { Pagination } from "@/components/ui/Pagination.jsx";
+import { customersAdminApi } from "@/services/customersAdmin.api.js";
 
 const USER_STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -52,11 +54,23 @@ const NEW_CUSTOMER_INITIAL = {
 
 const getStatusLabel = (value) => STATUS_LABEL_MAP[value] ?? value;
 
+const normalizeCustomerRecord = (customer = {}) => {
+  const nameParts = String(customer.nombre ?? "").split(" ").filter(Boolean);
+  const firstName = nameParts[0] ?? "";
+  const lastName = nameParts.slice(1).join(" ");
+  return {
+    ...customer,
+    status: customer.status ?? customer.rol ?? "activo",
+    firstName,
+    lastName,
+    phone: customer.telefono ?? customer.phone ?? "",
+  };
+};
+
 export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
   const [condensed, setCondensed] = useState(false);
   const [viewMode, setViewMode] = useState("list"); // "list" o "grid"
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -64,8 +78,29 @@ export default function CustomersPage() {
   const [breadcrumb, setBreadcrumb] = useState(null); // Para mostrar de dónde viene la orden
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   const [newCustomerForm, setNewCustomerForm] = useState(NEW_CUSTOMER_INITIAL);
+  const [isCreatingSubmitting, setIsCreatingSubmitting] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [editForm, setEditForm] = useState({ nombre: "", email: "", telefono: "", status: "activo" });
+  const [isEditingSubmitting, setIsEditingSubmitting] = useState(false);
 
   const limit = 10; // Reducir a 10 para mejor visualización
+
+  const {
+    data: customersResponse,
+    isLoading: isLoadingCustomers,
+    refetch: refetchCustomers,
+  } = useQuery({
+    queryKey: ["admin-customers", page, limit, search],
+    queryFn: () => customersAdminApi.list({ page, limit, search }),
+    keepPreviousData: true,
+    staleTime: 1000 * 60,
+  });
+
+  const customersData = customersResponse?.data ?? null;
+  const customersList = customersData?.items ?? [];
+  const totalCustomers = customersData?.total ?? customersList.length;
+  const pageSize = customersData?.pageSize ?? limit;
+  const pageCount = Math.max(1, Math.ceil(totalCustomers / pageSize));
 
   // Helper para cargar una orden completa con sus relaciones
   const loadFullOrder = (order) => {
@@ -97,16 +132,33 @@ export default function CustomersPage() {
   }, [resetNewCustomerForm]);
 
   const handleCreateCustomer = useCallback(
-    (event) => {
+    async (event) => {
       event.preventDefault();
-      console.log("Crear nuevo cliente", newCustomerForm);
-      // TODO: Reemplazar por llamada al backend cuando esté disponible
-      setIsCreatingCustomer(false);
-      resetNewCustomerForm();
-      setRefreshKey((prev) => prev + 1);
-      setPage(1);
+      setIsCreatingSubmitting(true);
+      try {
+        const payload = {
+          nombre:
+            `${newCustomerForm.firstName.trim()} ${newCustomerForm.lastName.trim()}`.trim() ||
+            newCustomerForm.firstName.trim(),
+          email: newCustomerForm.email.trim(),
+          telefono: newCustomerForm.phone.trim(),
+          rol: newCustomerForm.status || "activo",
+        };
+        const response = await customersAdminApi.create(payload);
+        const createdCustomer = response?.data?.data ?? response?.data ?? response;
+        setSelectedCustomer(normalizeCustomerRecord(createdCustomer));
+        refetchCustomers();
+        setIsCreatingCustomer(false);
+        resetNewCustomerForm();
+        setPage(1);
+      } catch (error) {
+        console.error("Error creando cliente:", error);
+        window.alert(error?.message ?? "No se pudo crear el cliente");
+      } finally {
+        setIsCreatingSubmitting(false);
+      }
     },
-    [newCustomerForm, resetNewCustomerForm],
+    [newCustomerForm, resetNewCustomerForm, refetchCustomers, setPage, setSelectedCustomer],
   );
 
   const handleNewCustomerChange = useCallback((field) => (event) => {
@@ -123,13 +175,13 @@ export default function CustomersPage() {
   }, []);
 
   const handleRefresh = useCallback(() => {
-    setRefreshKey((prev) => prev + 1);
-  }, []);
+    refetchCustomers();
+  }, [refetchCustomers]);
 
   const handleViewOrder = (order) => {
     const fullOrder = loadFullOrder(order);
     const customer = selectedCustomer;
-    setBreadcrumb(customer ? `${customer.firstName} ${customer.lastName}` : null);
+    setBreadcrumb(customer ? customer.nombre : null);
     setSelectedOrder(fullOrder);
   };
 
@@ -138,37 +190,16 @@ export default function CustomersPage() {
     setBreadcrumb(null);
   };
 
-  // Filtrado de datos
-  const filteredData = useMemo(() => {
-    const customersList = customersDb?.users ?? [];
-    let filtered = [...customersList];
+  const enhancedCustomers = useMemo(
+    () => customersList.map(normalizeCustomerRecord),
+    [customersList],
+  );
 
-    // Búsqueda por nombre o email
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filtered = filtered.filter(
-        (c) =>
-          `${c.firstName} ${c.lastName}`.toLowerCase().includes(searchLower) ||
-          c.email.toLowerCase().includes(searchLower)
-      );
-    }
+  const filteredCustomers = useMemo(() => {
+    if (!statusFilter) return enhancedCustomers;
+    return enhancedCustomers.filter((customer) => customer.status === statusFilter);
+  }, [enhancedCustomers, statusFilter]);
 
-    if (statusFilter) {
-      filtered = filtered.filter((c) => c.status === statusFilter);
-    }
-
-    return filtered;
-  }, [search, statusFilter, refreshKey]);
-
-  // Paginación
-  const total = filteredData.length;
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    return filteredData.slice(start, end);
-  }, [filteredData, page, limit]);
-
-  // Calcular pedidos por cliente
   const customerOrders = useMemo(() => {
     const ordersMap = {};
     for (const order of ordersDb.orders) {
@@ -178,14 +209,69 @@ export default function CustomersPage() {
       ordersMap[order.userId]++;
     }
     return ordersMap;
-  }, [refreshKey]);
+  }, []);
 
-  // Handler para cambiar status de cliente
-  const handleStatusChange = (customerId, newStatus) => {
-    console.log("Cambiar status de", customerId, "a", newStatus);
-    // TODO: Implementar actualización de status en backend
-    // Por ahora solo lo mostramos en consola
-  };
+  const handleStatusChange = useCallback(
+    async (customerId, newStatus) => {
+      try {
+        await customersAdminApi.update(customerId, { rol: newStatus });
+        refetchCustomers();
+      } catch (error) {
+        console.error("Error cambiando estado de cliente:", error);
+        window.alert(error?.message ?? "No se pudo actualizar el estado del cliente");
+      }
+    },
+    [refetchCustomers],
+  );
+
+  const handleOpenEditDialog = useCallback((customer) => {
+    setEditingCustomer(customer);
+    setEditForm({
+      nombre: customer?.nombre ?? "",
+      email: customer?.email ?? "",
+      telefono: customer?.telefono ?? "",
+      status: customer?.status ?? customer?.rol ?? "activo",
+    });
+  }, []);
+
+  const handleCloseEditDialog = useCallback(() => {
+    setEditingCustomer(null);
+    setEditForm({ nombre: "", email: "", telefono: "", status: "activo" });
+  }, []);
+
+  const handleEditFormChange = useCallback((field) => (event) => {
+    setEditForm((prev) => ({
+      ...prev,
+      [field]: event.target.value,
+    }));
+  }, []);
+
+  const handleUpdateCustomer = useCallback(
+    async (event) => {
+      event.preventDefault();
+      if (!editingCustomer) return;
+      setIsEditingSubmitting(true);
+      try {
+        const payload = {
+          nombre: editForm.nombre.trim(),
+          email: editForm.email.trim(),
+          telefono: editForm.telefono.trim(),
+          status: editForm.status,
+        };
+        const response = await customersAdminApi.update(editingCustomer.id, payload);
+        const updated = response?.data?.data ?? response?.data ?? response;
+        setSelectedCustomer(normalizeCustomerRecord(updated));
+        refetchCustomers();
+        handleCloseEditDialog();
+      } catch (error) {
+        console.error("Error editando cliente:", error);
+        window.alert(error?.message ?? "No se pudo actualizar el cliente");
+      } finally {
+        setIsEditingSubmitting(false);
+      }
+    },
+    [editingCustomer, editForm, refetchCustomers, handleCloseEditDialog, setSelectedCustomer],
+  );
 
   // Definición de columnas
   const columns = useMemo(
@@ -198,9 +284,9 @@ export default function CustomersPage() {
           const customer = row.original;
           return (
             <div className="flex flex-col gap-0.5 px-1 py-2">
-              <span className="text-sm font-medium text-(--text-strong)">
-                {customer.firstName} {customer.lastName}
-              </span>
+                <span className="text-sm font-medium text-(--text-strong)">
+                  {customer.nombre}
+                </span>
               <span className="flex items-center gap-1 text-xs text-(--color-text-muted)">
                 <Mail className="h-3 w-3" />
                 {customer.email}
@@ -326,7 +412,7 @@ export default function CustomersPage() {
                     intent="neutral"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    aria-label={`Acciones para ${customer.firstName}`}
+                    aria-label={`Acciones para ${customer.nombre}`}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
@@ -342,8 +428,7 @@ export default function CustomersPage() {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
-                      console.log("Editar cliente:", customer);
-                      // TODO: Abrir formulario de edición
+                      handleOpenEditDialog(customer);
                     }}
                   >
                     <Edit3 className="mr-2 h-4 w-4" />
@@ -352,9 +437,8 @@ export default function CustomersPage() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onSelect={() => {
-                      if (confirm(`¿Desactivar a ${customer.firstName} ${customer.lastName}?`)) {
-                        console.log("Desactivar cliente:", customer);
-                        // TODO: Implementar desactivación
+                      if (confirm(`¿Desactivar a ${customer.nombre}?`)) {
+                        handleStatusChange(customer.id, "inactive");
                       }
                     }}
                     className="text-(--color-error)"
@@ -453,7 +537,7 @@ export default function CustomersPage() {
             Clientes
           </h1>
           <p className="text-sm text-(--text-weak)">
-            Gestiona la comunidad de usuarios registrados en MOA. {total} clientes en total.
+            Gestiona la comunidad de usuarios registrados en MOA. {totalCustomers} clientes en total.
           </p>
         </div>
       </div>
@@ -462,11 +546,11 @@ export default function CustomersPage() {
       {viewMode === "list" ? (
         <DataTableV2
           columns={columns}
-          data={paginatedData}
-          loading={false}
+          data={filteredCustomers}
+          loading={isLoadingCustomers}
           page={page}
-          pageSize={limit}
-          total={total}
+          pageSize={pageSize}
+          total={totalCustomers}
           onPageChange={setPage}
           toolbar={toolbar}
           condensed={condensed}
@@ -479,7 +563,7 @@ export default function CustomersPage() {
           
           {/* Grid View */}
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {paginatedData.map((customer) => {
+            {filteredCustomers.map((customer) => {
               const orderCount = customerOrders[customer.id] || 0;
               return (
                 <div
@@ -489,7 +573,7 @@ export default function CustomersPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-medium text-(--text-strong)">
-                        {customer.firstName} {customer.lastName}
+                        {customer.nombre}
                       </h3>
                       <p className="mt-0.5 text-xs text-(--text-muted)">{customer.email}</p>
                     </div>
@@ -534,7 +618,7 @@ export default function CustomersPage() {
           </div>
           
           {/* Pagination for grid */}
-          {total > limit && (
+          {totalCustomers > pageSize && (
             <div className="mt-4 flex justify-center">
               <div className="flex items-center gap-2">
                 <Button
@@ -546,12 +630,12 @@ export default function CustomersPage() {
                   Anterior
                 </Button>
                 <span className="text-sm text-(--text-weak)">
-                  Página {page} de {Math.ceil(total / limit)}
+                  Página {page} de {pageCount}
                 </span>
                 <Button
                   appearance="ghost"
                   size="sm"
-                  disabled={page >= Math.ceil(total / limit)}
+                  disabled={page >= pageCount}
                   onClick={() => setPage(page + 1)}
                 >
                   Siguiente
@@ -634,8 +718,73 @@ export default function CustomersPage() {
               <Button appearance="ghost" intent="neutral" onClick={handleCancelNewCustomer} type="button">
                 Cancelar
               </Button>
-              <Button appearance="solid" intent="primary" type="submit">
-                Crear cliente
+              <Button
+                appearance="solid"
+                intent="primary"
+                type="submit"
+                disabled={isCreatingSubmitting}
+              >
+                {isCreatingSubmitting ? "Creando..." : "Crear cliente"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={Boolean(editingCustomer)}
+        onOpenChange={(open) => {
+          if (!open) handleCloseEditDialog();
+        }}
+      >
+        <DialogContent className="space-y-4 max-w-lg">
+          <DialogTitle>Editar cliente</DialogTitle>
+          <form onSubmit={handleUpdateCustomer} className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input
+                label="Nombre"
+                value={editForm.nombre}
+                onChange={handleEditFormChange("nombre")}
+                required
+              />
+              <Input
+                label="Correo"
+                type="email"
+                value={editForm.email}
+                onChange={handleEditFormChange("email")}
+                required
+              />
+            </div>
+            <Input
+              label="Teléfono"
+              type="tel"
+              value={editForm.telefono}
+              onChange={handleEditFormChange("telefono")}
+            />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-(--color-text-muted)">Estado</label>
+              <select
+                value={editForm.status}
+                onChange={handleEditFormChange("status")}
+                className="w-full rounded-lg border border-(--color-border) bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-(--color-primary1) focus:bg-white"
+              >
+                {STATUS_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <DialogFooter className="px-0">
+              <Button appearance="ghost" intent="neutral" onClick={handleCloseEditDialog} type="button">
+                Cancelar
+              </Button>
+              <Button
+                appearance="solid"
+                intent="primary"
+                type="submit"
+                disabled={isEditingSubmitting}
+              >
+                {isEditingSubmitting ? "Guardando..." : "Guardar cambios"}
               </Button>
             </DialogFooter>
           </form>

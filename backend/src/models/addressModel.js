@@ -1,4 +1,4 @@
-import { pool } from "../../database/config.js";
+import pool from "../../database/config.js";
 
 /**
  * Modelo para gestión de direcciones de usuarios

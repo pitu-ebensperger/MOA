@@ -1,13 +1,6 @@
-
--- INSTRUCCIONES:
--- 1. Asegúrate de que DDL.sql ya fue ejecutado
--- 2. Ejecuta este archivo con: psql -d moa -f DDL_DIRECCIONES_PAGOS.sql
--- ============================================================================
-
 \c moa;
 
 -- TABLA DIRECCIONES
--- (usuario puede tener múltiples direcciones, pero solo una predeterminada)
 CREATE TABLE IF NOT EXISTS direcciones (
     direccion_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES usuarios (usuario_id) ON DELETE CASCADE,

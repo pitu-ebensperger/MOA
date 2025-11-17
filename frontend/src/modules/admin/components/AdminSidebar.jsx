@@ -1,17 +1,33 @@
-import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { API_PATHS } from "@/config/api-paths.js";
+
+const navItems = [
+  { label: "Dashboard", to: API_PATHS.admin.dashboard },
+  { label: "Pedidos", to: API_PATHS.admin.orders },
+  { label: "Productos", to: API_PATHS.admin.products },
+  { label: "Categorías", to: API_PATHS.admin.categories },
+  { label: "Clientes", to: API_PATHS.admin.customers },
+  { label: "Configuraciones", to: API_PATHS.admin.settings },
+];
 
 // Sidebar de navegación para dashboard admin
 export default function AdminSidebar() {
+  const location = useLocation();
   return (
     <aside className="bg-moa-neutral-100 w-64 h-full p-6 flex flex-col border-r border-moa-neutral-200">
       <h2 className="text-xl font-bold mb-8 text-moa-primary">Admin Panel</h2>
       <nav className="flex flex-col gap-4">
-        <a href="#" className="text-moa-neutral-700 hover:text-moa-primary font-medium">Dashboard</a>
-        <a href="#" className="text-moa-neutral-700 hover:text-moa-primary font-medium">Usuarios</a>
-        <a href="#" className="text-moa-neutral-700 hover:text-moa-primary font-medium">Productos</a>
-        <a href="#" className="text-moa-neutral-700 hover:text-moa-primary font-medium">Categorías</a>
-        <a href="#" className="text-moa-neutral-700 hover:text-moa-primary font-medium">Órdenes</a>
-        <a href="#" className="text-moa-neutral-700 hover:text-moa-primary font-medium">Ajustes</a>
+        {navItems.map((item) => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className={`text-moa-neutral-700 font-medium transition hover:text-moa-primary ${
+              location.pathname.startsWith(item.to) ? "text-moa-primary" : ""
+            }`}
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
     </aside>
   );

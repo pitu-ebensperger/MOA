@@ -1,5 +1,6 @@
 import pool from "../../database/config.js";
 import { NotFoundError, ValidationError, ForbiddenError } from "../utils/error.utils.js";
+import { createAdminCustomerModel, updateAdminCustomerModel } from "../models/usersModel.js";
 
 /**
  * Controlador para operaciones administrativas
@@ -225,6 +226,95 @@ export class AdminController {
         }
       });
     } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Crear cliente manualmente (Admin)
+   */
+  static async createCustomer(req, res, next) {
+    try {
+      const { nombre, email, telefono, rol, password } = req.body;
+
+      if (!nombre || !email) {
+        return res.status(400).json({
+          success: false,
+          message: "Nombre y correo son obligatorios",
+        });
+      }
+
+      const newCustomer = await createAdminCustomerModel({
+        nombre,
+        email,
+        telefono,
+        rol,
+        password,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Cliente creado correctamente",
+        data: newCustomer,
+      });
+    } catch (error) {
+      console.error("Error creando cliente admin:", error);
+      if (error.code === "23505") {
+        return res.status(409).json({
+          success: false,
+          message: "El correo ya está registrado",
+        });
+      }
+      next(error);
+    }
+  }
+
+  /**
+   * Actualizar cliente desde dashboard (Admin)
+   */
+  static async updateCustomer(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { nombre, email, telefono, status, rol } = req.body;
+
+      if (!nombre && !email && !telefono && !status && !rol) {
+        return res.status(400).json({
+          success: false,
+          message: "Debes proporcionar al menos un campo para actualizar",
+        });
+      }
+
+      const updates = {
+        ...(nombre !== undefined ? { nombre } : {}),
+        ...(email !== undefined ? { email } : {}),
+        ...(telefono !== undefined ? { telefono } : {}),
+      };
+
+      if (status) {
+        updates.rol = status;
+      } else if (rol) {
+        updates.rol = rol;
+      }
+
+      const updatedCustomer = await updateAdminCustomerModel({
+        id,
+        ...updates,
+      });
+
+      if (!updatedCustomer) {
+        return res.status(404).json({
+          success: false,
+          message: "Cliente no encontrado",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Cliente actualizado",
+        data: updatedCustomer,
+      });
+    } catch (error) {
+      console.error("Error actualizando cliente admin:", error);
       next(error);
     }
   }

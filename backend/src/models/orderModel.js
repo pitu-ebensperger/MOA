@@ -223,18 +223,22 @@ const getOrdersByUserId = async (usuarioId, options = {}) => {
 /**
  * Actualizar estado de pago de una orden
  */
-const updatePaymentStatus = async (ordenId, estadoPago, transaccionId = null) => {
+const updatePaymentStatus = async (ordenId, estadoPago, transaccionId = null, metodoPagoUsado = null) => {
   const query = `
     UPDATE ordenes 
     SET 
       estado_pago = $1,
       transaccion_id = $2,
-      fecha_pago = CASE WHEN $1 = 'pagado' THEN now() ELSE fecha_pago END
-    WHERE orden_id = $3
+      metodo_pago_usado = COALESCE($3, metodo_pago_usado),
+      fecha_pago = CASE 
+        WHEN $1 = 'pagado' AND fecha_pago IS NULL THEN now() 
+        ELSE fecha_pago 
+      END
+    WHERE orden_id = $4
     RETURNING *
   `;
 
-  const { rows } = await pool.query(query, [estadoPago, transaccionId, ordenId]);
+  const { rows } = await pool.query(query, [estadoPago, transaccionId, metodoPagoUsado, ordenId]);
   return rows[0];
 };
 

@@ -42,7 +42,9 @@ export const API_PATHS = {
     categoryDetail: (id) => `/admin/categorias/${id}`,
     categoryProductsCount: (id) => `/admin/categorias/${id}/productos/count`,
     orders: "/admin/pedidos",
-    customers: "/admin/clientes",
+    customers: "/admin/usuarios",
+    createCustomer: "/admin/clientes",
+    updateCustomer: (id) => `/admin/clientes/${id}`,
     settings: "/admin/configuraciones",
     uiDemo: "/admin", // TODO: quitar alias temporal cuando UI demo tenga ruta propia
     // Ruta de pruebas de componentes
