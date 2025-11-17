@@ -21,5 +21,8 @@
     "cssstyle": "^2.3.0",
     "jsdom": "^27.1.0",
     "vite-node": "^5.0.0"
+  },
+  "dependencies": {
+    "prop-types": "^15.8.1"
   }
 }
