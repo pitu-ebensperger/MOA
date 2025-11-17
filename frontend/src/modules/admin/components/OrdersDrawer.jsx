@@ -125,24 +125,22 @@ export default function OrdersDrawer({ open, order, onClose }) {
                       {items.length === 0 && (
                         <div className="px-4 py-3 text-sm text-(--color-text-muted)">Esta orden no tiene ítems.</div>
                       )}
-                      {items.map((item, idx) => (
-                        <div key={idx} className="flex items-center gap-3 px-4 py-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-neutral3) text-xs text-(--color-text-muted)">
-                            {item.name?.[0] ?? "?"}
+                      {items.map((item, idx) => {
+                        return (
+                          <div key={idx} className="flex items-center gap-3 px-4 py-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-neutral3) text-xs text-(--color-text-muted)">
+                              {item.name?.[0] ?? "?"}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
+                              <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
+                            </div>
+                            <div className="text-right text-sm font-medium tabular-nums">
+                              <Price value={item.unitPrice ?? 0} />
+                            </div>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
-                            <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
-                          </div>
-                          <div className="text-right text-sm font-medium tabular-nums">
-                            <Price value={item.unitPrice ?? 0} />
-                          </div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
-                          <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
-                        </div>
-                      )}
+                        );
+                      })}
                       <div className="flex items-center justify-between">
                         <span className="text-(--color-text-muted)">Envío</span>
                         <span className="tabular-nums"><Price value={shipping ?? 0} /></span>
@@ -225,30 +223,28 @@ export default function OrdersDrawer({ open, order, onClose }) {
                             <p className="mt-1 text-xs text-(--color-text-muted)">Tracking: <span className="font-mono">{tracking}</span></p>
                           )}
                         </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de envío</p>
-                          <p className="mt-0.5">{safeDate(shippedAt)}</p>
-                        </div>
-                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
-                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de entrega</p>
-                          <p className="mt-0.5">{safeDate(deliveredAt)}</p>
-                        </div>
-                        <div className="rounded-md border border-(--color-border) bg-white px-3 py-2 sm:col-span-2">
-                          <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Dirección de envío {address?.label ? `(${address.label})` : ""}</p>
-                          <p className="mt-0.5 wrap-break-word">{fullAddress ?? "–"}</p>
-                        </div>
                       </div>
                     </div>
-                  </Dl>
-                </div>
-              </div>
-            </section>
+
+                    <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de envío</p>
+                        <p className="mt-0.5">{safeDate(shippedAt)}</p>
+                      </div>
+                      <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Fecha de entrega</p>
+                        <p className="mt-0.5">{safeDate(deliveredAt)}</p>
+                      </div>
+                      <div className="rounded-md border border-(--color-border) bg-white px-3 py-2 sm:col-span-2">
+                        <p className="text-[11px] uppercase tracking-wide text-(--color-text-muted)">Dirección de envío {address?.label ? `(${address.label})` : ""}</p>
+                        <p className="mt-0.5 wrap-break-word">{fullAddress ?? "–"}</p>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              },
+            ]}
+          />
 
             {/* Col derecha: Meta (envío / cliente / pago) */}
             <aside className="md:col-span-4">
@@ -320,7 +316,6 @@ export default function OrdersDrawer({ open, order, onClose }) {
           </div>
         </div>
 
-        </div>
       </DialogContent>
     </Dialog>
   );
