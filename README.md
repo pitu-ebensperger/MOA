@@ -1,5 +1,14 @@
 # Proyecto Marketplace
 
+### Usuarios para frontend testing:
+- **admin@moa.cl** (contraseña: admin o demo o 123456)
+- **demo@moa.cl** (contraseña: demo o admin o 123456) 
+- **cliente@mail.com** (contraseña: demo o admin o 123456)
+
+> Los mocks están habilitados por defecto en `frontend/.env`  
+> Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
+
+
 ## Estructura del repositorio
 
 _Cada carpeta gestiona su propio node_modules locales, instalar dependencias antes de ejecutar_
@@ -41,7 +50,7 @@ Ejecutar: `npm run -w backend dev`
 
 - Dejar en componentes si es un elemento genérico o si aparece en 2+ páginas.
 
----
+-------------------------------------------------------
 
 ## Requerimientos
 
@@ -100,3 +109,13 @@ Ejecutar: `npm run -w backend dev`
      (b) ¿Qué fue lo que más disfrutaste de desarrollar tu proyecto? Ya sea del proceso, del resultado o de aquello que te haya entregado mayor satisfacción.
      (c) ¿De qué manera crees que la metodología de aprendizaje fue un aporte para el resultado obtenido? Para responder, mira hacia atrás y reflexiona sobre tu aprendizaje, la metodología de estudio, el trabajo colaborativo, entre otras cosas.
    - Cada estudiante debe subir su propio video, esta debe subirse en la sesión de la tutoría, específicamente en el documento con nombre “Video Proyecto”.
+
+
+
+-----------------------------------
+
+## Testing (jest)
+
+Correr tests:
+**Frontend** cd frontend && npm test
+**Backend** cd backend && npm test
