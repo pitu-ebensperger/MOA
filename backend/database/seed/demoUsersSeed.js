@@ -23,6 +23,15 @@ const DEMO_USERS = [
   },
   {
     publicId: nanoid(),
+    nombre: "Usuario Demo Alias",
+    email: "demo@moal.cl",
+    telefono: "+56912345679",
+    password: "demo",
+    rol: "cliente",
+    rol_code: "CLIENTE",
+  },
+  {
+    publicId: nanoid(),
     nombre: "Camila López",
     email: "cliente@mail.com",
     telefono: "+56987654321",

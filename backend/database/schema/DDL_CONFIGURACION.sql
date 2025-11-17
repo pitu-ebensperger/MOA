@@ -1,13 +1,3 @@
--- =====================================================
--- TABLA DE CONFIGURACIÓN DE TIENDA
--- =====================================================
--- Autor: Sistema MOA
--- Fecha: 2025-11-17
--- Descripción: Tabla para almacenar configuración editable
---              de la tienda (info, contacto, redes sociales)
--- =====================================================
-
--- Eliminar tabla si existe
 DROP TABLE IF EXISTS configuracion_tienda CASCADE;
 
 -- Crear tabla de configuración
@@ -29,7 +19,7 @@ CREATE TABLE configuracion_tienda (
     
     -- Metadata
     actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    actualizado_por INTEGER REFERENCES usuarios(id_usuario),
+    actualizado_por BIGINT REFERENCES usuarios(usuario_id),
     
     CONSTRAINT uq_single_config CHECK (id = 1) -- Solo permitir un registro
 );

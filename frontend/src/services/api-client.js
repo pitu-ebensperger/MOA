@@ -117,7 +117,7 @@ function tryMockRoute(path, method, data) {
 }
 
 // Petición base (fetch)
-async function request(path, { method = "GET", data, headers = {}, auth = false, timeout = DEFAULT_TIMEOUT } = {}) {
+async function request(path, { method = "GET", data, headers = {}, auth = null, timeout = DEFAULT_TIMEOUT } = {}) {
   // Intentar usar mock primero
   const mockResult = tryMockRoute(path, method, data);
   if (mockResult !== null) {
@@ -145,6 +145,28 @@ async function request(path, { method = "GET", data, headers = {}, auth = false,
       opts.headers["Content-Type"] = "application/json";
       opts.body = typeof data === "string" ? data : JSON.stringify(data);
     }
+  }
+
+  // Auto-detectar auth si no se especifica
+  if (auth === null) {
+    // Rutas que típicamente requieren autenticación
+    const authRequiredPatterns = [
+      /\/admin\//,
+      /\/perfil/,
+      /\/profile/,
+      /\/carrito/,
+      /\/cart/,
+      /\/direcciones/,
+      /\/addresses/,
+      /\/pedidos/,
+      /\/orders/,
+      /\/metodos-pago/,
+      /\/payment/,
+      /\/usuario/,
+      /\/user/,
+    ];
+    
+    auth = authRequiredPatterns.some(pattern => pattern.test(path));
   }
 
   // Authorization si es cliente privado
@@ -191,17 +213,11 @@ async function request(path, { method = "GET", data, headers = {}, auth = false,
   return payload;
 }
 
-// Factories de verbos con/ sin auth
-const verbs = (auth) => ({
-  get:    (path, opts = {})       => request(path, { ...opts, method: "GET",    auth }),
-  post:   (path, data, opts = {}) => request(path, { ...opts, method: "POST",   data, auth }),
-  put:    (path, data, opts = {}) => request(path, { ...opts, method: "PUT",    data, auth }),
-  patch:  (path, data, opts = {}) => request(path, { ...opts, method: "PATCH",  data, auth }),
-  delete: (path, opts = {})       => request(path, { ...opts, method: "DELETE", auth }),
-});
-
-// Cliente listo para usar
+// Cliente API simple con auto-detección de autenticación
 export const apiClient = {
-  public:  verbs(false),
-  private: verbs(true),
+  get:    (path, opts = {})       => request(path, { ...opts, method: "GET" }),
+  post:   (path, data, opts = {}) => request(path, { ...opts, method: "POST", data }),
+  put:    (path, data, opts = {}) => request(path, { ...opts, method: "PUT", data }),
+  patch:  (path, data, opts = {}) => request(path, { ...opts, method: "PATCH", data }),
+  delete: (path, opts = {})       => request(path, { ...opts, method: "DELETE" }),
 };

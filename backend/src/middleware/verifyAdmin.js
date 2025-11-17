@@ -4,7 +4,7 @@ import { getUserByIdModel } from "../models/usersModel.js";
 import "dotenv/config";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const DEMO_USER_EMAIL = "demo@moa.cl";
+const DEMO_USER_EMAILS = new Set(["demo@moa.cl", "demo@moal.cl"]);
 
 /**
  * Middleware para verificar que el usuario es administrador
@@ -61,7 +61,8 @@ export const verifyAdmin = async (req, res, next) => {
     // Verificar que el usuario tiene rol de administrador
     const lowerRoleCode = user.rolCode?.toLowerCase();
     const isAdminUser = lowerRoleCode === 'admin';
-    const isDemoUser = user.email?.toLowerCase() === DEMO_USER_EMAIL;
+    const normalizedEmail = user.email?.toLowerCase();
+    const isDemoUser = normalizedEmail && DEMO_USER_EMAILS.has(normalizedEmail);
 
     if (!isAdminUser && !isDemoUser) {
       throw new ForbiddenError("Acceso denegado. Se requieren privilegios de administrador");
@@ -110,7 +111,9 @@ export const optionalAdminVerify = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await getUserByIdModel(decoded.id);
     
-    if (user && user.rolCode?.toLowerCase() === 'admin') {
+    const normalizedEmail = user?.email?.toLowerCase();
+    const isDemoUser = normalizedEmail && DEMO_USER_EMAILS.has(normalizedEmail);
+    if (user && (user.rolCode?.toLowerCase() === 'admin' || isDemoUser)) {
       req.user = {
         id: user.id,
         usuario_id: user.id,

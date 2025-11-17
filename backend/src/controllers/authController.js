@@ -1,4 +1,4 @@
-import { findUserModel } from "../models/usersModel.js";
+import { findUserModel, getUserByIdModel } from "../models/usersModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -53,22 +53,32 @@ export const loginUser = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
-    const email = req.user;
-    if (!email) {
+    const authPayload = req.user;
+    if (!authPayload) {
       throw new UnauthorizedError("No autorizado");
     }
-    const user = await findUserModel(email);
+
+    // Preferir buscar por ID si viene en el token, sino por email
+    const { id: usuarioId, email } = authPayload;
+    let user = null;
+
+    if (usuarioId) {
+      user = await getUserByIdModel(usuarioId);
+    } else if (email) {
+      user = await findUserModel(email);
+    }
 
     if (!user) {
       throw new NotFoundError("Usuario");
     }
 
     const profile = {
+      id: user.usuario_id ?? user.id ?? null,
       nombre: user.nombre,
       email: user.email,
       telefono: user.telefono,
-      rol: user.rol,
-      role_code: user.role_code,
+      rol: user.rol ?? user.role ?? null,
+      role_code: user.rol_code ?? user.role_code ?? user.rolCode ?? null,
     };
 
     res.status(200).json(profile);

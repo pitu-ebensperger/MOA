@@ -1,15 +1,5 @@
-import { useState } from "react";
-import PropTypes from "prop-types";
-import Card from "@/modules/profile/components/Card.jsx"
-import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx"
-import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/radix/Dialog.jsx";
+import Card from "./Card.jsx";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 
 const normalizeOrderProduct = (product, index) => {
   if (!product || typeof product !== "object") {
@@ -29,37 +19,11 @@ const normalizeOrderProduct = (product, index) => {
   };
 };
 
-const productShape = PropTypes.shape({
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  slug: PropTypes.string,
-  name: PropTypes.string,
-  price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  img: PropTypes.string,
-  imgUrl: PropTypes.string,
-  gallery: PropTypes.arrayOf(PropTypes.string),
-});
-
 const OrderSection = ({ products = [], isLoading = false, error = null }) => {
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  
   const recentPurchases = (Array.isArray(products) ? products : [])
     .slice(0, 4)
     .map(normalizeOrderProduct);
   const hasPurchases = recentPurchases.length > 0;
-
-  // Crear órdenes mock para demostración del timeline
-  const mockOrders = recentPurchases.map((product, idx) => ({
-    id: product.id,
-    order_code: `MOA-2024-${1000 + idx}`,
-    metodo_despacho: idx === 0 ? 'express' : idx === 1 ? 'retiro' : 'standard',
-    creado_en: new Date(Date.now() - (idx * 3 * 24 * 60 * 60 * 1000)).toISOString(),
-    fecha_entrega_estimada: new Date(Date.now() + ((5 - idx * 2) * 24 * 60 * 60 * 1000)).toISOString(),
-    producto: product,
-  }));
-
-  const handleOrderClick = (order) => {
-    setSelectedOrder(order);
-  };
 
   return (
     <>
@@ -73,61 +37,11 @@ const OrderSection = ({ products = [], isLoading = false, error = null }) => {
         </p>
       )}
       {!isLoading && !error && hasPurchases ? (
-        <>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            {mockOrders.map((order) => (
-              <div key={order.id} className="cursor-pointer" onClick={() => handleOrderClick(order)}>
-                <Card data={order.producto} />
-                <div className="mt-2 text-center">
-                  <p className="text-xs text-dark/60">Orden #{order.order_code}</p>
-                  <p className="text-xs font-medium text-primary1">
-                    {order.metodo_despacho === 'express' ? 'Express' : 
-                     order.metodo_despacho === 'retiro' ? 'Retiro' : 
-                     'Standard'}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Dialog para mostrar el timeline de la orden */}
-          <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">
-                  Seguimiento de Pedido
-                </DialogTitle>
-                <DialogDescription>
-                  Orden #{selectedOrder?.order_code}
-                </DialogDescription>
-              </DialogHeader>
-              
-              {selectedOrder && (
-                <div className="mt-4">
-                  <OrderStatusTimeline order={selectedOrder} />
-                  
-                  {/* Detalles del producto */}
-                  <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                    <h4 className="mb-3 font-semibold text-dark">Detalles del pedido</h4>
-                    <div className="flex items-center gap-4">
-                      <img 
-                        src={selectedOrder.producto.img} 
-                        alt={selectedOrder.producto.name}
-                        className="h-20 w-20 rounded-lg object-cover"
-                      />
-                      <div className="flex-1">
-                        <p className="font-medium text-dark">{selectedOrder.producto.name}</p>
-                        <p className="text-sm text-dark/60">
-                          ${selectedOrder.producto.price.toLocaleString('es-CL')}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
-        </>
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+          {recentPurchases.map((product) => (
+            <Card key={product.id} data={product} />
+          ))}
+        </div>
       ) : null}
       {!isLoading && !error && !hasPurchases && (
         <div className="rounded-xl border border-dashed border-primary2/40 bg-white/60 p-8 text-center text-sm text-dark/70">
@@ -139,9 +53,3 @@ const OrderSection = ({ products = [], isLoading = false, error = null }) => {
 };
 
 export default OrderSection;
-
-OrderSection.propTypes = {
-  products: PropTypes.arrayOf(productShape),
-  isLoading: PropTypes.bool,
-  error: PropTypes.string,
-};

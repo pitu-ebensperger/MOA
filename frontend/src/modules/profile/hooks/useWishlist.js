@@ -1,5 +1,5 @@
-import { usePersistentState } from "@/hooks/usePersistentState.js"
-import { useAuth } from "@/context/auth-context.js"
+import { usePersistentState } from "../../../hooks/usePersistentState.js";
+import { useAuth } from "../../../context/auth-context.js";
 import { useEffect } from "react";
 
 const WISHLIST_STORAGE_KEY = "wishlist";

@@ -214,7 +214,7 @@ const mockOrdersApi = {
 const remoteOrdersApi = {
   async list(params = {}) {
     const query = buildQueryString(params);
-    const data = await apiClient.private.get(
+    const data = await apiClient.get(
       `${API_PATHS.admin.orders}${query}`
     );
 
@@ -232,7 +232,7 @@ const remoteOrdersApi = {
   async getById(id) {
     if (!id) throw new Error("order id is required");
 
-    const data = await apiClient.private.get(
+    const data = await apiClient.get(
       `${API_PATHS.admin.orders}/${id}`
     );
 
@@ -242,7 +242,7 @@ const remoteOrdersApi = {
   async cancel(id) {
     if (!id) throw new Error("order id is required");
 
-    const data = await apiClient.private.post(
+    const data = await apiClient.post(
       `${API_PATHS.admin.orders}/${id}/cancel`,
     );
 
@@ -254,7 +254,7 @@ const remoteOrdersApi = {
     const status = updates?.status;
     if (!status) throw new Error("status is required");
 
-    const payload = await apiClient.private.patch(
+    const payload = await apiClient.patch(
       `${API_PATHS.admin.orders}/${id}/estado`,
       { estado_envio: status }
     );

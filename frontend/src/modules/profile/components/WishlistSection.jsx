@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import Card from "@/modules/profile/components/Card.jsx"
-import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
+import Card from "./Card.jsx";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 
 const normalizeWishlistProduct = (product, index) => {
   if (!product || typeof product !== "object") {
