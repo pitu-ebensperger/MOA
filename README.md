@@ -1,19 +1,12 @@
 # Proyecto Marketplace
 
 ### Usuarios para frontend testing:
-
-**🔥 MODO MOCK ACTIVADO** (Sin necesidad de backend)
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
 - **demo@moa.cl** (contraseña: demo o admin o 123456) 
 - **cliente@mail.com** (contraseña: demo o admin o 123456)
 
-> ✅ Los mocks están habilitados por defecto en `frontend/.env`  
-> ✅ Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
-
-**🔧 Debug de autenticación:**
-- Ve a `http://localhost:5173/debug-login` para probar el sistema de login
-- Revisa la consola del navegador para logs detallados 
-
+> Los mocks están habilitados por defecto en `frontend/.env`  
+> Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
 
 
 ## Estructura del repositorio
