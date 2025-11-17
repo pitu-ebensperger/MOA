@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { 
+import {
   getProducts,
-  getProduct: getProductById,
+  getProductById,
   getProductBySlug,
   createProduct,
   updateProduct,
@@ -9,7 +9,7 @@ import {
   updateStock,
   getLowStockProducts,
   getProductStats,
-  searchProducts
+  searchProducts,
 } from "../src/controllers/productsController.js";
 import { verifyToken } from "../src/middleware/tokenMiddleware.js";
 import { verifyAdmin } from "../src/middleware/verifyAdmin.js";
@@ -42,10 +42,20 @@ router.put("/admin/productos/:id", verifyToken, verifyAdmin, updateProduct);
 router.delete("/admin/productos/:id", verifyToken, verifyAdmin, deleteProduct);
 
 // Actualizar stock de producto
-router.patch("/admin/productos/:id/stock", verifyToken, verifyAdmin, updateStock);
+router.patch(
+  "/admin/productos/:id/stock",
+  verifyToken,
+  verifyAdmin,
+  updateStock
+);
 
 // Obtener productos con stock bajo
-router.get("/admin/productos/stock/low", verifyToken, verifyAdmin, getLowStockProducts);
+router.get(
+  "/admin/productos/stock/low",
+  verifyToken,
+  verifyAdmin,
+  getLowStockProducts
+);
 
 // Obtener estadísticas de productos
 router.get("/admin/productos/stats", verifyToken, verifyAdmin, getProductStats);

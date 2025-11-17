@@ -1,4 +1,4 @@
-import { pool } from "../../database/config.js";
+import pool from "../../database/config.js";
 
 /**
  * Modelo para gestión de direcciones de usuarios
@@ -65,16 +65,16 @@ export const addressModel = {
       ciudad,
       region,
       codigo_postal,
-      pais = 'Chile',
+      pais = "Chile",
       telefono_contacto,
       instrucciones_entrega,
-      es_predeterminada = false
+      es_predeterminada = false,
     } = addressData;
 
     // Si es predeterminada, quitar flag de otras direcciones
     if (es_predeterminada) {
       await pool.query(
-        'UPDATE direcciones SET es_predeterminada = FALSE WHERE usuario_id = $1',
+        "UPDATE direcciones SET es_predeterminada = FALSE WHERE usuario_id = $1",
         [userId]
       );
     }
@@ -89,9 +89,19 @@ export const addressModel = {
     `;
 
     const result = await pool.query(query, [
-      userId, etiqueta, calle, numero, depto_oficina, comuna, ciudad, 
-      region, codigo_postal, pais, telefono_contacto, instrucciones_entrega, 
-      es_predeterminada
+      userId,
+      etiqueta,
+      calle,
+      numero,
+      depto_oficina,
+      comuna,
+      ciudad,
+      region,
+      codigo_postal,
+      pais,
+      telefono_contacto,
+      instrucciones_entrega,
+      es_predeterminada,
     ]);
 
     return result.rows[0];
@@ -108,7 +118,7 @@ export const addressModel = {
     // Si es predeterminada, quitar flag de otras direcciones
     if (addressData.es_predeterminada) {
       await pool.query(
-        'UPDATE direcciones SET es_predeterminada = FALSE WHERE usuario_id = $1 AND direccion_id != $2',
+        "UPDATE direcciones SET es_predeterminada = FALSE WHERE usuario_id = $1 AND direccion_id != $2",
         [userId, addressId]
       );
     }
@@ -119,12 +129,21 @@ export const addressModel = {
     let paramIndex = 3;
 
     const allowedFields = [
-      'etiqueta', 'calle', 'numero', 'depto_oficina', 'comuna', 'ciudad',
-      'region', 'codigo_postal', 'pais', 'telefono_contacto', 
-      'instrucciones_entrega', 'es_predeterminada'
+      "etiqueta",
+      "calle",
+      "numero",
+      "depto_oficina",
+      "comuna",
+      "ciudad",
+      "region",
+      "codigo_postal",
+      "pais",
+      "telefono_contacto",
+      "instrucciones_entrega",
+      "es_predeterminada",
     ];
 
-    allowedFields.forEach(field => {
+    allowedFields.forEach((field) => {
       if (addressData.hasOwnProperty(field)) {
         fields.push(`${field} = $${paramIndex}`);
         values.push(addressData[field]);
@@ -139,7 +158,7 @@ export const addressModel = {
 
     const query = `
       UPDATE direcciones 
-      SET ${fields.join(', ')}, actualizado_en = now()
+      SET ${fields.join(", ")}, actualizado_en = now()
       WHERE direccion_id = $1 AND usuario_id = $2
       RETURNING *
     `;
@@ -157,7 +176,7 @@ export const addressModel = {
   async setAsDefault(addressId, userId) {
     // Quitar flag de todas
     await pool.query(
-      'UPDATE direcciones SET es_predeterminada = FALSE WHERE usuario_id = $1',
+      "UPDATE direcciones SET es_predeterminada = FALSE WHERE usuario_id = $1",
       [userId]
     );
 
@@ -196,8 +215,9 @@ export const addressModel = {
    * @returns {Promise<number>} Cantidad de direcciones
    */
   async countByUserId(userId) {
-    const query = 'SELECT COUNT(*)::int as count FROM direcciones WHERE usuario_id = $1';
+    const query =
+      "SELECT COUNT(*)::int as count FROM direcciones WHERE usuario_id = $1";
     const result = await pool.query(query, [userId]);
     return result.rows[0].count;
-  }
+  },
 };

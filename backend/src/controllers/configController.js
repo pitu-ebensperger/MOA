@@ -1,5 +1,5 @@
-import configModel from '../models/configModel.js';
-import { handleError } from '../utils/error.utils.js';
+import configModel from "../models/configModel.js";
+import { handleError } from "../utils/error.utils.js";
 
 /**
  * Controlador para gestionar la configuración de la tienda
@@ -13,14 +13,14 @@ const configController = {
   async getConfig(req, res) {
     try {
       const config = await configModel.getConfig();
-      
+
       res.status(200).json({
         success: true,
-        data: config
+        data: config,
       });
     } catch (error) {
-      console.error('Error en getConfig:', error);
-      handleError(res, error, 'Error al obtener la configuración');
+      console.error("Error en getConfig:", error);
+      handleError(res, error, "Error al obtener la configuración");
     }
   },
 
@@ -32,11 +32,11 @@ const configController = {
   async updateConfig(req, res) {
     try {
       const userId = req.user?.id_usuario;
-      
+
       if (!userId) {
         return res.status(401).json({
           success: false,
-          message: 'Usuario no autenticado'
+          message: "Usuario no autenticado",
         });
       }
 
@@ -44,7 +44,7 @@ const configController = {
       if (!req.user?.es_admin) {
         return res.status(403).json({
           success: false,
-          message: 'No tienes permisos para realizar esta acción'
+          message: "No tienes permisos para realizar esta acción",
         });
       }
 
@@ -54,7 +54,7 @@ const configController = {
       if (!configData || Object.keys(configData).length === 0) {
         return res.status(400).json({
           success: false,
-          message: 'Debe proporcionar al menos un campo para actualizar'
+          message: "Debe proporcionar al menos un campo para actualizar",
         });
       }
 
@@ -64,13 +64,13 @@ const configController = {
         if (!emailRegex.test(configData.email)) {
           return res.status(400).json({
             success: false,
-            message: 'Formato de email inválido'
+            message: "Formato de email inválido",
           });
         }
       }
 
       // Validar URLs si se proporcionan
-      const urlFields = ['instagram_url', 'facebook_url', 'twitter_url'];
+      const urlFields = ["instagram_url", "facebook_url", "twitter_url"];
       for (const field of urlFields) {
         if (configData[field]) {
           try {
@@ -78,22 +78,22 @@ const configController = {
           } catch {
             return res.status(400).json({
               success: false,
-              message: `URL inválida en el campo ${field}`
+              message: `URL inválida en el campo ${field}`,
             });
           }
         }
       }
 
       const updatedConfig = await configModel.updateConfig(configData, userId);
-      
+
       res.status(200).json({
         success: true,
-        message: 'Configuración actualizada correctamente',
-        data: updatedConfig
+        message: "Configuración actualizada correctamente",
+        data: updatedConfig,
       });
     } catch (error) {
-      console.error('Error en updateConfig:', error);
-      handleError(res, error, 'Error al actualizar la configuración');
+      console.error("Error en updateConfig:", error);
+      handleError(res, error, "Error al actualizar la configuración");
     }
   },
 
@@ -108,22 +108,22 @@ const configController = {
       if (!req.user?.es_admin) {
         return res.status(403).json({
           success: false,
-          message: 'No tienes permisos para realizar esta acción'
+          message: "No tienes permisos para realizar esta acción",
         });
       }
 
       const config = await configModel.initializeConfig();
-      
+
       res.status(201).json({
         success: true,
-        message: 'Configuración inicializada correctamente',
-        data: config
+        message: "Configuración inicializada correctamente",
+        data: config,
       });
     } catch (error) {
-      console.error('Error en initializeConfig:', error);
-      handleError(res, error, 'Error al inicializar la configuración');
+      console.error("Error en initializeConfig:", error);
+      handleError(res, error, "Error al inicializar la configuración");
     }
-  }
+  },
 };
 
 export default configController;

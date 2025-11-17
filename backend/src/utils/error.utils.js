@@ -7,7 +7,11 @@ const PG_ERROR_CODES = {
 const timestamp = () => new Date().toISOString();
 
 export class AppError extends Error {
-  constructor(message = "Error interno del servidor", statusCode = 500, { isOperational = true, errors = null } = {}) {
+  constructor(
+    message = "Error interno del servidor",
+    statusCode = 500,
+    { isOperational = true, errors = null } = {}
+  ) {
     super(message);
     this.name = this.constructor.name;
     this.statusCode = statusCode;
@@ -48,7 +52,8 @@ export class ConflictError extends AppError {
   }
 }
 
-export const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+export const asyncHandler = (fn) => (req, res, next) =>
+  Promise.resolve(fn(req, res, next)).catch(next);
 
 const buildErrorResponse = ({ message, errors }) => ({
   success: false,
@@ -62,21 +67,21 @@ const handlePgError = (err, res) => {
     return res.status(409).json(
       buildErrorResponse({
         message: "Ya existe un registro con esos datos",
-      }),
+      })
     );
   }
   if (err.code === PG_ERROR_CODES.FOREIGN_KEY_VIOLATION) {
     return res.status(409).json(
       buildErrorResponse({
         message: "No se puede completar la operación por referencias en uso",
-      }),
+      })
     );
   }
   if (err.code === PG_ERROR_CODES.INVALID_TEXT_REPRESENTATION) {
     return res.status(400).json(
       buildErrorResponse({
         message: "Formato de dato inválido en la solicitud",
-      }),
+      })
     );
   }
   return null;
@@ -87,14 +92,14 @@ const handleJwtError = (err, res) => {
     return res.status(401).json(
       buildErrorResponse({
         message: "Token expirado",
-      }),
+      })
     );
   }
   if (err.name === "JsonWebTokenError" || err.name === "NotBeforeError") {
     return res.status(401).json(
       buildErrorResponse({
         message: "Token inválido",
-      }),
+      })
     );
   }
   return null;
@@ -105,7 +110,8 @@ export const errorHandler = (err, req, res, next) => {
     return next(err);
   }
 
-  const error = err instanceof Error ? err : new Error(String(err ?? "Error desconocido"));
+  const error =
+    err instanceof Error ? err : new Error(String(err ?? "Error desconocido"));
 
   // eslint-disable-next-line no-console
   console.error(`[${timestamp()}] ${req.method} ${req.originalUrl}`, error);
@@ -115,7 +121,7 @@ export const errorHandler = (err, req, res, next) => {
       buildErrorResponse({
         message: error.message,
         errors: error.errors,
-      }),
+      })
     );
   }
 
@@ -123,7 +129,7 @@ export const errorHandler = (err, req, res, next) => {
     return res.status(400).json(
       buildErrorResponse({
         message: "JSON inválido en el cuerpo de la solicitud",
-      }),
+      })
     );
   }
 
@@ -136,6 +142,26 @@ export const errorHandler = (err, req, res, next) => {
   return res.status(500).json(
     buildErrorResponse({
       message: "Error interno del servidor",
-    }),
+    })
   );
+};
+
+export const handleError = (res, error, message = "Error en la operación") => {
+  console.error(error);
+
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+      errors: error.errors || null,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message,
+    detail: error.message,
+    timestamp: new Date().toISOString(),
+  });
 };
