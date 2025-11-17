@@ -22,13 +22,18 @@ export const loginUser = async (req, res, next) => {
     if (!JWT_SECRET) {
       throw new AppError("JWT secret no configurado", 500);
     }
-    const token = jwt.sign({ email }, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
+    const token = jwt.sign(
+      { id: user.usuario_id, email: user.email },
+      JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      }
+    );
 
     return res.status(200).json({
       token,
       user: {
+        id: user.usuario_id,
         nombre: user.nombre,
         email: user.email,
         telefono: user.telefono,
@@ -52,12 +57,16 @@ export const getUser = async (req, res, next) => {
     if (!user) {
       throw new NotFoundError("Usuario");
     }
-    const filteredUser = {
+
+    const profile = {
       nombre: user.nombre,
       email: user.email,
       telefono: user.telefono,
+      rol: user.rol,
+      role_code: user.role_code,
     };
-    res.status(200).json([filteredUser]);
+
+    res.status(200).json(profile);
   } catch (error) {
     next(error);
   }

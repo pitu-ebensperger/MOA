@@ -25,17 +25,27 @@ CREATE TABLE categorias (
 
 CREATE TABLE productos (
     producto_id BIGSERIAL PRIMARY KEY,
-    public_id TEXT UNIQUE NOT NULL, --> creada con nanoid? o definir sistema propio?
+    public_id TEXT UNIQUE NOT NULL,
     categoria_id INT REFERENCES categorias (categoria_id),
+    collection_id INT,
     nombre TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
     sku TEXT UNIQUE NOT NULL,
     precio_cents INT NOT NULL,
+    compare_at_price_cents INT,
     stock INT DEFAULT 0,
+    status TEXT DEFAULT 'activo',
     descripcion TEXT,
     descripcion_corta TEXT,
     img_url TEXT,
     gallery TEXT [],
+    badge TEXT [],
+    tags TEXT [],
+    color TEXT,
+    material TEXT,
+    dimensions JSONB,
+    weight JSONB,
+    specs JSONB,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
