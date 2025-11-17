@@ -1,6 +1,10 @@
 import { productsModel } from "../models/productsModel.js";
 import { categoriesModel } from "../models/categoriesModel.js";
-import { AppError, UnauthorizedError, ForbiddenError } from "../utils/error.utils.js";
+import {
+  AppError,
+  UnauthorizedError,
+  ForbiddenError,
+} from "../utils/error.utils.js";
 
 /**
  * Controlador para gestión de productos
@@ -21,20 +25,16 @@ export const productsController = {
         maxPrice,
         onlyLowStock,
         sortBy,
-        sortOrder
+        sortOrder,
       } = req.query;
 
-      // Validar parámetros
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
-      if (pageNum < 1) {
-        throw new AppError('El número de página debe ser mayor a 0', 400);
-      }
-
-      if (limitNum < 1 || limitNum > 100) {
-        throw new AppError('El límite debe estar entre 1 y 100', 400);
-      }
+      if (pageNum < 1)
+        throw new AppError("El número de página debe ser mayor a 0", 400);
+      if (limitNum < 1 || limitNum > 100)
+        throw new AppError("El límite debe estar entre 1 y 100", 400);
 
       const options = {
         page: pageNum,
@@ -44,16 +44,31 @@ export const productsController = {
         status,
         minPrice: minPrice ? parseInt(minPrice) : null,
         maxPrice: maxPrice ? parseInt(maxPrice) : null,
-        onlyLowStock: onlyLowStock === 'true',
+        onlyLowStock: onlyLowStock === "true",
         sortBy,
-        sortOrder
+        sortOrder,
       };
 
       const result = await productsModel.getAll(options);
 
+      // 🔥 NORMALIZACIÓN PARA EL FRONTEND
+      const formattedItems = result.items.map((p) => ({
+        id: p.producto_id ?? p.id,
+        public_id: p.public_id ?? p.publicId ?? p.publicId,
+        nombre: p.nombre ?? p.name,
+        slug: p.slug,
+        sku: p.sku,
+        precio_cents: p.precio_cents ?? p.price_cents,
+        price: (p.precio_cents ?? p.price_cents) / 100,
+        stock: p.stock,
+        img_url: p.img_url ?? p.image ?? null,
+        categoria_id: p.categoria_id ?? p.categoryId,
+        categoria_nombre: p.category_name ?? p.categoryName,
+      }));
+
       res.json({
         success: true,
-        data: result.items,
+        data: formattedItems,
         pagination: result.pagination,
         filters: {
           search,
@@ -61,8 +76,8 @@ export const productsController = {
           status,
           minPrice,
           maxPrice,
-          onlyLowStock: onlyLowStock === 'true'
-        }
+          onlyLowStock: onlyLowStock === "true",
+        },
       });
     } catch (error) {
       next(error);
@@ -88,12 +103,12 @@ export const productsController = {
       }
 
       if (!product) {
-        throw new AppError('Producto no encontrado', 404);
+        throw new AppError("Producto no encontrado", 404);
       }
 
       res.json({
         success: true,
-        data: product
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -110,17 +125,17 @@ export const productsController = {
       const product = await productsModel.getBySlug(slug);
 
       if (!product) {
-        throw new AppError('Producto no encontrado', 404);
+        throw new AppError("Producto no encontrado", 404);
       }
 
       // Solo mostrar productos activos en la vista pública
-      if (product.status !== 'activo' && !req.user?.isAdmin) {
-        throw new AppError('Producto no disponible', 404);
+      if (product.status !== "activo" && !req.user?.isAdmin) {
+        throw new AppError("Producto no disponible", 404);
       }
 
       res.json({
         success: true,
-        data: product
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -151,13 +166,19 @@ export const productsController = {
         material,
         dimensions,
         weight,
-        specs
+        specs,
       } = req.body;
 
       // Validaciones requeridas
-      if (!categoria_id || !nombre || !slug || !sku || precio_cents === undefined) {
+      if (
+        !categoria_id ||
+        !nombre ||
+        !slug ||
+        !sku ||
+        precio_cents === undefined
+      ) {
         throw new AppError(
-          'Campos requeridos: categoria_id, nombre, slug, sku, precio_cents',
+          "Campos requeridos: categoria_id, nombre, slug, sku, precio_cents",
           400
         );
       }
@@ -165,35 +186,38 @@ export const productsController = {
       // Verificar que la categoría existe
       const category = await categoriesModel.getById(categoria_id);
       if (!category) {
-        throw new AppError('Categoría no encontrada', 400);
+        throw new AppError("Categoría no encontrada", 400);
       }
 
       // Verificar que el slug no existe
       const slugExists = await productsModel.slugExists(slug);
       if (slugExists) {
-        throw new AppError('Ya existe un producto con ese slug', 400);
+        throw new AppError("Ya existe un producto con ese slug", 400);
       }
 
       // Verificar que el SKU no existe
       const skuExists = await productsModel.skuExists(sku);
       if (skuExists) {
-        throw new AppError('Ya existe un producto con ese SKU', 400);
+        throw new AppError("Ya existe un producto con ese SKU", 400);
       }
 
       // Validar precio
       if (precio_cents < 0) {
-        throw new AppError('El precio no puede ser negativo', 400);
+        throw new AppError("El precio no puede ser negativo", 400);
       }
 
       // Validar stock
       if (stock !== undefined && stock < 0) {
-        throw new AppError('El stock no puede ser negativo', 400);
+        throw new AppError("El stock no puede ser negativo", 400);
       }
 
       // Validar status
-      const validStatuses = ['activo', 'inactivo', 'descontinuado'];
+      const validStatuses = ["activo", "inactivo", "descontinuado"];
       if (status && !validStatuses.includes(status)) {
-        throw new AppError(`Status debe ser uno de: ${validStatuses.join(', ')}`, 400);
+        throw new AppError(
+          `Status debe ser uno de: ${validStatuses.join(", ")}`,
+          400
+        );
       }
 
       const productData = {
@@ -204,7 +228,7 @@ export const productsController = {
         precio_cents,
         compare_at_price_cents,
         stock,
-        status: status || 'activo',
+        status: status || "activo",
         descripcion: descripcion?.trim() || null,
         descripcion_corta: descripcion_corta?.trim() || null,
         img_url: img_url?.trim() || null,
@@ -215,15 +239,15 @@ export const productsController = {
         material: material?.trim() || null,
         dimensions: dimensions || null,
         weight: weight || null,
-        specs: specs || null
+        specs: specs || null,
       };
 
       const product = await productsModel.create(productData);
 
       res.status(201).json({
         success: true,
-        message: 'Producto creado exitosamente',
-        data: product
+        message: "Producto creado exitosamente",
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -239,13 +263,13 @@ export const productsController = {
       const productId = parseInt(id);
 
       if (isNaN(productId)) {
-        throw new AppError('ID de producto inválido', 400);
+        throw new AppError("ID de producto inválido", 400);
       }
 
       // Verificar que el producto existe
       const existingProduct = await productsModel.getById(productId);
       if (!existingProduct) {
-        throw new AppError('Producto no encontrado', 404);
+        throw new AppError("Producto no encontrado", 404);
       }
 
       const {
@@ -267,43 +291,46 @@ export const productsController = {
         material,
         dimensions,
         weight,
-        specs
+        specs,
       } = req.body;
 
       // Validaciones si se proporcionan
       if (categoria_id !== undefined) {
         const category = await categoriesModel.getById(categoria_id);
         if (!category) {
-          throw new AppError('Categoría no encontrada', 400);
+          throw new AppError("Categoría no encontrada", 400);
         }
       }
 
       if (slug !== undefined) {
         const slugExists = await productsModel.slugExists(slug, productId);
         if (slugExists) {
-          throw new AppError('Ya existe un producto con ese slug', 400);
+          throw new AppError("Ya existe un producto con ese slug", 400);
         }
       }
 
       if (sku !== undefined) {
         const skuExists = await productsModel.skuExists(sku, productId);
         if (skuExists) {
-          throw new AppError('Ya existe un producto con ese SKU', 400);
+          throw new AppError("Ya existe un producto con ese SKU", 400);
         }
       }
 
       if (precio_cents !== undefined && precio_cents < 0) {
-        throw new AppError('El precio no puede ser negativo', 400);
+        throw new AppError("El precio no puede ser negativo", 400);
       }
 
       if (stock !== undefined && stock < 0) {
-        throw new AppError('El stock no puede ser negativo', 400);
+        throw new AppError("El stock no puede ser negativo", 400);
       }
 
       if (status !== undefined) {
-        const validStatuses = ['activo', 'inactivo', 'descontinuado'];
+        const validStatuses = ["activo", "inactivo", "descontinuado"];
         if (!validStatuses.includes(status)) {
-          throw new AppError(`Status debe ser uno de: ${validStatuses.join(', ')}`, 400);
+          throw new AppError(
+            `Status debe ser uno de: ${validStatuses.join(", ")}`,
+            400
+          );
         }
       }
 
@@ -315,17 +342,23 @@ export const productsController = {
       if (slug !== undefined) updateData.slug = slug.toLowerCase().trim();
       if (sku !== undefined) updateData.sku = sku.toUpperCase().trim();
       if (precio_cents !== undefined) updateData.precio_cents = precio_cents;
-      if (compare_at_price_cents !== undefined) updateData.compare_at_price_cents = compare_at_price_cents;
+      if (compare_at_price_cents !== undefined)
+        updateData.compare_at_price_cents = compare_at_price_cents;
       if (stock !== undefined) updateData.stock = stock;
       if (status !== undefined) updateData.status = status;
-      if (descripcion !== undefined) updateData.descripcion = descripcion?.trim() || null;
-      if (descripcion_corta !== undefined) updateData.descripcion_corta = descripcion_corta?.trim() || null;
+      if (descripcion !== undefined)
+        updateData.descripcion = descripcion?.trim() || null;
+      if (descripcion_corta !== undefined)
+        updateData.descripcion_corta = descripcion_corta?.trim() || null;
       if (img_url !== undefined) updateData.img_url = img_url?.trim() || null;
-      if (gallery !== undefined) updateData.gallery = Array.isArray(gallery) ? gallery : [];
-      if (badge !== undefined) updateData.badge = Array.isArray(badge) ? badge : [];
+      if (gallery !== undefined)
+        updateData.gallery = Array.isArray(gallery) ? gallery : [];
+      if (badge !== undefined)
+        updateData.badge = Array.isArray(badge) ? badge : [];
       if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [];
       if (color !== undefined) updateData.color = color?.trim() || null;
-      if (material !== undefined) updateData.material = material?.trim() || null;
+      if (material !== undefined)
+        updateData.material = material?.trim() || null;
       if (dimensions !== undefined) updateData.dimensions = dimensions || null;
       if (weight !== undefined) updateData.weight = weight || null;
       if (specs !== undefined) updateData.specs = specs || null;
@@ -334,8 +367,8 @@ export const productsController = {
 
       res.json({
         success: true,
-        message: 'Producto actualizado exitosamente',
-        data: product
+        message: "Producto actualizado exitosamente",
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -352,25 +385,25 @@ export const productsController = {
       const productId = parseInt(id);
 
       if (isNaN(productId)) {
-        throw new AppError('ID de producto inválido', 400);
+        throw new AppError("ID de producto inválido", 400);
       }
 
       // Verificar que el producto existe
       const existingProduct = await productsModel.getById(productId);
       if (!existingProduct) {
-        throw new AppError('Producto no encontrado', 404);
+        throw new AppError("Producto no encontrado", 404);
       }
 
       let success = false;
-      let message = '';
+      let message = "";
 
-      if (permanent === 'true') {
+      if (permanent === "true") {
         // Eliminación permanente
         try {
           success = await productsModel.hardDelete(productId);
-          message = 'Producto eliminado permanentemente';
+          message = "Producto eliminado permanentemente";
         } catch (error) {
-          if (error.message.includes('orden(es)')) {
+          if (error.message.includes("orden(es)")) {
             throw new AppError(error.message, 400);
           }
           throw error;
@@ -378,16 +411,16 @@ export const productsController = {
       } else {
         // Eliminación suave (cambiar status a inactivo)
         success = await productsModel.softDelete(productId);
-        message = 'Producto marcado como inactivo';
+        message = "Producto marcado como inactivo";
       }
 
       if (!success) {
-        throw new AppError('Error al eliminar el producto', 500);
+        throw new AppError("Error al eliminar el producto", 500);
       }
 
       res.json({
         success: true,
-        message
+        message,
       });
     } catch (error) {
       next(error);
@@ -400,49 +433,58 @@ export const productsController = {
   async updateStock(req, res, next) {
     try {
       const { id } = req.params;
-      const { quantity, operation = 'set' } = req.body;
+      const { quantity, operation = "set" } = req.body;
       const productId = parseInt(id);
 
       if (isNaN(productId)) {
-        throw new AppError('ID de producto inválido', 400);
+        throw new AppError("ID de producto inválido", 400);
       }
 
       if (quantity === undefined || isNaN(quantity)) {
-        throw new AppError('Cantidad requerida y debe ser numérica', 400);
+        throw new AppError("Cantidad requerida y debe ser numérica", 400);
       }
 
       // Verificar que el producto existe
       const existingProduct = await productsModel.getById(productId);
       if (!existingProduct) {
-        throw new AppError('Producto no encontrado', 404);
+        throw new AppError("Producto no encontrado", 404);
       }
 
       let product = null;
 
-      if (operation === 'set') {
+      if (operation === "set") {
         // Establecer stock específico
         if (quantity < 0) {
-          throw new AppError('El stock no puede ser negativo', 400);
+          throw new AppError("El stock no puede ser negativo", 400);
         }
         product = await productsModel.update(productId, { stock: quantity });
-      } else if (operation === 'add') {
+      } else if (operation === "add") {
         // Agregar stock
-        product = await productsModel.updateStock(productId, Math.abs(quantity));
-      } else if (operation === 'subtract') {
+        product = await productsModel.updateStock(
+          productId,
+          Math.abs(quantity)
+        );
+      } else if (operation === "subtract") {
         // Restar stock
-        product = await productsModel.updateStock(productId, -Math.abs(quantity));
+        product = await productsModel.updateStock(
+          productId,
+          -Math.abs(quantity)
+        );
       } else {
-        throw new AppError('Operación debe ser: set, add, o subtract', 400);
+        throw new AppError("Operación debe ser: set, add, o subtract", 400);
       }
 
       if (!product) {
-        throw new AppError('No se pudo actualizar el stock. Verifique que haya stock suficiente.', 400);
+        throw new AppError(
+          "No se pudo actualizar el stock. Verifique que haya stock suficiente.",
+          400
+        );
       }
 
       res.json({
         success: true,
-        message: 'Stock actualizado exitosamente',
-        data: product
+        message: "Stock actualizado exitosamente",
+        data: product,
       });
     } catch (error) {
       next(error);
@@ -458,7 +500,10 @@ export const productsController = {
       const thresholdNum = parseInt(threshold);
 
       if (isNaN(thresholdNum) || thresholdNum < 0) {
-        throw new AppError('El umbral debe ser un número mayor o igual a 0', 400);
+        throw new AppError(
+          "El umbral debe ser un número mayor o igual a 0",
+          400
+        );
       }
 
       const products = await productsModel.getLowStockProducts(thresholdNum);
@@ -466,7 +511,7 @@ export const productsController = {
       res.json({
         success: true,
         data: products,
-        threshold: thresholdNum
+        threshold: thresholdNum,
       });
     } catch (error) {
       next(error);
@@ -489,8 +534,8 @@ export const productsController = {
           lowStock: stats.low_stock,
           outOfStock: stats.out_of_stock,
           averagePriceCents: stats.avg_price_cents,
-          totalStock: stats.total_stock
-        }
+          totalStock: stats.total_stock,
+        },
       });
     } catch (error) {
       next(error);
@@ -509,12 +554,12 @@ export const productsController = {
         maxPrice,
         page = 1,
         limit = 20,
-        sortBy = 'nombre',
-        sortOrder = 'ASC'
+        sortBy = "nombre",
+        sortOrder = "ASC",
       } = req.query;
 
       if (!search || search.trim().length < 2) {
-        throw new AppError('La búsqueda debe tener al menos 2 caracteres', 400);
+        throw new AppError("La búsqueda debe tener al menos 2 caracteres", 400);
       }
 
       const options = {
@@ -524,9 +569,9 @@ export const productsController = {
         categoryId: category ? parseInt(category) : null,
         minPrice: minPrice ? parseInt(minPrice) : null,
         maxPrice: maxPrice ? parseInt(maxPrice) : null,
-        status: 'activo', // Solo productos activos en búsqueda pública
+        status: "activo", // Solo productos activos en búsqueda pública
         sortBy,
-        sortOrder
+        sortOrder,
       };
 
       const result = await productsModel.getAll(options);
@@ -535,16 +580,17 @@ export const productsController = {
         success: true,
         data: result.items,
         pagination: result.pagination,
-        query: search
+        query: search,
       });
     } catch (error) {
       next(error);
     }
-  }
+  },
 };
 
 // Mantener compatibilidad con las exportaciones existentes
-export const { getProducts, getProduct: getProductById } = productsController;
+export const getProducts = productsController.getProducts;
+export const getProductById = productsController.getProduct;
 
 // Funciones individuales para compatibilidad
 export const getProductBySlug = productsController.getProductBySlug;

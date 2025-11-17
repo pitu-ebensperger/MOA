@@ -31,6 +31,9 @@ export default function ProductsPage() {
   const { products: fetchedProducts, isLoading, error } = useProducts(productQueryFilters);
   const { categories: fetchedCategories } = useCategories();
 
+console.log("🔵 RAW products from backend:", fetchedProducts);
+console.log("🟢 Search query:", searchQuery);
+
   const { addToCart } = useCart();
 
   const {
@@ -61,6 +64,7 @@ export default function ProductsPage() {
   });
 
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
 
   useEffect(() => {
     setCurrentPage(1);

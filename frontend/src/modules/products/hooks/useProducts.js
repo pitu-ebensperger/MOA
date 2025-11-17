@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { productsApi } from "@/services/products.api.js"
+import { productsApi } from "@/services/products.api.js";
 
 const PRODUCTS_QUERY_KEY = ["products"];
 
@@ -19,8 +19,8 @@ export const useProducts = (filters) => {
   });
 
   return {
-    products: query.data?.items ?? [],
-    total: query.data?.total ?? query.data?.items?.length ?? 0,
+    products: query.data?.data ?? [],
+    total: query.data?.data?.length ?? 0,
     isLoading: query.isLoading,
     error: query.error ?? null,
     refetch: query.refetch,

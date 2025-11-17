@@ -1,4 +1,4 @@
-import { apiClient } from './api-client.js';
+import { apiClient } from "./api-client.js";
 
 /**
  * Servicio para gestionar la configuración de la tienda
@@ -10,10 +10,12 @@ import { apiClient } from './api-client.js';
  */
 export const getStoreConfig = async () => {
   try {
-    const response = await apiClient.get('/api/config');
+    const response = await apiClient.public.get("/api/config");
+    console.log("CONFIG RESPONSE:", response);
     return response;
   } catch (error) {
-    console.error('Error al obtener configuración:', error);
+    console.error("BACKEND ERROR RAW:", error);
+    console.error("BACKEND ERROR DATA:", error.data);
     throw error;
   }
 };
@@ -25,10 +27,10 @@ export const getStoreConfig = async () => {
  */
 export const updateStoreConfig = async (configData) => {
   try {
-    const response = await apiClient.put('/api/config', configData);
-    return response.data;
+    const response = await apiClient.private.put("/api/config", configData);
+    return response;
   } catch (error) {
-    console.error('Error al actualizar configuración:', error);
+    console.error("Error al actualizar configuración:", error);
     throw error;
   }
 };
@@ -39,10 +41,10 @@ export const updateStoreConfig = async (configData) => {
  */
 export const initializeStoreConfig = async () => {
   try {
-    const response = await apiClient.post('/api/config/init');
-    return response.data;
+    const response = await apiClient.private.post("/api/config/init");
+    return response;
   } catch (error) {
-    console.error('Error al inicializar configuración:', error);
+    console.error("Error al inicializar configuración:", error);
     throw error;
   }
 };

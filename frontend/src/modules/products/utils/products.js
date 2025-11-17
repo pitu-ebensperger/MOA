@@ -1,12 +1,11 @@
-import { toNum } from "@/utils/number.js"
+import { toNum } from "@/utils/number.js";
 
-// Precio num o null
 export const resolveProductPrice = (product) => {
-  const n = toNum(product?.price);
-  return n;
+  return toNum(product?.price);
 };
 
 export { buildProductCategoryPool } from "./productCategory.js";
+
 export {
   matchesText,
   createCategoryMatcher,
