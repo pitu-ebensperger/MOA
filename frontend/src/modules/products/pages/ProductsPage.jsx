@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
-// layout/ui
+
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { Pagination } from "../../../components/ui/Pagination.jsx";
-// secciones
+
 import ProductGallery from "../components/ProductGallery.jsx";
 import { ProductsFiltersPanel } from "../components/ProductsFiltersPanel.jsx";
-// hooks
+
 import { useCategories } from "../hooks/useCategories.js";
 import { useProducts } from "../hooks/useProducts.js";
 import { useProductFilters } from "../hooks/useProductFilters.js";
 import { useCatalogControls } from "../hooks/useCatalogControls.js";
+import { useCart } from "../../cart/hooks/useCart.js";
 
 export default function ProductsPage() {
   const { products: fetchedProducts, isLoading, error } = useProducts();
   const { categories: fetchedCategories } = useCategories();
+
+  const { addToCart } = useCart();
+
   const {
     sort,
     setSort,
@@ -21,6 +25,7 @@ export default function ProductsPage() {
     handleChangeItemsPerPage,
     pageSizeOptions,
   } = useCatalogControls();
+
   const {
     categories,
     filters,
@@ -39,6 +44,7 @@ export default function ProductsPage() {
     sort,
     itemsPerPage,
   });
+
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
@@ -63,7 +69,7 @@ export default function ProductsPage() {
               <select
                 value={itemsPerPage}
                 onChange={(event) => handleChangeItemsPerPage(event.target.value)}
-              className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
+                className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
               >
                 {pageSizeOptions.map((option) => (
                   <option key={option} value={option}>
@@ -72,12 +78,13 @@ export default function ProductsPage() {
                 ))}
               </select>
             </label>
+
             <label className="flex items-center gap-2 text-sm text-(--text-weak)">
               Ordenar por{" "}
               <select
                 value={sort}
                 onChange={(event) => setSort(event.target.value)}
-              className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
+                className="w-fit rounded-full border border-transparent bg-transparent px-2 py-2 text-sm text-neutral-700 transition focus:border-(--color-primary1,#6B5444) focus:outline-none"
               >
                 <option value="relevance">Relevancia</option>
                 <option value="price-asc">Precio: menor a mayor</option>
@@ -89,7 +96,7 @@ export default function ProductsPage() {
             <button
               type="button"
               onClick={() => setIsMobileFiltersOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border border-(--color-primary1,#6B5444) px-3 py-2 text-sm font-medium text-(--color-primary1,#6B5444) transition hover:bg-(--color-primary1,#6B5444) hover:text-white lg:hidden"
+              className="inline-flex items-center gap-2 rounded-full border border-(--color-primary1,#6B5444) px-3 py-2 text-sm font-medium text-(--color-primary1,#6B5444) transition hover:bg-(--color-primary1,#6B5444) hover:text-white lg:hidden"
             >
               Filtros
             </button>
@@ -102,6 +109,7 @@ export default function ProductsPage() {
           <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
             Filtros activos
           </span>
+
           {appliedFilters.map((filter) => (
             <button
               key={filter.type}
@@ -110,9 +118,7 @@ export default function ProductsPage() {
               className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-100"
             >
               {filter.label}
-              <span aria-hidden className="text-neutral-400">
-                ×
-              </span>
+              <span aria-hidden className="text-neutral-400">×</span>
             </button>
           ))}
         </div>
@@ -135,6 +141,7 @@ export default function ProductsPage() {
             No pudimos cargar los productos. Intenta nuevamente más tarde.
           </div>
         )}
+
         {isLoading && paginationInfo.totalItems === 0 ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -145,7 +152,10 @@ export default function ProductsPage() {
             ))}
           </div>
         ) : (
-          <ProductGallery products={paginatedProducts} />
+          <ProductGallery
+            products={paginatedProducts}
+            onAddToCart={addToCart}
+          />
         )}
       </ProductsFiltersPanel>
 
