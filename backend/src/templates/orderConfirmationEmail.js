@@ -117,6 +117,18 @@ export function buildOrderConfirmationEmail({ order = {}, user = {}, address = {
   const taxFormatted = formatMoney(tax)
   const totalFormatted = formatMoney(total)
 
+  const safeCustomerName = escapeHtml(customerName)
+  const greetingName = safeCustomerName.split(" ")[0] || "cliente"
+  const safeShippingAddress = escapeHtml(shippingAddress) || "Dirección registrada"
+  const safeShippingMethod = escapeHtml(shippingMethod) || "Despacho estándar"
+  const safePaymentMethod = escapeHtml(paymentMethod)
+  const safePaymentStatus = escapeHtml(paymentStatus)
+  const safeDeliveryStatus = escapeHtml(deliveryStatus)
+  const safeContactEmail = contactEmail ? escapeHtml(contactEmail) : ""
+  const safeContactPhone = contactPhone ? escapeHtml(contactPhone) : ""
+  const safeOrderLink = customerOrderLink ? escapeHtml(customerOrderLink) : ""
+  const safeTrackingUrl = trackingUrl ? escapeHtml(trackingUrl) : ""
+
   const html = `
     <html>
       <body style="margin:0;background-color:#f4f4f7;font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#111827;">
@@ -127,7 +139,7 @@ export function buildOrderConfirmationEmail({ order = {}, user = {}, address = {
                 <tr>
                   <td style="background:#5c33ff; padding:32px; color:#ffffff; text-align:center;">
                     <p style="margin:0; font-size:14px; letter-spacing:0.3em; text-transform:uppercase; opacity:0.8;">Orden confirmada</p>
-                    <h1 style="margin:8px 0 0; font-size:28px;">Gracias por tu compra, ${customerName.split(" ")[0] || "cliente"}!</h1>
+                    <h1 style="margin:8px 0 0; font-size:28px;">Gracias por tu compra, ${greetingName}!</h1>
                     <p style="margin:12px 0 0; font-size:16px;">Tu código ${orderCode} ya está listo.</p>
                   </td>
                 </tr>
@@ -147,7 +159,7 @@ export function buildOrderConfirmationEmail({ order = {}, user = {}, address = {
                         </td>
                         <td style="padding:16px 24px; background:#f9fafb; text-align:right;">
                           <p style="margin:0; font-size:12px; letter-spacing:0.2em; color:#6b7280; text-transform:uppercase;">Estado</p>
-                          <p style="margin:6px 0 0; font-size:16px; font-weight:600;">${deliveryStatus.replace(/_/g, " ")} / ${paymentStatus.replace(/_/g, " ")}</p>
+                          <p style="margin:6px 0 0; font-size:16px; font-weight:600;">${safeDeliveryStatus.replace(/_/g, " ")} / ${safePaymentStatus.replace(/_/g, " ")}</p>
                         </td>
                       </tr>
                     </table>
@@ -159,14 +171,14 @@ export function buildOrderConfirmationEmail({ order = {}, user = {}, address = {
                       <tr>
                         <td style="vertical-align:top; padding-right:16px; width:50%; font-size:12px; color:#6b7280;">
                           <p style="margin:0; letter-spacing:0.2em; text-transform:uppercase;">Envío</p>
-                          <p style="margin:6px 0 0; font-size:14px; color:#111827;">${shippingAddress || "Dirección registrada"}</p>
-                          <p style="margin:4px 0 0; font-size:14px; color:#111827;">${shippingMethod}</p>
-                          ${contactPhone ? `<p style="margin:4px 0 0; font-size:14px; color:#111827;">Tel: ${contactPhone}</p>` : ""}
+                          <p style="margin:6px 0 0; font-size:14px; color:#111827;">${safeShippingAddress}</p>
+                          <p style="margin:4px 0 0; font-size:14px; color:#111827;">${safeShippingMethod}</p>
+                          ${safeContactPhone ? `<p style="margin:4px 0 0; font-size:14px; color:#111827;">Tel: ${safeContactPhone}</p>` : ""}
                         </td>
                         <td style="vertical-align:top; font-size:12px; color:#6b7280;">
                           <p style="margin:0; letter-spacing:0.2em; text-transform:uppercase;">Pago</p>
-                          <p style="margin:6px 0 0; font-size:14px; color:#111827;">${paymentMethod}</p>
-                          ${contactEmail ? `<p style="margin:4px 0 0; font-size:14px; color:#111827;">Email: ${contactEmail}</p>` : ""}
+                          <p style="margin:6px 0 0; font-size:14px; color:#111827;">${safePaymentMethod}</p>
+                          ${safeContactEmail ? `<p style="margin:4px 0 0; font-size:14px; color:#111827;">Email: ${safeContactEmail}</p>` : ""}
                         </td>
                       </tr>
                     </table>
@@ -212,8 +224,8 @@ export function buildOrderConfirmationEmail({ order = {}, user = {}, address = {
                 </tr>
                 <tr>
                   <td align="center" style="padding:16px 40px 40px;">
-                    ${customerOrderLink ? `<a href="${customerOrderLink}" style="display:inline-block;padding:12px 28px;border-radius:999px;background:#5c33ff;color:#ffffff;text-decoration:none;font-weight:600;">Ver mi orden</a>` : ""}
-                    ${trackingUrl ? `<p style="margin:12px 0 0; font-size:14px; color:#6b7280;"><strong>Tracking:</strong> <a href="${trackingUrl}" style="color:#5c33ff;">${trackingUrl}</a></p>` : ""}
+                    ${safeOrderLink ? `<a href="${safeOrderLink}" style="display:inline-block;padding:12px 28px;border-radius:999px;background:#5c33ff;color:#ffffff;text-decoration:none;font-weight:600;">Ver mi orden</a>` : ""}
+                    ${safeTrackingUrl ? `<p style="margin:12px 0 0; font-size:14px; color:#6b7280;"><strong>Tracking:</strong> <a href="${safeTrackingUrl}" style="color:#5c33ff;">${safeTrackingUrl}</a></p>` : ""}
                   </td>
                 </tr>
               </table>

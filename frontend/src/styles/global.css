@@ -75,7 +75,15 @@ input:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary1
 /* SECCIONES ----------------------------------------------------------------------------------------------------------------*/
 
 /* NAVBAR */
-.nav-container { background-color: color-mix(in oklab, var(--color-secondary2) 10%, transparent); border-color: transparent; }
+.nav-container {
+  background-color: color-mix(in oklab, var(--color-secondary2) 10%, transparent);
+  border-color: transparent;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.nav-container.scrolled {
+  background-color: var(--color-light);
+  border-color: rgba(255,255,255,0.2);
+}
 
 .brand { font-family: var(--font-display); color: var(--color-primary1); letter-spacing: -0.025em; font-size: var(--text-2xl); }
 

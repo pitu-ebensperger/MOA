@@ -88,6 +88,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
       setIsScrolled(window.scrollY > scrollThreshold);
     };
 
+    handleScroll();
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -161,10 +162,8 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
 
   return (
     <>
-      <div className={`nav-container shadow-md fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b animate-slide-down transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-color-light backdrop-blur-lg shadow-xl' 
-          : 'bg-color-light/80'
+      <div className={`nav-container shadow-md fixed top-0 left-0 right-0 z-50 border-b animate-slide-down transition-all duration-300 ${
+        isScrolled ? 'backdrop-blur-lg shadow-xl scrolled' : 'backdrop-blur-md'
       }`}>
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">

@@ -4,6 +4,7 @@ import { Navbar } from '@/components/layout/Navbar.jsx'
 import { Footer } from '@/components/layout/Footer.jsx'
 import { API_PATHS } from '@/config/api-paths.js'
 import { AddressProvider } from '@/context/AddressContext.jsx'
+import ErrorBoundary from '@/components/error/ErrorBoundary.jsx'
 
 import { HomePage } from '@/modules/home/pages/HomePage.jsx'
 import { CategoriesPage } from '@/modules/categories/pages/CategoriesPage.jsx'
@@ -30,6 +31,7 @@ import {PrivacyPage} from '@/modules/support/pages/PrivacyPage.jsx'
 import {TermsPage} from '@/modules/support/pages/TermsPage.jsx'
 import { ReturnsAndExchangesPage } from '@/modules/support/pages/ReturnsAndExchangesPage.jsx'
 import { NotFoundPage } from '@/modules/support/pages/NotFoundPage.jsx'
+import { ServerErrorPage } from '@/modules/support/pages/ServerErrorPage.jsx'
 
 import { AdminRoute } from '@/modules/auth/hooks/useAuth.jsx'
 import EntornoAdmin from '@/modules/admin/components/EntornoAdmin.jsx'
@@ -46,6 +48,7 @@ import { ScrollToTop } from '@/components/layout/ScrollToTop.jsx'
 import '@/styles/global.css'
 import '@/styles/tokens.css'
 import '@/styles/components/buttons.css'
+import '@/styles/sweetalert.css'
 
 export const App = () => {
   const location = useLocation()
@@ -53,7 +56,8 @@ export const App = () => {
   const { home, auth, products, support, admin } = API_PATHS
 
   return (
-    <AddressProvider>
+    <ErrorBoundary showDetails={import.meta.env.DEV}>
+      <AddressProvider>
       <div className="min-h-screen w-full overflow-x-hidden bg-(--color-light)">
         {!isAdminRoute && <Navbar />}
         {!isAdminRoute && <CartDrawer />}
@@ -135,10 +139,17 @@ export const App = () => {
             </Route>
 
             <Route path='/style-guide/*' element={<StyleGuidePage />} />
+            
+            {/* Error Routes */}
+            <Route path="/error/500" element={<ServerErrorPage statusCode={500} />} />
+            <Route path="/error/502" element={<ServerErrorPage statusCode={502} />} />
+            <Route path="/error/503" element={<ServerErrorPage statusCode={503} />} />
+            <Route path="/error/504" element={<ServerErrorPage statusCode={504} />} />
           </Routes>
         </main>
         {!isAdminRoute && <Footer />}
       </div>
     </AddressProvider>
+    </ErrorBoundary>
   )
 }

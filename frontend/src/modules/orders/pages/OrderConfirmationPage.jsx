@@ -169,6 +169,20 @@ export const OrderConfirmationPage = () => {
     order?.payment?.provider ?? order?.metodo_pago_marca ?? order?.metodo_pago_tipo ?? "Método de pago"
 
   const shippingMethod = order?.shipment?.carrier ?? order?.metodo_despacho ?? "Despacho estándar"
+  const statusLabel = (
+    order?.status ??
+    order?.estado_envio ??
+    order?.shipment?.status ??
+    "pendiente"
+  ).replace(/_/g, " ")
+  const shippingStatusLabel = (
+    order?.shipment?.status ?? statusLabel
+  ).replace(/_/g, " ")
+  const paymentAuthorization =
+    order?.payment?.authorizationCode ??
+    order?.authorization ??
+    order?.codigo_autorizacion ??
+    null
 
   return (
     <main className="page min-h-screen bg-(--color-light) py-12">
