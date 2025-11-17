@@ -139,3 +139,21 @@ export const errorHandler = (err, req, res, next) => {
     }),
   );
 };
+
+// Helper function for backwards compatibility
+export const handleError = (res, error, defaultMessage = 'Error interno del servidor') => {
+  console.error('Error:', error);
+  
+  if (error instanceof AppError) {
+    return res.status(error.statusCode).json({
+      success: false,
+      message: error.message,
+      errors: error.errors || null
+    });
+  }
+
+  return res.status(500).json({
+    success: false,
+    message: defaultMessage
+  });
+};

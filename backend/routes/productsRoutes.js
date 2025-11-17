@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { 
   getProducts,
-  getProduct: getProductById,
+  getProductById,
   getProductBySlug,
   createProduct,
   updateProduct,

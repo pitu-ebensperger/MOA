@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import Card from "@/modules/profile/components/Card.jsx"
 import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
@@ -27,6 +28,16 @@ const normalizeOrderProduct = (product, index) => {
     img: product.img ?? product.imgUrl ?? product.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE,
   };
 };
+
+const productShape = PropTypes.shape({
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  slug: PropTypes.string,
+  name: PropTypes.string,
+  price: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  img: PropTypes.string,
+  imgUrl: PropTypes.string,
+  gallery: PropTypes.arrayOf(PropTypes.string),
+});
 
 const OrderSection = ({ products = [], isLoading = false, error = null }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -128,3 +139,9 @@ const OrderSection = ({ products = [], isLoading = false, error = null }) => {
 };
 
 export default OrderSection;
+
+OrderSection.propTypes = {
+  products: PropTypes.arrayOf(productShape),
+  isLoading: PropTypes.bool,
+  error: PropTypes.string,
+};

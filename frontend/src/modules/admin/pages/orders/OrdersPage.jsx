@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { RefreshCw } from "lucide-react";
 
 import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
@@ -44,15 +44,31 @@ export default function OrdersPage() {
     search,
   });
 
+  const handleUpdateOrderStatus = useCallback(
+    async (order, newStatus) => {
+      const targetId = order?.id ?? order?.number;
+      if (!targetId || !newStatus) return;
+
+      try {
+        await ordersApi.updateStatus(targetId, { status: newStatus });
+        refetch();
+      } catch (error) {
+        console.error("Error al actualizar el estado de la orden:", error);
+        window.alert(
+          error?.message ??
+            "No se pudo actualizar el estado de la orden. Intenta nuevamente."
+        );
+      }
+    },
+    [refetch]
+  );
+
   const columns = useMemo(
     () =>
       buildOrderColumns({
         onOpen: (order) => setSelectedOrder(order),
         onUpdateStatus: (order, newStatus) => {
-          console.log("Actualizar estado de orden:", order.number, "a", newStatus);
-          // TODO: Implementar llamada a API para actualizar estado
-          // await ordersApi.updateStatus(order.id, newStatus);
-          refetch();
+          handleUpdateOrderStatus(order, newStatus);
         },
         onCancel: async (order) => {
           if (!window.confirm(`¿Estás seguro de cancelar la orden ${order.number}?`)) return;
@@ -66,7 +82,7 @@ export default function OrdersPage() {
           }
         },
       }),
-    [refetch],
+    [refetch, handleUpdateOrderStatus],
   );
 
   const toolbar = useMemo(

@@ -26,7 +26,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout, user } = useAuth();
 
   useEffect(() => {
     if (!location.hash) return;
@@ -98,17 +98,18 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     {
       icon: User,
       label: 'Mi Perfil',
-      href: API_PATHS.auth.profile
+      href: API_PATHS.auth.profile,
     },
     {
       icon: Package,
       label: 'Mis Pedidos',
-      href: '/mis-pedidos'
+      href: API_PATHS.auth.profile,
+      state: { initialTab: 'orders' },
     },
     {
       icon: Heart,
       label: 'Lista de Deseos',
-      href: '/wishlist'
+      href: '/wishlist',
     },
   ];
 
@@ -118,8 +119,8 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     navigate(API_PATHS.home.landing);
   };
 
-  const handleProfileMenuClick = (href) => {
-    navigate(href);
+  const handleProfileMenuClick = (item) => {
+    navigate(item.href, { state: item.state });
     setIsProfileDropdownOpen(false);
   };
 
@@ -362,7 +363,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
                                 <button
                                   key={item.label}
                                   onClick={() => {
-                                    handleProfileMenuClick(item.href);
+                                    handleProfileMenuClick(item);
                                     setIsMenuOpen(false);
                                   }}
                                   className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 transition-colors"

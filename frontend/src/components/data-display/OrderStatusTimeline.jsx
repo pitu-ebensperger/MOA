@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { 
   ESTADOS_ORDEN, 
   METODOS_DESPACHO,
@@ -182,7 +183,7 @@ export default function OrderStatusTimeline({ order }) {
       )}
       
       {/* Información de contacto */}
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
+  <div className="rounded-xl border border-blue-200 bg-blue-50 p-6">
         <h3 className="mb-3 font-semibold text-blue-900">
           ¿Dudas sobre tu pedido?
         </h3>
@@ -208,3 +209,14 @@ export default function OrderStatusTimeline({ order }) {
     </div>
   );
 }
+
+OrderStatusTimeline.propTypes = {
+  order: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    order_code: PropTypes.string,
+    metodo_despacho: PropTypes.string,
+    fecha_entrega_estimada: PropTypes.string,
+    creado_en: PropTypes.string,
+    createdAt: PropTypes.string,
+  }),
+};

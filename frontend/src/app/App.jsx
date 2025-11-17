@@ -72,6 +72,7 @@ export const App = () => {
           <Route path={auth.forgot} element={<ForgotPasswordPage />} />
           <Route path={auth.reset} element={<ResetPasswordPage />} />
           <Route path={auth.profile} element={<ProfilePage />} />
+          <Route path="/mis-pedidos" element={<ProfilePage initialTab="orders" />} />
           <Route path='/wishlist' element={<WishlistPage />} />         
           <Route path={support.contact} element={<ContactPage />} /> 
           <Route path={support.privacy} element={<PrivacyPage />} /> 

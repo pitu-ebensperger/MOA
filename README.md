@@ -24,6 +24,12 @@ Ejecutar: `npm run -w backend dev`
 - npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
   -npm run seed:products --workspace backend (correr para agregar productos iniciales)
 
+### Stripe (pasarela de pago)
+
+- Define las variables de entorno `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` para habilitar la pasarela de Stripe en modo sandbox o producción.
+- La API expone el endpoint `/webhooks/stripe`, que Stripe usará para enviar confirmaciones asincrónicas.
+- Puedes usar las credenciales de prueba de Stripe y los números de tarjeta `4242 4242 4242 4242` para simular cobros sin mover dinero real; recuerda cambiar a claves reales para producción.
+
 **`docs/`**
 
 - [Estructura proyecto y Progreso](./docs/STATUS.md)

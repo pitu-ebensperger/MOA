@@ -3,9 +3,17 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
+import webhookController from "./src/controllers/webhookController.js";
+
 dotenv.config();
 
 const app = express();
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  webhookController.handleStripeWebhook
+);
 
 app.use(express.json());
 app.use(cors());

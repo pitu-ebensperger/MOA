@@ -1,8 +1,40 @@
+import Stripe from "stripe";
 import orderModel from "../models/orderModel.js";
+import orderAdminModel from "../models/orderAdminModel.js";
+import paymentModel from "../models/paymentModel.js";
 import { getCartItems } from "../models/cartModel.js";
 import { addressModel } from "../models/addressModel.js";
 
 const getRequestUserId = (req) => req.user?.usuario_id ?? req.user?.id;
+
+const ORDER_STATUS_TRANSITIONS = {
+  pending: () => ({
+    estado_pago: 'pendiente',
+    estado_envio: 'preparacion',
+  }),
+  processing: () => ({
+    estado_pago: 'procesando',
+    estado_envio: 'preparacion',
+  }),
+  shipped: () => ({
+    estado_pago: 'pagado',
+    estado_envio: 'enviado',
+  }),
+  fulfilled: () => ({
+    estado_pago: 'pagado',
+    estado_envio: 'entregado',
+    fecha_entrega_real: new Date().toISOString(),
+  }),
+  cancelled: () => ({
+    estado_pago: 'cancelado',
+    estado_envio: 'devuelto',
+  }),
+};
+
+const buildOrderStatusPayload = (order, status) => ({
+  ...order,
+  status,
+});
 
 /**
  * Crear nueva orden desde el carrito
@@ -101,7 +133,7 @@ const createOrderFromCart = async (req, res) => {
 
   } catch (error) {
     console.error('Error creando orden:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Error al crear orden',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
@@ -179,17 +211,76 @@ const getOrderById = async (req, res) => {
   }
 };
 
+const stripeClient = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2023-11-15' })
+  : null;
+
+const formatCardDescriptor = (cardDetails) => {
+  if (!cardDetails) return 'Tarjeta Stripe';
+  const brand = cardDetails.brand ? `${cardDetails.brand[0].toUpperCase()}${cardDetails.brand.slice(1)}` : 'Tarjeta';
+  const last4 = cardDetails.last4 || 'XXXX';
+  return `${brand} terminada en ${last4}`;
+};
+
+const describePaymentIntentMethod = (paymentIntent) => {
+  const charge = paymentIntent?.charges?.data?.[0];
+  const cardDetails = charge?.payment_method_details?.card;
+  return formatCardDescriptor(cardDetails);
+};
+
+const persistStripePaymentMethod = async (usuarioId, paymentMethodId, guardarMetodo = false) => {
+  if (!guardarMetodo || !paymentMethodId) return null;
+  const existing = await paymentModel.getByToken(paymentMethodId, usuarioId);
+  if (existing) return existing;
+
+  if (!stripeClient) {
+    throw new Error('Stripe no está configurado para guardar métodos de pago.');
+  }
+
+  const paymentMethod = await stripeClient.paymentMethods.retrieve(paymentMethodId);
+  const card = paymentMethod.card ?? {};
+  const tipo_metodo = card.funding === 'credit' ? 'credito' : 'debito';
+  const month = card.exp_month ? String(card.exp_month).padStart(2, '0') : '00';
+  const year = card.exp_year ? String(card.exp_year).slice(-2) : '00';
+  const fecha_expiracion = `${month}/${year}`;
+
+  return paymentModel.create({
+    usuario_id: usuarioId,
+    tipo_metodo,
+    ultimos_digitos: card.last4 || "0000",
+    nombre_titular: paymentMethod.billing_details?.name || 'Titular',
+    fecha_expiracion,
+    token_pago: paymentMethod.id,
+    predeterminado: false,
+    marca: card.brand || null,
+    proveedor_pago: 'stripe',
+    metadata: {
+      country: card.country,
+      funding: card.funding,
+      brand: card.brand,
+    },
+  });
+};
+
 /**
  * Procesar pago de una orden (simulado)
  * En producción, esto integraría con Transbank/Flow/Stripe
  */
 const processPayment = async (req, res) => {
+  let order = null;
   try {
+    if (!stripeClient) {
+      return res.status(500).json({
+        success: false,
+        message: 'Stripe no está configurado para procesar pagos',
+      });
+    }
+
     const usuarioId = getRequestUserId(req);
     const { id } = req.params;
-    const { metodo_pago_id, token_pago } = req.body;
+    const { metodo_pago_id, payment_method_id, guardar_metodo = false } = req.body;
 
-    const order = await orderModel.getOrderById(id);
+    order = await orderModel.getOrderById(id);
 
     if (!order) {
       return res.status(404).json({
@@ -212,27 +303,114 @@ const processPayment = async (req, res) => {
       });
     }
 
-    // AQUÍ iría la integración con pasarela de pago
-    // Por ahora, simulamos un pago exitoso
-    const transaccionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    let paymentMethodToken = payment_method_id;
+    let savedMethod = null;
 
-    const updatedOrder = await orderModel.updatePaymentStatus(
+    if (metodo_pago_id) {
+      savedMethod = await paymentModel.getById(metodo_pago_id, usuarioId);
+      if (!savedMethod) {
+        return res.status(404).json({
+          success: false,
+          message: 'Método de pago no encontrado',
+        });
+      }
+
+      if (!savedMethod.token_pago) {
+        return res.status(400).json({
+          success: false,
+          message: 'Este método no tiene un token validado',
+        });
+      }
+
+      paymentMethodToken = savedMethod.token_pago;
+    }
+
+    if (!paymentMethodToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Debe enviar un método de pago tokenizado',
+      });
+    }
+
+    await orderModel.updatePaymentStatus(id, 'procesando');
+
+    const paymentIntent = await stripeClient.paymentIntents.create({
+      amount: order.total_cents,
+      currency: 'clp',
+      payment_method: paymentMethodToken,
+      confirm: true,
+      off_session: Boolean(savedMethod),
+      description: `Orden ${order.order_code}`,
+      metadata: {
+        orden_id: order.orden_id,
+        usuario_id: usuarioId,
+      },
+      receipt_email: order.usuario_email,
+    });
+
+    if (paymentIntent.status === 'succeeded') {
+      await persistStripePaymentMethod(usuarioId, paymentIntent.payment_method, guardar_metodo);
+
+      const updatedOrder = await orderModel.updatePaymentStatus(
+        id,
+        'pagado',
+        paymentIntent.id,
+        describePaymentIntentMethod(paymentIntent)
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'Pago procesado exitosamente',
+        data: updatedOrder,
+      });
+    }
+
+    if (['requires_action', 'requires_payment_method'].includes(paymentIntent.status)) {
+      return res.status(202).json({
+        success: true,
+        message: 'El pago requiere pasos adicionales',
+        data: {
+          status: paymentIntent.status,
+          clientSecret: paymentIntent.client_secret,
+        },
+      });
+    }
+
+    await orderModel.updatePaymentStatus(
       id,
-      'pagado',
-      transaccionId
+      'fallido',
+      paymentIntent.id,
+      describePaymentIntentMethod(paymentIntent)
     );
 
-    res.status(200).json({
-      success: true,
-      message: 'Pago procesado exitosamente',
-      data: updatedOrder,
+    return res.status(402).json({
+      success: false,
+      message: 'El pago fue rechazado por la pasarela',
+      data: {
+        status: paymentIntent.status,
+      },
     });
 
   } catch (error) {
     console.error('Error procesando pago:', error);
+
+    if (order) {
+      await orderModel.updatePaymentStatus(
+        order.orden_id,
+        'fallido',
+        error?.payment_intent?.id || null,
+        'Stripe: error inesperado'
+      );
+    }
+
+    const StripeErrorClass = Stripe.errors?.StripeError;
+    const friendlyMessage = StripeErrorClass && error instanceof StripeErrorClass
+      ? error.message
+      : 'Error al procesar el pago';
+
     res.status(500).json({
       success: false,
-      message: 'Error al procesar pago',
+      message: friendlyMessage,
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
@@ -294,12 +472,62 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: 'El campo status es requerido',
+      });
+    }
+
+    const normalizedStatus = String(status).trim().toLowerCase();
+    const builder = ORDER_STATUS_TRANSITIONS[normalizedStatus];
+    if (!builder) {
+      const allowedStatuses = Object.keys(ORDER_STATUS_TRANSITIONS).join(', ');
+      return res.status(400).json({
+        success: false,
+        message: `Status inválido. Valores permitidos: ${allowedStatuses}`,
+      });
+    }
+
+    const existingOrder = await orderAdminModel.getOrderByIdAdmin(id);
+    if (!existingOrder) {
+      return res.status(404).json({
+        success: false,
+        message: 'Orden no encontrada',
+      });
+    }
+
+    await orderAdminModel.updateOrderStatus(id, builder());
+
+    const updatedOrder = await orderAdminModel.getOrderByIdAdmin(id);
+    const orderToReturn = updatedOrder ?? existingOrder;
+
+    res.status(200).json({
+      success: true,
+      data: buildOrderStatusPayload(orderToReturn, normalizedStatus),
+    });
+  } catch (error) {
+    console.error('Error actualizando estado de orden:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al actualizar estado de orden',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+};
+
 const orderController = {
   createOrderFromCart,
   getUserOrders,
   getOrderById,
   processPayment,
   cancelOrder,
+  updateOrderStatus,
 };
 
 export default orderController;

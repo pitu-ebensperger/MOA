@@ -99,14 +99,24 @@ export default function CustomersPage() {
   const handleCreateCustomer = useCallback(
     (event) => {
       event.preventDefault();
-      console.log("Crear nuevo cliente", newCustomerForm);
-      // TODO: Reemplazar por llamada al backend cuando esté disponible
+      const timestamp = Date.now();
+      const newCustomer = {
+        id: `usr-${timestamp}`,
+        firstName: newCustomerForm.firstName.trim() || `Cliente ${timestamp}`,
+        lastName: newCustomerForm.lastName.trim(),
+        email: newCustomerForm.email.trim(),
+        phone: newCustomerForm.phone.trim(),
+        status: newCustomerForm.status || "active",
+        createdAt: new Date().toISOString(),
+      };
+      customersDb.users.unshift(newCustomer);
       setIsCreatingCustomer(false);
       resetNewCustomerForm();
       setRefreshKey((prev) => prev + 1);
       setPage(1);
+      setSelectedCustomer(newCustomer);
     },
-    [newCustomerForm, resetNewCustomerForm],
+    [newCustomerForm, resetNewCustomerForm, setSelectedCustomer],
   );
 
   const handleNewCustomerChange = useCallback((field) => (event) => {
@@ -182,10 +192,32 @@ export default function CustomersPage() {
 
   // Handler para cambiar status de cliente
   const handleStatusChange = (customerId, newStatus) => {
-    console.log("Cambiar status de", customerId, "a", newStatus);
-    // TODO: Implementar actualización de status en backend
-    // Por ahora solo lo mostramos en consola
+    const index = customersDb.users.findIndex((user) => user.id === customerId);
+    if (index === -1) return;
+    customersDb.users[index] = {
+      ...customersDb.users[index],
+      status: newStatus,
+    };
+    setRefreshKey((prev) => prev + 1);
   };
+
+  const handleEditCustomer = useCallback((customer) => {
+    if (!customer) return;
+    const updatedFirstName = window.prompt("Nuevo nombre", customer.firstName) ?? customer.firstName;
+    const updatedLastName = window.prompt("Nuevo apellido", customer.lastName) ?? customer.lastName;
+    const updatedEmail = window.prompt("Nuevo correo electrónico", customer.email) ?? customer.email;
+    const updatedPhone = window.prompt("Nuevo teléfono", customer.phone) ?? customer.phone;
+    const index = customersDb.users.findIndex((user) => user.id === customer.id);
+    if (index === -1) return;
+    customersDb.users[index] = {
+      ...customersDb.users[index],
+      firstName: updatedFirstName.trim() || customersDb.users[index].firstName,
+      lastName: updatedLastName.trim() || customersDb.users[index].lastName,
+      email: updatedEmail.trim() || customersDb.users[index].email,
+      phone: updatedPhone.trim() || customersDb.users[index].phone,
+    };
+    setRefreshKey((prev) => prev + 1);
+  }, [setRefreshKey]);
 
   // Definición de columnas
   const columns = useMemo(
@@ -342,8 +374,7 @@ export default function CustomersPage() {
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onSelect={() => {
-                      console.log("Editar cliente:", customer);
-                      // TODO: Abrir formulario de edición
+                      handleEditCustomer(customer);
                     }}
                   >
                     <Edit3 className="mr-2 h-4 w-4" />
@@ -353,8 +384,7 @@ export default function CustomersPage() {
                   <DropdownMenuItem
                     onSelect={() => {
                       if (confirm(`¿Desactivar a ${customer.firstName} ${customer.lastName}?`)) {
-                        console.log("Desactivar cliente:", customer);
-                        // TODO: Implementar desactivación
+                        handleStatusChange(customer.id, "inactive");
                       }
                     }}
                     className="text-(--color-error)"

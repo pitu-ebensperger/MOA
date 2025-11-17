@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Package, Heart, MapPin } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/shadcn/ui/tabs.jsx';
 import { UserInfoTab } from '@/modules/profile/components/tabs/UserInfoTab.jsx';
@@ -7,10 +7,17 @@ import { WishlistTab } from '@/modules/profile/components/tabs/WishlistTab.jsx';
 import { AddressesTab } from '@/modules/profile/components/tabs/AddressesTab.jsx';
 import { useAuth } from '@/context/auth-context.js';
 import '../styles/ProfilePage.css';
+import { useLocation } from 'react-router-dom';
 
-export const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState('profile');
+export const ProfilePage = ({ initialTab = 'profile' }) => {
+  const location = useLocation();
+  const locationInitialTab = location.state?.initialTab;
+  const [activeTab, setActiveTab] = useState(locationInitialTab ?? initialTab);
   const { user } = useAuth();
+
+  useEffect(() => {
+    setActiveTab(locationInitialTab ?? initialTab);
+  }, [locationInitialTab, initialTab]);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: 'var(--color-neutral1)' }}>

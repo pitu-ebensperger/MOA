@@ -179,6 +179,34 @@ const mockOrdersApi = {
 
     return buildMockOrderView(updated);
   },
+
+  async updateStatus(id, status) {
+    if (!id) throw new Error("order id is required");
+    if (!status) throw new Error("status is required");
+
+    await delay();
+
+    const idx = ordersDb.orders.findIndex(
+      (o) => String(o.id) === String(id) || String(o.number) === String(id),
+    );
+
+    if (idx === -1) {
+      const err = new Error("Order not found");
+      err.status = 404;
+      throw err;
+    }
+
+    const updated = {
+      ...ordersDb.orders[idx],
+      status,
+      updatedAt: new Date().toISOString(),
+    };
+
+    ordersDb.orders[idx] = updated;
+
+    return buildMockOrderView(updated);
+  },
+
 };
 
 /* Remote implementation --------------------------------------------------------------------------------------------- */
@@ -220,6 +248,20 @@ const remoteOrdersApi = {
 
     return data ? normalizeOrder(data, data) : null;
   },
+
+  async updateStatus(id, status) {
+    if (!id) throw new Error("order id is required");
+    if (!status) throw new Error("status is required");
+
+    const payload = await apiClient.private.put(
+      `/api/admin/orders/${id}/status`,
+      { status }
+    );
+
+    const orderData = payload?.data ?? payload;
+    return orderData ? normalizeOrder(orderData, orderData) : null;
+  },
+
 };
 
 /* Export ------------------------------------------------------------------------------------------------------------ */

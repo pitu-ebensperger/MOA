@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { MapPin, Plus, Trash2, Star, StarOff, Edit } from 'lucide-react';
 import { useAddresses } from '@/context/AddressContext'
 import { Button } from '@/components/shadcn/ui/button.jsx'
@@ -45,6 +46,18 @@ const REGIONES = [
   'Aysén',
   'Magallanes',
 ];
+
+const addressShape = PropTypes.shape({
+  direccion_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  calle: PropTypes.string,
+  departamento: PropTypes.string,
+  comuna: PropTypes.string,
+  ciudad: PropTypes.string,
+  region: PropTypes.string,
+  codigo_postal: PropTypes.string,
+  referencia: PropTypes.string,
+  predeterminada: PropTypes.bool,
+});
 
 const AddressCard = ({ address, onEdit, onDelete, onSetDefault }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -129,6 +142,13 @@ const AddressCard = ({ address, onEdit, onDelete, onSetDefault }) => {
       </AlertDialog>
     </>
   );
+};
+
+AddressCard.propTypes = {
+  address: addressShape.isRequired,
+  onEdit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
+  onSetDefault: PropTypes.func.isRequired,
 };
 
 const AddressForm = ({ address, onSubmit, onCancel }) => {
@@ -281,7 +301,17 @@ const AddressForm = ({ address, onSubmit, onCancel }) => {
         </Button>
       </DialogFooter>
     </form>
-  );
+);
+};
+
+AddressForm.propTypes = {
+  address: addressShape,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
+};
+
+AddressForm.defaultProps = {
+  address: null,
 };
 
 export const AddressesSection = () => {
