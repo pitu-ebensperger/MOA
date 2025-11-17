@@ -21,7 +21,10 @@ export const verifyToken = async (req, res, next) => {
     const decoded = jwt.verify(extractToken, JWT_SECRET);
     req.user = {
       id: decoded.id,
+      usuario_id: decoded.id,
       email: decoded.email,
+      role_code: decoded.role_code,
+      rol: decoded.rol,
     };
     next();
   } catch (error) {

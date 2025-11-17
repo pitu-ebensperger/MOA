@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Modal } from "../../../components/ui/Modal.jsx";
+import { Modal } from "@/components/ui/Modal.jsx"
 import { Trash2 } from "lucide-react";
 
 const STATUS_VALUES = ["activo", "sin_stock", "borrador"];

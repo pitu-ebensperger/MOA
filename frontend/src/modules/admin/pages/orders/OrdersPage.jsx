@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { RefreshCw } from "lucide-react";
 
-import { DataTableV2 } from "../../../../components/data-display/DataTableV2.jsx";
+import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
 import {
   TableToolbar,
   TableSearch,
@@ -9,16 +9,14 @@ import {
   FilterTags,
   ToolbarSpacer,
   QuickFilterPill,
-  ColumnsMenuButton,
-  ClearFiltersButton,
   LayoutToggleButton,
 } from "../../../../components/data-display/TableToolbar.jsx";
-import { Button } from "../../../../components/ui/Button.jsx";
+import { Button } from "@/components/ui/Button.jsx"
 
-import { useAdminOrders } from "../../hooks/useAdminOrders.js";
-import { buildOrderColumns } from "../../utils/ordersColumns.jsx";
-import OrdersDrawer from "../../components/OrdersDrawer.jsx";
-import { ordersApi } from "../../../../services/orders.api.js";
+import { useAdminOrders } from "@/modules/admin/hooks/useAdminOrders.js"
+import { buildOrderColumns } from "@/modules/admin/utils/ordersColumns.jsx"
+import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
+import { ordersApi } from "@/services/orders.api.js"
 
 const ORDER_STATUS_OPTIONS = [
   { label: "Todos los estados", value: "" },
@@ -70,13 +68,6 @@ export default function OrdersPage() {
       }),
     [refetch],
   );
-
-  const clearAll = () => {
-    setSearch("");
-    setStatus("");
-    setActiveTags([]);
-    setPage(1);
-  };
 
   const toolbar = useMemo(
     () => (table) => (
@@ -137,8 +128,6 @@ export default function OrdersPage() {
           }}
         />
         <div className="ml-auto flex items-center gap-2">
-          <ColumnsMenuButton table={table} />
-          <ClearFiltersButton onClear={clearAll} />
           <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
           <Button
             appearance="ghost"
@@ -160,7 +149,7 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-sans text-xl font-semibold tracking-tight text-(--text-strong)">
+          <h1 className="text-3xl font-bold text-primary1 mb-2">
             Pedidos
           </h1>
           <p className="text-sm text-(--text-weak)">

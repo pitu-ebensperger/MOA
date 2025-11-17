@@ -1,17 +1,37 @@
 import { useMemo } from "react";
-import { Activity, Layers, Package, Settings, TrendingUp, Users, Warehouse, AlertTriangle, Truck, BarChart3, Calendar, ArrowUpRight, ArrowDownRight, PieChart, Star, Heart, Eye, ShoppingCart } from "lucide-react";
+import { 
+  Activity, 
+  Package, 
+  TrendingUp, 
+  Users, 
+  AlertTriangle, 
+  Truck, 
+  BarChart3, 
+  Calendar, 
+  ArrowUpRight, 
+  ArrowDownRight, 
+  Star, 
+  Eye, 
+  ShoppingCart,
+  Settings,
+  Layers,
+  Warehouse,
+  DollarSign,
+  Clock
+} from "lucide-react";
 
-import { useAdminOrders } from "../hooks/useAdminOrders.js";
-import { useAdminProducts } from "../hooks/useAdminProducts.js";
+import { useAdminDashboard } from "@/modules/admin/hooks/useAdminDashboard.js"
+import { useAdminOrders } from "@/modules/admin/hooks/useAdminOrders.js"
+import { useAdminProducts } from "@/modules/admin/hooks/useAdminProducts.js"
 
-import { Button } from "../../../components/ui/Button.jsx";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { formatCurrencyCLP } from "../../../utils/currency.js";
-import { formatDate_ddMMyyyy, relativeTime } from "../../../utils/date.js";
-import { ORDER_STATUS_MAP } from "../../../config/status-maps.js";
-import { API_PATHS } from "../../../config/api-paths.js";
-
-const SUMMARY_ORDER_LIMIT = 500;
+import { Button } from "@/components/ui/Button.jsx"
+import { Skeleton } from "@/components/ui/Skeleton.jsx"
+import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs.jsx"
+import { formatCurrencyCLP } from "@/utils/currency.js"
+import { formatDate_ddMMyyyy, relativeTime } from "@/utils/date.js"
+import { ORDER_STATUS_MAP } from "@/config/status-maps.js"
+import { API_PATHS } from "@/config/api-paths.js"
 
 const formatCount = (value) => {
   const number = Number(value);
@@ -19,14 +39,126 @@ const formatCount = (value) => {
   return number.toLocaleString("es-CL");
 };
 
+const MetricCard = ({ 
+  title, 
+  value, 
+  subtitle, 
+  icon: Icon, 
+  trend, 
+  trendValue, 
+  className = "",
+  size = "default",
+  accentColor = "var(--color-primary1)"
+}) => {
+  const sizeClasses = {
+    small: "p-4",
+    default: "p-6", 
+    large: "p-8"
+  };
+
+  const titleClasses = {
+    small: "text-sm",
+    default: "text-base",
+    large: "text-lg"
+  };
+
+  const valueClasses = {
+    small: "text-2xl",
+    default: "text-3xl",
+    large: "text-4xl"
+  };
+
+  return (
+    <div 
+      className={`rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] shadow-[var(--shadow-sm)] transition-all hover:shadow-[var(--shadow-md)] ${sizeClasses[size]} ${className}`}
+    >
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <p className={`font-medium text-neutral-600 ${titleClasses[size]}`}>{title}</p>
+          {subtitle && (
+            <p className="text-xs text-neutral-400 mt-1">{subtitle}</p>
+          )}
+        </div>
+        {Icon && (
+          <div 
+            className="rounded-2xl p-3"
+            style={{ 
+              backgroundColor: `color-mix(in srgb, ${accentColor} 10%, transparent)`,
+            }}
+          >
+            <Icon 
+              className="h-5 w-5" 
+              style={{ color: accentColor }}
+            />
+          </div>
+        )}
+      </div>
+      
+      <div className="space-y-2">
+        <p className={`font-bold text-(--text-strong) ${valueClasses[size]}`}>
+          {value}
+        </p>
+        
+        {trend && (
+          <div className="flex items-center gap-1">
+            {trend === "up" ? (
+              <ArrowUpRight className="h-4 w-4 text-[color:var(--color-success)]" />
+            ) : (
+              <ArrowDownRight className="h-4 w-4 text-[color:var(--color-error)]" />
+            )}
+            <span 
+              className={`text-sm font-medium ${
+                trend === "up" ? "text-[color:var(--color-success)]" : "text-[color:var(--color-error)]"
+              }`}
+            >
+              {trendValue}
+            </span>
+            <span className="text-xs text-neutral-500">vs mes anterior</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const QuickActionCard = ({ label, description, icon: Icon, to, variant = "default" }) => {
+  const variants = {
+    default: "border-neutral-200 hover:border-primary1/30 hover:bg-primary4/20",
+    primary: "border-primary1/30 bg-primary4/10 hover:bg-primary4/30",
+    warning: "border-warning/30 bg-warning/10 hover:bg-warning/20"
+  };
+
+  return (
+    <Button
+      appearance="ghost"
+      intent="neutral"
+      to={to}
+      className={`h-auto p-6 flex-col items-start space-y-3 text-left transition-all ${variants[variant]}`}
+    >
+      <div className="flex items-center gap-3 w-full">
+        <Icon className="h-6 w-6 text-primary1" />
+        <div className="flex-1">
+          <p className="font-semibold text-neutral-800">{label}</p>
+          {description && (
+            <p className="text-sm text-neutral-500 mt-1">{description}</p>
+          )}
+        </div>
+      </div>
+    </Button>
+  );
+};
+
 export default function AdminDashboardPage() {
+  const { data: dashboardData, isLoading, isError, refetch } = useAdminDashboard();
+
+  // Fallback para compatibilidad con el hook anterior
   const {
-    items: orders = [],
+    items: fallbackOrders = [],
     total: totalOrdersRaw,
     isLoading: ordersLoading,
     error: ordersError,
     refetch: refetchOrders,
-  } = useAdminOrders({ page: 1, limit: SUMMARY_ORDER_LIMIT });
+  } = useAdminOrders({ page: 1, limit: 4 });
 
   const {
     total: totalProductsRaw,
@@ -35,703 +167,543 @@ export default function AdminDashboardPage() {
     refetch: refetchProducts,
   } = useAdminProducts({ page: 1, limit: 1 });
 
-  const totalOrders = Number.isFinite(Number(totalOrdersRaw)) ? Number(totalOrdersRaw) : orders.length;
-  const totalProducts = Number.isFinite(Number(totalProductsRaw)) ? Number(totalProductsRaw) : 0;
+  // Usar datos del dashboard principal o fallback
+  const metrics = dashboardData?.metrics || {
+    totalProducts: Number.isFinite(Number(totalProductsRaw)) ? Number(totalProductsRaw) : 0,
+    totalOrders: Number.isFinite(Number(totalOrdersRaw)) ? Number(totalOrdersRaw) : fallbackOrders.length,
+    totalRevenue: fallbackOrders.reduce((sum, order) => sum + Number(order.total ?? 0), 0),
+    totalCustomers: new Set(fallbackOrders.map(o => o.userId || o.userEmail)).size,
+    monthlyRevenue: 0,
+    previousMonthRevenue: 0,
+    growthPercentage: 0,
+  };
 
-  const dashboardData = useMemo(() => {
-    const revenue = orders.reduce((sum, order) => sum + Number(order.total ?? 0), 0);
+  const stockData = dashboardData?.stock || {
+    lowStockItems: 8,
+    outOfStockItems: 3,
+  };
 
-    const uniqueCustomers = new Set(
-      orders
-        .map((order) => String(order.userId ?? order.userEmail ?? "")) // fallback for anonymous
-        .filter(Boolean),
-    ).size;
-
-    const statusCounts = orders.reduce((acc, order) => {
-      const key = String(order.status ?? "pending").toLowerCase();
-      acc[key] = (acc[key] ?? 0) + 1;
-      return acc;
-    }, {});
-
-    // Simulamos productos con stock bajo (esto debería venir del backend)
-    const lowStockItems = 8; // Productos con stock menor a 5 unidades
-    const outOfStockItems = 3; // Productos sin stock
-
-    // Datos simulados para el reporte de ventas
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const lastMonthRevenue = 2450000; // Simulado
-    const currentMonthRevenue = revenue;
-    const growthPercentage = lastMonthRevenue > 0 
-      ? ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100).toFixed(1)
-      : 0;
-
-    // Top categorías por ventas (simulado)
-    const topCategories = [
-      { name: "Living", sales: 1200000, orders: 15 },
-      { name: "Comedor", sales: 890000, orders: 12 },
-      { name: "Dormitorio", sales: 650000, orders: 8 },
-      { name: "Iluminación", sales: 350000, orders: 7 },
-    ];
-
-    // Datos para el gráfico de distribución semanal (simulado)
-    const weeklyDistribution = [
-      { day: "Lunes", orders: 12, percentage: 15 },
-      { day: "Martes", orders: 18, percentage: 22.5 },
-      { day: "Miércoles", orders: 15, percentage: 18.75 },
-      { day: "Jueves", orders: 14, percentage: 17.5 },
-      { day: "Viernes", orders: 21, percentage: 26.25 },
-    ];
-
-    // Productos populares (simulado)
-    const popularProducts = [
-      {
-        id: 1,
-        name: "Sofá Modular Arena",
-        sku: "MOA-LIV-SOFA-001",
-        views: 342,
-        sales: 15,
-        price: 459990,
-        image: "https://images.unsplash.com/photo-1616047006789-b7af5afb8c20?q=80&w=400",
-        conversionRate: 4.4
-      },
-      {
-        id: 2,
-        name: "Mesa Roble Extensible",
-        sku: "MOA-COM-MESA-045",
-        views: 289,
-        sales: 12,
-        price: 329990,
-        image: "https://images.unsplash.com/photo-1583845112239-97ef1341b271?q=80&w=400",
-        conversionRate: 4.2
-      },
-      {
-        id: 3,
-        name: "Lámpara Industrial Cobre",
-        sku: "MOA-ILU-LAMP-023",
-        views: 156,
-        sales: 8,
-        price: 89990,
-        image: "https://images.unsplash.com/photo-1606170033648-5d55a3edf314?q=80&w=400",
-        conversionRate: 5.1
-      }
-    ];
-
-    return {
-      revenue,
-      uniqueCustomers,
-      statusCounts,
-      lowStockItems,
-      outOfStockItems,
-      lastMonthRevenue,
-      growthPercentage,
-      topCategories,
-      weeklyDistribution,
-      popularProducts,
-      latestOrders: orders.slice(0, 4),
-    };
-  }, [orders]);
-
-  const statusEntries = Object.entries(ORDER_STATUS_MAP).map(([status, config]) => ({
-    status,
-    label: config.label,
-    variant: config.variant,
-    count: dashboardData.statusCounts[status] ?? 0,
-  }));
-
-  const totalStatusCount = statusEntries.reduce((sum, entry) => sum + entry.count, 0);
-
-  const statsCards = [
-    {
-      label: "Productos en catálogo",
-      helper: "Muebles y decoración",
-      icon: Warehouse,
-      value: productsLoading ? "…" : formatCount(totalProducts),
-    },
-    {
-      label: "Ingresos del mes",
-      helper: "Ventas completadas",
-      icon: TrendingUp,
-      value: ordersLoading ? "..." : formatCurrencyCLP(dashboardData.revenue),
-    },
-    {
-      label: "Pedidos totales",
-      helper: "Órdenes procesadas",
-      icon: Package,
-      value: ordersLoading ? "…" : formatCount(totalOrders),
-    },
-    {
-      label: "Stock bajo",
-      helper: "Requieren reposición",
-      icon: AlertTriangle,
-      value: ordersLoading ? "…" : formatCount(dashboardData.lowStockItems),
-    },
-  ];
-
-  const quickActions = [
-    { label: "Gestión Productos", to: API_PATHS.admin.products, icon: Layers },
-    { label: "Pedidos & Envíos", to: API_PATHS.admin.orders, icon: Truck },
-    { label: "Stock & Inventario", to: API_PATHS.admin.products, icon: Warehouse },
-    { label: "Configuración", to: API_PATHS.admin.settings, icon: Settings },
-  ];
+  const topProducts = dashboardData?.topProducts || [];
+  const categories = dashboardData?.categories || [];
+  const recentOrders = dashboardData?.recentOrders || fallbackOrders.slice(0, 4);
 
   const handleRefresh = () => {
+    refetch?.();
     refetchOrders?.();
     refetchProducts?.();
   };
 
-  const isLoading = ordersLoading || productsLoading;
-  const hasError = Boolean(ordersError || productsError);
+  const hasError = Boolean(isError || ordersError || productsError);
+  const loading = isLoading || ordersLoading || productsLoading;
+
+  const quickActions = [
+    { 
+      label: "Gestión de Productos", 
+      description: "Catálogo, precios y stock",
+      to: API_PATHS.admin.products, 
+      icon: Layers 
+    },
+    { 
+      label: "Pedidos y Envíos", 
+      description: "Seguimiento de órdenes",
+      to: API_PATHS.admin.orders, 
+      icon: Truck 
+    },
+    { 
+      label: "Inventario", 
+      description: "Control de stock",
+      to: API_PATHS.admin.products, 
+      icon: Warehouse,
+      variant: stockData.lowStockItems > 5 ? "warning" : "default"
+    },
+    { 
+      label: "Configuración", 
+      description: "Ajustes de tienda",
+      to: API_PATHS.admin.settings, 
+      icon: Settings 
+    },
+  ];
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-8">
       <header className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-neutral-400">MOA Administración</p>
-        <h1 className="text-3xl font-semibold text-primary">Centro de Control</h1>
-        <p className="text-sm text-neutral-500">Gestión integral de productos, pedidos y operaciones MOA.</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-neutral-400">
+          MOA Administración
+        </p>
+        <h1 className="text-3xl font-bold text-primary1 mb-2">Centro de Control</h1>
+        <p className="text-neutral-600 max-w-2xl">
+          Gestión integral de tu tienda de muebles. Monitor en tiempo real las ventas, 
+          inventario y operaciones de MOA.
+        </p>
       </header>
 
       {hasError && (
-        <div className="rounded-3xl border border-error/30 bg-error/[0.06] p-5 text-sm text-error">
-          <p>No se pudo cargar la información del panel.</p>
-          <Button appearance="ghost" intent="neutral" size="sm" className="mt-3" onClick={handleRefresh}>
-            Reintentar
-          </Button>
+        <div className="rounded-3xl border border-error/30 bg-error/[0.06] p-6">
+          <div className="flex items-start gap-4">
+            <AlertTriangle className="h-6 w-6 text-error mt-1 shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-semibold text-error mb-2">Error de conexión</h3>
+              <p className="text-error/80 text-sm mb-4">
+                No se pudieron cargar algunos datos del panel de control.
+              </p>
+              <Button appearance="ghost" intent="error" size="sm" onClick={handleRefresh}>
+                Reintentar
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statsCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <article
-              key={card.label}
-              className="flex flex-col gap-3 rounded-3xl border border-neutral-100 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center justify-between gap-2 text-sm text-neutral-500">
-                <span>{card.label}</span>
-                <Icon className="h-4 w-4 text-(--color-secondary1)" aria-hidden />
-              </div>
-              <p className="text-3xl font-semibold tracking-tight text-(--text-strong)">{card.value}</p>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">{card.helper}</p>
-            </article>
-          )
-        })}
+      {/* Métricas principales */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="Ingresos del mes"
+          subtitle="Ventas completadas"
+          value={loading ? <Skeleton className="h-8 w-32" /> : formatCurrencyCLP(metrics.monthlyRevenue)}
+          icon={DollarSign}
+          trend={metrics.growthPercentage >= 0 ? "up" : "down"}
+          trendValue={`${Math.abs(metrics.growthPercentage).toFixed(1)}%`}
+          accentColor="var(--color-success)"
+        />
+        
+        <MetricCard
+          title="Pedidos totales"
+          subtitle="Órdenes procesadas"
+          value={loading ? <Skeleton className="h-8 w-20" /> : formatCount(metrics.totalOrders)}
+          icon={Package}
+          accentColor="var(--color-primary1)"
+        />
+        
+        <MetricCard
+          title="Productos activos"
+          subtitle="En catálogo"
+          value={loading ? <Skeleton className="h-8 w-20" /> : formatCount(metrics.totalProducts)}
+          icon={Layers}
+          accentColor="var(--color-secondary1)"
+        />
+        
+        <MetricCard
+          title="Stock bajo"
+          subtitle="Requieren reposición"
+          value={loading ? <Skeleton className="h-8 w-16" /> : formatCount(stockData.lowStockItems)}
+          icon={AlertTriangle}
+          accentColor={stockData.lowStockItems > 5 ? "var(--color-warning)" : "var(--color-success)"}
+        />
       </div>
 
-      {/* Alertas de inventario específicas para MOA */}
-      <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6">
-        <div className="flex items-start gap-4">
-          <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <h3 className="font-semibold text-amber-800 mb-2">Alertas de Inventario</h3>
-            <div className="space-y-2 text-sm text-amber-700">
-              <p>• {dashboardData.outOfStockItems} productos sin stock disponible</p>
-              <p>• {dashboardData.lowStockItems} productos con stock bajo (menos de 5 unidades)</p>
-              <p>• 2 productos requieren reposición urgente</p>
-            </div>
-            <div className="mt-4 flex gap-3">
-              <Button appearance="ghost" intent="warning" size="sm">
-                Ver productos sin stock
-              </Button>
-              <Button appearance="ghost" intent="warning" size="sm">
-                Generar orden de compra
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Tabs principales */}
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+          <TabsTrigger value="overview">Resumen</TabsTrigger>
+          <TabsTrigger value="sales">Ventas</TabsTrigger>
+          <TabsTrigger value="products">Productos</TabsTrigger>
+          <TabsTrigger value="operations">Operaciones</TabsTrigger>
+        </TabsList>
 
-      {/* Widget de Reporte de Ventas */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <article className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Análisis mensual</p>
-              <h2 className="text-xl font-semibold text-primary">Reporte de Ventas</h2>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-neutral-500">
-              <Calendar className="h-4 w-4" />
-              Noviembre 2025
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            {/* Comparación mensual */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-neutral-600">Mes actual</p>
-                <p className="text-2xl font-bold text-(--text-strong)">{formatCurrencyCLP(dashboardData.revenue)}</p>
-                <div className="flex items-center gap-1 text-sm">
-                  {Number(dashboardData.growthPercentage) >= 0 ? (
-                    <>
-                      <ArrowUpRight className="h-4 w-4 text-green-600" />
-                      <span className="text-green-600">+{dashboardData.growthPercentage}%</span>
-                    </>
-                  ) : (
-                    <>
-                      <ArrowDownRight className="h-4 w-4 text-red-600" />
-                      <span className="text-red-600">{dashboardData.growthPercentage}%</span>
-                    </>
-                  )}
-                  <span className="text-neutral-500">vs mes anterior</span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-neutral-600">Mes anterior</p>
-                <p className="text-lg font-semibold text-neutral-600">{formatCurrencyCLP(dashboardData.lastMonthRevenue)}</p>
-                <p className="text-xs text-neutral-400">Octubre 2025</p>
-              </div>
-            </div>
-
-            {/* Top categorías */}
-            <div>
-              <p className="text-sm font-medium text-neutral-600 mb-3">Categorías más vendidas</p>
+        {/* Tab: Resumen */}
+        <TabsContent value="overview">
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Acciones rápidas */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-primary1">Acciones Rápidas</h3>
               <div className="space-y-3">
-                {dashboardData.topCategories.map((category, index) => (
-                  <div key={category.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-(--color-primary1) text-xs font-semibold text-white">
-                        {index + 1}
-                      </span>
-                      <div>
-                        <p className="text-sm font-medium text-(--text-strong)">{category.name}</p>
-                        <p className="text-xs text-neutral-500">{category.orders} pedidos</p>
-                      </div>
-                    </div>
-                    <p className="text-sm font-semibold text-(--text-strong)">{formatCurrencyCLP(category.sales)}</p>
-                  </div>
+                {quickActions.map((action) => (
+                  <QuickActionCard
+                    key={action.label}
+                    label={action.label}
+                    description={action.description}
+                    icon={action.icon}
+                    to={action.to}
+                    variant={action.variant}
+                  />
                 ))}
               </div>
             </div>
-          </div>
 
-          <div className="mt-6 pt-6 border-t border-neutral-100">
-            <Button appearance="ghost" intent="primary" size="sm" className="w-full">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Ver reporte completo
-            </Button>
-          </div>
-        </article>
-
-        <article className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Tendencias</p>
-              <h2 className="text-xl font-semibold text-primary">Métricas de Rendimiento</h2>
-            </div>
-            <TrendingUp className="h-5 w-5 text-(--color-secondary1)" />
-          </div>
-
-          <div className="space-y-6">
-            {/* Métricas clave */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100">
-                <p className="text-xs uppercase tracking-wide text-blue-700 font-medium">Ticket promedio</p>
-                <p className="text-xl font-bold text-blue-800 mt-1">
-                  {totalOrders > 0 ? formatCurrencyCLP(Math.round(dashboardData.revenue / totalOrders)) : "$0"}
-                </p>
-                <p className="text-xs text-blue-600 mt-1">Por pedido</p>
-              </div>
-              <div className="p-4 rounded-2xl bg-green-50 border border-green-100">
-                <p className="text-xs uppercase tracking-wide text-green-700 font-medium">Conversión</p>
-                <p className="text-xl font-bold text-green-800 mt-1">2.4%</p>
-                <p className="text-xs text-green-600 mt-1">Visitante a compra</p>
-              </div>
-            </div>
-
-            {/* Indicadores de actividad */}
+            {/* Alertas de stock */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-neutral-600">Productos más vistos</span>
-                <span className="text-sm font-semibold text-(--text-strong)">Sofás modulares</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-neutral-600">Categoría estrella</span>
-                <span className="text-sm font-semibold text-(--text-strong)">Living</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-neutral-600">Hora pico de ventas</span>
-                <span className="text-sm font-semibold text-(--text-strong)">20:00 - 22:00</span>
-              </div>
-            </div>
-
-            {/* Progreso del mes */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-neutral-600">Progreso del mes</span>
-                <span className="font-semibold text-(--text-strong)">56%</span>
-              </div>
-              <div className="h-2 rounded-full bg-neutral-100">
-                <div className="h-full w-[56%] rounded-full bg-(--color-primary1)"></div>
-              </div>
-              <p className="text-xs text-neutral-500">17 días de 30 días del mes</p>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      {/* Sección de distribución operativa */}
-      <article className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Estados de pedidos</p>
-            <h2 className="text-xl font-semibold text-primary">Distribución operativa</h2>
-          </div>
-          <span className="text-xs font-semibold text-neutral-500">
-            {totalStatusCount ? `${totalStatusCount} pedidos activos` : "Sin actividad"}
-          </span>
-        </div>
-        {totalStatusCount ? (
-          <div className="space-y-4 mb-6">
-            {statusEntries.map((entry) => (
-              <div key={entry.status} className="space-y-1">
-                <div className="flex items-center justify-between text-sm font-medium text-neutral-600">
-                  <span className="flex items-center gap-2">
-                    <StatusPill status={entry.status} domain="order" className="text-[10px]" />
-                    {entry.label}
-                  </span>
-                  <span className="text-xs font-semibold text-(--text-strong)">{entry.count}</span>
+              <h3 className="text-xl font-semibold text-primary1">Alertas de Inventario</h3>
+              <div className="rounded-3xl border border-warning/30 bg-warning/10 p-6">
+                <div className="flex items-start gap-4">
+                  <AlertTriangle className="h-6 w-6 text-warning mt-1 shrink-0" />
+                  <div className="flex-1 space-y-3">
+                    <h4 className="font-semibold text-warning">Atención requerida</h4>
+                    <div className="space-y-2 text-sm text-warning/80">
+                      <p>• {stockData.outOfStockItems} productos sin stock</p>
+                      <p>• {stockData.lowStockItems} productos con stock bajo</p>
+                      <p>• 2 productos requieren reposición urgente</p>
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button appearance="ghost" intent="warning" size="sm">
+                        Ver inventario
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="h-2 rounded-full bg-(--surface-subtle)">
-                  <div
-                    className="h-full rounded-full bg-(--color-primary1)"
-                    style={{
-                      width: `${Math.max(4, Math.round((entry.count / totalStatusCount) * 100))}%`,
-                    }}
+              </div>
+            </div>
+
+            {/* Métricas del día */}
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-primary1">Hoy</h3>
+              <div className="space-y-4">
+                <MetricCard
+                  title="Visitantes"
+                  value="127"
+                  icon={Users}
+                  size="small"
+                  accentColor="var(--color-primary3)"
+                />
+                <MetricCard
+                  title="Conversión"
+                  value="2.4%"
+                  icon={TrendingUp}
+                  size="small"
+                  trend="up"
+                  trendValue="0.3%"
+                  accentColor="var(--color-success)"
+                />
+                <MetricCard
+                  title="Actividad"
+                  value="84%"
+                  icon={Activity}
+                  size="small"
+                  accentColor="var(--color-secondary2)"
+                />
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab: Ventas */}
+        <TabsContent value="sales">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Análisis de ventas */}
+            <div className="rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Análisis mensual</p>
+                  <h2 className="text-2xl font-semibold text-primary1">Reporte de Ventas</h2>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-neutral-500">
+                  <Calendar className="h-4 w-4" />
+                  Noviembre 2025
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <MetricCard
+                    title="Mes actual"
+                    value={formatCurrencyCLP(metrics.monthlyRevenue)}
+                    trend={metrics.growthPercentage >= 0 ? "up" : "down"}
+                    trendValue={`${Math.abs(metrics.growthPercentage).toFixed(1)}%`}
+                    size="small"
+                  />
+                  <MetricCard
+                    title="Mes anterior"
+                    value={formatCurrencyCLP(metrics.previousMonthRevenue)}
+                    subtitle="Octubre 2025"
+                    size="small"
+                  />
+                </div>
+
+                {/* Top categorías */}
+                <div>
+                  <h4 className="font-semibold text-neutral-700 mb-4">Categorías más vendidas</h4>
+                  <div className="space-y-3">
+                    {categories.slice(0, 4).map((category, index) => (
+                      <div
+                        key={category.id}
+                        className="flex items-center justify-between rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral4)] p-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary1 text-xs font-semibold text-white">
+                            {index + 1}
+                          </span>
+                          <div>
+                            <p className="font-medium text-neutral-800">{category.name}</p>
+                            <p className="text-xs text-neutral-500">{category.orders} pedidos</p>
+                          </div>
+                        </div>
+                        <p className="font-semibold text-neutral-800">
+                          {formatCurrencyCLP(category.revenue)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-[color:var(--color-border)]">
+                <Button appearance="ghost" intent="primary" size="sm" className="w-full">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Ver reporte completo
+                </Button>
+              </div>
+            </div>
+
+            {/* Métricas de rendimiento */}
+            <div className="space-y-6">
+              <MetricCard
+                title="Ticket promedio"
+                subtitle="Por pedido"
+                value={
+                  metrics.totalOrders > 0 
+                    ? formatCurrencyCLP(Math.round(metrics.totalRevenue / metrics.totalOrders)) 
+                    : "$0"
+                }
+                icon={DollarSign}
+                size="large"
+                accentColor="var(--color-primary2)"
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <MetricCard
+                  title="Conversión"
+                  value="2.4%"
+                  subtitle="Visitante a compra"
+                  icon={TrendingUp}
+                  size="small"
+                  accentColor="var(--color-success)"
+                />
+                <MetricCard
+                  title="Clientes"
+                  value={formatCount(metrics.totalCustomers)}
+                  subtitle="Únicos"
+                  icon={Users}
+                  size="small"
+                  accentColor="var(--color-secondary1)"
+                />
+              </div>
+
+              <div className="rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] p-6">
+                <h4 className="font-semibold text-neutral-700 mb-4">Progreso del mes</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-neutral-600">Meta mensual</span>
+                    <span className="font-semibold text-neutral-800">56%</span>
+                  </div>
+                  <div className="h-3 rounded-full bg-neutral-200">
+                    <div className="h-full w-[56%] rounded-full bg-primary1"></div>
+                  </div>
+                  <p className="text-xs text-neutral-500">17 días de 30 días del mes</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab: Productos */}
+        <TabsContent value="products">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-primary1">Productos Destacados</h2>
+              <Button appearance="solid" intent="primary" to={API_PATHS.admin.products}>
+                Ver todos los productos
+              </Button>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {topProducts.map((product, index) => (
+                <div
+                  key={product.id}
+                  className="group relative overflow-hidden rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] transition-all hover:shadow-[var(--shadow-lg)]"
+                >
+                  <div className="relative aspect-4/3 overflow-hidden bg-neutral-100">
+                    <img 
+                      src={product.image} 
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1 text-sm font-semibold text-neutral-800">
+                        <Star className="h-3 w-3" />
+                        #{index + 1}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-6 space-y-4">
+                    <div>
+                      <h3 className="font-semibold text-lg text-neutral-800 line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-neutral-500 mt-1">{product.sku}</p>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-primary1">
+                        {formatCurrencyCLP(product.price)}
+                      </span>
+                      <span className="text-success font-semibold">
+                        {product.conversionRate}% conv.
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2 text-neutral-600">
+                        <Eye className="h-4 w-4" />
+                        <span>{product.views} vistas</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-neutral-600">
+                        <ShoppingCart className="h-4 w-4" />
+                        <span>{product.sales} ventas</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-neutral-500">Rendimiento</span>
+                        <span className="font-semibold text-neutral-700">
+                          {Math.round((product.sales / product.views) * 100)}%
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-neutral-200">
+                        <div
+                          className="h-full rounded-full bg-linear-to-r from-primary1 to-primary3"
+                          style={{
+                            width: `${Math.min(100, (product.sales / product.views) * 100 * 20)}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Tab: Operaciones */}
+        <TabsContent value="operations">
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Pedidos recientes */}
+            <div className="rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold text-primary1">Últimos Pedidos</h2>
+                  <p className="text-sm text-neutral-500">Actividad reciente</p>
+                </div>
+                <Button size="sm" onClick={handleRefresh}>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Actualizar
+                </Button>
+              </div>
+
+              {loading ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div
+                      key={`order-skeleton-${idx}`}
+                      className="flex items-center gap-4 rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral2)] p-4"
+                    >
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-3 w-24" />
+                      </div>
+                      <Skeleton className="h-6 w-16" />
+                    </div>
+                  ))}
+                </div>
+              ) : recentOrders.length ? (
+                <div className="space-y-4">
+                  {recentOrders.map((order) => (
+                    <div
+                      key={order.id ?? order.number}
+                      className="flex items-center gap-4 rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral2)] p-4 transition-colors hover:bg-[color:var(--color-neutral3)]"
+                    >
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary4">
+                        <Package className="h-5 w-5 text-primary1" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-neutral-800">
+                          Pedido #{order.number}
+                        </p>
+                        <p className="text-sm text-neutral-500">
+                          {formatDate_ddMMyyyy(order.createdAt, "—")} · {formatCurrencyCLP(order.total)}
+                        </p>
+                      </div>
+                      <StatusPill status={order.status} domain="order" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 text-neutral-300 mx-auto mb-3" />
+                  <p className="text-neutral-500">No hay pedidos recientes</p>
+                </div>
+              )}
+            </div>
+
+            {/* Estado operativo */}
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] p-6">
+                <h3 className="text-lg font-semibold text-primary1 mb-4">Estado Operativo</h3>
+                <div className="space-y-4">
+                  <MetricCard
+                    title="Pedidos activos"
+                    value={formatCount(metrics.totalOrders)}
+                    icon={Activity}
+                    size="small"
+                  />
+                  <MetricCard
+                    title="Envíos pendientes"
+                    value="12"
+                    icon={Truck}
+                    size="small"
+                    accentColor="var(--color-warning)"
+                  />
+                  <MetricCard
+                    title="Stock crítico"
+                    value={formatCount(stockData.lowStockItems)}
+                    icon={AlertTriangle}
+                    size="small"
+                    accentColor="var(--color-error)"
                   />
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 mb-6">
-            <Activity className="h-12 w-12 text-neutral-300 mx-auto mb-3" />
-            <p className="text-sm text-neutral-500">Los pedidos se registran aquí en cuanto haya actividad.</p>
-            <p className="text-xs text-neutral-400 mt-1">El flujo operativo aparecerá cuando los clientes realicen compras.</p>
-          </div>
-        )}
-        <div className="border-t border-neutral-100 pt-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-3">Acciones rápidas</p>
-          <div className="flex flex-wrap gap-3">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <Button
-                  key={action.label}
-                  appearance="ghost"
-                  intent="primary"
-                  size="sm"
-                  to={action.to}
-                  leadingIcon={<Icon className="h-4 w-4" aria-hidden />}
-                >
-                  {action.label}
-                </Button>
-              )
-            })}
-          </div>
-        </div>
-      </article>
 
-      {/* Widgets adicionales: Conversion Rate y Distribución de Órdenes */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Widget de Conversion Rate detallado */}
-        <article className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Rendimiento</p>
-              <h2 className="text-xl font-semibold text-primary">Tasa de Conversión</h2>
-            </div>
-            <TrendingUp className="h-5 w-5 text-(--color-secondary1)" />
-          </div>
-
-          <div className="space-y-6">
-            {/* Conversión principal */}
-            <div className="text-center p-6 rounded-2xl bg-linear-to-br from-blue-50 to-indigo-100 border border-blue-200">
-              <p className="text-sm font-medium text-blue-700 mb-2">Conversión Global</p>
-              <p className="text-4xl font-bold text-blue-800">2.4%</p>
-              <div className="flex items-center justify-center gap-1 mt-2">
-                <ArrowUpRight className="h-4 w-4 text-green-600" />
-                <span className="text-sm text-green-600">+0.3% vs mes anterior</span>
-              </div>
-            </div>
-
-            {/* Conversiones por categoría */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-neutral-700">Conversión por Categoría</p>
-              {dashboardData.topCategories.map((category, index) => {
-                const conversionRate = (Math.random() * 2 + 1.5).toFixed(1); // Simulado
-                return (
-                  <div key={category.name} className="flex items-center justify-between p-3 rounded-xl bg-neutral-50 border border-neutral-100">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        index === 0 ? 'bg-blue-500' : 
-                        index === 1 ? 'bg-green-500' : 
-                        index === 2 ? 'bg-purple-500' : 'bg-orange-500'
-                      }`}></div>
-                      <span className="text-sm font-medium text-neutral-700">{category.name}</span>
-                    </div>
-                    <span className="text-sm font-bold text-neutral-800">{conversionRate}%</span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Botón de acción */}
-            <div className="pt-4 border-t border-neutral-100">
-              <Button appearance="ghost" intent="primary" size="sm" className="w-full">
-                Optimizar conversión
-              </Button>
-            </div>
-          </div>
-        </article>
-
-        {/* Widget de Distribución de Órdenes con Pie Chart */}
-        <article className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Análisis temporal</p>
-              <h2 className="text-xl font-semibold text-primary">Distribución de Órdenes</h2>
-            </div>
-            <PieChart className="h-5 w-5 text-(--color-secondary1)" />
-          </div>
-
-          <div className="space-y-6">
-            {/* Simulación de pie chart con barras */}
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-neutral-700 mb-4">Distribución Semanal</p>
-              {dashboardData.weeklyDistribution.map((day, index) => (
-                <div key={day.day} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-neutral-600">{day.day}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-neutral-500">{day.orders} órdenes</span>
-                      <span className="text-sm font-semibold text-neutral-800">{day.percentage}%</span>
-                    </div>
-                  </div>
-                  <div className="h-2 rounded-full bg-neutral-100">
-                    <div 
-                      className={`h-full rounded-full ${
-                        index === 0 ? 'bg-blue-500' : 
-                        index === 1 ? 'bg-green-500' : 
-                        index === 2 ? 'bg-purple-500' : 
-                        index === 3 ? 'bg-orange-500' : 'bg-pink-500'
-                      }`}
-                      style={{ width: `${day.percentage * 4}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Resumen de categorías */}
-            <div className="pt-4 border-t border-neutral-100">
-              <p className="text-sm font-semibold text-neutral-700 mb-3">Breakdown por Categoría</p>
-              <div className="grid grid-cols-2 gap-3">
-                {dashboardData.topCategories.slice(0, 4).map((category, index) => (
-                  <div key={category.name} className="text-center p-3 rounded-xl bg-neutral-50">
-                    <div className={`w-4 h-4 rounded-full mx-auto mb-2 ${
-                      index === 0 ? 'bg-blue-500' : 
-                      index === 1 ? 'bg-green-500' : 
-                      index === 2 ? 'bg-purple-500' : 'bg-orange-500'
-                    }`}></div>
-                    <p className="text-xs font-medium text-neutral-600">{category.name}</p>
-                    <p className="text-sm font-bold text-neutral-800">{category.orders}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      {/* Widget de Productos Populares */}
-      <article className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Top performers</p>
-            <h2 className="text-xl font-semibold text-primary">Productos Populares</h2>
-          </div>
-          <Star className="h-5 w-5 text-(--color-secondary1)" />
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {dashboardData.popularProducts.map((product, index) => (
-            <div key={product.id} className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all hover:shadow-lg hover:border-neutral-300">
-              {/* Imagen del producto */}
-              <div className="relative aspect-4/3 overflow-hidden bg-neutral-100">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-sm px-2 py-1 text-xs font-semibold text-neutral-800">
-                    #{index + 1}
-                  </span>
-                </div>
-              </div>
-
-              {/* Contenido */}
-              <div className="p-4 space-y-3">
-                <div>
-                  <h3 className="font-semibold text-sm text-neutral-800 line-clamp-2">{product.name}</h3>
-                  <p className="text-xs text-neutral-500 mt-1">{product.sku}</p>
-                </div>
-
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-primary">{formatCurrencyCLP(product.price)}</span>
-                  <span className="text-green-600 font-semibold">{product.conversionRate}% conv.</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-1 text-neutral-600">
-                    <Eye className="h-3 w-3" />
-                    <span>{product.views} vistas</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-neutral-600">
-                    <ShoppingCart className="h-3 w-3" />
-                    <span>{product.sales} ventas</span>
-                  </div>
-                </div>
-
-                {/* Barra de rendimiento */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-neutral-500">Rendimiento</span>
-                    <span className="font-semibold text-neutral-700">{Math.round((product.sales / product.views) * 100)}%</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-neutral-100">
-                    <div 
-                      className="h-full rounded-full bg-linear-to-r from-blue-500 to-purple-500"
-                      style={{ width: `${Math.min(100, (product.sales / product.views) * 100 * 20)}%` }}
-                    />
-                  </div>
+              <div className="rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] p-6">
+                <h3 className="text-lg font-semibold text-primary1 mb-4">Acciones Rápidas</h3>
+                <div className="space-y-3">
+                  <Button 
+                    appearance="ghost" 
+                    intent="primary" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    to={API_PATHS.admin.orders}
+                  >
+                    <Package className="h-4 w-4 mr-3" />
+                    Gestionar pedidos
+                  </Button>
+                  <Button 
+                    appearance="ghost" 
+                    intent="primary" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    to={API_PATHS.admin.products}
+                  >
+                    <Warehouse className="h-4 w-4 mr-3" />
+                    Revisar inventario
+                  </Button>
+                  <Button 
+                    appearance="ghost" 
+                    intent="primary" 
+                    size="sm" 
+                    className="w-full justify-start"
+                    to={API_PATHS.admin.settings}
+                  >
+                    <Settings className="h-4 w-4 mr-3" />
+                    Configuración
+                  </Button>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-neutral-100">
-          <Button appearance="ghost" intent="primary" size="sm" className="w-full">
-            Ver análisis completo de productos
-          </Button>
-        </div>
-      </article>
-
-      {/* Últimos pedidos y widget lateral */}
-      <div className="grid gap-6 lg:grid-cols-4">
-        <article className="lg:col-span-3 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <header className="flex flex-wrap items-center justify-between gap-3 mb-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-400">Pedidos recientes</p>
-              <h2 className="text-xl font-semibold text-primary">Últimos pedidos de muebles</h2>
-            </div>
-            <Button 
-              appearance="solid" 
-              intent="primary" 
-              size="sm" 
-              onClick={handleRefresh}
-              className="bg-(--color-primary1) hover:shadow-sm transition-shadow"
-            >
-              Actualizar
-            </Button>
-          </header>
-          {isLoading ? (
-            <div className="py-10 text-center text-sm text-neutral-500">Cargando pedidos...</div>
-          ) : dashboardData.latestOrders.length ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {dashboardData.latestOrders.map((order) => (
-                <div
-                  key={order.id ?? order.number}
-                  className="flex flex-col gap-3 rounded-2xl border border-neutral-100 p-4 shadow-[0_5px_12px_rgba(15,23,42,0.05)]"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <p className="text-sm font-semibold text-(--text-strong)">Pedido #{order.number}</p>
-                      <p className="text-xs text-neutral-500">
-                        {formatDate_ddMMyyyy(order.createdAt, "—")}
-                      </p>
-                    </div>
-                    <StatusPill status={order.status} domain="order" />
-                  </div>
-                  <div className="flex items-center justify-between gap-4 text-sm">
-                    <span className="text-neutral-500">Total</span>
-                    <strong className="text-(--text-strong)">{formatCurrencyCLP(order.total)}</strong>
-                  </div>
-                  <p className="text-xs text-neutral-400">{relativeTime(order.createdAt, new Date(), "—")}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <Package className="h-16 w-16 text-neutral-300 mx-auto mb-4" />
-              <p className="text-lg font-medium text-neutral-500 mb-2">Aún no hay pedidos de muebles registrados</p>
-              <p className="text-sm text-neutral-400">Los pedidos aparecerán aquí cuando los clientes compren productos</p>
-            </div>
-          )}
-        </article>
-
-        {/* Widget lateral */}
-        <article className="lg:col-span-1 rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-neutral-400 mb-2">Rendimiento</p>
-              <h3 className="text-lg font-semibold text-primary">Métricas del día</h3>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-linear-to-br from-blue-50 to-blue-100 border border-blue-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500 text-white">
-                    <TrendingUp className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-blue-700 uppercase tracking-wide">Conversión</p>
-                    <p className="text-lg font-bold text-blue-800">2.4%</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-linear-to-br from-green-50 to-green-100 border border-green-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500 text-white">
-                    <Users className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-green-700 uppercase tracking-wide">Visitantes</p>
-                    <p className="text-lg font-bold text-green-800">127</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-linear-to-br from-purple-50 to-purple-100 border border-purple-200">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-purple-500 text-white">
-                    <Activity className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-purple-700 uppercase tracking-wide">Actividad</p>
-                    <p className="text-lg font-bold text-purple-800">84%</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-neutral-100">
-              <Button 
-                appearance="ghost" 
-                intent="primary" 
-                size="sm" 
-                className="w-full"
-              >
-                Ver más métricas
-              </Button>
-            </div>
           </div>
-        </article>
-      </div>
+        </TabsContent>
+      </Tabs>
     </section>
   );
 }

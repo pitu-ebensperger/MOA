@@ -13,6 +13,7 @@
     "test:ui-tokens": "node src/config/__tests__/ui-tokens.test.js",
     "test:accessibility": "node src/config/__tests__/accessibility.test.js",
     "test:config": "npm run test:status-maps && npm run test:ui-tokens && npm run test:accessibility",
+    "test:auth": "node scripts/test-auth-mock.js",
     "export:tokens": "node scripts/export-tokens.js"
   },
   "dependencies": {

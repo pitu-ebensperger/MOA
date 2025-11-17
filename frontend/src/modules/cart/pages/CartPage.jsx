@@ -1,26 +1,24 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
+  ArrowRight,
   Minus,
   Plus,
   Trash2,
   ShoppingCart,
   Truck,
-  ShieldCheck,
-  Sparkles,
   PackageCheck,
 } from "lucide-react";
-import { useCartContext } from "../../../context/cart-context.js";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
-import { resolveProductPrice } from "../../products/utils/products.js";
-import { API_PATHS } from "../../../config/api-paths.js";
+import { useCartContext } from "@/context/cart-context.js"
+import { Price } from "@/components/data-display/Price.jsx"
+import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
+import { resolveProductPrice } from "@/modules/products/utils/products.js"
+import { API_PATHS } from "@/config/api-paths.js"
 import {
   Badge,
   buttonClasses,
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -43,24 +41,6 @@ const shippingOptions = [
   { value: "standard", label: "Despacho estándar", detail: "48-72 h hábiles", cost: 0 },
   { value: "express", label: "Despacho express", detail: "24 h hábiles", cost: 6900 },
   { value: "pickup", label: "Retiro en showroom", detail: "Disponible hoy", cost: 0 },
-];
-
-const guarantees = [
-  {
-    icon: Truck,
-    title: "Logística boutique",
-    copy: "Coordinamos envíos cuidados en Santiago y regiones.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Piezas certificadas",
-    copy: "Cada objeto va con seguro y certificado de autenticidad.",
-  },
-  {
-    icon: Sparkles,
-    title: "Styling incluido",
-    copy: "Te asesoramos para que combine perfecto en tu espacio.",
-  },
 ];
 
 export const CartPage = () => {
@@ -88,17 +68,10 @@ export const CartPage = () => {
   return (
     <main className="page container-px mx-auto max-w-6xl py-12">
       <header className="mb-10 space-y-4">
-        <Badge variant="accent" className="bg-[var(--color-primary3)] text-[var(--color-text-on-dark)]">
-          Carro curado
-        </Badge>
         <div>
           <h1 className="title-serif text-4xl text-[var(--color-primary1)]">
-            {hasItems ? "Revise tu selección" : "Tu carrito aún no tiene tesoros"}
+            {hasItems ? "Carro de compra" : "Tu carrito aún no tiene tesoros"}
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-            Guardamos tus elecciones favoritas para que puedas finalizar la compra con calma.
-            Coordina el envío boutique o prográmalo para retiro en nuestro showroom.
-          </p>
         </div>
       </header>
 
@@ -106,31 +79,20 @@ export const CartPage = () => {
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-6">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between gap-4">
-                <div>
-                  <CardTitle>Piezas seleccionadas</CardTitle>
-                  <CardDescription>
-                    {cartItems.length} producto{cartItems.length === 1 ? "" : "s"} listos para envío
-                  </CardDescription>
-                </div>
-                <Badge variant="neutral" className="text-[var(--color-primary2)]">
-                  Curado MOA
-                </Badge>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {cartItems.map((item, index) => {
-                  const itemPrice = resolveProductPrice(item) ?? 0;
-                  const quantity = Number(item.quantity) || 1;
-                  const itemTotal = itemPrice * quantity;
+              <CardContent className="p-0">
+                <div className="divide-y divide-[var(--border)]">
+                  {cartItems.map((item, index) => {
+                    const itemPrice = resolveProductPrice(item) ?? 0;
+                    const quantity = Number(item.quantity) || 1;
+                    const itemTotal = itemPrice * quantity;
 
-                  return (
-                    <article
-                      key={getItemKey(item, index)}
-                      className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-white/80 p-4 shadow-[var(--shadow-sm)]"
-                    >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                    return (
+                      <div
+                        key={getItemKey(item, index)}
+                        className="flex flex-col gap-4 px-4 py-5 first:pt-5 last:pb-5 sm:flex-row sm:items-start"
+                      >
                         <div className="flex flex-1 gap-4">
-                          <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-[#44311417]">
+                          <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-[#44311417]">
                             <img
                               src={buildItemImage(item)}
                               alt={item.name ?? "Producto"}
@@ -144,8 +106,6 @@ export const CartPage = () => {
                             </p>
                           </div>
                         </div>
-
-                        <Separator className="sm:hidden" />
 
                         <div className="flex flex-1 flex-col gap-3">
                           <div className="flex items-center justify-between text-sm text-[var(--color-text-muted)]">
@@ -187,16 +147,14 @@ export const CartPage = () => {
                               onClick={() => removeFromCart(item.id)}
                               className={buttonClasses({
                                 variant: "ghost",
-                                size: "sm",
-                                className: "gap-2 text-[0.6rem] uppercase tracking-[0.4em]",
+                                size: "icon",
+                                className: "h-9 w-9",
                               })}
+                              aria-label={`Eliminar ${item.name}`}
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
-                              Quitar
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
-
-                          <Separator />
 
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-[var(--color-text-muted)]">Subtotal pieza</span>
@@ -204,9 +162,9 @@ export const CartPage = () => {
                           </div>
                         </div>
                       </div>
-                    </article>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-3">
                 <div className="flex w-full items-center justify-between text-sm text-[var(--color-text-muted)]">
@@ -222,39 +180,46 @@ export const CartPage = () => {
                 </button>
               </CardFooter>
             </Card>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              {guarantees.map(({ icon, title, copy }) => {
-                const IconComponent = icon;
-                return (
-                  <Card key={title} className="bg-white/70 p-4 shadow-none">
-                    <div className="flex items-start gap-3">
-                      <div className="rounded-full bg-[var(--color-primary4)]/70 p-2 text-[var(--color-primary1)]">
-                        <IconComponent className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-[var(--color-primary2)]">{title}</p>
-                        <p className="text-xs text-[var(--color-text-secondary)]">{copy}</p>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
           </div>
 
           <aside className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Resumen de compra</CardTitle>
-                <CardDescription>Define el tipo de entrega y revisa el total final.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
+                    <span>Subtotal</span>
+                    <Price value={total} />
+                  </div>
+                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
+                    <span>Envío</span>
+                    {shippingCost ? (
+                      <Price value={shippingCost} className="text-[var(--color-primary2)]" />
+                    ) : (
+                      <Badge variant="accent" className="text-[0.6rem] tracking-[0.3em]">
+                        Gratis
+                      </Badge>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between text-base font-semibold text-[var(--color-primary1)]">
+                    <span>Total</span>
+                    <Price value={grandTotal} />
+                  </div>
+                </div>
+
+                <Separator />
+
                 <div className="space-y-2">
                   <Label required>Método de entrega</Label>
                   <Select value={shippingMethod} onValueChange={setShippingMethod}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona el método" />
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4" />
+                        <SelectValue placeholder="Selecciona el método" />
+                      </div>
                     </SelectTrigger>
                     <SelectContent>
                       {shippingOptions.map((option) => (
@@ -280,38 +245,17 @@ export const CartPage = () => {
                     </div>
                   </div>
                 </div>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
-                    <span>Subtotal</span>
-                    <Price value={total} />
-                  </div>
-                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
-                    <span>Envío</span>
-                    {shippingCost ? (
-                      <Price value={shippingCost} className="text-[var(--color-primary2)]" />
-                    ) : (
-                      <Badge variant="accent" className="text-[0.6rem] tracking-[0.3em]">
-                        Gratis
-                      </Badge>
-                    )}
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between text-base font-semibold text-[var(--color-primary1)]">
-                    <span>Total</span>
-                    <Price value={grandTotal} />
-                  </div>
-                </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-3">
                 <Link
                   to="/checkout"
                   className={buttonClasses({
                     size: "lg",
-                    className: "w-full justify-center text-base",
+                    className: "w-full justify-center gap-2 text-base",
                   })}
                 >
                   Continuar al checkout
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to={API_PATHS.products.products}

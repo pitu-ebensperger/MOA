@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Button } from "./Button"; 
-import { cx } from "../../utils/ui-helpers.js";
+import { Button } from "@/components/ui/Button"
+import { cx } from "@/utils/ui-helpers.js"
 
 
 export function Dropdown({

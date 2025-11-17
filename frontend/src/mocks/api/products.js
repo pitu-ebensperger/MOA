@@ -1,9 +1,9 @@
-import { PRODUCTS, CATEGORIES } from "../database/index.js";
-import { delay } from "../../utils/delay.js";
-import { normalizeCategory } from "../../utils/normalizers.js";
-import { sortProducts } from "../../utils/sort.js";
-import { matchesText, createCategoryMatcher, matchesPrice, matchesStatus } from "../../modules/products/utils/productsFilter.js";
-import { toNum } from "../../utils/number.js";
+import { PRODUCTS, CATEGORIES } from "@/mocks/database/index.js"
+import { delay } from "@/utils/delay.js"
+import { normalizeCategory } from "@/utils/normalizers.js"
+import { sortProducts } from "@/utils/sort.js"
+import { matchesText, createCategoryMatcher, matchesPrice, matchesStatus } from "@/modules/products/utils/productsFilter.js"
+import { toNum } from "@/utils/number.js"
 
 const cloneProduct = (p) => ({
   ...p,

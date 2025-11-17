@@ -23,7 +23,12 @@ export const loginUser = async (req, res, next) => {
       throw new AppError("JWT secret no configurado", 500);
     }
     const token = jwt.sign(
-      { id: user.usuario_id, email: user.email },
+      { 
+        id: user.usuario_id, 
+        email: user.email,
+        role_code: user.role_code,
+        rol: user.rol
+      },
       JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRES_IN,

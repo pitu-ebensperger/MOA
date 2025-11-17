@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Swal from 'sweetalert2'
 import { Mail } from 'lucide-react'
-import { requestPasswordReset } from '../../../services/auth.api.js'
+import { requestPasswordReset } from '@/services/auth.api.js'
 
 export default function ForgotPasswordPage(){
   const [email, setEmail] = useState('')

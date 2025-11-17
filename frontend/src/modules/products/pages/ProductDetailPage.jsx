@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
-import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
-import { Accordion } from "../../../components/ui/Accordion.jsx";
-import { Price } from "../../../components/data-display/Price.jsx";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs.jsx"
+import { Accordion } from "@/components/ui/Accordion.jsx"
+import { Price } from "@/components/data-display/Price.jsx"
 
-import { productsApi } from "../../../services/products.api.js";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
-import { useCategories } from "../hooks/useCategories.js";
-import { API_PATHS } from "../../../config/api-paths.js";
+import { productsApi } from "@/services/products.api.js"
+import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
+import { useCategories } from "@/modules/products/hooks/useCategories.js"
+import { API_PATHS } from "@/config/api-paths.js"
 import { Minus, Plus, Recycle, ShieldCheck, Truck } from "lucide-react";
-import { useCartContext } from "../../../context/cart-context.js";
+import { useCartContext } from "@/context/cart-context.js"
+import { useAuth } from "@/context/auth-context.js"
 
 const initialState = {
   product: null,
@@ -101,6 +102,8 @@ export const ProductDetailPage = () => {
   const [selectedImage, setSelectedImage] = useState(DEFAULT_PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
   const { addToCart, updateQuantity } = useCartContext() ?? {};
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const productsBasePath = API_PATHS.products.products;
 
   const baseBreadcrumbItems = [
@@ -333,6 +336,10 @@ export const ProductDetailPage = () => {
                   type="button"
                   disabled={product.stock <= 0}
                   onClick={() => {
+                    if (!isAuthenticated) {
+                      navigate(API_PATHS.auth.login);
+                      return;
+                    }
                     if (!addToCart) return;
                     addToCart(product);
                     if (quantity > 1 && updateQuantity) {

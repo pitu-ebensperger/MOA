@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
     "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
     "seed:categories": "node database/seed/categoriesSeed.js",
     "seed:products": "node database/seed/productsSeed.js",
@@ -31,7 +31,7 @@
     "supertest": "^7.1.4"
   },
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "keywords": [],
   "author": "",
   "license": "ISC"

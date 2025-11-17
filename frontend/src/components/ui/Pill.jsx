@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { PILL_STYLES } from "../../config/ui-tokens.js";
+import { PILL_STYLES } from "@/config/ui-tokens.js"
 
 // Pill ---------------------------------------------------
 export function Pill({ children, variant = "neutral", className = "" }) {

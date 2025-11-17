@@ -1,4 +1,4 @@
-import { cartsDb } from "../database/carts.js";
+import { cartsDb } from "@/mocks/database/carts.js"
 
 // Mock Cart API
 export const mockCartApi = {

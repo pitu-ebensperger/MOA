@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Info, ShoppingCart, Star } from "lucide-react";
-import { Button, IconButton, AnimatedCTAButton } from "../../../components/ui/Button.jsx";
-import Badge from "../../../components/ui/Badge.jsx";
-import { Accordion } from "../../../components/ui/Accordion.jsx";
-import { Pagination } from "../../../components/ui/Pagination.jsx";
-import { Pill } from "../../../components/ui/Pill.jsx";
-import { SearchBar } from "../../../components/ui/SearchBar.jsx";
-import CategoriesCard from "../../categories/components/CategoriesCard.jsx";
-import ProductCard from "../../products/components/ProductCard.jsx";
-import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
-import { TableToolbar, TableSearch, FilterSelect, FilterTags, ToolbarSpacer, QuickFilterPill, FilterTabs, FilterMenuButton, LayoutToggleButton, ColumnsMenuButton, ClearFiltersButton } from "../../../components/data-display/TableToolbar.jsx";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
-import { API_PATHS } from "../../../config/api-paths.js";
+import { Button, IconButton, AnimatedCTAButton } from "@/components/ui/Button.jsx"
+import Badge from "@/components/ui/Badge.jsx"
+import { Accordion } from "@/components/ui/Accordion.jsx"
+import { Pagination } from "@/components/ui/Pagination.jsx"
+import { Pill } from "@/components/ui/Pill.jsx"
+import { SearchBar } from "@/components/ui/SearchBar.jsx"
+import CategoriesCard from "@/modules/categories/components/CategoriesCard.jsx"
+import ProductCard from "@/modules/products/components/ProductCard.jsx"
+import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
+import { TableToolbar, TableSearch, FilterSelect, FilterTags, ToolbarSpacer, QuickFilterPill, FilterTabs, FilterMenuButton, LayoutToggleButton, ColumnsMenuButton, ClearFiltersButton } from "@/components/data-display/TableToolbar.jsx"
+import { Price } from "@/components/data-display/Price.jsx"
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs.jsx"
+import { API_PATHS } from "@/config/api-paths.js"
 import {
   BADGE_VARIANTS,
   BADGE_SIZES,
@@ -30,11 +30,11 @@ import {
   SHIPMENT_STATUS_MAP,
   USER_STATUS_MAP,
 } from "../../../config/status-maps.js";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { Tooltip } from "../../../components/ui/Tooltip.jsx";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../../../components/ui/radix/DropdownMenu.jsx";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogClose } from "../../../components/ui/radix/Dialog.jsx";
-import OrdersDrawer from "../../admin/components/OrdersDrawer.jsx";
+import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import { Tooltip } from "@/components/ui/Tooltip.jsx"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/radix/DropdownMenu.jsx"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogClose } from "@/components/ui/radix/Dialog.jsx"
+import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
 
 const colorTokens = [
   {

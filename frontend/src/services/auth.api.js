@@ -1,5 +1,5 @@
-import { apiClient } from './api-client.js'
-import { API_PATHS } from '../config/api-paths.js'
+import { apiClient } from '@/services/api-client.js'
+import { API_PATHS } from '@/config/api-paths.js'
 
 const buildProfilePath = (userId) =>
   userId

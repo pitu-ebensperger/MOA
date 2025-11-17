@@ -1,4 +1,4 @@
-import { cx } from "../utils/ui-helpers.js";
+import { cx } from "@/utils/ui-helpers.js"
 
 /* PILL STYLES   ----------------------------------------------------------------------------*/ 
 

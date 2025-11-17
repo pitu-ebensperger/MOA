@@ -1,7 +1,7 @@
-import { formatDate_ddMMyyyy } from "../../../utils/date.js";
-import { formatCurrencyCLP } from "../../../utils/currency.js";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../../../components/ui/radix/DropdownMenu.jsx";
+import { formatDate_ddMMyyyy } from "@/utils/date.js"
+import { formatCurrencyCLP } from "@/utils/currency.js"
+import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/radix/DropdownMenu.jsx"
 import { MoreHorizontal, Eye, XCircle } from "lucide-react";
 
 export const buildOrderColumns = ({ onOpen, onUpdateStatus, onCancel }) => [

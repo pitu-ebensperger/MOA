@@ -1,20 +1,20 @@
 //path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
 import React, { useState, useMemo, useCallback } from "react";
 import { Plus } from "lucide-react";
-import ProductDetailDrawer from "../components/ProductDetailDrawer.jsx";
-import ProductDrawer from "../components/ProductDrawer.jsx";
+import ProductDetailDrawer from "@/modules/admin/components/ProductDetailDrawer.jsx"
+import ProductDrawer from "@/modules/admin/components/ProductDrawer.jsx"
 
-import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
+import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
 // Toolbar pieces used in separate ProductsToolbar component
-import ProductsToolbar from "./ProductsToolbar.jsx";
-import { Button } from "../../../components/ui/Button.jsx";
-import { productsApi } from "../../../services/products.api.js";
+import ProductsToolbar from "@/modules/admin/pages/ProductsToolbar.jsx"
+import { Button } from "@/components/ui/Button.jsx"
+import { productsApi } from "@/services/products.api.js"
 
-import { useAdminProducts } from "../hooks/useAdminProducts.js";
-import { useCategories } from "../../products/hooks/useCategories.js";
-import { buildProductColumns } from "../utils/ProductsColumns.jsx";
-import { DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
-import { PRODUCT_STATUS_OPTIONS } from "../../../config/status-options.js";
+import { useAdminProducts } from "@/modules/admin/hooks/useAdminProducts.js"
+import { useCategories } from "@/modules/products/hooks/useCategories.js"
+import { buildProductColumns } from "@/modules/admin/utils/ProductsColumns.jsx"
+import { DEFAULT_PAGE_SIZE } from "@/config/constants.js"
+import { PRODUCT_STATUS_OPTIONS } from "@/config/status-options.js"
 
 export default function ProductsAdminPage() {
   const [page, setPage] = useState(1);
@@ -140,12 +140,6 @@ export default function ProductsAdminPage() {
   const renderToolbar = useCallback(
     (table) => (
       <ProductsToolbar
-        table={table}
-        search={search}
-        onSearchChange={(v) => {
-          setSearch(v);
-          setPage(1);
-        }}
         onlyLowStock={onlyLowStock}
         onToggleLowStock={() => {
           setOnlyLowStock((v) => !v);
@@ -155,7 +149,7 @@ export default function ProductsAdminPage() {
         onRemoveTag={handleRemoveTag}
       />
     ),
-    [search, onlyLowStock, activeTags, handleRemoveTag],
+    [onlyLowStock, activeTags, handleRemoveTag],
   );
 
   // (toolbar inline version removed for lint compliance)
@@ -165,7 +159,7 @@ export default function ProductsAdminPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-sans text-xl font-semibold tracking-tight text-primary">
+          <h1 className="text-3xl font-bold text-primary1 mb-2">
             Productos
           </h1>
           <p className="text-sm text-(--text-weak)">

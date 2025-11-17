@@ -1,7 +1,7 @@
-import { env } from "../config/env.js";
-import { API_PATHS } from "../config/api-paths.js";
-import { mockHomeApi } from "../mocks/api/home.js";
-import { apiClient } from "./api-client.js";
+import { env } from "@/config/env.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { mockHomeApi } from "@/mocks/api/home.js"
+import { apiClient } from "@/services/api-client.js"
 
 const normalizeLanding = (payload = {}) => ({
   hero: payload.hero ?? null,

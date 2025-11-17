@@ -1,17 +1,16 @@
-import React, { useState, useMemo } from "react";
-import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, Ban, ShoppingBag, LayoutGrid, Rows } from "lucide-react";
-import CustomerDrawer from "../components/CustomerDrawer.jsx";
-import OrdersDrawer from "../components/OrdersDrawer.jsx";
-import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
+import React, { useState, useMemo, useCallback } from "react";
+import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, Ban, ShoppingBag, LayoutGrid, Rows, ListFilter } from "lucide-react";
+import CustomerDrawer from "@/modules/admin/components/CustomerDrawer.jsx"
+import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
+import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
 import {
   TableToolbar,
   TableSearch,
   FilterTags,
   ToolbarSpacer,
-  ColumnsMenuButton,
-  ClearFiltersButton,
+  LayoutToggleButton,
 } from "../../../components/data-display/TableToolbar.jsx";
-import { Button, IconButton } from "../../../components/ui/Button.jsx";
+import { Button, IconButton } from "@/components/ui/Button.jsx"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,10 +18,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../components/ui/radix/DropdownMenu.jsx";
-import { customersDb } from "../../../mocks/database/customers.js";
-import { ordersDb } from "../../../mocks/database/orders.js";
-import { formatDate_ddMMyyyy } from "../../../utils/date.js";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
+import { customersDb } from "@/mocks/database/customers.js"
+import { ordersDb } from "@/mocks/database/orders.js"
+import { formatDate_ddMMyyyy } from "@/utils/date.js"
+import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/radix/Dialog.jsx";
+import { Input } from "@/components/ui/Input.jsx";
 
 const USER_STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -31,15 +37,32 @@ const USER_STATUS_OPTIONS = [
   { value: "suspended", label: "Suspendido" },
 ];
 
+const STATUS_FILTER_OPTIONS = USER_STATUS_OPTIONS.filter((option) => option.value);
+const STATUS_LABEL_MAP = Object.fromEntries(
+  STATUS_FILTER_OPTIONS.map((option) => [option.value, option.label])
+);
+const NEW_CUSTOMER_INITIAL = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  status: STATUS_FILTER_OPTIONS[0]?.value ?? "active",
+};
+
+const getStatusLabel = (value) => STATUS_LABEL_MAP[value] ?? value;
+
 export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [activeTags, setActiveTags] = useState([]);
-  const [condensed] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [condensed, setCondensed] = useState(false);
   const [viewMode, setViewMode] = useState("list"); // "list" o "grid"
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [breadcrumb, setBreadcrumb] = useState(null); // Para mostrar de dónde viene la orden
+  const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
+  const [newCustomerForm, setNewCustomerForm] = useState(NEW_CUSTOMER_INITIAL);
 
   const limit = 10; // Reducir a 10 para mejor visualización
 
@@ -62,6 +85,45 @@ export default function CustomersPage() {
       userPhone: user?.phone ?? "—",
     };
   };
+
+  const resetNewCustomerForm = useCallback(() => {
+    setNewCustomerForm(NEW_CUSTOMER_INITIAL);
+  }, []);
+
+  const handleCancelNewCustomer = useCallback(() => {
+    resetNewCustomerForm();
+    setIsCreatingCustomer(false);
+  }, [resetNewCustomerForm]);
+
+  const handleCreateCustomer = useCallback(
+    (event) => {
+      event.preventDefault();
+      console.log("Crear nuevo cliente", newCustomerForm);
+      // TODO: Reemplazar por llamada al backend cuando esté disponible
+      setIsCreatingCustomer(false);
+      resetNewCustomerForm();
+      setRefreshKey((prev) => prev + 1);
+      setPage(1);
+    },
+    [newCustomerForm, resetNewCustomerForm],
+  );
+
+  const handleNewCustomerChange = useCallback((field) => (event) => {
+    const value = event.target.value;
+    setNewCustomerForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }, []);
+
+  const handleStatusFilter = useCallback((value) => {
+    setStatusFilter(value);
+    setPage(1);
+  }, []);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshKey((prev) => prev + 1);
+  }, []);
 
   const handleViewOrder = (order) => {
     const fullOrder = loadFullOrder(order);
@@ -90,8 +152,12 @@ export default function CustomersPage() {
       );
     }
 
+    if (statusFilter) {
+      filtered = filtered.filter((c) => c.status === statusFilter);
+    }
+
     return filtered;
-  }, [search]);
+  }, [search, statusFilter, refreshKey]);
 
   // Paginación
   const total = filteredData.length;
@@ -111,7 +177,7 @@ export default function CustomersPage() {
       ordersMap[order.userId]++;
     }
     return ordersMap;
-  }, []);
+  }, [refreshKey]);
 
   // Handler para cambiar status de cliente
   const handleStatusChange = (customerId, newStatus) => {
@@ -126,7 +192,7 @@ export default function CustomersPage() {
       {
         accessorKey: "fullName",
         header: "Cliente",
-        enableSorting: true,
+        enableSorting: false,
         cell: ({ row }) => {
           const customer = row.original;
           return (
@@ -139,22 +205,6 @@ export default function CustomersPage() {
                 {customer.email}
               </span>
             </div>
-          );
-        },
-      },
-      {
-        accessorKey: "phone",
-        header: "Teléfono",
-        enableSorting: false,
-        cell: ({ row }) => {
-          const customer = row.original;
-          return customer.phone ? (
-            <div className="flex items-center gap-1 px-1 py-2 text-sm text-(--text-weak)">
-              <Phone className="h-3.5 w-3.5" />
-              {customer.phone}
-            </div>
-          ) : (
-            <span className="px-1 py-2 text-sm text-(--color-text-muted)">—</span>
           );
         },
       },
@@ -175,8 +225,49 @@ export default function CustomersPage() {
       },
       {
         accessorKey: "status",
-        header: "Estado",
-        enableSorting: true,
+        header: () => (
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold text-(--color-text-muted)">Estado</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <IconButton
+                  aria-label="Filtrar por estado"
+                  intent="neutral"
+                  size="xs"
+                  icon={<ListFilter size={14} />}
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem
+                  onSelect={() => handleStatusFilter("")}
+                  className="flex justify-between gap-2"
+                >
+                  <span>Todos los estados</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {STATUS_FILTER_OPTIONS.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onSelect={() => handleStatusFilter(option.value)}
+                    className="flex items-center justify-between gap-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <StatusPill status={option.value} domain="user" />
+                      <span className="text-xs text-(--color-text-muted)">{option.label}</span>
+                    </div>
+                    {statusFilter === option.value ? (
+                      <span className="text-(--color-primary1)">✓</span>
+                    ) : null}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {statusFilter ? (
+              <StatusPill status={statusFilter} domain="user" className="text-[10px]" />
+            ) : null}
+          </div>
+        ),
+        enableSorting: false,
         cell: ({ row }) => {
           const customer = row.original;
           return (
@@ -187,7 +278,7 @@ export default function CustomersPage() {
                     className="cursor-pointer transition-opacity hover:opacity-80"
                     aria-label="Cambiar estado"
                   >
-                    <StatusPill status={customer.status} />
+                    <StatusPill status={customer.status} domain="user" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
@@ -277,14 +368,19 @@ export default function CustomersPage() {
         },
       },
     ],
-    [customerOrders]
+    [customerOrders, handleStatusFilter, statusFilter]
   );
 
-  const clearAll = () => {
-    setSearch("");
-    setActiveTags([]);
-    setPage(1);
-  };
+  const activeStatusTags = useMemo(() => {
+    if (!statusFilter) return [];
+    return [
+      {
+        key: "status",
+        value: statusFilter,
+        label: `Estado: ${getStatusLabel(statusFilter)}`,
+      },
+    ];
+  }, [statusFilter]);
 
   const toolbar = useMemo(
     () => (table) => (
@@ -298,19 +394,10 @@ export default function CustomersPage() {
           placeholder="Buscar por nombre, email…"
         />
         <ToolbarSpacer />
-        <FilterTags
-          tags={activeTags}
-          onRemove={(tag) => {
-            setActiveTags((tags) =>
-              tags.filter((t) => !(t.key === tag.key && t.value === tag.value))
-            );
-          }}
-        />
+        <FilterTags tags={activeStatusTags} onRemove={() => handleStatusFilter("")} />
         <div className="ml-auto flex items-center gap-2">
-          <ColumnsMenuButton table={table} />
-          <ClearFiltersButton onClear={clearAll} />
-          
-          {/* Botones de Layout List/Grid */}
+          <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
+
           <div className="flex items-center gap-0.5 rounded-md border border-(--color-border) p-0.5">
             <IconButton
               appearance="ghost"
@@ -331,15 +418,12 @@ export default function CustomersPage() {
               className={viewMode === "grid" ? "bg-(--color-primary1)/10" : ""}
             />
           </div>
-          
+
           <Button
             appearance="ghost"
             intent="neutral"
             size="sm"
-            onClick={() => {
-              console.log("Refrescar datos");
-              // TODO: Implementar refetch cuando tengamos API real
-            }}
+            onClick={handleRefresh}
             leadingIcon={<RefreshCw className="h-4 w-4" />}
           >
             Refrescar
@@ -349,17 +433,14 @@ export default function CustomersPage() {
             intent="primary"
             size="sm"
             leadingIcon={<UserPlus className="h-4 w-4" />}
-            onClick={() => {
-              console.log("Crear nuevo cliente");
-              // TODO: Abrir modal/formulario
-            }}
+            onClick={() => setIsCreatingCustomer(true)}
           >
             Nuevo cliente
           </Button>
         </div>
       </TableToolbar>
     ),
-    [search, activeTags, viewMode]
+    [search, activeStatusTags, viewMode, condensed, handleRefresh, handleStatusFilter]
   );
 
   return (
@@ -367,7 +448,7 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-sans text-xl font-semibold tracking-tight text-primary">
+          <h1 className="text-3xl font-bold text-primary1 mb-2">
             Clientes
           </h1>
           <p className="text-sm text-(--text-weak)">
@@ -494,6 +575,71 @@ export default function CustomersPage() {
         onClose={handleCloseOrder}
         breadcrumb={breadcrumb}
       />
+
+      <Dialog
+        open={isCreatingCustomer}
+        onOpenChange={(open) => {
+          if (!open) handleCancelNewCustomer();
+        }}
+      >
+        <DialogContent className="space-y-4 max-w-lg">
+          <DialogTitle>Nuevo cliente</DialogTitle>
+          <p className="text-sm text-(--color-text-muted)">
+            Registra manualmente a un cliente y prepara el payload para conectar con el backend cuando esté disponible.
+          </p>
+          <form onSubmit={handleCreateCustomer} className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input
+                label="Nombre"
+                value={newCustomerForm.firstName}
+                onChange={handleNewCustomerChange("firstName")}
+                required
+              />
+              <Input
+                label="Apellido"
+                value={newCustomerForm.lastName}
+                onChange={handleNewCustomerChange("lastName")}
+                required
+              />
+            </div>
+            <Input
+              label="Correo"
+              type="email"
+              value={newCustomerForm.email}
+              onChange={handleNewCustomerChange("email")}
+              required
+            />
+            <Input
+              label="Teléfono"
+              type="tel"
+              value={newCustomerForm.phone}
+              onChange={handleNewCustomerChange("phone")}
+            />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-(--color-text-muted)">Estado</label>
+              <select
+                value={newCustomerForm.status}
+                onChange={handleNewCustomerChange("status")}
+                className="w-full rounded-lg border border-(--color-border) bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-(--color-primary1) focus:bg-white"
+              >
+                {STATUS_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <DialogFooter className="px-0">
+              <Button appearance="ghost" intent="neutral" onClick={handleCancelNewCustomer} type="button">
+                Cancelar
+              </Button>
+              <Button appearance="solid" intent="primary" type="submit">
+                Crear cliente
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

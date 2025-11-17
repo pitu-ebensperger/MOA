@@ -1,6 +1,7 @@
-import { env } from "../config/env.js";
-import { mockAuthApi } from "../mocks/api/auth.js";
-import { mockCartApi } from "../mocks/api/cart.js";
+import { env } from "@/config/env.js"
+import { mockAuthApi } from "@/mocks/api/auth.js"
+import { mockCartApi } from "@/mocks/api/cart.js"
+import { analyticsData } from "@/mocks/analytics.data.js"
 
 const DEFAULT_TIMEOUT = env.API_TIMEOUT ?? 15000;
 
@@ -27,11 +28,11 @@ const isRawBody =
 function tryMockRoute(path, method, data) {
   if (!env.USE_MOCKS) return null;
 
-  // Auth routes
-  if (path.includes('/auth/login') && method === 'POST') {
+  // Auth routes - corregidas para coincidir con API_PATHS
+  if ((path.includes('/auth/login') || path.includes('/login')) && method === 'POST') {
     return mockAuthApi.login(data);
   }
-  if (path.includes('/auth/register') && method === 'POST') {
+  if ((path.includes('/auth/register') || path.includes('/registro')) && method === 'POST') {
     return mockAuthApi.register(data);
   }
   if (path.includes('/auth/profile') || path.includes('/perfil')) {
@@ -40,10 +41,10 @@ function tryMockRoute(path, method, data) {
     const userId = userIdMatch?.[1] || userIdMatch?.[2];
     return mockAuthApi.profile(userId);
   }
-  if (path.includes('/auth/forgot-password') && method === 'POST') {
+  if (path.includes('/auth/forgot-password') || path.includes('/olvidaste-contrasena')) {
     return mockAuthApi.requestPasswordReset(data.email);
   }
-  if (path.includes('/auth/reset-password') && method === 'POST') {
+  if (path.includes('/auth/reset-password') || path.includes('/restablecer-contrasena')) {
     return mockAuthApi.resetPassword();
   }
 
@@ -73,6 +74,43 @@ function tryMockRoute(path, method, data) {
     if (method === 'DELETE') {
       return mockCartApi.clearCart(userId);
     }
+  }
+
+  // Analytics routes
+  if (path.includes('/admin/analytics/dashboard') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.dashboardMetrics), 300);
+    });
+  }
+  if (path.includes('/admin/analytics/sales') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.salesAnalytics), 350);
+    });
+  }
+  if (path.includes('/admin/analytics/conversion') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.conversionMetrics), 280);
+    });
+  }
+  if (path.includes('/admin/analytics/products/top') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.topProducts), 320);
+    });
+  }
+  if (path.includes('/admin/analytics/categories') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.categoryAnalytics), 290);
+    });
+  }
+  if (path.includes('/admin/analytics/stock') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.stockAnalytics), 250);
+    });
+  }
+  if (path.includes('/admin/analytics/orders/distribution') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.orderDistribution), 310);
+    });
   }
 
   return null;

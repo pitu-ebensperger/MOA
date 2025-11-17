@@ -1,5 +1,5 @@
-import { toNum } from "./number.js";
-import { ALL_CATEGORY_ID } from "../config/constants.js";
+import { toNum } from "@/utils/number.js"
+import { ALL_CATEGORY_ID } from "@/config/constants.js"
 
 export const normalizeProduct = (p = {}) => {
   const id = p.id ?? null;

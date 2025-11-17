@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getPaginationRowModel, flexRender } from "@tanstack/react-table";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ArrowUpDown, ChevronUp, ChevronDown, Filter, MoreHorizontal, Pencil, Check, X } from "lucide-react";
-import { Pagination } from "../ui/Pagination.jsx";
-import { IconButton } from "../ui/Button.jsx";
-import { InputSm } from "../ui/Input.jsx";
+import { Pagination } from "@/components/ui/Pagination.jsx"
+import { IconButton } from "@/components/ui/Button.jsx"
+import { InputSm } from "@/components/ui/Input.jsx"
 
 /* DataTableV2
    Features (current implementation):

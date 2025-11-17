@@ -1,4 +1,4 @@
-import { usersDb } from "../database/users.js";
+import { usersDb } from "@/mocks/database/users.js"
 
 // Mock Auth API
 export const mockAuthApi = {

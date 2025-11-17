@@ -1,4 +1,4 @@
-import { API_PATHS } from "../../config/api-paths.js";
+import { API_PATHS } from "@/config/api-paths.js"
 
 const PRODUCTS_PATH = API_PATHS.products.products;
 

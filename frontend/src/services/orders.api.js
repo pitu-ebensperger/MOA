@@ -1,13 +1,13 @@
-import { env } from "../config/env.js";
-import { API_PATHS } from "../config/api-paths.js";
-import { apiClient } from "./api-client.js";
-import { delay } from "../utils/delay.js";
-import { buildQueryString } from "../utils/https.js";
-import { toNum } from "../utils/number.js";
-import { paginate } from "../utils/pagination.js";
+import { env } from "@/config/env.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { apiClient } from "@/services/api-client.js"
+import { delay } from "@/utils/delay.js"
+import { buildQueryString } from "@/utils/https.js"
+import { toNum } from "@/utils/number.js"
+import { paginate } from "@/utils/pagination.js"
 
-import { customersDb } from "../mocks/database/customers.js";
-import { ordersDb } from "../mocks/database/orders.js";
+import { customersDb } from "@/mocks/database/customers.js"
+import { ordersDb } from "@/mocks/database/orders.js"
 
 
 

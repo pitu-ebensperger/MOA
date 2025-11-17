@@ -55,6 +55,7 @@ export {
   SpinnerOverlay,
   DotsLoader,
 } from "./Spinner.jsx";
+export { Skeleton } from "./Skeleton.jsx";
 
 // Layout & Structure
 export {

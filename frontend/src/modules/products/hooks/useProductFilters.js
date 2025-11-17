@@ -1,12 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
-import { ensureNumber } from "../../../utils/number.js";
-import { clamp } from "../../../utils/math.js";
-import { formatCurrencyCLP } from "../../../utils/currency.js";
-import { buildCategoriesWithAll } from "../../../utils/normalizers.js";
-import { createCategoryMatcher, resolveProductPrice } from "../utils/products.js";
+import { ALL_CATEGORY_ID, DEFAULT_PAGE_SIZE } from "@/config/constants.js"
+import { ensureNumber } from "@/utils/number.js"
+import { clamp } from "@/utils/math.js"
+import { formatCurrencyCLP } from "@/utils/currency.js"
+import { buildCategoriesWithAll } from "@/utils/normalizers.js"
+import { createCategoryMatcher, resolveProductPrice } from "@/modules/products/utils/products.js"
+import { matchesText } from "@/modules/products/utils/productsFilter.js"
 
 const resolveCategoryFromQuery = (categoryQuery, categories) => {
   if (!categoryQuery) return ALL_CATEGORY_ID;
@@ -54,6 +55,8 @@ export const useProductFilters = ({
   const [min, setMin] = useState(0);
   const [max, setMax] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const rawSearchQuery = searchParams.get("search") ?? searchParams.get("q") ?? "";
+  const searchQuery = String(rawSearchQuery ?? "").trim();
 
   const categories = useMemo(() => buildCategoriesWithAll(fetchedCategories), [fetchedCategories]);
   const matchCategory = useMemo(() => createCategoryMatcher(categories), [categories]);
@@ -65,6 +68,7 @@ export const useProductFilters = ({
   const { minPrice, maxPrice } = useMemo(() => buildPriceBounds(allProducts), [allProducts]);
   const categoryQuery = searchParams.get("category");
   const searchParamsSnapshot = searchParams.toString();
+  const initialSearchSyncRef = useRef(true);
 
   const resolvedCategoryFromQuery = useMemo(
     () => resolveCategoryFromQuery(categoryQuery, categories),
@@ -83,9 +87,20 @@ export const useProductFilters = ({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [category, min, max, selectedSort, setCurrentPage]);
+  }, [category, min, max, selectedSort, searchQuery, setCurrentPage]);
 
   useEffect(() => {
+    // Prevent the initial render from wiping the incoming category query before it can be applied.
+    if (initialSearchSyncRef.current) {
+      initialSearchSyncRef.current = false;
+      return;
+    }
+
+    const isApplyingInitialCategory = Boolean(categoryQuery) && category !== resolvedCategoryFromQuery;
+    if (isApplyingInitialCategory) {
+      return;
+    }
+
     const nextParam =
       category === ALL_CATEGORY_ID
         ? null
@@ -106,7 +121,14 @@ export const useProductFilters = ({
       nextSearchParams.set("category", nextParam);
     }
     setSearchParams(nextSearchParams, { replace: true });
-  }, [category, categories, categoryQuery, searchParamsSnapshot, setSearchParams]);
+  }, [
+    category,
+    categories,
+    categoryQuery,
+    resolvedCategoryFromQuery,
+    searchParamsSnapshot,
+    setSearchParams,
+  ]);
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((product) => {
@@ -115,9 +137,19 @@ export const useProductFilters = ({
       const safeMax = ensureNumber(max, maxPrice);
       const withinPriceRange = price >= safeMin && price <= safeMax;
       const matchesCat = matchCategory(product, category);
-      return withinPriceRange && matchesCat;
+      const matchesSearch = matchesText(product, searchQuery);
+      return withinPriceRange && matchesCat && matchesSearch;
     });
-  }, [allProducts, category, min, max, minPrice, maxPrice, matchCategory]);
+  }, [
+    allProducts,
+    category,
+    min,
+    max,
+    minPrice,
+    maxPrice,
+    matchCategory,
+    searchQuery,
+  ]);
 
   const sortedProducts = useMemo(() => {
     if (selectedSort === "relevance") return filteredProducts;
@@ -206,5 +238,6 @@ export const useProductFilters = ({
     handleRemoveFilter,
     resetFilters,
     totalResults,
+    searchQuery,
   };
 };

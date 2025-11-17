@@ -1,10 +1,10 @@
 import React from "react";
-import { Dialog, DialogContent } from "../../../components/ui/radix/Dialog.jsx";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { Accordion } from "../../../components/ui/Accordion.jsx";
-import { Badge } from "../../../components/ui/Badge.jsx";
-import { formatDate_ddMMyyyy } from "../../../utils/date.js";
+import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx"
+import { Price } from "@/components/data-display/Price.jsx"
+import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import { Accordion } from "@/components/ui/Accordion.jsx"
+import { Badge } from "@/components/ui/Badge.jsx"
+import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { Package, Tag, Layers, Calendar, TrendingUp, AlertCircle } from "lucide-react";
 
 // Helpers

@@ -1,20 +1,21 @@
 import { useState } from "react";
+import { StoreSettingsPage } from "./StoreSettingsPage.jsx";
 
 const TABS = [
+  { id: "store", label: "Tienda" },
   { id: "general", label: "General" },
   { id: "account", label: "Cuenta" },
-  { id: "notifications", label: "Notificaciones" },
 ];
 
 export default function AdminSettingsPage() {
   // Estado para saber qué tab está activa
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("store");
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-6 lg:py-8">
       {/* Título de la página */}
       <header className="mb-6 lg:mb-8">
-        <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
+        <h1 className="text-3xl font-bold text-primary1 mb-2">
           Configuración
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
@@ -61,9 +62,9 @@ export default function AdminSettingsPage() {
 
       {/* Contenido dependiendo del tab activo */}
       <section className="space-y-6">
+        {activeTab === "store" && <StoreSettingsPage />}
         {activeTab === "general" && <GeneralSettings />}
         {activeTab === "account" && <AccountSettings />}
-        {activeTab === "notifications" && <NotificationSettings />}
       </section>
     </div>
   );
@@ -135,41 +136,6 @@ function AccountSettings() {
             placeholder="admin@moa.cl"
           />
         </div>
-      </div>
-    </div>
-  );
-}
-
-function NotificationSettings() {
-  return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 lg:p-5 space-y-4">
-      <header>
-        <h2 className="text-sm font-semibold text-neutral-900">
-          Notificaciones
-        </h2>
-        <p className="text-xs text-neutral-500">
-          Controla qué alertas quieres recibir.
-        </p>
-      </header>
-
-      <div className="space-y-3">
-        {[
-          "Nuevo pedido creado",
-          "Stock bajo en productos",
-          "Error en integración / API",
-        ].map((label) => (
-          <label
-            key={label}
-            className="flex items-start gap-2 text-sm text-neutral-800"
-          >
-            <input
-              type="checkbox"
-              className="mt-[2px] h-4 w-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
-              defaultChecked
-            />
-            <span>{label}</span>
-          </label>
-        ))}
       </div>
     </div>
   );

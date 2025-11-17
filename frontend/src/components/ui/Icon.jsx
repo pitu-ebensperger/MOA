@@ -1,5 +1,5 @@
 import React from "react";
-import { cx } from "../../utils/ui-helpers.js";
+import { cx } from "@/utils/ui-helpers.js"
 
 /* -------------------------------------------------------------------------- */
 /* Icon Component - Wrapper para lucide-react con tokens CSS                 */

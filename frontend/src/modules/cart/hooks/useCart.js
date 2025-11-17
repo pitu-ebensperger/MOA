@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
-import { usePersistentState } from "../../../hooks/usePersistentState.js";
-import { useAuth } from "../../../context/auth-context.js";
+import { usePersistentState } from "@/hooks/usePersistentState.js"
+import { useAuth } from "@/context/auth-context.js"
 
 const CART_STORAGE_KEY = "cart";
 

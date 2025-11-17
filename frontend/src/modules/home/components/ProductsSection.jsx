@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import ProductCard from "../../products/components/ProductCard.jsx";
-import { Button } from "../../../components/ui/Button.jsx";
-import { createCategoryMatcher } from "../../products/utils/products.js";
-import { ALL_CATEGORY_ID } from "../../../config/constants.js";
-import { API_PATHS } from "../../../config/api-paths.js";
-import { buildCategoryTabs, normalizeFeaturedProduct } from "../../../utils/normalizers.js";
+import ProductCard from "@/modules/products/components/ProductCard.jsx"
+import { Button } from "@/components/ui/Button.jsx"
+import { createCategoryMatcher } from "@/modules/products/utils/products.js"
+import { ALL_CATEGORY_ID } from "@/config/constants.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { buildCategoryTabs, normalizeFeaturedProduct } from "@/utils/normalizers.js"
 
 export default function ProductsSection({ products, categories }) {
   const tabs = useMemo(() => buildCategoryTabs(categories), [categories]);

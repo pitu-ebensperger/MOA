@@ -1,5 +1,5 @@
 import React from "react";
-import Pill from "./Pill.jsx";
+import Pill from "@/components/ui/Pill.jsx"
 import {
   PRODUCT_STATUS_MAP,
   ORDER_STATUS_MAP,

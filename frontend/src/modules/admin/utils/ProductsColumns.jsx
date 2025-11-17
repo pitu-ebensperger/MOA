@@ -1,8 +1,8 @@
 //path/frontend/src/modules/admin/utils/productsColumns.jsx
 import { AlertTriangle, MoreHorizontal, Eye, Edit3, Copy, Trash2, Filter, Check } from "lucide-react";
-import { formatCurrencyCLP } from "../../../utils/currency.js";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { LOW_STOCK_THRESHOLD } from "../../../config/constants.js";
+import { formatCurrencyCLP } from "@/utils/currency.js"
+import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import { LOW_STOCK_THRESHOLD } from "@/config/constants.js"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../components/ui/radix/DropdownMenu.jsx";
-import { Button } from "../../../components/ui/Button.jsx";
+import { Button } from "@/components/ui/Button.jsx"
 
 
 

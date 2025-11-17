@@ -1,6 +1,6 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { cx } from "../../../utils/ui-helpers.js";
+import { cx } from "@/utils/ui-helpers.js"
 
 export function Dialog({ children, open, onOpenChange }) {
   return (
@@ -57,13 +57,26 @@ export function DialogContent({ children, className, variant = "center", placeme
   );
 }
 
-export function DialogHeader({ title, description }) {
+export function DialogHeader({ title, description, children }) {
   return (
-    <div className="mb-3">
-      {title && <h3 className="text-lg font-semibold text-(--color-primary1)">{title}</h3>}
-      {description && <p className="text-sm text-(--color-secondary2)">{description}</p>}
+    <div className="space-y-2 border-b border-gray-200 pb-4 mb-4">
+      {title && <h2 className="text-lg font-semibold text-gray-900">{title}</h2>}
+      {description && <p className="text-sm text-gray-600">{description}</p>}
+      {children}
     </div>
   );
+}
+
+export function DialogTitle({ children, className = "" }) {
+  return <h2 className={`text-lg font-semibold text-gray-900 ${className}`}>{children}</h2>;
+}
+
+export function DialogDescription({ children, className = "" }) {
+  return <p className={`text-sm text-gray-600 ${className}`}>{children}</p>;
+}
+
+export function DialogFooter({ children, className = "" }) {
+  return <div className={`flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200 ${className}`}>{children}</div>;
 }
 
 export function DialogClose({ children, asChild = true, className }) {

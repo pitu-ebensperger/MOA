@@ -1,9 +1,9 @@
 import React from "react";
-import AdminSidebar from "../components/AdminSidebar";
-import AdminHeader from "../components/AdminHeader";
-import AdminStatsCard from "../components/AdminStatsCard";
-import AdminTable from "../components/AdminTable";
-import AdminActionButton from "../components/AdminActionButton";
+import AdminSidebar from "@/modules/admin/components/AdminSidebar"
+import AdminHeader from "@/modules/admin/components/AdminHeader"
+import AdminStatsCard from "@/modules/admin/components/AdminStatsCard"
+import AdminTable from "@/modules/admin/components/AdminTable"
+import AdminActionButton from "@/modules/admin/components/AdminActionButton"
 
 // Vista principal del Dashboard Admin - MOA Muebles & Decoración
 export default function AdminDashboard() {

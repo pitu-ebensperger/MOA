@@ -2,12 +2,12 @@
 import React from "react";
 import { Plus, RefreshCw, Download, FileSpreadsheet, FileText, ChevronDown } from "lucide-react";
 
-import { TanstackDataTable } from "../../../../components/data-display/DataTable.jsx";
-import { Pagination } from "../../../../components/ui/Pagination.jsx";
+import { TanstackDataTable } from "@/components/data-display/DataTable.jsx"
+import { Pagination } from "@/components/ui/Pagination.jsx"
 
-import { useAdminProducts } from "../../hooks/useAdminProducts.js";
-import { useCategories } from "../../../products/hooks/useCategories.js";
-import { buildProductColumns } from "../../utils/ProductsColumns.jsx";
+import { useAdminProducts } from "@/modules/admin/hooks/useAdminProducts.js"
+import { useCategories } from "@/modules/products/hooks/useCategories.js"
+import { buildProductColumns } from "@/modules/admin/utils/ProductsColumns.jsx"
 
 export default function ProductsAdminPage() {
   const [page, setPage] = React.useState(1);
@@ -121,7 +121,7 @@ export default function ProductsAdminPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-sans text-xl font-semibold tracking-tight text-(--text-strong)">
+          <h1 className="text-3xl font-bold text-primary1 mb-2">
             Productos
           </h1>
           <p className="text-sm text-(--text-weak)">

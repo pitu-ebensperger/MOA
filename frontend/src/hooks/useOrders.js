@@ -1,4 +1,4 @@
-import { usePersistentState } from "./usePersistentState.js";
+import { usePersistentState } from "@/hooks/usePersistentState.js"
 
 const ORDERS_STORAGE_KEY = "orders";
 

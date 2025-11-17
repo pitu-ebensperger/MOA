@@ -4,11 +4,9 @@ import {
   TableToolbar,
   FilterTags,
   QuickFilterPill,
-  ColumnsMenuButton,
 } from "../../../components/data-display/TableToolbar.jsx";
 
 export default function ProductsToolbar({
-  table,
   onlyLowStock,
   onToggleLowStock,
   activeTags,
@@ -22,15 +20,11 @@ export default function ProductsToolbar({
         </QuickFilterPill>
         <FilterTags tags={activeTags} onRemove={onRemoveTag} />
       </div>
-      <div className="ml-auto flex items-center gap-2">
-        <ColumnsMenuButton table={table} />
-      </div>
     </TableToolbar>
   );
 }
 
 ProductsToolbar.propTypes = {
-  table: PropTypes.object.isRequired,
   onlyLowStock: PropTypes.bool.isRequired,
   onToggleLowStock: PropTypes.func.isRequired,
   activeTags: PropTypes.arrayOf(

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../../context/auth-context.js'
+import { useAuth } from '@/context/auth-context.js'
 
 const UserInfoSection = () => {
   const { user, token } = useAuth();  

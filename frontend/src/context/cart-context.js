@@ -1,4 +1,4 @@
-import { createStrictContext } from "./createStrictContext.js";
+import { createStrictContext } from "@/context/createStrictContext.js"
 
 export const [CartContext, useCartContext] = createStrictContext("Cart", {
   displayName: "CartContext",

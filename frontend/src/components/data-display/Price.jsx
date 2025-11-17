@@ -1,4 +1,4 @@
-import { formatCurrencyCLP } from "../../utils/currency.js";
+import { formatCurrencyCLP } from "@/utils/currency.js"
 
 export const Price = ({
   value,

@@ -1,6 +1,6 @@
 // Data & UI defaults
-export const DEFAULT_PAGE_SIZE = 20;
-export const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 24, 36, 48];
+export const DEFAULT_PAGE_SIZE = 12;
+export const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 16, 20, 24];
 
 // Inventory
 export const LOW_STOCK_THRESHOLD = 8;

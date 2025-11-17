@@ -1,10 +1,11 @@
 import React from "react";
-import { Dialog, DialogContent } from "../../../components/ui/radix/Dialog.jsx";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { Pill } from "../../../components/ui/Pill.jsx";
-import { formatDate_ddMMyyyy } from "../../../utils/date.js";
+import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx";
+import { Price } from "@/components/data-display/Price.jsx";
+import { StatusPill } from "@/components/ui/StatusPill.jsx";
+import { Pill } from "@/components/ui/Pill.jsx";
+import { formatDate_ddMMyyyy } from "@/utils/date.js";
 import { CalendarDays, PackageCheck, Truck, ChevronRight } from "lucide-react";
+import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx";
 
 // Helpers pequeños para no ensuciar el JSX
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
@@ -126,9 +127,29 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null }
             className="divide-y divide-(--color-border) rounded-2xl border border-(--color-border) bg-white shadow-sm"
             sections={[
               {
+                key: "tracking",
+                title: "Seguimiento del pedido",
+                defaultOpen: true,
+                render: () => (
+                  <div className="px-2 py-3">
+                    <OrderStatusTimeline 
+                      order={{
+                        id: order.id,
+                        order_code: order.number,
+                        metodo_despacho: order.shipment?.carrier === 'Retiro en tienda' ? 'retiro' : 
+                                        order.shipment?.carrier === 'Express' ? 'express' : 'standard',
+                        creado_en: order.createdAt,
+                        fecha_entrega_estimada: order.shipment?.deliveredAt || 
+                                               new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+                      }} 
+                    />
+                  </div>
+                ),
+              },
+              {
                 key: "summary",
                 title: "Resumen de la orden",
-                defaultOpen: true,
+                defaultOpen: false,
                 render: () => (
                   <div className="space-y-3">
                     <div className="divide-y divide-(--color-border) rounded-lg border border-(--color-border)">

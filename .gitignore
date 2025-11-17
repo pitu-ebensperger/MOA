@@ -24,11 +24,10 @@ snapshots/*.json
 
 scripts/*.jsx
 scripts/*.js
-
+src/scripts/**.js
 
 **/styleguide/StyleGuidePage.jsx
 
 .copilot-temp
-docs/**.md
-docs/misDOCS/
 
+docs/misDOCS/*.md
