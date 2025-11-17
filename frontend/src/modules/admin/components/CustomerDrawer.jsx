@@ -45,7 +45,6 @@ function Accordion({ sections, className = "" }) {
 }
 
 export default function CustomerDrawer({ open, customer, onClose, onViewOrder }) {
-  // Derivados seguros antes de hooks
   const id = customer?.id;
   const firstName = customer?.firstName ?? "";
   const lastName = customer?.lastName ?? "";

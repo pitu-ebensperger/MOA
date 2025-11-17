@@ -5,15 +5,25 @@ import ProductDetailDrawer from "../components/ProductDetailDrawer.jsx";
 import ProductDrawer from "../components/ProductDrawer.jsx";
 
 import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
+import { TableSearch } from "../../../components/data-display/TableToolbar.jsx";
 // Toolbar pieces used in separate ProductsToolbar component
 import ProductsToolbar from "./ProductsToolbar.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
+import { productsApi } from "../../../services/products.api.js";
 
 import { useAdminProducts } from "../hooks/useAdminProducts.js";
 import { useCategories } from "../../products/hooks/useCategories.js";
 import { buildProductColumns } from "../utils/ProductsColumns.jsx";
-import { DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
+import { DEFAULT_PAGE_SIZE, LOW_STOCK_THRESHOLD } from "../../../config/constants.js";
 import { PRODUCT_STATUS_OPTIONS } from "../../../config/status-options.js";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../components/shadcn/ui/index.js";
+import { LOW_STOCK_THRESHOLD } from "../../../config/constants.js";
 
 export default function ProductsAdminPage() {
   const [page, setPage] = useState(1);
@@ -219,11 +229,15 @@ export default function ProductsAdminPage() {
         initial={null}
         categories={categories ?? []}
         onClose={() => setCreatingNewProduct(false)}
-        onSubmit={(payload) => {
-          console.log("Crear producto", payload);
-          // Aquí iría llamada API POST /products
-          setCreatingNewProduct(false);
-          refetch();
+        onSubmit={async (payload) => {
+          try {
+            await productsApi.create(payload);
+            setCreatingNewProduct(false);
+            refetch();
+          } catch (error) {
+            console.error("Error al crear producto:", error);
+            alert("Error al crear el producto. Por favor, intenta nuevamente.");
+          }
         }}
       />
 
@@ -233,18 +247,26 @@ export default function ProductsAdminPage() {
         initial={selectedProductEdit}
         categories={categories ?? []}
         onClose={() => setSelectedProductEdit(null)}
-        onSubmit={(payload) => {
-          console.log("Actualizar producto", payload);
-          // Aquí iría llamada API PUT /products/:id
-          setSelectedProductEdit(null);
-          refetch();
-        }}
-        onDelete={(product) => {
-          if (confirm(`¿Eliminar producto "${product.name}"?`)) {
-            console.log("Eliminar producto", product);
-            // Aquí iría llamada API DELETE /products/:id
+        onSubmit={async (payload) => {
+          try {
+            await productsApi.update(payload.id, payload);
             setSelectedProductEdit(null);
             refetch();
+          } catch (error) {
+            console.error("Error al actualizar producto:", error);
+            alert("Error al actualizar el producto. Por favor, intenta nuevamente.");
+          }
+        }}
+        onDelete={async (product) => {
+          if (confirm(`¿Eliminar producto "${product.name}"?`)) {
+            try {
+              await productsApi.remove(product.id);
+              setSelectedProductEdit(null);
+              refetch();
+            } catch (error) {
+              console.error("Error al eliminar producto:", error);
+              alert("Error al eliminar el producto. Por favor, intenta nuevamente.");
+            }
           }
         }}
       />
