@@ -1,6 +1,6 @@
 //path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
 import React from "react";
-import { Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw, Download, FileSpreadsheet, FileText, ChevronDown } from "lucide-react";
 
 import { TanstackDataTable } from "../../../../components/data-display/DataTable.jsx";
 import { Pagination } from "../../../../components/ui/Pagination.jsx";
@@ -14,6 +14,7 @@ export default function ProductsAdminPage() {
   const [search, setSearch] = React.useState("");
   const [status, setStatus] = React.useState("");
   const [onlyLowStock, setOnlyLowStock] = React.useState(false);
+  const [showExportDropdown, setShowExportDropdown] = React.useState(false);
 
   const limit = 20;
 
@@ -48,6 +49,73 @@ export default function ProductsAdminPage() {
     [categoryMap],
   );
 
+  // Funciones de exportación
+  const exportToCSV = () => {
+    const headers = ["SKU", "Nombre", "Categoría", "Precio", "Stock", "Estado"];
+    const csvData = [
+      headers.join(","),
+      ...items.map(item => [
+        item.sku || "",
+        `"${item.name || ""}"`,
+        `"${categoryMap[item.fk_category_id] || ""}"`,
+        item.price || 0,
+        item.stock || 0,
+        item.status || ""
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `productos_moa_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShowExportDropdown(false);
+  };
+
+  const exportToExcel = () => {
+    // Para una implementación más robusta de Excel, podrías usar una librería como xlsx
+    // Por ahora, exportamos como CSV con extensión .xls para compatibilidad
+    const headers = ["SKU", "Nombre", "Categoría", "Precio (CLP)", "Stock", "Estado"];
+    const csvData = [
+      headers.join("\t"),
+      ...items.map(item => [
+        item.sku || "",
+        item.name || "",
+        categoryMap[item.fk_category_id] || "",
+        item.price || 0,
+        item.stock || 0,
+        item.status || ""
+      ].join("\t"))
+    ].join("\n");
+
+    const blob = new Blob([csvData], { type: "application/vnd.ms-excel;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `productos_moa_${new Date().toISOString().split('T')[0]}.xls`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setShowExportDropdown(false);
+  };
+
+  // Cerrar dropdown al hacer click fuera
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showExportDropdown && !event.target.closest('.export-dropdown')) {
+        setShowExportDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showExportDropdown]);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
@@ -70,6 +138,43 @@ export default function ProductsAdminPage() {
           >
             <RefreshCw className="h-4 w-4" />
           </button>
+          
+          {/* Botón de exportación con dropdown */}
+          <div className="relative export-dropdown">
+            <button
+              type="button"
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              className="inline-flex items-center gap-1 rounded-full border border-(--color-secondary1) px-3 py-2 text-sm text-(--color-secondary1) hover:bg-(--surface-subtle)"
+            >
+              <Download className="h-4 w-4" />
+              Exportar
+              <ChevronDown className="h-3 w-3" />
+            </button>
+            
+            {showExportDropdown && (
+              <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-(--border-subtle) bg-white shadow-lg z-10">
+                <div className="p-1">
+                  <button
+                    type="button"
+                    onClick={exportToCSV}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-(--text-weak) hover:bg-(--surface-subtle) hover:text-(--text-strong)"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Exportar como CSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={exportToExcel}
+                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-(--text-weak) hover:bg-(--surface-subtle) hover:text-(--text-strong)"
+                  >
+                    <FileSpreadsheet className="h-4 w-4" />
+                    Exportar como Excel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <button
             type="button"
             className="inline-flex items-center gap-1 rounded-full bg-(--color-primary1) px-3 py-2 text-sm text-white hover:opacity-90"

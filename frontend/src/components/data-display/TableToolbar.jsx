@@ -3,7 +3,7 @@ import { InputSm } from "../ui/Input.jsx";
 import { SelectSm, SelectGhost } from "../ui/Select.jsx";
 import { Button, IconButton } from "../ui/Button.jsx";
 import { cx } from "@utils/ui-helpers.js";
-import { Search, Filter, LayoutGrid, Rows, ChevronDown, Columns as ColumnsIcon, X } from "lucide-react";
+import { Search, ListFilter, LayoutGrid, Rows, ChevronDown, Columns as ColumnsIcon, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/radix/DropdownMenu.jsx";
 
 export function TableToolbar({ children, className }) {
@@ -17,12 +17,16 @@ export function TableToolbar({ children, className }) {
 export function TableSearch({ value, onChange, placeholder = "Buscar...", className }) {
   return (
     <div className={cx("flex items-center gap-2", className)}>
-      <InputSm
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange?.(e.target.value)}
-        leftIcon={<Search size={16} />}
-      />
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-(--color-text-muted)" />
+        <input
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => onChange?.(e.target.value)}
+          className="h-8 w-full rounded-full border border-(--color-border) bg-white pl-9 pr-4 text-sm text-(--text-strong) placeholder:text-(--color-text-muted) focus:border-(--color-primary1) focus:outline-none focus:ring-2 focus:ring-(--color-primary1)/20"
+        />
+      </div>
     </div>
   );
 }
@@ -105,7 +109,7 @@ export function FilterTabs({ tabs = [], value, onChange, className }) {
 
 export function FilterMenuButton({ onClick, label = "Filtros" }) {
   return (
-    <Button appearance="ghost" iconLeft={<Filter size={16} />} onClick={onClick}>
+    <Button appearance="ghost" iconLeft={<ListFilter size={16} />} onClick={onClick}>
       {label}
     </Button>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { Button } from "@components/ui/Button.jsx";
@@ -35,10 +35,13 @@ export default function EntornoAdmin({ children }) {
     }
   }, [isExpanded]);
 
- 
+  // Importar estilos de admin
+  useEffect(() => {
+    import("../../../styles/admin.css");
+  }, []);
 
   return (
-    <div className="admin-shell min-h-screen bg-(--background) text-body">
+    <div className="admin-shell admin-page min-h-screen bg-(--background) text-body" data-admin-context>
       <header className="h-0" />
 
       <div className="flex min-h-screen relative items-stretch">

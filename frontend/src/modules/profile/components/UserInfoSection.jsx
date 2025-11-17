@@ -12,7 +12,6 @@ const UserInfoSection = () => {
     telefono: "",
   });
 
-  // 🔥 Carga inicial del usuario desde el backend
   useEffect(() => {
     console.log("UseEffect ejecutado -> user:", user, "token:", token);
 
@@ -37,7 +36,6 @@ const UserInfoSection = () => {
       .catch((err) => console.error("Error cargando usuario:", err));
   }, [user, token]);
 
-  // 🔥 Actualiza los campos del formulario
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -45,7 +43,6 @@ const UserInfoSection = () => {
     });
   };
 
-  // 🔥 PATCH para guardar cambios
   const handleSaveClick = async () => {
     try {
       const res = await fetch(`http://localhost:3000/usuario/${user.id}`, {
@@ -68,7 +65,6 @@ const UserInfoSection = () => {
       const data = await res.json();
       console.log("Usuario actualizado:", data);
 
-      // 🟢 Actualiza inmediatamente el formulario con la respuesta del backend
       if (data.user) {
         setForm({
           nombre: data.user.nombre,
@@ -98,7 +94,6 @@ const UserInfoSection = () => {
           <h2 className="text-2xl mb-4">@{form.nombre}</h2>
 
           <form className="flex flex-col gap-2">
-            {/* Nombre */}
             <input
               type="text"
               name="nombre"
@@ -108,7 +103,6 @@ const UserInfoSection = () => {
               className="w-full border border-primary2 rounded px-4 py-2"
             />
 
-            {/* Email - solo lectura */}
             <input
               type="email"
               name="email"
@@ -117,7 +111,6 @@ const UserInfoSection = () => {
               className="w-full border border-primary2 rounded px-4 py-2 bg-gray-100"
             />
 
-            {/* Teléfono */}
             <input
               type="tel"
               name="telefono"
@@ -127,7 +120,6 @@ const UserInfoSection = () => {
               className="w-full border border-primary2 rounded px-4 py-2"
             />
 
-            {/* Botones */}
             <div className="flex justify-between gap-2 mt-4">
               <button
                 type="button"

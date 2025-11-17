@@ -6,6 +6,7 @@ export const customersDb = {
       lastName: "López",
       email: "camila.lopez@example.com",
       phone: "+56 9 8765 4321",
+      status: "active",
       createdAt: "2023-08-12T16:25:00Z",
     },
     {
@@ -14,6 +15,7 @@ export const customersDb = {
       lastName: "Pizarro",
       email: "diego.pizarro@example.com",
       phone: "+56 9 9988 7766",
+      status: "active",
       createdAt: "2024-01-04T10:12:00Z",
     },
     {
@@ -22,6 +24,7 @@ export const customersDb = {
       lastName: "Rojas",
       email: "valentina.rojas@example.com",
       phone: "+56 9 7654 3210",
+      status: "active",
       createdAt: "2024-02-15T14:30:00Z",
     },
     {
@@ -30,6 +33,7 @@ export const customersDb = {
       lastName: "Silva",
       email: "matias.silva@example.com",
       phone: "+56 9 8877 6655",
+      status: "inactive",
       createdAt: "2024-03-22T09:45:00Z",
     },
     {
@@ -38,6 +42,7 @@ export const customersDb = {
       lastName: "Muñoz",
       email: "sofia.munoz@example.com",
       phone: "+56 9 9966 5544",
+      status: "active",
       createdAt: "2024-01-28T11:20:00Z",
     },
     {
@@ -46,6 +51,7 @@ export const customersDb = {
       lastName: "Fernández",
       email: "lucas.fernandez@example.com",
       phone: "+56 9 7111 2233",
+      status: "active",
       createdAt: "2024-04-01T10:12:00Z",
     },
     {
@@ -54,6 +60,7 @@ export const customersDb = {
       lastName: "Castro",
       email: "isidora.castro@example.com",
       phone: "+56 9 7222 3344",
+      status: "active",
       createdAt: "2024-04-02T11:05:00Z",
     },
     {
@@ -62,6 +69,7 @@ export const customersDb = {
       lastName: "Paredes",
       email: "nicolas.paredes@example.com",
       phone: "+56 9 7333 4455",
+      status: "suspended",
       createdAt: "2024-04-03T14:20:00Z",
     },
     {
@@ -70,6 +78,7 @@ export const customersDb = {
       lastName: "Uribe",
       email: "catalina.uribe@example.com",
       phone: "+56 9 7444 5566",
+      status: "active",
       createdAt: "2024-04-04T09:45:00Z",
     },
     {
@@ -78,6 +87,7 @@ export const customersDb = {
       lastName: "Ojeda",
       email: "felipe.ojeda@example.com",
       phone: "+56 9 7555 6677",
+      status: "active",
       createdAt: "2024-04-05T17:30:00Z",
     },
     {
@@ -86,6 +96,7 @@ export const customersDb = {
       lastName: "Molina",
       email: "antonia.molina@example.com",
       phone: "+56 9 7666 7788",
+      status: "active",
       createdAt: "2024-04-06T08:50:00Z",
     },
     {
@@ -94,6 +105,7 @@ export const customersDb = {
       lastName: "Reyes",
       email: "joaquin.reyes@example.com",
       phone: "+56 9 7777 8899",
+      status: "active",
       createdAt: "2024-04-07T19:15:00Z",
     },
     {
@@ -102,6 +114,7 @@ export const customersDb = {
       lastName: "Durán",
       email: "francisca.duran@example.com",
       phone: "+56 9 7888 9900",
+      status: "active",
       createdAt: "2024-04-08T12:05:00Z",
     },
     {
@@ -110,6 +123,7 @@ export const customersDb = {
       lastName: "Vidal",
       email: "benjamin.vidal@example.com",
       phone: "+56 9 7999 0011",
+      status: "inactive",
       createdAt: "2024-04-09T15:40:00Z",
     },
     {
@@ -118,6 +132,7 @@ export const customersDb = {
       lastName: "Serrano",
       email: "agustina.serrano@example.com",
       phone: "+56 9 7000 1122",
+      status: "active",
       createdAt: "2024-04-10T09:30:00Z",
     },
     {
@@ -126,6 +141,7 @@ export const customersDb = {
       lastName: "Quiroz",
       email: "alan.quiroz@example.com",
       phone: "+56 9 7112 2233",
+      status: "suspended",
       createdAt: "2024-04-11T16:45:00Z",
     },
     {
@@ -134,6 +150,7 @@ export const customersDb = {
       lastName: "Bravo",
       email: "emilia.bravo@example.com",
       phone: "+56 9 7223 3344",
+      status: "active",
       createdAt: "2024-04-12T11:25:00Z",
     },
     {
@@ -142,6 +159,7 @@ export const customersDb = {
       lastName: "Rivas",
       email: "diego.rivas@example.com",
       phone: "+56 9 7334 4455",
+      status: "active",
       createdAt: "2024-04-13T08:55:00Z",
     },
     {
@@ -150,6 +168,7 @@ export const customersDb = {
       lastName: "Carrasco",
       email: "martina.carrasco@example.com",
       phone: "+56 9 7445 5566",
+      status: "active",
       createdAt: "2024-04-14T13:15:00Z",
     },
     {
@@ -158,6 +177,7 @@ export const customersDb = {
       lastName: "Godoy",
       email: "tomas.godoy@example.com",
       phone: "+56 9 7556 6677",
+      status: "inactive",
       createdAt: "2024-04-15T18:05:00Z",
     },
     {
@@ -166,6 +186,7 @@ export const customersDb = {
       lastName: "Soto",
       email: "valeria.soto@example.com",
       phone: "+56 9 7667 7788",
+      status: "active",
       createdAt: "2024-04-16T10:40:00Z",
     },
     {
@@ -174,6 +195,7 @@ export const customersDb = {
       lastName: "Miranda",
       email: "esteban.miranda@example.com",
       phone: "+56 9 7778 8899",
+      status: "suspended",
       createdAt: "2024-04-17T14:55:00Z",
     },
     {
@@ -182,6 +204,7 @@ export const customersDb = {
       lastName: "Cabrera",
       email: "renata.cabrera@example.com",
       phone: "+56 9 7889 9900",
+      status: "active",
       createdAt: "2024-04-18T09:20:00Z",
     },
     {
@@ -190,6 +213,7 @@ export const customersDb = {
       lastName: "Del Valle",
       email: "bastian.delvalle@example.com",
       phone: "+56 9 7990 0011",
+      status: "active",
       createdAt: "2024-04-19T12:10:00Z",
     },
     {
@@ -198,6 +222,7 @@ export const customersDb = {
       lastName: "Palma",
       email: "constanza.palma@example.com",
       phone: "+56 9 7001 1122",
+      status: "active",
       createdAt: "2024-04-20T16:25:00Z",
     },
     {
@@ -206,6 +231,7 @@ export const customersDb = {
       lastName: "Andrade",
       email: "josefa.andrade@example.com",
       phone: "+56 9 7113 2233",
+      status: "inactive",
       createdAt: "2024-04-21T08:15:00Z",
     },
     {
@@ -214,6 +240,7 @@ export const customersDb = {
       lastName: "Varela",
       email: "vicente.varela@example.com",
       phone: "+56 9 7224 3344",
+      status: "active",
       createdAt: "2024-04-22T13:50:00Z",
     },
     {
@@ -222,6 +249,7 @@ export const customersDb = {
       lastName: "Ríos",
       email: "camilo.rios@example.com",
       phone: "+56 9 7335 4455",
+      status: "suspended",
       createdAt: "2024-04-23T11:05:00Z",
     },
     {
@@ -230,6 +258,7 @@ export const customersDb = {
       lastName: "Araya",
       email: "florencia.araya@example.com",
       phone: "+56 9 7446 5566",
+      status: "active",
       createdAt: "2024-04-24T17:20:00Z",
     },
     {
@@ -238,6 +267,7 @@ export const customersDb = {
       lastName: "Herrera",
       email: "rodrigo.herrera@example.com",
       phone: "+56 9 7557 6677",
+      status: "active",
       createdAt: "2024-04-25T09:35:00Z",
     },
     {
@@ -246,6 +276,7 @@ export const customersDb = {
       lastName: "Valdés",
       email: "lucia.valdes@example.com",
       phone: "+56 9 7668 7788",
+      status: "active",
       createdAt: "2024-04-26T15:55:00Z",
     },
     {
@@ -254,6 +285,7 @@ export const customersDb = {
       lastName: "Saavedra",
       email: "matias.saavedra@example.com",
       phone: "+56 9 7779 8899",
+      status: "inactive",
       createdAt: "2024-04-27T08:05:00Z",
     },
     {
@@ -262,6 +294,7 @@ export const customersDb = {
       lastName: "Castillo",
       email: "luz.castillo@example.com",
       phone: "+56 9 7880 9900",
+      status: "active",
       createdAt: "2024-04-28T12:00:00Z",
     },
     {
@@ -270,6 +303,7 @@ export const customersDb = {
       lastName: "León",
       email: "maximiliano.leon@example.com",
       phone: "+56 9 7991 0011",
+      status: "suspended",
       createdAt: "2024-04-29T10:20:00Z",
     },
     {
@@ -278,6 +312,7 @@ export const customersDb = {
       lastName: "Salinas",
       email: "olivia.salinas@example.com",
       phone: "+56 9 7002 1122",
+      status: "active",
       createdAt: "2024-04-30T14:10:00Z",
     },
   ],
