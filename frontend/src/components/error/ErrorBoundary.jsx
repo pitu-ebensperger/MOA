@@ -45,7 +45,9 @@ class ErrorBoundary extends Component {
 
   logErrorToService = (error, errorInfo) => {
     // Aquí podrías enviar el error a un servicio como Sentry, LogRocket, etc.
-    if (process.env.NODE_ENV === 'production') {
+    const isDevelopment = import.meta.env.DEV;
+    
+    if (!isDevelopment) {
       // Ejemplo de envío de error
       const errorData = {
         message: error.message,
@@ -119,7 +121,7 @@ ${errorInfo?.componentStack || 'No disponible'}
 
       // Componente de error por defecto
       return (
-        <div className="min-h-screen bg-gradient-to-b from-[#FAFAF9] to-[#F3F1EB] flex items-center justify-center p-4">
+        <div className="min-h-screen bg-linear-to-b from-[#FAFAF9] to-[#F3F1EB] flex items-center justify-center p-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
             {/* Ícono de error */}
             <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
@@ -178,7 +180,7 @@ ${errorInfo?.componentStack || 'No disponible'}
             </div>
 
             {/* Detalles técnicos (solo en desarrollo) */}
-            {showDetails && process.env.NODE_ENV === 'development' && (
+            {showDetails && import.meta.env.DEV && (
               <details className="mt-6 text-left">
                 <summary className="cursor-pointer text-sm text-[#8B7355] hover:text-[#443114] mb-2">
                   Detalles técnicos
