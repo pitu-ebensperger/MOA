@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Modal } from "../../../components/ui/Modal.jsx";
+import { Modal } from "@/components/ui/Modal.jsx"
 import { Trash2 } from "lucide-react";
 
 const STATUS_VALUES = ["activo", "sin_stock", "borrador"];
@@ -16,7 +16,6 @@ const productSchema = z.object({
   stock: z.coerce.number().int().min(0, "Stock inválido"),
   status: z.enum(STATUS_VALUES).default("activo"),
   fk_category_id: z.union([z.string(), z.number()]).nullable().optional(),
-  fk_collection_id: z.union([z.string(), z.number()]).nullable().optional(),
   imgUrl: z.string().url("URL inválida").or(z.literal("")).optional(),
   description: z.string().optional(),
   color: z.string().optional(),
@@ -41,7 +40,6 @@ export function ProductDrawer({
   onDelete, // (product) => void
   initial,
   categories = [],
-  collections = [],
 }) {
   const {
     register,
@@ -50,18 +48,17 @@ export function ProductDrawer({
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: "",
-      sku: "",
-      price: 0,
-      stock: 0,
-      status: "activo",
-      fk_category_id: "",
-      fk_collection_id: "",
-      imgUrl: "",
-      description: "",
-      color: "",
-      material: "",
+        defaultValues: {
+          name: "",
+          sku: "",
+          price: 0,
+          stock: 0,
+          status: "activo",
+          fk_category_id: "",
+          imgUrl: "",
+          description: "",
+          color: "",
+          material: "",
       dimHeight: "",
       dimWidth: "",
       dimLength: "",
@@ -73,17 +70,16 @@ export function ProductDrawer({
   useEffect(() => {
     if (!open) return;
 
-    if (initial) {
-      const dim = initial.dimensions || {};
-      reset({
-        ...initial,
-        fk_category_id: initial.fk_category_id ?? "",
-        fk_collection_id: initial.fk_collection_id ?? "",
-        dimHeight: dim.height ?? "",
-        dimWidth: dim.width ?? "",
-        dimLength: dim.length ?? "",
-        dimUnit: dim.unit ?? "cm",
-      });
+        if (initial) {
+          const dim = initial.dimensions || {};
+          reset({
+            ...initial,
+            fk_category_id: initial.fk_category_id ?? "",
+            dimHeight: dim.height ?? "",
+            dimWidth: dim.width ?? "",
+            dimLength: dim.length ?? "",
+            dimUnit: dim.unit ?? "cm",
+          });
     } else {
       reset({});
     }
@@ -232,21 +228,6 @@ export function ProductDrawer({
                 >
                   <option value="">Sin categoría</option>
                   {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="block text-sm">
-                <span className="mb-1 block">Colección</span>
-                <select
-                  className="w-full rounded-md border px-3 py-2"
-                  {...register("fk_collection_id")}
-                >
-                  <option value="">Sin colección</option>
-                  {collections.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>

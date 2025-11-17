@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { homeApi } from "../../../services/home.api.js";
+import { homeApi } from "@/services/home.api.js"
 
 const initialState = {
   data: null,

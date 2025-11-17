@@ -1,4 +1,4 @@
-import { API_PATHS } from '../config/api-paths.js';
+import { API_PATHS } from '@/config/api-paths.js'
 
 export const ROUTES = {
   home: '/',
@@ -25,7 +25,6 @@ export const ROUTES = {
   admin: {
     dashboard: API_PATHS.admin.dashboard,
     products: API_PATHS.admin.products,
-    collections: API_PATHS.admin.collections,
     orders: API_PATHS.admin.orders,
     customers: API_PATHS.admin.customers,
     settings: API_PATHS.admin.settings,

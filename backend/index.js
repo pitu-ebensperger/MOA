@@ -8,12 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-let PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-});
-
-/* ----------------------------------------------------------------------------------------------------------- */
+/* ----------------------------- Rutas ----------------------------- */
 
 import categoriesRouter from "./routes/categoriesRoutes.js";
 import productsRouter from "./routes/productsRoutes.js";
@@ -33,3 +28,8 @@ app.use(cartRoutes);
 app.use(home);
 
 app.use(errorHandler);
+
+let PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+});

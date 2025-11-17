@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cx } from "../../utils/ui-helpers.js";
+import { cx } from "@/utils/ui-helpers.js"
 
 const AccordionSection = ({ title, children, defaultOpen = false, className }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);

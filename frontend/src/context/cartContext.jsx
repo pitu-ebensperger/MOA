@@ -1,5 +1,5 @@
-import { useCart } from "../modules/cart/hooks/useCart";
-import { CartContext } from "./cart-context.js";
+import { useCart } from "@/modules/cart/hooks/useCart"
+import { CartContext } from "@/context/cart-context.js"
 
 export const CartProvider = ({ children }) => {
   const cartState = useCart();

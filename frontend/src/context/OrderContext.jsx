@@ -1,5 +1,5 @@
-import { useOrders } from "../hooks/state/useOrders";
-import { OrderContext } from "./order-context.js";
+import { useOrders } from "@/hooks/state/useOrders"
+import { OrderContext } from "@/context/order-context.js"
 
 export const OrderProvider = ({ children }) => {
   const orderState = useOrders();

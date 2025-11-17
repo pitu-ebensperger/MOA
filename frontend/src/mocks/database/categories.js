@@ -54,7 +54,7 @@ export const CATEGORIES = [
     slug: "decoracion",
     name: "Decoración",
     description:
-      "Colecciones que aportan estilo y personalidad a cada rincón del hogar.",
+      "Accesorios y objetos que aportan estilo y personalidad a cada rincón del hogar.",
     coverImage:
       "https://images.unsplash.com/photo-1514053026555-49ce8886ae41?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop", // terraza/jardín
     parentId: null,

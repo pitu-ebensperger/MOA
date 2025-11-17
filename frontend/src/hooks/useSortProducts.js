@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
-import { sortProducts, PRODUCT_SORT_KEYS, PRODUCT_SORT_DIRS } from "../utils/sort.js";
+import { sortProducts, PRODUCT_SORT_KEYS, PRODUCT_SORT_DIRS } from "@/utils/sort.js"
 
 
 export const useSortedProducts = (items = [], { sortBy = "updatedAt", sortDir = "desc" } = {}) => {

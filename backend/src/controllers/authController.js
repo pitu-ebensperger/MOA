@@ -1,4 +1,4 @@
-import { findUserModel } from "../models/usersModel.js";
+import { findUserModel, getUserByIdModel } from "../models/usersModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -23,7 +23,12 @@ export const loginUser = async (req, res, next) => {
       throw new AppError("JWT secret no configurado", 500);
     }
     const token = jwt.sign(
-      { id: user.usuario_id, email: user.email },
+      { 
+        id: user.usuario_id, 
+        email: user.email,
+        role_code: user.role_code,
+        rol: user.rol
+      },
       JWT_SECRET,
       {
         expiresIn: process.env.JWT_EXPIRES_IN,
@@ -48,23 +53,32 @@ export const loginUser = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
   try {
-    const userFromToken = req.user;
-    if (!userFromToken || !userFromToken.email) {
+    const authPayload = req.user;
+    if (!authPayload) {
       throw new UnauthorizedError("No autorizado");
     }
-    const user = await findUserModel(userFromToken.email);
+
+    // Preferir buscar por ID si viene en el token, sino por email
+    const { id: usuarioId, email } = authPayload;
+    let user = null;
+
+    if (usuarioId) {
+      user = await getUserByIdModel(usuarioId);
+    } else if (email) {
+      user = await findUserModel(email);
+    }
 
     if (!user) {
       throw new NotFoundError("Usuario");
     }
 
     const profile = {
-      id: user.usuario_id,
+      id: user.usuario_id ?? user.id ?? null,
       nombre: user.nombre,
       email: user.email,
       telefono: user.telefono,
-      rol: user.rol,
-      role_code: user.role_code,
+      rol: user.rol ?? user.role ?? null,
+      role_code: user.rol_code ?? user.role_code ?? user.rolCode ?? null,
     };
 
     res.status(200).json(profile);

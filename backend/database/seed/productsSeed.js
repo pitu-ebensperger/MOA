@@ -7,7 +7,6 @@ function normalizeProduct(product) {
     public_id: nanoid(),
 
     categoria_id: product.fk_category_id ?? null,
-    collection_id: product.fk_collection_id ?? null,
 
     nombre: product.name,
     slug: product.slug,
@@ -48,7 +47,6 @@ async function seedProducts() {
         INSERT INTO productos (
           public_id,
           categoria_id,
-          collection_id,
           nombre,
           slug,
           sku,
@@ -69,10 +67,10 @@ async function seedProducts() {
           specs
         )
         VALUES (
-          $1, $2, $3, $4, $5, $6, 
+          $1, $2, $3, $4, $5, $6,
           $7, $8, $9, $10, $11, $12,
           $13, $14, $15, $16, $17, $18,
-          $19, $20, $21
+          $19, $20
         )
         RETURNING producto_id;
       `;
@@ -80,7 +78,6 @@ async function seedProducts() {
       const values = [
         p.public_id,
         p.categoria_id,
-        p.collection_id,
         p.nombre,
         p.slug,
         p.sku,

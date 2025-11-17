@@ -1,27 +1,27 @@
 import React from "react";
-import AdminSidebar from "../components/AdminSidebar";
-import AdminHeader from "../components/AdminHeader";
-import AdminStatsCard from "../components/AdminStatsCard";
-import AdminTable from "../components/AdminTable";
-import AdminActionButton from "../components/AdminActionButton";
+import AdminSidebar from "@/modules/admin/components/AdminSidebar"
+import AdminHeader from "@/modules/admin/components/AdminHeader"
+import AdminStatsCard from "@/modules/admin/components/AdminStatsCard"
+import AdminTable from "@/modules/admin/components/AdminTable"
+import AdminActionButton from "@/modules/admin/components/AdminActionButton"
 
-// Vista principal del Dashboard Admin
+// Vista principal del Dashboard Admin - MOA Muebles & Decoración
 export default function AdminDashboard() {
-  // Datos de ejemplo para las tarjetas de estadísticas
+  // Datos de ejemplo adaptados al negocio de muebles MOA
   const stats = [
-    { title: "Total Usuarios", value: "1,234", icon: "👥" },
-    { title: "Total Productos", value: "567", icon: "📦" },
-    { title: "Ventas Hoy", value: "$12,345", icon: "💰" },
-    { title: "Órdenes Pendientes", value: "89", icon: "🛒" },
+    { title: "Catálogo Activo", value: "567", icon: "🪑" },
+    { title: "Pedidos Mes", value: "89", icon: "�" },
+    { title: "Ingresos Mes", value: "$2.890.450", icon: "💰" },
+    { title: "Stock Bajo", value: "12", icon: "⚠️" },
   ];
 
-  // Datos de ejemplo para la tabla
-  const tableColumns = ["ID", "Usuario", "Email", "Estado", "Acciones"];
+  // Datos de ejemplo para productos recientes o con necesidad de atención
+  const tableColumns = ["SKU", "Producto", "Categoría", "Stock", "Estado"];
   const tableData = [
-    { ID: "1", Usuario: "Juan Pérez", Email: "juan@example.com", Estado: "Activo", Acciones: "Ver" },
-    { ID: "2", Usuario: "María López", Email: "maria@example.com", Estado: "Activo", Acciones: "Ver" },
-    { ID: "3", Usuario: "Carlos García", Email: "carlos@example.com", Estado: "Inactivo", Acciones: "Ver" },
-    { ID: "4", Usuario: "Ana Martínez", Email: "ana@example.com", Estado: "Activo", Acciones: "Ver" },
+    { SKU: "MOA-LIV-SOFA-001", Producto: "Sofá Modular Arena", Categoría: "Living", Stock: "6", Estado: "Activo" },
+    { SKU: "MOA-DOR-VELA-002", Producto: "Velador Rústico", Categoría: "Dormitorio", Stock: "2", Estado: "Stock Bajo" },
+    { SKU: "MOA-COM-MESA-045", Producto: "Mesa Roble Extensible", Categoría: "Comedor", Stock: "8", Estado: "Activo" },
+    { SKU: "MOA-ILU-LAMP-023", Producto: "Lámpara Industrial", Categoría: "Iluminación", Stock: "0", Estado: "Sin Stock" },
   ];
 
   return (
@@ -48,28 +48,31 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          {/* Sección de acciones rápidas */}
+          {/* Sección de gestión de inventario MOA */}
           <div className="bg-white rounded-lg shadow p-6 mb-8 border border-moa-neutral-200">
-            <h2 className="text-xl font-bold text-moa-neutral-900 mb-4">Acciones Rápidas</h2>
+            <h2 className="text-xl font-bold text-moa-neutral-900 mb-4">Gestión Rápida MOA</h2>
             <div className="flex flex-wrap gap-4">
-              <AdminActionButton onClick={() => alert("Crear Usuario")}>
-                Crear Usuario
+              <AdminActionButton onClick={() => alert("Nuevo Producto")}>
+                🪑 Nuevo Producto
               </AdminActionButton>
-              <AdminActionButton onClick={() => alert("Agregar Producto")}>
-                Agregar Producto
+              <AdminActionButton onClick={() => alert("Gestionar Categorías")}>
+                📂 Categorías
               </AdminActionButton>
-              <AdminActionButton onClick={() => alert("Nueva Categoría")}>
-                Nueva Categoría
+              <AdminActionButton onClick={() => alert("Control Stock")}>
+                📊 Control Stock
               </AdminActionButton>
-              <AdminActionButton onClick={() => alert("Ver Reportes")}>
-                Ver Reportes
+              <AdminActionButton onClick={() => alert("Reportes Ventas")}>
+                📈 Reportes
+              </AdminActionButton>
+              <AdminActionButton onClick={() => alert("Gestión Envíos")}>
+                🚚 Envíos
               </AdminActionButton>
             </div>
           </div>
 
-          {/* Tabla de usuarios recientes */}
+          {/* Tabla de productos que requieren atención */}
           <div className="bg-white rounded-lg shadow p-6 border border-moa-neutral-200">
-            <h2 className="text-xl font-bold text-moa-neutral-900 mb-4">Usuarios Recientes</h2>
+            <h2 className="text-xl font-bold text-moa-neutral-900 mb-4">Productos Requieren Atención</h2>
             <AdminTable columns={tableColumns} data={tableData} />
           </div>
         </main>

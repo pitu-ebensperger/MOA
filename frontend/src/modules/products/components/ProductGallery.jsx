@@ -1,5 +1,5 @@
-import ProductCard from "./ProductCard.jsx";
-import { useWishlist } from "../../profile/hooks/useWishlist.js";
+import ProductCard from "@/modules/products/components/ProductCard.jsx"
+import { useWishlist } from "@/modules/profile/hooks/useWishlist.js"
 
 export default function ProductGallery({ products = [], onAddToCart }) {
   const { wishlist, toggleWishlist } = useWishlist();

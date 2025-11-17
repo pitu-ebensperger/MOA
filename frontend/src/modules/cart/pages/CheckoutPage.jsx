@@ -1,11 +1,17 @@
+import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart } from "lucide-react";
-import { useCartContext } from "../../../context/cart-context.js";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { API_PATHS } from "../../../config/api-paths.js";
-import { resolveProductPrice } from "../../products/utils/products.js";
+import { useCartContext } from "@/context/cart-context.js"
+import { useAddresses } from "@/context/AddressContext.jsx"
+import { usePaymentMethods } from "@/context/PaymentContext.jsx"
+import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
+import { Price } from "@/components/data-display/Price.jsx"
+import { API_PATHS } from "@/config/api-paths.js"
+import { resolveProductPrice } from "@/modules/products/utils/products.js"
+import { METODOS_DESPACHO } from "@/utils/orderTracking.js"
+import ShippingMethodSelector from "@/modules/cart/components/ShippingMethodSelector.jsx"
+import { createOrder } from "@/services/checkout.api.js"
 import {
   Badge,
   Button,
@@ -30,12 +36,6 @@ import {
 const buildItemImage = (item) =>
   item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
 
-const deliveryOptions = [
-  { value: "standard", label: "Despacho estándar", detail: "48-72 h hábiles", cost: 0 },
-  { value: "express", label: "Despacho express", detail: "24 h hábiles", cost: 6900 },
-  { value: "pickup", label: "Retiro en showroom", detail: "Disponible hoy", cost: 0 },
-];
-
 const paymentOptions = [
   { value: "transfer", label: "Transferencia bancaria" },
   { value: "card", label: "Tarjeta crédito / débito" },
@@ -43,28 +43,115 @@ const paymentOptions = [
 ];
 
 export const CheckoutPage = () => {
+  const navigate = useNavigate();
   const { cartItems, total, removeFromCart, clearCart } = useCartContext();
-  const [deliveryMethod, setDeliveryMethod] = useState(deliveryOptions[0].value);
-  const [paymentMethod, setPaymentMethod] = useState(paymentOptions[0].value);
+  const { addresses, defaultAddress } = useAddresses();
+  const { paymentMethods, defaultPaymentMethod } = usePaymentMethods();
+  
+  const [shippingMethod, setShippingMethod] = useState('standard');
+  const [selectedAddressId, setSelectedAddressId] = useState(defaultAddress?.direccion_id || null);
+  const [selectedPaymentId, setSelectedPaymentId] = useState(defaultPaymentMethod?.metodo_pago_id || null);
   const [notes, setNotes] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Datos de contacto
+  const [contactData, setContactData] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+  });
+
+  // Dirección nueva (si no usa guardada)
+  const [newAddress, setNewAddress] = useState({
+    calle: '',
+    comuna: '',
+    ciudad: '',
+    region: '',
+  });
 
   const hasItems = cartItems.length > 0;
 
-  const deliveryInfo = useMemo(
-    () => deliveryOptions.find((option) => option.value === deliveryMethod) ?? deliveryOptions[0],
-    [deliveryMethod]
+  const shippingInfo = useMemo(
+    () => METODOS_DESPACHO[shippingMethod] ?? METODOS_DESPACHO.standard,
+    [shippingMethod]
   );
 
-  const shippingCost = hasItems ? deliveryInfo.cost : 0;
+  const shippingCost = hasItems ? shippingInfo.precio : 0;
   const grandTotal = total + shippingCost;
 
-  const handlePay = () => {
+  const handleShippingChange = (method) => {
+    setShippingMethod(method);
+  };
+
+  const handleContactChange = (field, value) => {
+    setContactData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddressChange = (field, value) => {
+    setNewAddress(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePay = async () => {
     if (!hasItems) {
       alert("Tu carrito está vacío 🛒");
       return;
     }
-    clearCart();
-    alert("¡Gracias por tu compra! 🛍️");
+
+    // Validaciones
+    if (!contactData.nombre || !contactData.email || !contactData.telefono) {
+      alert("Por favor completa todos los datos de contacto");
+      return;
+    }
+
+    // Si no es retiro, validar dirección
+    if (shippingMethod !== 'retiro') {
+      if (!selectedAddressId && (!newAddress.calle || !newAddress.comuna || !newAddress.ciudad || !newAddress.region)) {
+        alert("Por favor completa la dirección de envío");
+        return;
+      }
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const checkoutData = {
+        metodo_despacho: shippingMethod,
+        notas_cliente: notes,
+        contacto: contactData,
+      };
+
+      // Si usa dirección guardada
+      if (selectedAddressId && shippingMethod !== 'retiro') {
+        checkoutData.usar_direccion_guardada = true;
+        checkoutData.direccion_id = selectedAddressId;
+      } 
+      // Si es dirección nueva
+      else if (shippingMethod !== 'retiro') {
+        checkoutData.usar_direccion_guardada = false;
+        checkoutData.direccion_nueva = newAddress;
+      }
+
+      // Agregar método de pago si está seleccionado
+      if (selectedPaymentId) {
+        checkoutData.metodo_pago_id = selectedPaymentId;
+      }
+
+      const response = await createOrder(checkoutData);
+
+      if (response.success) {
+        clearCart();
+        alert(`¡Orden creada exitosamente! Código: ${response.data.order_code}`);
+        navigate('/perfil'); // Redirigir a perfil donde verá sus órdenes
+      } else {
+        alert(response.message || 'Error al crear la orden');
+      }
+
+    } catch (error) {
+      console.error('Error en checkout:', error);
+      alert(error.response?.data?.message || 'Error al procesar la orden. Por favor intenta nuevamente.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -94,19 +181,32 @@ export const CheckoutPage = () => {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label required>Nombre completo</Label>
-                    <Input placeholder="Andrea Muñoz" autoComplete="name" />
+                    <Input 
+                      placeholder="Andrea Muñoz" 
+                      autoComplete="name"
+                      value={contactData.nombre}
+                      onChange={(e) => handleContactChange('nombre', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label required>Correo</Label>
-                    <Input type="email" placeholder="andrea@estudio.cl" autoComplete="email" />
+                    <Input 
+                      type="email" 
+                      placeholder="andrea@estudio.cl" 
+                      autoComplete="email"
+                      value={contactData.email}
+                      onChange={(e) => handleContactChange('email', e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label required>Teléfono</Label>
-                    <Input type="tel" placeholder="+56 9 5555 5555" autoComplete="tel" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Número de documento</Label>
-                    <Input placeholder="12.345.678-9" autoComplete="off" />
+                    <Input 
+                      type="tel" 
+                      placeholder="+56 9 5555 5555" 
+                      autoComplete="tel"
+                      value={contactData.telefono}
+                      onChange={(e) => handleContactChange('telefono', e.target.value)}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -118,34 +218,78 @@ export const CheckoutPage = () => {
                 <CardDescription>Selecciona la modalidad que prefieras; todo queda agendado en una sola visita.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="space-y-2">
-                  <Label required>Dirección</Label>
-                  <Input placeholder="Avenida Italia 1234" autoComplete="street-address" />
-                </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label required>Ciudad</Label>
-                    <Input placeholder="Providencia" autoComplete="address-level2" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label required>Método de entrega</Label>
-                    <Select value={deliveryMethod} onValueChange={setDeliveryMethod}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona una opción" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {deliveryOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value} textValue={option.label}>
-                            <div className="flex flex-col">
-                              <span className="font-semibold text-[var(--color-primary2)]">{option.label}</span>
-                              <span className="text-xs text-[var(--color-text-muted)]">{option.detail}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                {/* Selector de método de despacho */}
+                <ShippingMethodSelector
+                  value={shippingMethod}
+                  onChange={handleShippingChange}
+                />
+
+                {/* Solo mostrar dirección si no es retiro */}
+                {shippingMethod !== 'retiro' && (
+                  <>
+                    {/* Selector de dirección guardada */}
+                    {addresses.length > 0 && (
+                      <div className="space-y-2">
+                        <Label>Dirección guardada</Label>
+                        <Select value={selectedAddressId?.toString()} onValueChange={(val) => setSelectedAddressId(parseInt(val))}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar dirección guardada" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {addresses.map(addr => (
+                              <SelectItem key={addr.direccion_id} value={addr.direccion_id.toString()}>
+                                {addr.etiqueta || `${addr.calle}, ${addr.comuna}`}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    
+                    {/* O nueva dirección */}
+                    {!selectedAddressId && (
+                      <>
+                        <div className="space-y-2">
+                          <Label required>Calle y número</Label>
+                          <Input 
+                            placeholder="Avenida Italia 1234" 
+                            autoComplete="street-address"
+                            value={newAddress.calle}
+                            onChange={(e) => handleAddressChange('calle', e.target.value)}
+                          />
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <div className="space-y-2">
+                            <Label required>Comuna</Label>
+                            <Input 
+                              placeholder="Providencia" 
+                              autoComplete="address-level3"
+                              value={newAddress.comuna}
+                              onChange={(e) => handleAddressChange('comuna', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label required>Ciudad</Label>
+                            <Input 
+                              placeholder="Santiago" 
+                              autoComplete="address-level2"
+                              value={newAddress.ciudad}
+                              onChange={(e) => handleAddressChange('ciudad', e.target.value)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label required>Región</Label>
+                            <Input 
+                              placeholder="Metropolitana" 
+                              value={newAddress.region}
+                              onChange={(e) => handleAddressChange('region', e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label required>Método de pago</Label>
@@ -264,8 +408,9 @@ export const CheckoutPage = () => {
                   size="lg"
                   className="w-full justify-center text-base"
                   onClick={handlePay}
+                  disabled={isProcessing}
                 >
-                  Confirmar y pagar
+                  {isProcessing ? 'Procesando...' : 'Confirmar y pagar'}
                 </Button>
                 <Link
                   to="/cart"
@@ -333,10 +478,12 @@ export const CheckoutPage = () => {
               className: "text-[var(--color-primary1)]",
             })}
           >
-            Explorar colecciones
+            Explorar catálogo
           </Link>
         </Card>
       )}
     </main>
   );
 };
+
+CheckoutPage.propTypes = {};

@@ -1,9 +1,9 @@
-import { env } from "../config/env.js";
-import { API_PATHS } from "../config/api-paths.js";
-import { mockCatalogApi } from "../mocks/api/products.js";
-import { apiClient } from "./api-client.js";
-import { normalizeCategoryList, normalizeProduct } from "../utils/normalizers.js";
-import { buildQueryString } from "../utils/https.js";
+import { env } from "@/config/env.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { mockCatalogApi } from "@/mocks/api/products.js"
+import { apiClient } from "@/services/api-client.js"
+import { normalizeCategoryList, normalizeProduct } from "@/utils/normalizers.js"
+import { buildQueryString } from "@/utils/https.js"
 
 const normalizeListResponse = (payload = {}) => {
   const src = Array.isArray(payload.items)

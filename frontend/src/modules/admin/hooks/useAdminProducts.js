@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { productsApi } from "../../../services/products.api.js";
+import { productsApi } from "@/services/products.api.js"
 
 const ADMIN_PRODUCTS_QUERY_KEY = ["admin-products"];
 
@@ -9,6 +9,7 @@ const buildAdminParams = ({
   limit = 20,
   search = "",
   status = "",
+  categoryId = "",
   onlyLowStock = false,
 }) => {
   const safeLimit = Math.max(1, limit);
@@ -22,15 +23,16 @@ const buildAdminParams = ({
 
   if (search.trim()) params.search = search.trim();
   if (status) params.status = status;
+  if (categoryId) params.categoryId = categoryId;
   if (onlyLowStock) params.low_stock = true;
 
   return params;
 };
 
-export function useAdminProducts({ page, limit, search, status, onlyLowStock }) {
+export function useAdminProducts({ page, limit, search, status, categoryId, onlyLowStock }) {
   const params = useMemo(
-    () => buildAdminParams({ page, limit, search, status, onlyLowStock }),
-    [page, limit, search, status, onlyLowStock],
+    () => buildAdminParams({ page, limit, search, status, categoryId, onlyLowStock }),
+    [page, limit, search, status, categoryId, onlyLowStock],
   );
 
   const query = useQuery({

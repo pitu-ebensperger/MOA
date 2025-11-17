@@ -1,4 +1,4 @@
-import { ProductFiltersContent } from "./ProductFiltersContent.jsx";
+import { ProductFiltersContent } from "@/modules/products/components/ProductFiltersContent.jsx"
 
 export function ProductSidebar({
   categories,

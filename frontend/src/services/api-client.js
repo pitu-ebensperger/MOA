@@ -1,4 +1,7 @@
-import { env } from "../config/env.js";
+import { env } from "@/config/env.js"
+import { mockAuthApi } from "@/mocks/api/auth.js"
+import { mockCartApi } from "@/mocks/api/cart.js"
+import { analyticsData } from "@/mocks/analytics.data.js"
 
 const DEFAULT_TIMEOUT = env.API_TIMEOUT ?? 15000;
 
@@ -21,8 +24,106 @@ const isRawBody =
     (typeof Blob !== "undefined" && data instanceof Blob) ||
     (typeof ArrayBuffer !== "undefined" && data instanceof ArrayBuffer);
 
+// Mock interceptor
+function tryMockRoute(path, method, data) {
+  if (!env.USE_MOCKS) return null;
+
+  // Auth routes - corregidas para coincidir con API_PATHS
+  if ((path.includes('/auth/login') || path.includes('/login')) && method === 'POST') {
+    return mockAuthApi.login(data);
+  }
+  if ((path.includes('/auth/register') || path.includes('/registro')) && method === 'POST') {
+    return mockAuthApi.register(data);
+  }
+  if (path.includes('/auth/profile') || path.includes('/perfil')) {
+    // Extraer userId de la URL si está disponible
+    const userIdMatch = path.match(/\/perfil\/([^/]+)|\/profile\/([^/]+)/);
+    const userId = userIdMatch?.[1] || userIdMatch?.[2];
+    return mockAuthApi.profile(userId);
+  }
+  if (path.includes('/auth/forgot-password') || path.includes('/olvidaste-contrasena')) {
+    return mockAuthApi.requestPasswordReset(data.email);
+  }
+  if (path.includes('/auth/reset-password') || path.includes('/restablecer-contrasena')) {
+    return mockAuthApi.resetPassword();
+  }
+
+  // Cart routes
+  const cartMatch = path.match(/\/carrito\/([^/]+)/);
+  if (cartMatch) {
+    const userId = cartMatch[1];
+    
+    if (method === 'GET') {
+      return mockCartApi.getCart(userId);
+    }
+    if (path.includes('/items') && method === 'POST') {
+      return mockCartApi.addItem(userId, data);
+    }
+    
+    const itemMatch = path.match(/\/items\/([^/]+)/);
+    if (itemMatch) {
+      const itemId = itemMatch[1];
+      if (method === 'PUT') {
+        return mockCartApi.updateItem(userId, itemId, data.quantity);
+      }
+      if (method === 'DELETE') {
+        return mockCartApi.removeItem(userId, itemId);
+      }
+    }
+    
+    if (method === 'DELETE') {
+      return mockCartApi.clearCart(userId);
+    }
+  }
+
+  // Analytics routes
+  if (path.includes('/admin/analytics/dashboard') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.dashboardMetrics), 300);
+    });
+  }
+  if (path.includes('/admin/analytics/sales') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.salesAnalytics), 350);
+    });
+  }
+  if (path.includes('/admin/analytics/conversion') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.conversionMetrics), 280);
+    });
+  }
+  if (path.includes('/admin/analytics/products/top') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.topProducts), 320);
+    });
+  }
+  if (path.includes('/admin/analytics/categories') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.categoryAnalytics), 290);
+    });
+  }
+  if (path.includes('/admin/analytics/stock') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.stockAnalytics), 250);
+    });
+  }
+  if (path.includes('/admin/analytics/orders/distribution') && method === 'GET') {
+    return new Promise(resolve => {
+      setTimeout(() => resolve(analyticsData.orderDistribution), 310);
+    });
+  }
+
+  return null;
+}
+
 // Petición base (fetch)
-async function request(path, { method = "GET", data, headers = {}, auth = false, timeout = DEFAULT_TIMEOUT } = {}) {
+async function request(path, { method = "GET", data, headers = {}, auth = null, timeout = DEFAULT_TIMEOUT } = {}) {
+  // Intentar usar mock primero
+  const mockResult = tryMockRoute(path, method, data);
+  if (mockResult !== null) {
+    return await mockResult;
+  }
+
   const baseURL = env.API_BASE_URL;
   const url = new URL(path, baseURL);
 
@@ -44,6 +145,28 @@ async function request(path, { method = "GET", data, headers = {}, auth = false,
       opts.headers["Content-Type"] = "application/json";
       opts.body = typeof data === "string" ? data : JSON.stringify(data);
     }
+  }
+
+  // Auto-detectar auth si no se especifica
+  if (auth === null) {
+    // Rutas que típicamente requieren autenticación
+    const authRequiredPatterns = [
+      /\/admin\//,
+      /\/perfil/,
+      /\/profile/,
+      /\/carrito/,
+      /\/cart/,
+      /\/direcciones/,
+      /\/addresses/,
+      /\/pedidos/,
+      /\/orders/,
+      /\/metodos-pago/,
+      /\/payment/,
+      /\/usuario/,
+      /\/user/,
+    ];
+    
+    auth = authRequiredPatterns.some(pattern => pattern.test(path));
   }
 
   // Authorization si es cliente privado
@@ -90,17 +213,11 @@ async function request(path, { method = "GET", data, headers = {}, auth = false,
   return payload;
 }
 
-// Factories de verbos con/ sin auth
-const verbs = (auth) => ({
-  get:    (path, opts = {})       => request(path, { ...opts, method: "GET",    auth }),
-  post:   (path, data, opts = {}) => request(path, { ...opts, method: "POST",   data, auth }),
-  put:    (path, data, opts = {}) => request(path, { ...opts, method: "PUT",    data, auth }),
-  patch:  (path, data, opts = {}) => request(path, { ...opts, method: "PATCH",  data, auth }),
-  delete: (path, opts = {})       => request(path, { ...opts, method: "DELETE", auth }),
-});
-
-// Cliente listo para usar
+// Cliente API simple con auto-detección de autenticación
 export const apiClient = {
-  public:  verbs(false),
-  private: verbs(true),
+  get:    (path, opts = {})       => request(path, { ...opts, method: "GET" }),
+  post:   (path, data, opts = {}) => request(path, { ...opts, method: "POST", data }),
+  put:    (path, data, opts = {}) => request(path, { ...opts, method: "PUT", data }),
+  patch:  (path, data, opts = {}) => request(path, { ...opts, method: "PATCH", data }),
+  delete: (path, opts = {})       => request(path, { ...opts, method: "DELETE" }),
 };

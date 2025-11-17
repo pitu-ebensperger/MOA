@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ordersApi } from "../../../services/orders.api.js";
+import { ordersApi } from "@/services/orders.api.js"
 
 const buildAdminParams = ({ page = 1, limit = 20, status = "", search = "" }) => {
   const safeLimit = Math.max(1, Number(limit) || 20);

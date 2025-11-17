@@ -1,6 +1,6 @@
-import { PRODUCTS, CATEGORIES, contentDb } from "../database/index.js";
-import { delay } from "../../utils/delay.js";
-import { normalizeCategory } from "../../utils/normalizers.js";
+import { PRODUCTS, CATEGORIES, contentDb } from "@/mocks/database/index.js"
+import { delay } from "@/utils/delay.js"
+import { normalizeCategory } from "@/utils/normalizers.js"
 
 const catalogDb = {
   categories: CATEGORIES.map(normalizeCategory),

@@ -1,7 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { RefreshCw } from "lucide-react";
 
-import { DataTableV2 } from "../../../../components/data-display/DataTableV2.jsx";
+import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
 import {
   TableToolbar,
   TableSearch,
@@ -9,16 +9,14 @@ import {
   FilterTags,
   ToolbarSpacer,
   QuickFilterPill,
-  ColumnsMenuButton,
-  ClearFiltersButton,
   LayoutToggleButton,
 } from "../../../../components/data-display/TableToolbar.jsx";
-import { Button } from "../../../../components/ui/Button.jsx";
+import { Button } from "@/components/ui/Button.jsx"
 
-import { useAdminOrders } from "../../hooks/useAdminOrders.js";
-import { buildOrderColumns } from "../../utils/ordersColumns.jsx";
-import OrdersDrawer from "../../components/OrdersDrawer.jsx";
-import { ordersApi } from "../../../../services/orders.api.js";
+import { useAdminOrders } from "@/modules/admin/hooks/useAdminOrders.js"
+import { buildOrderColumns } from "@/modules/admin/utils/ordersColumns.jsx"
+import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
+import { ordersApi } from "@/services/orders.api.js"
 
 const ORDER_STATUS_OPTIONS = [
   { label: "Todos los estados", value: "" },
@@ -46,15 +44,31 @@ export default function OrdersPage() {
     search,
   });
 
+  const handleUpdateOrderStatus = useCallback(
+    async (order, newStatus) => {
+      const targetId = order?.id ?? order?.number;
+      if (!targetId || !newStatus) return;
+
+      try {
+        await ordersApi.updateStatus(targetId, { status: newStatus });
+        refetch();
+      } catch (error) {
+        console.error("Error al actualizar el estado de la orden:", error);
+        window.alert(
+          error?.message ??
+            "No se pudo actualizar el estado de la orden. Intenta nuevamente."
+        );
+      }
+    },
+    [refetch]
+  );
+
   const columns = useMemo(
     () =>
       buildOrderColumns({
         onOpen: (order) => setSelectedOrder(order),
         onUpdateStatus: (order, newStatus) => {
-          console.log("Actualizar estado de orden:", order.number, "a", newStatus);
-          // TODO: Implementar llamada a API para actualizar estado
-          // await ordersApi.updateStatus(order.id, newStatus);
-          refetch();
+          handleUpdateOrderStatus(order, newStatus);
         },
         onCancel: async (order) => {
           if (!window.confirm(`¿Estás seguro de cancelar la orden ${order.number}?`)) return;
@@ -68,15 +82,8 @@ export default function OrdersPage() {
           }
         },
       }),
-    [refetch],
+    [refetch, handleUpdateOrderStatus],
   );
-
-  const clearAll = () => {
-    setSearch("");
-    setStatus("");
-    setActiveTags([]);
-    setPage(1);
-  };
 
   const toolbar = useMemo(
     () => (table) => (
@@ -137,8 +144,6 @@ export default function OrdersPage() {
           }}
         />
         <div className="ml-auto flex items-center gap-2">
-          <ColumnsMenuButton table={table} />
-          <ClearFiltersButton onClear={clearAll} />
           <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
           <Button
             appearance="ghost"
@@ -160,7 +165,7 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-sans text-xl font-semibold tracking-tight text-(--text-strong)">
+          <h1 className="text-3xl font-bold text-primary1 mb-2">
             Pedidos
           </h1>
           <p className="text-sm text-(--text-weak)">

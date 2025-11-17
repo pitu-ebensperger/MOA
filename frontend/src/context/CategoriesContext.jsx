@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { productsApi } from "../services/products.api.js";
-import { CategoriesContext } from "./categories-context.js";
+import { productsApi } from "@/services/products.api.js"
+import { CategoriesContext } from "@/context/categories-context.js"
 
 export const CategoriesProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);

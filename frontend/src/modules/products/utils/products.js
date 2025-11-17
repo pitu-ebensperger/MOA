@@ -1,4 +1,4 @@
-import { toNum } from "../../../utils/number.js";
+import { toNum } from "@/utils/number.js"
 
 // Precio num o null
 export const resolveProductPrice = (product) => {
@@ -10,7 +10,6 @@ export { buildProductCategoryPool } from "./productCategory.js";
 export {
   matchesText,
   createCategoryMatcher,
-  matchesCollection,
   matchesPrice,
   matchesStatus,
 } from "./productsFilter.js";

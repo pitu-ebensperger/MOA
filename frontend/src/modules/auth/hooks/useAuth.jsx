@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth } from "../../../context/auth-context.js";
-import { API_PATHS } from "../../../config/api-paths.js";
+import { useAuth } from "@/context/auth-context.js"
+import { API_PATHS } from "@/config/api-paths.js"
 
 
 export function ProtectedRoute() {

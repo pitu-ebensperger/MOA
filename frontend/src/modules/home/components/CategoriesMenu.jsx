@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useCategories } from "../../products/hooks/useCategories.js";
-import { normalizeCategoryMenuItems } from "../../../utils/normalizers.js";
+import { useCategories } from "@/modules/products/hooks/useCategories.js"
+import { normalizeCategoryMenuItems } from "@/utils/normalizers.js"
 
 export default function CategoriesMenu({
   title = "Productos",

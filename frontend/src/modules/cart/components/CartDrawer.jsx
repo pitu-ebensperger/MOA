@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Minus, X, Trash2, ShoppingCart } from "lucide-react";
-import { Button } from "../../../components/ui/Button.jsx";
-import { Price } from "../../../components/data-display/Price.jsx";
+import { Button } from "@/components/ui/Button.jsx"
+import { Price } from "@/components/data-display/Price.jsx"
 
-import { useCartContext } from "../../../context/cart-context.js";
+import { useCartContext } from "@/context/cart-context.js"
 
-import { resolveProductPrice } from "../../products/utils/products.js";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
-import { API_PATHS } from "../../../config/api-paths.js";
+import { resolveProductPrice } from "@/modules/products/utils/products.js"
+import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
+import { API_PATHS } from "@/config/api-paths.js"
 
 const buildItemImage = (item) =>
   item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;

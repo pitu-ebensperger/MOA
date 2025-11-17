@@ -6,7 +6,21 @@
 
 ## ✅ COMPLETADOS RECIENTEMENTE
 
-- ~~Reemplazar todos los imports del frontend por el alias `@/`~
+- ~~Reemplazar todos los imports del frontend por el alias `@/`~~ ✅ COMPLETADO (17 nov 2025)
+  - 145 archivos actualizados, ~800+ imports convertidos
+  - Documentado en `docs/CONVERSION_IMPORTS_ALIAS.md`
+  - Compilación exitosa sin errores
+  - Sistema completo de checkout funcionando
+  - Modelos, controladores y rutas de órdenes creados
+- Añadir validaciones PropTypes para los componentes clave de perfil y checkout ✅ COMPLETADO (hoy)
+  - `OrderStatusTimeline.jsx`, `AddressesSection.jsx`, `CheckoutPage.jsx` y `MyOrdersSection.jsx` ahora declaran formas esperadas
+  - Protege datos de orden, dirección y productos antes de renderizar Timeline, formularios y listado
+  - Mejora la confiabilidad sin migrar aún a TypeScript
+
+- Renovamos la navegación admin y wishlist (hoy)
+  - `AdminSidebar.jsx` y `Navbar.jsx` usan rutas reales (`API_PATHS`) y el menú de perfil lleva a la pestaña correcta `/perfil?tab=orders`.
+  - Los botones “Agregar al carro” de `Profile -> Card.jsx` invocan `addToCart`/login en lugar de ser decorativos, y `ProfilePage.jsx` puede inicializar la pestaña correcta según `location.state.initialTab`.
+  - `OrdersPage.jsx` y `ordersApi.updateStatus` permiten cambiar estados de pedido contra mocks o API real y refrescan la vista; `CustomersPage.jsx` gestiona creación, edición, cambios de estado y desactivación directamente desde el panel.
 
 ---
 
@@ -82,6 +96,14 @@
     - `setSelectedPaymentId` (línea 52)
     - `paymentMethod` (línea 295)
     - `setPaymentMethod` (línea 295)
+
+### Checkout context
+- Rebuild the payment context by destructuring the tuple from `createStrictContext`, exporting the strict hook, and wrapping `App` (or `AddressProvider`) with the now-correct `PaymentProvider` so `usePaymentMethods` is usable in the checkout flow.
+- Define a real `paymentMethod` state in `CheckoutPage` (or reuse `selectedPaymentId`) before rendering the `<Select>` at line 295, and align it with `paymentOptions` so the form no longer references an undefined variable.
+
+### Manejo de errores y páginas
+- Auditar y documentar el middleware `errorHandler` en `backend/src/utils/error.utils.js` y su registro en `backend/index.js` (orden de routers `home`, `wishlist`, `cart`, etc.) para asegurar respuestas consistentes (revisar `AppError`, `ValidationError`, errores de PG/JWT) y añadir pruebas en `backend/__tests__/routes.test.js` que disparen 4xx/5xx sobre esas rutas.
+- Crear o actualizar la experiencia de usuario cuando ocurren errores críticos (`ServerErrorPage.jsx`, `ErrorBoundary` o fallback en `App.jsx`) manteniendo `NotFoundPage.jsx` como la ruta `*` actual y documentar qué errores usan cada vista.
 
 ---
 
@@ -210,6 +232,7 @@
   - **Buscar:** Referencias a "post sacada front"
   - **Verificar:** Que diseño final está implementado en todos los módulos
   - **Limpiar:** Archivos mock antiguos no usados
+- Eliminar cualquier mock data o endpoints simulados (`mockOrders`, `mockProducts`, etc.) que aún se usen en el build y reemplazarlos por integraciones reales antes del deploy
 
 ### TODOs en Código
 - Auditar y resolver comentarios TODO:
@@ -255,6 +278,7 @@ Antes de llevar a producción, verificar:
 - [ ] Flujo de compra probado end-to-end
 - [ ] Pasarela de pago integrada y probada
 - [ ] Emails de confirmación configurados
+- [ ] Ajustar el tiempo de expiración del JWT en backend y documentarlo antes del deploy (IMPORTANTE)
 - [ ] Variables de entorno configuradas (DB, API keys, etc.)
 - [ ] Build de producción exitoso (`npm run build`)
 - [ ] HTTPS configurado

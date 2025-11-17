@@ -1,16 +1,17 @@
 import React from "react";
-import { Dialog, DialogContent } from "../../../components/ui/radix/Dialog.jsx";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { Pill } from "../../../components/ui/Pill.jsx";
-import { formatDate_ddMMyyyy } from "../../../utils/date.js";
-import { CalendarDays, PackageCheck, Truck } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx";
+import { Price } from "@/components/data-display/Price.jsx";
+import { StatusPill } from "@/components/ui/StatusPill.jsx";
+import { Pill } from "@/components/ui/Pill.jsx";
+import { formatDate_ddMMyyyy } from "@/utils/date.js";
+import { CalendarDays, PackageCheck, Truck, ChevronRight } from "lucide-react";
+import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx";
 
 // Helpers pequeños para no ensuciar el JSX
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
 const safeText = (v) => (v == null || v === "" ? "–" : v);
 
-export default function OrdersDrawer({ open, order, onClose }) {
+export default function OrdersDrawer({ open, order, onClose, breadcrumb = null }) {
   // Si no hay orden seleccionada, no mostramos nada
   if (!open || !order) return null;
 
@@ -25,7 +26,6 @@ export default function OrdersDrawer({ open, order, onClose }) {
     userName,
     userEmail,
     userPhone,
-    subtotal,
     shipping,
     total,
   } = order;
@@ -83,8 +83,18 @@ export default function OrdersDrawer({ open, order, onClose }) {
         showClose={true}
       >
         <div className="flex h-full flex-col bg-(--color-neutral2) text-(--color-text)">
-        {/* Header (sticky) */}
-  <header className="sticky top-0 z-10 flex items-center justify-between border-b border-(--color-border) bg-white/90 px-7 py-5 backdrop-blur">
+          {/* Header (sticky) */}
+          <header className="sticky top-0 z-10 border-b border-(--color-border) bg-white/90 px-7 py-5 backdrop-blur">
+            {/* Breadcrumb si viene de cliente */}
+            {breadcrumb && (
+              <div className="mb-3 flex items-center gap-1 text-xs text-(--color-text-muted)">
+                <span>{breadcrumb}</span>
+                <ChevronRight className="h-3 w-3" />
+                <span className="text-(--color-primary1)">Orden {number}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between">
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wide text-(--color-text-muted)">
               Orden
@@ -102,6 +112,7 @@ export default function OrdersDrawer({ open, order, onClose }) {
                 {deliveredAt ? `Entrega: ${safeDate(deliveredAt)}` : shippedAt ? `Envío: ${safeDate(shippedAt)}` : "Sin fecha"}
               </span>
             </div>
+            </div>
             <div className="flex flex-col items-end gap-1 text-right">
               <span className="text-xs text-(--color-text-muted)">Estado</span>
               <StatusPill status={status} />
@@ -116,9 +127,29 @@ export default function OrdersDrawer({ open, order, onClose }) {
             className="divide-y divide-(--color-border) rounded-2xl border border-(--color-border) bg-white shadow-sm"
             sections={[
               {
+                key: "tracking",
+                title: "Seguimiento del pedido",
+                defaultOpen: true,
+                render: () => (
+                  <div className="px-2 py-3">
+                    <OrderStatusTimeline 
+                      order={{
+                        id: order.id,
+                        order_code: order.number,
+                        metodo_despacho: order.shipment?.carrier === 'Retiro en tienda' ? 'retiro' : 
+                                        order.shipment?.carrier === 'Express' ? 'express' : 'standard',
+                        creado_en: order.createdAt,
+                        fecha_entrega_estimada: order.shipment?.deliveredAt || 
+                                               new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+                      }} 
+                    />
+                  </div>
+                ),
+              },
+              {
                 key: "summary",
                 title: "Resumen de la orden",
-                defaultOpen: true,
+                defaultOpen: false,
                 render: () => (
                   <div className="space-y-3">
                     <div className="divide-y divide-(--color-border) rounded-lg border border-(--color-border)">

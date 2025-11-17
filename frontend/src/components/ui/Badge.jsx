@@ -1,6 +1,6 @@
 import React from "react";
-import { cx } from "../../utils/ui-helpers.js";
-import { BADGE_VARIANTS, BADGE_SIZES } from "../../config/ui-tokens.js";
+import { cx } from "@/utils/ui-helpers.js"
+import { BADGE_VARIANTS, BADGE_SIZES } from "@/config/ui-tokens.js"
 
 /* Badge Component  -------------------------------------------------------------------------- */
 
