@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth-context.js'
 import { SearchBar } from '@/components/ui/SearchBar.jsx'
+import { SearchBarEmergency } from '@/components/ui/SearchBarEmergency.jsx'
 import { API_PATHS } from '@/config/api-paths.js'
 
 const NAV_ITEMS = [
@@ -65,14 +66,20 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
         setIsSearchOpen(false);
         setIsMenuOpen(false);
         setIsProfileDropdownOpen(false);
+        setSearchQuery(''); // Limpiar también la query
+      }
+      
+      // EMERGENCY: Force close search with Ctrl/Cmd + Escape
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Escape') {
+        setIsSearchOpen(false);
+        setSearchQuery('');
+        console.log('Cierre forzado');
       }
     };
 
-    if (isSearchOpen || isMenuOpen || isProfileDropdownOpen) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [isSearchOpen, isMenuOpen, isProfileDropdownOpen]);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Detectar scroll para cambiar opacidad del navbar
   useEffect(() => {
@@ -132,7 +139,6 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
       icon: Package,
       label: 'Mis Pedidos',
       href: API_PATHS.auth.profile,
-      state: { initialTab: 'orders' },
     },
     {
       icon: Heart,
@@ -148,7 +154,8 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   };
 
   const handleProfileMenuClick = (item) => {
-    navigate(item.href, { state: item.state });
+    const navigationOptions = item.state ? { state: item.state } : undefined;
+    navigate(item.href, navigationOptions);
     setIsProfileDropdownOpen(false);
   };
 
@@ -436,7 +443,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
         </nav>
       </div>
     </div>
-    <SearchBar
+    <SearchBarEmergency
       isOpen={isSearchOpen}
       value={searchQuery}
       onChange={handleSearchChange}

@@ -2,7 +2,7 @@
 
 ### Usuarios para frontend testing:
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
-- **demo@moa.cl** (contraseña: demo o admin o 123456) 
+- **demo@moa.cl / demo@moal.cl** (contraseña: demo o admin o 123456) 
 - **cliente@mail.com** (contraseña: demo o admin o 123456)
  
 ### Tarjetas de prueba Webpay (integración)

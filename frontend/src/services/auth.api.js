@@ -8,41 +8,36 @@ const buildProfilePath = (userId) =>
 
 // Auth API agrupada
 export const authApi = {
-  // POST /auth/login
-  login: async (payload) => {
-    const res = await apiClient.public.post(API_PATHS.auth.login, payload)
-    return res?.data ?? res
+  async login(payload = {}) {
+    const res = await apiClient.post(API_PATHS.auth.login, payload)
+    return res
   },
 
-  // POST /auth/register
-  register: async (payload) => {
-    const res = await apiClient.public.post(API_PATHS.auth.register, payload)
-    return res?.data ?? res
+  async register(payload = {}) {
+    const res = await apiClient.post(API_PATHS.auth.register, payload)
+    return res
   },
 
-  // GET /auth/profile (requiere token)
-  profile: async (userId) => {
-    const endpoint = buildProfilePath(userId)
-    const res = await apiClient.private.get(endpoint)
-    return res?.data ?? res
+  async profile(userId) {
+    const endpoint = userId ? API_PATHS.auth.profileUpdate(userId) : API_PATHS.auth.profile
+    const res = await apiClient.get(endpoint)
+    return res
   },
 
-  // POST /auth/forgot-password (envía email)
-  requestPasswordReset: async (email) => {
-    const res = await apiClient.public.post(
-      API_PATHS.auth.forgot ?? '/auth/forgot-password',
-      { email },
+  async requestPasswordReset(payload = {}) {
+    const res = await apiClient.post(
+      API_PATHS.auth.requestPasswordReset,
+      payload
     )
-    return res?.data ?? res
+    return res
   },
 
-  // POST /auth/reset-password (token + nueva password)
-  resetPassword: async ({ token, password }) => {
-    const res = await apiClient.public.post(
-      API_PATHS.auth.reset ?? '/auth/reset-password',
-      { token, password },
+  async resetPassword(payload = {}) {
+    const res = await apiClient.post(
+      API_PATHS.auth.resetPassword,
+      payload
     )
-    return res?.data ?? res
+    return res
   },
 }
 

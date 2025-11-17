@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useAuth } from '@/context/auth-context.js'
+import { useAuth } from '../../../context/auth-context.js';
 
 export const useUser = () => {
   const { user: authUser } = useAuth(); // traemos el usuario autenticado
@@ -42,7 +42,7 @@ export const useUser = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+  }, [authUser, fetchProfile]);
 
   return { profile, loading, error, fetchProfile, updateProfile };
 };

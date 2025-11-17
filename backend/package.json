@@ -8,6 +8,7 @@
     "start": "node server.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules npx jest --watch",
+    "migrate": "node scripts/migrate.js",
     "migration": "node scripts/runMigration.js",
     "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
     "seed:categories": "node database/seed/categoriesSeed.js",

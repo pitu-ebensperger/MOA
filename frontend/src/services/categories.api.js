@@ -19,27 +19,27 @@ const sanitizeSlug = (value = "") =>
 
 const remoteCategoriesApi = {
   async list() {
-    const data = await apiClient.public.get(API_PATHS.products.categories);
+    const data = await apiClient.get(API_PATHS.products.categories);
     return normalizeCategoryList(data);
   },
   async create(payload = {}) {
-    const response = await apiClient.private.post(API_PATHS.admin.categories, payload);
+    const response = await apiClient.post(API_PATHS.admin.categories, payload);
     const payloadData = response?.data ?? response;
     return normalizeCategory(payloadData);
   },
   async update(id, patch = {}) {
     if (id == null) throw new Error("Se requiere el ID de la categoría");
-    const response = await apiClient.private.put(API_PATHS.admin.categoryDetail(id), patch);
+    const response = await apiClient.put(API_PATHS.admin.categoryDetail(id), patch);
     const payloadData = response?.data ?? response;
     return normalizeCategory(payloadData);
   },
   async remove(id) {
     if (id == null) throw new Error("Se requiere el ID de la categoría");
-    return apiClient.private.delete(API_PATHS.admin.categoryDetail(id));
+    return apiClient.delete(API_PATHS.admin.categoryDetail(id));
   },
   async countProducts(id) {
     if (id == null) throw new Error("Se requiere el ID de la categoría");
-    const response = await apiClient.private.get(API_PATHS.admin.categoryProductsCount(id));
+    const response = await apiClient.get(API_PATHS.admin.categoryProductsCount(id));
     return response?.data?.producto_count ?? response?.data?.productCount ?? null;
   },
 };

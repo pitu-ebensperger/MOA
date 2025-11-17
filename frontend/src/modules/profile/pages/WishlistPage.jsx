@@ -1,6 +1,6 @@
-import Card from "@/modules/profile/components/Card.jsx"
-import { useProducts } from "@/modules/products/hooks/useProducts.js"
-import { useWishlist } from "@/modules/profile/hooks/useWishlist.js"
+import Card from "../components/Card.jsx";
+import { useProducts } from "../../products/hooks/useProducts.js";
+import { useWishlist } from "../../profile/hooks/useWishlist.js";
 
 const WISHLIST_PRODUCT_FILTERS = Object.freeze({ limit: 100 });
 
