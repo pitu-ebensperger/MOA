@@ -1,13 +1,10 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth as useAuthCtx } from "../../../context/AuthContext.jsx";
+import { useAuth } from "../../../context/auth-context.js";
 import { API_PATHS } from "../../../config/api-paths.js";
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAuth = () => useAuthCtx();
 
 
 export function ProtectedRoute() {
-  const { isAuthenticated } = useAuthCtx();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
 
   return isAuthenticated ? (
@@ -18,7 +15,7 @@ export function ProtectedRoute() {
 }
 
 export function AdminRoute() {
-  const { isAuthenticated, isAdmin } = useAuthCtx();
+  const { isAuthenticated, isAdmin } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {

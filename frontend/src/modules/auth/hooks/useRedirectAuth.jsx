@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from './useAuth.jsx';
+import { useAuth } from '../../../context/auth-context.js';
 import { ROUTES } from '../../../routes/routes.js';
 
 export function useRedirectAfterAuth() {

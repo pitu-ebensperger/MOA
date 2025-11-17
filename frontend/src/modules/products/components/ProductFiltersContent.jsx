@@ -1,28 +1,8 @@
 import { useMemo } from "react";
 
 import { DoubleRangeSlider } from "./DoubleRangeSlider.jsx";
-import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
-
-const normalizeCategories = (categories = []) => {
-  const base = Array.isArray(categories) ? categories : [];
-  const mapped = base
-    .map((cat, index) => {
-      if (!cat) return null;
-      if (typeof cat === "string") {
-        return { id: cat, name: cat };
-      }
-      const id = cat.id ?? cat.slug ?? `cat-${index}`;
-      const name = cat.name ?? String(cat.slug ?? cat.id ?? `Categoría ${index + 1}`);
-      return { id, name };
-    })
-    .filter(Boolean);
-
-  const hasAll = mapped.some((cat) => String(cat.id) === String(ALL_CATEGORY_ID));
-  const normalized = hasAll ? mapped : [{ id: ALL_CATEGORY_ID, name: "Todas" }, ...mapped];
-  return normalized.length ? normalized : [{ id: ALL_CATEGORY_ID, name: "Todas" }];
-};
-
-const clampValue = (value, min, max) => Math.min(Math.max(value, min), max);
+import { normalizeCategoryFilterOptions } from "../../../utils/normalizers.js";
+import { clamp } from "../../../utils/math.js";
 
 export function ProductFiltersContent({
   categories,
@@ -31,11 +11,14 @@ export function ProductFiltersContent({
   onChangeCategory,
   onChangePrice,
 }) {
-  const normalizedCategories = useMemo(() => normalizeCategories(categories), [categories]);
+  const normalizedCategories = useMemo(
+    () => normalizeCategoryFilterOptions(categories),
+    [categories],
+  );
   const minLimit = limits?.min ?? 0;
   const maxLimit = limits?.max ?? 0;
-  const selectedMin = clampValue(Math.round(filters.min), minLimit, maxLimit);
-  const selectedMax = clampValue(Math.round(filters.max), selectedMin, maxLimit);
+  const selectedMin = clamp(Math.round(filters.min), minLimit, maxLimit);
+  const selectedMax = clamp(Math.round(filters.max), selectedMin, maxLimit);
   const sliderStep = Math.max(1, Math.round((maxLimit - minLimit) / 40));
   const hasCustomMin = Number.isFinite(filters.min) && filters.min !== minLimit;
   const hasCustomMax = Number.isFinite(filters.max) && filters.max !== maxLimit;
@@ -43,8 +26,8 @@ export function ProductFiltersContent({
   const inputMaxValue = hasCustomMax ? selectedMax : "";
 
   const updateRange = (nextMin, nextMax) => {
-    const boundedMin = clampValue(Number(nextMin), minLimit, maxLimit);
-    const boundedMax = clampValue(Number(nextMax), minLimit, maxLimit);
+    const boundedMin = clamp(Number(nextMin), minLimit, maxLimit);
+    const boundedMax = clamp(Number(nextMax), minLimit, maxLimit);
     const normalizedMin = Math.min(boundedMin, boundedMax);
     const normalizedMax = Math.max(boundedMin, boundedMax);
     onChangePrice({

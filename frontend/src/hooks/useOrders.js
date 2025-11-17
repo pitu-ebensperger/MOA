@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { usePersistentState } from "./usePersistentState.js";
+
+const ORDERS_STORAGE_KEY = "orders";
 
 export const useOrders = () => {
-  const [orders, setOrders] = useState(() => {
-    const saved = localStorage.getItem("orders");
-    return saved ? JSON.parse(saved) : [];
+  const [orders, setOrders] = usePersistentState(ORDERS_STORAGE_KEY, {
+    initialValue: [],
   });
 
   // Crear  nueva orden
@@ -14,11 +15,7 @@ export const useOrders = () => {
       ...orderData, // { productos, total, etc. }
     };
 
-    setOrders((prev) => {
-      const updated = [...prev, newOrder];
-      localStorage.setItem("orders", JSON.stringify(updated));
-      return updated;
-    });
+    setOrders((prev) => [...prev, newOrder]);
 
     return newOrder;
   };
@@ -28,13 +25,8 @@ export const useOrders = () => {
 
   // Borrar  órdenes 
   const clearOrders = () => {
-    localStorage.removeItem("orders");
     setOrders([]);
   };
-
-  useEffect(() => {
-    localStorage.setItem("orders", JSON.stringify(orders));
-  }, [orders]);
 
   return { orders, createOrder, getOrderById, clearOrders };
 };

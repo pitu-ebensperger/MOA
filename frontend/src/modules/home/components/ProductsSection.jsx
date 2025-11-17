@@ -1,52 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import ProductCard from "../../products/components/ProductCard.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
 import { createCategoryMatcher } from "../../products/utils/products.js";
-import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
+import { ALL_CATEGORY_ID } from "../../../config/constants.js";
 import { API_PATHS } from "../../../config/api-paths.js";
-
-const normalizeProduct = (product, index) => {
-  const safeId = product?.id ?? `featured-${index}`;
-  const normalizedName = product?.name ?? product?.slug ?? `Producto ${index + 1}`;
-  const normalizedImage = product?.imgUrl ?? product?.gallery?.[0] ?? null;
-  const normalizedPrice = product?.price ?? 50000;
-
-  return {
-    ...product,
-    id: safeId,
-    name: normalizedName,
-    imgUrl: normalizedImage,
-    price: normalizedPrice,
-  };
-};
-
-const buildTabs = (categories) => {
-  const source =
-    Array.isArray(categories) && categories.length
-      ? categories.filter((category) => category?.parentId === null || category?.parentId === undefined)
-      : [];
-
-  const items = source
-    .map((category, index) => {
-      const filterValue = category?.id ?? category?.slug ?? `category-${index}`;
-      return {
-        id: String(category?.id ?? category?.slug ?? index),
-        label: category?.name ?? `Categoría ${index + 1}`,
-        value: filterValue,
-      };
-    })
-    .filter((item) => Boolean(item.label));
-
-  const hasAll = items.some((item) => String(item.value) === String(ALL_CATEGORY_ID));
-  const baseTabs = hasAll
-    ? items
-    : [{ id: ALL_CATEGORY_ID, label: "Todos", value: ALL_CATEGORY_ID }, ...items];
-
-  return baseTabs.length ? baseTabs : [{ id: ALL_CATEGORY_ID, label: "Todos", value: ALL_CATEGORY_ID }];
-};
+import { buildCategoryTabs, normalizeFeaturedProduct } from "../../../utils/normalizers.js";
 
 export default function ProductsSection({ products, categories }) {
-  const tabs = useMemo(() => buildTabs(categories), [categories]);
+  const tabs = useMemo(() => buildCategoryTabs(categories), [categories]);
   const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
   const matchCategory = useMemo(
     () => createCategoryMatcher(Array.isArray(categories) ? categories : []),
@@ -63,7 +25,7 @@ export default function ProductsSection({ products, categories }) {
 
   const items = useMemo(() => {
     const source = Array.isArray(products) ? products : [];
-    const normalized = source.map(normalizeProduct);
+    const normalized = source.map((product, index) => normalizeFeaturedProduct(product, index));
     const filtered = normalized.filter((product) =>
       matchCategory(product, activeCategory),
     );
@@ -120,6 +82,7 @@ export default function ProductsSection({ products, categories }) {
 
       <div className="flex justify-center pt-1">
         <Button
+          as={Link}
           to={API_PATHS.products.products}
           appearance="outline"
           intent="primary"

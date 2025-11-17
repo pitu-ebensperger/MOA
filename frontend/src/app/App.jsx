@@ -30,6 +30,7 @@ import { NotFoundPage } from '../modules/support/pages/NotFoundPage.jsx'
 import { AdminRoute } from '../modules/auth/hooks/useAuth.jsx'
 import EntornoAdmin from '../modules/admin/components/EntornoAdmin.jsx'
 import AdminDashboardPage from '../modules/admin/pages/AdminDashboardPage.jsx'
+import AdminTestPage from '../modules/admin/pages/AdminTestPage.jsx'
 import OrdersPage from '../modules/admin/pages/orders/OrdersPage.jsx'
 import AdminProductsPage from '../modules/admin/pages/AdminProductsPage.jsx'
 import CustomersPage from '../modules/admin/pages/CustomersPage.jsx'
@@ -75,6 +76,7 @@ export const App = () => {
 
           <Route element={<AdminRoute />}>
             <Route path={admin.dashboard} element={<EntornoAdmin> <AdminDashboardPage /> </EntornoAdmin>} />
+            <Route path={admin.test} element={<EntornoAdmin> <AdminTestPage /> </EntornoAdmin>} />
             <Route path={admin.orders} element={<EntornoAdmin> <OrdersPage /> </EntornoAdmin>} />
             <Route path={admin.products} element={<EntornoAdmin> <AdminProductsPage /> </EntornoAdmin>} />
             <Route path={admin.collections} element={<EntornoAdmin> <AdminCollectionsPage /> </EntornoAdmin>} />

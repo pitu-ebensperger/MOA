@@ -1,7 +1,7 @@
 import { ShoppingCart, Menu, User, X, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../modules/auth/hooks/useAuth.jsx';
+import { useAuth } from '../../context/auth-context.js';
 import { SearchBar } from '../ui/SearchBar.jsx';
 import { API_PATHS } from '../../config/api-paths.js';
 

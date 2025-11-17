@@ -15,7 +15,10 @@
     "snapshot": "npm run -ws snapshot",
     "f:dev": "npm run -w frontend dev",
     "f:lint": "npm run -w frontend lint",
-    "b:dev": "npm run -w backend dev || echo \"(backend vacío)\""
+    "b:dev": "npm run -w backend dev || echo \"(backend vacío)\"",
+    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --forceExit",
+    "test:watch": "npm test -- --watch",
+    "test:coverage": "npm test -- --coverage"
   },
   "devDependencies": {
     "@asamuzakjp/css-color": "^4.0.5",

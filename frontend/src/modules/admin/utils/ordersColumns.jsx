@@ -25,21 +25,6 @@ export const buildOrderColumns = ({ onOpen }) => [
     ),
   },
   {
-    accessorKey: "userName",
-    header: "Cliente",
-    enableSorting: true,
-    cell: ({ row }) => (
-      <div className="flex flex-col">
-        <span>{row.original.userName || "-"}</span>
-        {row.original.userEmail && (
-          <span className="text-xs text-(--text-weak)">
-            {row.original.userEmail}
-          </span>
-        )}
-      </div>
-    ),
-  },
-  {
     accessorKey: "total",
     header: "Total",
     enableSorting: true,
@@ -51,6 +36,18 @@ export const buildOrderColumns = ({ onOpen }) => [
           : "-"}
       </span>
     ),
+  },
+  {
+    accessorKey: "items",
+    header: "Ítems",
+    enableSorting: false,
+    meta: { align: "center" },
+    cell: ({ row }) => {
+      const count = Array.isArray(row.original.items)
+        ? row.original.items.length
+        : 0;
+      return <span className="tabular-nums font-semibold">{count}</span>;
+    },
   },
   {
     accessorKey: "status",

@@ -10,6 +10,7 @@ import { App } from './App.jsx'
 
 import '../styles/global.css'
 import '../styles/tokens.css'
+import '../styles/shadcn-theme.css'
 import '../styles/components/buttons.css'
 
 const queryClient = new QueryClient()

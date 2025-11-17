@@ -1,6 +1,6 @@
 import { buildProductCategoryPool } from "./productCategory.js";
 import { toNum } from "../../../utils/number.js";
-import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
+import { ALL_CATEGORY_ID } from "../../../config/constants.js";
 
 const s = (v) => (v == null ? "" : String(v));
 

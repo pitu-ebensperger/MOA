@@ -39,7 +39,7 @@ export default function AdminCollectionsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold">Categorías principales</h2>
+          <h2 className="mb-3 text-lg font-semibold text-primary">Categorías principales</h2>
           {isLoading && <p className="text-sm text-neutral-500">Cargando categorías…</p>}
           {error && (
             <div className="text-sm text-red-600">Error al cargar categorías</div>
@@ -76,7 +76,7 @@ export default function AdminCollectionsPage() {
         </div>
 
         <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold">Colecciones</h2>
+          <h2 className="mb-3 text-lg font-semibold text-primary">Colecciones</h2>
           <p className="text-sm text-neutral-600">
             Próximamente podrás crear colecciones personalizadas combinando
             categorías y productos.

@@ -86,6 +86,12 @@ export function TanstackDataTable({
                       ? "text-center"
                       : "text-left";
 
+                  const meta = header.column.columnDef.meta || {};
+                  const headerMeta = meta.header || {};
+                  const showDefaultSort = headerMeta.showDefaultSortIndicator !== false;
+                  const sortIcons = headerMeta.sortIcons || {};
+                  const onFilterClick = headerMeta.onFilterClick;
+                  const headerExtra = headerMeta.extra;
                   return (
                     <th
                       key={header.id}
@@ -103,13 +109,32 @@ export function TanstackDataTable({
                           }
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <span className="text-[11px] opacity-60">↑</span>,
-                            desc: <span className="text-[11px] opacity-60">↓</span>,
-                          }[header.column.getIsSorted()] ??
-                            (header.column.getCanSort() ? (
-                              <span className="text-[11px] opacity-40">↕</span>
-                            ) : null)}
+                          {showDefaultSort && (
+                            ({
+                              asc: sortIcons.asc ?? <span className="text-[12px] opacity-70">▲</span>,
+                              desc: sortIcons.desc ?? <span className="text-[12px] opacity-70">▼</span>,
+                            }[header.column.getIsSorted()] ??
+                              (header.column.getCanSort()
+                                ? sortIcons.unsorted ?? (
+                                    <span className="text-[12px] opacity-40">⇅</span>
+                                  )
+                                : null))
+                          )}
+                          {onFilterClick && (
+                            <button
+                              type="button"
+                              className="ml-1 rounded p-0.5 text-neutral-400 hover:text-neutral-700"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onFilterClick(header.getContext());
+                              }}
+                              aria-label="Filtrar columna"
+                            >
+                              {/* Simple funnel icon */}
+                              <span className="text-[12px]">⏷</span>
+                            </button>
+                          )}
+                          {headerExtra && <span className="ml-1">{headerExtra}</span>}
                         </div>
                       )}
                     </th>

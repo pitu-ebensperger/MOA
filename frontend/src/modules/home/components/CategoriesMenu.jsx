@@ -1,17 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useCategories } from "../../products/hooks/useCategories.js";
-
-const normalizeCategories = (categories) => {
-  if (!Array.isArray(categories)) return [];
-  return categories
-    .filter((category) => category && category.parentId === null)
-    .map((category) => ({
-      id: String(category.id ?? category.slug ?? category.name),
-      name: category.name ?? category.title ?? "Categoría MOA",
-      slug: category.slug ?? null,
-      raw: category,
-    }));
-};
+import { normalizeCategoryMenuItems } from "../../../utils/normalizers.js";
 
 export default function CategoriesMenu({
   title = "Productos",
@@ -28,11 +17,7 @@ export default function CategoriesMenu({
 
   const categories = useMemo(() => {
     const source = shouldUseRemote ? fetchedCategories : providedCategories;
-    const normalized = normalizeCategories(source);
-    if (!normalized.some((category) => category.id === "all")) {
-      return [{ id: "all", name: "Todos", slug: "all", raw: null }, ...normalized];
-    }
-    return normalized;
+    return normalizeCategoryMenuItems(source);
   }, [fetchedCategories, providedCategories, shouldUseRemote]);
 
   const [activeCategoryId, setActiveCategoryId] = useState("all");

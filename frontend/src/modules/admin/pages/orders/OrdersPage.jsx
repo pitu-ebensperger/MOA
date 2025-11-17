@@ -89,15 +89,17 @@ export default function OrdersPage() {
       </div>
 
       {/* Tabla */}
-      <TanstackDataTable
-        columns={columns}
-        data={items}
-        loading={isLoading}
-        page={page}
-        pageSize={limit}
-        total={total}
-        onPageChange={setPage}
-      />
+      <div className="admin-table-surface">
+        <TanstackDataTable
+          columns={columns}
+          data={items}
+          loading={isLoading}
+          page={page}
+          pageSize={limit}
+          total={total}
+          onPageChange={setPage}
+        />
+      </div>
 
       {/* Paginación */}
       <div className="mt-3">

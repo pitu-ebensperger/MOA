@@ -2,8 +2,12 @@ import React from "react";
 import { Modal } from "../../../components/ui/Modal.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { StatusPill } from "../../../components/ui/StatusPill.jsx";
+<<<<<<< Updated upstream
 import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Pill } from "../../../components/ui/Pill.jsx";
+=======
+
+>>>>>>> Stashed changes
 import { formatDate_ddMMyyyy } from "../../../utils/date.js";
 import { CalendarDays, PackageCheck, Truck } from "lucide-react";
 
@@ -80,7 +84,7 @@ export default function OrdersDrawer({ open, order, onClose }) {
             <p className="text-[11px] font-medium uppercase tracking-wide text-(--color-text-muted)">
               Orden
             </p>
-            <h2 className="mt-0.5 truncate font-mono text-lg font-semibold tracking-tight">
+            <h2 className="mt-0.5 truncate font-mono text-lg font-semibold tracking-tight text-primary">
               {number ?? "Orden"}
             </h2>
           </div>
@@ -101,6 +105,7 @@ export default function OrdersDrawer({ open, order, onClose }) {
         </header>
 
         {/* Contenido scrollable */}
+<<<<<<< Updated upstream
   <div className="flex-1 overflow-y-auto px-6 py-4">
           {/* Encabezado compacto con fechas */}
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
@@ -114,6 +119,119 @@ export default function OrdersDrawer({ open, order, onClose }) {
                 {deliveredAt ? safeDate(deliveredAt) : shippedAt ? `${safeDate(shippedAt)} (en tránsito)` : "Pendiente"}
               </p>
             </div>
+=======
+        <div className="flex-1 overflow-y-auto px-7 py-6">
+          <div className="flex flex-col gap-10">
+            {/* Ítems */}
+            <section>
+              <h3 className="mb-3 text-sm font-semibold text-primary">Ítems</h3>
+              <div className="rounded-2xl border border-(--color-border) bg-white shadow-sm">
+                {items.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-(--color-text-muted)">Esta orden no tiene ítems.</div>
+                ) : (
+                  <ul className="divide-(--color-border)">
+                    {items.map((item, idx) => (
+                      <li key={idx} className="flex items-center gap-4 px-5 py-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-(--color-neutral3) text-xs text-(--color-text-muted)">
+                          {item.name?.[0] ?? "?"}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
+                          <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
+                        </div>
+                        <div className="text-right text-sm font-medium tabular-nums">
+                          <Price value={item.unitPrice ?? 0} />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* Totales */}
+                <div className="border-t border-(--color-border) px-5 py-4">
+                  <Dl>
+                    <DlRow label="Subtotal"><span className="tabular-nums"><Price value={subtotal ?? 0} /></span></DlRow>
+                    {order.tax ? (
+                      <DlRow label="Impuestos"><span className="tabular-nums"><Price value={order.tax} /></span></DlRow>
+                    ) : null}
+                    <DlRow label="Envío"><span className="tabular-nums"><Price value={shipping ?? 0} /></span></DlRow>
+                    <div className="grid grid-cols-3 gap-3 pt-2">
+                      <dt className="col-span-1 text-[11px] uppercase tracking-wide text-(--color-text-muted)">Total</dt>
+                      <dd className="col-span-2 text-sm font-medium tabular-nums"><Price value={total ?? payment?.amount ?? 0} /></dd>
+                    </div>
+                  </Dl>
+                </div>
+              </div>
+            </section>
+
+            {/* Meta (envío / cliente / pago) */}
+            <section>
+              {/* Envío y entrega */}
+              <section className="mb-8">
+                <h3 className="mb-3 text-sm font-semibold text-primary">Envío y entrega</h3>
+                {/* Stepper */}
+                <div className="relative">
+                  <ol className="flex items-center justify-between gap-2">
+                    {steps.map((s, idx) => {
+                      const active = idx <= shippingCurrentStep;
+                      const Icon = s.icon;
+                      return (
+                        <li key={s.key} className="flex min-w-0 flex-1 flex-col items-center">
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-full border text-[11px] ${active ? "bg-(--color-primary1) text-white border-(--color-primary1)" : "bg-white text-(--color-text-muted) border-(--color-border)"}`}>
+                            <Icon className={`h-4 w-4 ${active ? "text-white" : "text-(--color-text-muted)"}`} />
+                          </div>
+                          <span className={`mt-1 text-[11px] ${active ? "text-(--color-primary1)" : "text-(--color-text-muted)"}`}>{s.label}</span>
+                          <span className="mt-0.5 text-[10px] text-(--color-text-muted)">{safeDate(s.date)}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <div className="pointer-events-none absolute left-[calc(1.75rem)] right-[calc(1.75rem)] top-3 h-px bg-(--color-border)">
+                    <div className="h-full bg-(--color-primary1) transition-all" style={{ width: `${(shippingCurrentStep / (steps.length - 1)) * 100}%` }} />
+                  </div>
+                </div>
+
+                {/* Datos de envío (lista simple) */}
+                <Dl className="mt-4">
+                  <DlRow label="Carrier">
+                    <span className="font-medium">{safeText(deliveryService)}</span>
+                    <span className="ml-2 align-middle"><StatusPill status={shippingStatus} domain="shipment" /></span>
+                  </DlRow>
+                  {tracking && (
+                    <DlRow label="Tracking"><span className="font-mono text-[13px] text-(--color-text-muted)">{tracking}</span></DlRow>
+                  )}
+                  <DlRow label="Fecha de envío">{safeDate(shippedAt)}</DlRow>
+                  <DlRow label="Fecha de entrega">{safeDate(deliveredAt)}</DlRow>
+                  <DlRow label={`Dirección${address?.label ? ` (${address.label})` : ""}`}>
+                    <span className="break-words">{fullAddress ?? "–"}</span>
+                  </DlRow>
+                </Dl>
+              </section>
+
+              {/* Cliente */}
+              <section className="mb-8">
+                <h3 className="mb-3 text-sm font-semibold text-primary">Cliente</h3>
+                <Dl>
+                  <DlRow label="Nombre">{safeText(userName)}</DlRow>
+                  <DlRow label="Email"><span className="text-(--color-primary1)">{safeText(userEmail)}</span></DlRow>
+                  <DlRow label="Teléfono">{safeText(userPhone)}</DlRow>
+                </Dl>
+              </section>
+
+              {/* Pago */}
+              <section>
+                <h3 className="mb-3 text-sm font-semibold text-primary">Pago</h3>
+                <Dl>
+                  <DlRow label="Método">{safeText(paymentMethod)}</DlRow>
+                  {payment?.status && (
+                    <DlRow label="Estado">
+                      <StatusPill status={payment.status} domain="payment" />
+                    </DlRow>
+                  )}
+                </Dl>
+              </section>
+            </section>
+>>>>>>> Stashed changes
           </div>
 
           {/* Secciones en acordeón */}

@@ -1,7 +1,5 @@
-import { createContext, useContext } from "react";
 import { useOrders } from "../hooks/state/useOrders";
-
-const OrderContext = createContext();
+import { OrderContext } from "./order-context.js";
 
 export const OrderProvider = ({ children }) => {
   const orderState = useOrders();
@@ -12,5 +10,4 @@ export const OrderProvider = ({ children }) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useOrderContext = () => useContext(OrderContext);
+// Nota: useOrderContext y OrderContext se exportan desde ./order-context.js para respetar fast-refresh

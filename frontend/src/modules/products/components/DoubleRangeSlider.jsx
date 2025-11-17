@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-
-const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+import { clamp } from "../../../utils/math.js";
 
 export function DoubleRangeSlider({
   min = 0,

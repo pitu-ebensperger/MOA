@@ -8,6 +8,8 @@ import { Pagination } from "../../../components/ui/Pagination.jsx";
 import { useAdminProducts } from "../hooks/useAdminProducts.js";
 import { useCategories } from "../../products/hooks/useCategories.js";
 import { buildProductColumns } from "../utils/ProductsColumns.jsx";
+import { DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
+import { PRODUCT_STATUS_OPTIONS } from "../../../config/status-options.js";
 
 export default function ProductsAdminPage() {
   const [page, setPage] = React.useState(1);
@@ -15,7 +17,7 @@ export default function ProductsAdminPage() {
   const [status, setStatus] = React.useState("");
   const [onlyLowStock, setOnlyLowStock] = React.useState(false);
 
-  const limit = 20;
+  const limit = DEFAULT_PAGE_SIZE;
 
   const { items, total, totalPages, isLoading, refetch } = useAdminProducts({
     page,
@@ -53,7 +55,7 @@ export default function ProductsAdminPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-sans text-xl font-semibold tracking-tight text-(--text-strong)">
+          <h1 className="font-sans text-xl font-semibold tracking-tight text-primary">
             Productos
           </h1>
           <p className="text-sm text-(--text-weak)">
@@ -104,10 +106,11 @@ export default function ProductsAdminPage() {
             }}
             className="w-full rounded-full border border-(--border-subtle) bg-white px-3 py-1.5 text-sm"
           >
-            <option value="">Todos los estados</option>
-            <option value="activo">Activo</option>
-            <option value="borrador">Borrador</option>
-            <option value="archivado">Archivado</option>
+            {PRODUCT_STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
           </select>
         </div>
 

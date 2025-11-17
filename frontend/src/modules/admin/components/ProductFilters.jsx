@@ -1,6 +1,6 @@
 //path/src/modules/admin/components/ProductFiltersBar.jsx
 import React, { useMemo } from "react";
-import { PRODUCT_STATUS_OPTIONS } from "../../../utils/constants.js";
+import { PRODUCT_STATUS_OPTIONS } from "../../../config/status-options.js";
 
 export function ProductFilters({
   categories = [],

@@ -1,42 +1,23 @@
 import React, { forwardRef } from "react";
 import { cx } from "../../utils/ui-helpers.js";
+import {
+  BUTTON_APPEARANCES,
+  BUTTON_INTENTS,
+  BUTTON_SIZES,
+  BUTTON_SHAPES,
+  BUTTON_WIDTHS,
+  BUTTON_ALIGNS,
+  BUTTON_ELEVATIONS,
+  BUTTON_ICON_PLACEMENTS,
+  DEFAULT_BUTTON_OPTIONS,
+  BUTTON_LEGACY_VARIANTS,
+} from "../../config/ui-tokens.js";
 
 /* -------------------------------------------------------------------------- */
 /* Configuración y constantes                                                 */
 /* -------------------------------------------------------------------------- */
 
 const BUTTON_BASE_CLASS = "btn";
-
-const BUTTON_APPEARANCES = ["solid", "soft", "tinted", "outline", "ghost", "link", "bare"];
-const BUTTON_INTENTS = [
-  "primary",
-  "secondary",
-  "accent",
-  "neutral",
-  "info",
-  "success",
-  "warning",
-  "danger",
-  "inverse",
-  "muted",
-];
-const BUTTON_SIZES = ["xs", "sm", "md", "lg", "xl"];
-const BUTTON_SHAPES = ["default", "rounded", "pill", "square", "circle"];
-const BUTTON_WIDTHS = ["fit", "auto", "full", "stretch"];
-const BUTTON_ALIGNS = ["start", "center", "end"];
-const BUTTON_ELEVATIONS = ["none", "sm", "md", "lg"];
-const BUTTON_ICON_PLACEMENTS = ["start", "end", "only"];
-
-const DEFAULT_BUTTON_OPTIONS = {
-  appearance: "solid",
-  intent: "primary",
-  size: "md",
-  shape: "default",
-  width: "fit",
-  align: "center",
-  elevation: "sm",
-  iconPlacement: "start",
-};
 
 const BLEED_VALUE = "var(--spacing-sm)";
 const BLEED_MAP = {
@@ -55,22 +36,6 @@ const MOTION_CLASSNAMES = {
   "icon-slide": "motion-icon-slide",
   expand: "motion-expand",
   ripple: "motion-ripple",
-};
-
-const LEGACY_VARIANT_MAP = {
-  primary: { appearance: "solid", intent: "primary" },
-  "primary-round": { appearance: "solid", intent: "primary", shape: "pill" },
-  secondary: { appearance: "solid", intent: "secondary" },
-  ghost: { appearance: "ghost", intent: "neutral" },
-  "card-solid": { appearance: "soft", intent: "neutral", elevation: "md" },
-  "card-outline": { appearance: "outline", intent: "neutral" },
-  "cta-home": { appearance: "tinted", intent: "inverse", shape: "pill", motion: ["lift", "expand"] },
-  "cta-outline": { appearance: "outline", intent: "primary", shape: "pill", motion: "lift" },
-  icon: { appearance: "ghost", intent: "neutral", shape: "circle", iconOnly: true },
-  "icon-bg": { appearance: "soft", intent: "neutral", shape: "circle" },
-  animated: { appearance: "ghost", intent: "inverse", className: "btn-animated" },
-  round: { appearance: "soft", intent: "neutral", shape: "pill" },
-  drawer: { appearance: "ghost", intent: "neutral", width: "full" },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -155,9 +120,7 @@ function createPresetButton(displayName, { defaultProps = {}, presetClasses = []
   return PresetButton;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Componente base                                                             */
-/* -------------------------------------------------------------------------- */
+/* Componente base-------------------------------------------------------------------------- */
 
 export const Button = forwardRef(function Button(
   {
@@ -201,7 +164,7 @@ export const Button = forwardRef(function Button(
   },
   ref
 ) {
-  const legacyPreset = legacyVariant ? LEGACY_VARIANT_MAP[legacyVariant] : null;
+  const legacyPreset = legacyVariant ? BUTTON_LEGACY_VARIANTS[legacyVariant] : null;
 
   const resolvedAppearance = ensureOption(
     appearance ?? legacyPreset?.appearance,
@@ -352,9 +315,7 @@ export const Button = forwardRef(function Button(
   );
 });
 
-/* -------------------------------------------------------------------------- */
-/* Derivados: IconButton, grupos y botones animados                           */
-/* -------------------------------------------------------------------------- */
+/* Derivados-------------------------------------------------------------------------- */
 
 export function IconButton({
   icon,

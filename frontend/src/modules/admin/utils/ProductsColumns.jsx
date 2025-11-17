@@ -2,14 +2,10 @@
 import { AlertTriangle, Edit3, Eye, Trash2 } from "lucide-react";
 import { formatCurrencyCLP } from "../../../utils/currency.js";
 import { IconButton } from "../../../components/ui/Button.jsx";
+import { StatusPill } from "../../../components/ui/StatusPill.jsx";
+import { LOW_STOCK_THRESHOLD } from "../../../config/constants.js";
 
-const LOW_STOCK_THRESHOLD = 8;
 
-const PUBLICATION_BADGES = {
-  activo: { label: "Activo", classes: "bg-emerald-50 text-emerald-700" },
-  borrador: { label: "Borrador", classes: "bg-amber-50 text-amber-700" },
-  archivado: { label: "Archivado", classes: "bg-neutral-100 text-neutral-500" },
-};
 
 export function buildProductColumns({ onView, onEdit, onDelete, categoryMap }) {
   return [
@@ -87,15 +83,11 @@ export function buildProductColumns({ onView, onEdit, onDelete, categoryMap }) {
       header: "Estado",
       cell: ({ row }) => {
         const product = row.original;
-        const key = (product.status ?? "activo").toLowerCase();
-        const badge = PUBLICATION_BADGES[key] ?? PUBLICATION_BADGES.activo;
-
+        const status = (product.status ?? "activo").toLowerCase();
         return (
-          <span
-            className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ${badge.classes}`}
-          >
-            {badge.label}
-          </span>
+          <div className="px-1 py-2">
+            <StatusPill status={status} domain="product" />
+          </div>
         );
       },
     },

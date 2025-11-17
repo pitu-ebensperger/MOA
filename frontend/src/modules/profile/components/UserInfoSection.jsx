@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../auth/hooks/useAuth'
+import { useAuth } from '../../../context/auth-context.js'
 
 const UserInfoSection = () => {
 
