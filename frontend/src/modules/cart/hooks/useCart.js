@@ -1,94 +1,101 @@
+<<<<<<< HEAD
+import { useEffect, useMemo } from "react";
+import { usePersistentState } from "../../../hooks/usePersistentState.js";
+import { useAuth } from "../../../context/auth-context.js";
+import { cartApi } from "../../../services/cart.api.js";
+=======
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useAuth } from "@/context/auth-context.js"
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
 
 const CART_STORAGE_KEY = "cart";
 
 export const useCart = () => {
-  const { token } = useAuth();
+  const { token, status } = useAuth();
 
   const [cartItems, setCartItems] = usePersistentState(CART_STORAGE_KEY, {
     initialValue: [],
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  useEffect(() => {
-    if (!token) return;
+  const isSessionReady = Boolean(token) && status === "authenticated";
 
-    fetch("http://localhost:3000/cart", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data.items)) {
-          const normalized = data.items.map((item) => ({
-            id: item.producto_id,
-            quantity: item.cantidad,
-            price: item.precio_unit,
-            ...item,
-          }));
+  const ensureAuthenticated = () => {
+    if (isSessionReady) return true;
+    alert("Debes iniciar sesión y esperar a que tu sesión se confirme para usar el carrito");
+    return false;
+  };
+
+  const normalizeCartItem = (item) => ({
+    id: item.producto_id ?? item.product_id ?? item.id,
+    quantity: Number(item.cantidad ?? item.quantity ?? 0),
+    price: Number(item.precio_unit ?? item.precio ?? item.price ?? 0),
+    ...item,
+  });
+
+  useEffect(() => {
+    if (!isSessionReady) {
+      setCartItems([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await cartApi.getCart();
+        if (cancelled) return;
+
+        if (Array.isArray(data?.items)) {
+          const normalized = data.items.map(normalizeCartItem);
           setCartItems(normalized);
         }
-      })
-      .catch((err) => console.error("Error cargando carrito:", err));
-  }, [token]);
+      } catch (err) {
+        console.error("Error cargando carrito:", err);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isSessionReady, setCartItems]);
 
   const addToCart = async (product) => {
-    if (!token) return alert("Debes iniciar sesión para usar el carrito");
+    if (!ensureAuthenticated()) return;
+    const productId = product?.id ?? product?.producto_id;
+    if (!productId) return;
 
     try {
-      const res = await fetch("http://localhost:3000/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          producto_id: product.id,
-          cantidad: 1,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("ERROR al agregar al carrito:", data);
-        return;
-      }
+      const response = await cartApi.addToCart(productId, 1);
+      const normalized = response?.item ? normalizeCartItem(response.item) : null;
 
       setCartItems((prevCart) => {
-        const existing = prevCart.find((item) => item.id === product.id);
-        if (existing) {
+        const existing = prevCart.find((item) => item.id === productId);
+        if (normalized && existing) {
           return prevCart.map((item) =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
+            item.id === productId
+              ? { ...item, quantity: normalized.quantity }
               : item
           );
         }
-        return [...prevCart, { ...product, quantity: 1 }];
+
+        const baseItem = normalized ?? { ...product, id: productId, quantity: 1 };
+        if (existing) {
+          return prevCart.map((item) =>
+            item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+          );
+        }
+        return [...prevCart, baseItem];
       });
     } catch (err) {
       console.error("Error addToCart:", err);
     }
   };
 
-  const removeFromCart = async (productId) => {
+  const executeRemoveFromCart = async (productId) => {
     try {
-      const res = await fetch(
-        `http://localhost:3000/cart/remove/${productId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!res.ok) {
-        console.error("ERROR eliminando");
-        return;
-      }
-
+      await cartApi.removeFromCart(productId);
       setCartItems((prevCart) =>
         prevCart.filter((item) => item.id !== productId)
       );
@@ -97,49 +104,41 @@ export const useCart = () => {
     }
   };
 
+  const removeFromCart = async (productId) => {
+    if (!ensureAuthenticated()) return;
+    return executeRemoveFromCart(productId);
+  };
+
   const updateQuantity = async (productId, quantity) => {
-    if (quantity <= 0) return removeFromCart(productId);
+    if (!ensureAuthenticated()) return;
+    if (quantity <= 0) return executeRemoveFromCart(productId);
 
     try {
-      const res = await fetch("http://localhost:3000/cart/update", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          producto_id: productId,
-          cantidad: quantity,
-        }),
-      });
+      const response = await cartApi.updateQuantity(productId, quantity);
+      const normalized = response?.item ? normalizeCartItem(response.item) : null;
 
-      if (!res.ok) {
-        console.error("ERROR actualizando cantidad");
-        return;
+      if (normalized) {
+        setCartItems((prevCart) =>
+          prevCart.map((item) =>
+            item.id === productId ? { ...item, quantity: normalized.quantity } : item
+          )
+        );
+      } else {
+        setCartItems((prevCart) =>
+          prevCart.map((item) =>
+            item.id === productId ? { ...item, quantity } : item
+          )
+        );
       }
-
-      setCartItems((prevCart) =>
-        prevCart.map((item) =>
-          item.id === productId ? { ...item, quantity } : item
-        )
-      );
     } catch (err) {
       console.error("Error updateQuantity:", err);
     }
   };
 
   const clearCart = async () => {
+    if (!ensureAuthenticated()) return;
     try {
-      const res = await fetch("http://localhost:3000/cart/clear", {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        console.error("Error limpiando carrito");
-        return;
-      }
-
+      await cartApi.clearCart();
       setCartItems([]);
     } catch (err) {
       console.error("Error clearCart:", err);

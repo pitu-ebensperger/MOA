@@ -1,4 +1,4 @@
-import pool from "../../database/config.js";
+import { pool } from "../../database/config.js";
 
 export async function getHome(req, res) {
   try {

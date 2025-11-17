@@ -1,3 +1,4 @@
+import { pool } from "../../database/config.js";
 import { categoriesModel } from "../models/categoriesModel.js";
 
 /* GET /categorias */

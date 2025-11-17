@@ -36,70 +36,11 @@ const formatWeight = (weight) => {
   return `${weight.value} ${weight.unit ?? "kg"}`;
 };
 
-const normalizeGallery = (product) => {
-  const base = [
-    product?.imgUrl ?? null,
-    ...(Array.isArray(product?.gallery) ? product.gallery : []),
-  ].filter(Boolean);
-  if (!base.length) return [DEFAULT_PLACEHOLDER_IMAGE];
-  return Array.from(new Set(base));
-};
-
-const ProductMediaGallery = ({ images, selectedImage, onSelect }) => {
-  if (!images.length) return null;
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-[96px_1fr]">
-      {/* Thumbnails */}
-      <div className="hidden lg:flex lg:flex-col lg:gap-3">
-        {images.map((src) => (
-          <button
-            key={src}
-            type="button"
-            onClick={() => onSelect?.(src)}
-            className={`aspect-square overflow-hidden rounded-2xl border transition ${
-              selectedImage === src
-                ? "border-(--color-primary1) ring-2 ring-(--color-primary1)/30"
-                : "border-(--border-subtle) hover:border-(--color-primary1)"
-            }`}
-            aria-label="Ver imagen"
-          >
-            <img src={src} alt="miniatura producto" className="h-full w-full object-cover" />
-          </button>
-        ))}
-      </div>
-
-      {/* Imagen principal */}
-      <div className="overflow-hidden rounded-[32px] bg-[#44311417] min-h-[28rem] md:min-h-[36rem] lg:min-h-[42rem]">
-        <img src={selectedImage} alt="Producto" className="h-full w-full object-cover" />
-      </div>
-
-      {/* Thumbnails móviles */}
-      <div className="mt-2 flex gap-3 overflow-x-auto lg:hidden">
-        {images.map((src) => (
-          <button
-            key={src}
-            type="button"
-            onClick={() => onSelect?.(src)}
-            className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border transition ${
-              selectedImage === src ? "border-(--color-primary1)" : "border-(--border-subtle)"
-            }`}
-            aria-label="Ver imagen"
-          >
-            <img src={src} alt="miniatura producto" className="h-full w-full object-cover" />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 
 export const ProductDetailPage = () => {
   const { id } = useParams();
   const { categories } = useCategories();
   const [state, setState] = useState(initialState);
-  const [selectedImage, setSelectedImage] = useState(DEFAULT_PLACEHOLDER_IMAGE);
   const [quantity, setQuantity] = useState(1);
   const { addToCart, updateQuantity } = useCartContext() ?? {};
   const { isAuthenticated } = useAuth();
@@ -157,13 +98,6 @@ export const ProductDetailPage = () => {
     }
     return null;
   }, [product, categories, productsBasePath]);
-
-  const galleryImages = useMemo(() => normalizeGallery(product), [product]);
-
-  useEffect(() => {
-    if (!galleryImages.length) return;
-    setSelectedImage(galleryImages[0]);
-  }, [galleryImages]);
 
   const materialList = useMemo(() => {
     if (!product) return [];
@@ -288,52 +222,30 @@ export const ProductDetailPage = () => {
           <Breadcrumbs items={breadcrumbItems} className="text-sm font-light" />
         </div>
 
-        <article className="grid items-start gap-10 lg:grid-cols-[minmax(0,0.6fr)_minmax(0,0.4fr)]">
-          <div className="lg:col-span-1">
-            <ProductMediaGallery
-              images={galleryImages}
-              selectedImage={selectedImage}
-              onSelect={setSelectedImage}
-            />
-          </div>
-
-          <div className="lg:col-span-1">
-            <div className="sticky top-6 space-y-6">
-              <div>
-                <h1 className="title-sans text-2xl text-(--color-secondary12) sm:text-3xl">{product.name}</h1>
-                <div className="mt-3 flex items-baseline gap-3">
-                  <Price value={product.price} className="text-3xl font-semibold text-(--color-secondary1)" />
-                  {product.compareAtPrice && (
-                    <Price value={product.compareAtPrice} className="text-base text-neutral-400 line-through" />
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-(--color-secondary1)">
-                  {product.stock > 0 ? "En stock" : "Sin stock"}
-                </p>
+        <article className="grid gap-10">
+          <div className="space-y-6">
+            <div>
+              <h1 className="title-sans text-2xl text-(--color-secondary12) sm:text-3xl">{product.name}</h1>
+              <div className="mt-3 flex items-baseline gap-3">
+                <Price value={product.price} className="text-3xl font-semibold text-(--color-secondary1)" />
+                {product.compareAtPrice && (
+                  <Price value={product.compareAtPrice} className="text-base text-neutral-400 line-through" />
+                )}
               </div>
+              <p className="mt-1 text-sm text-(--color-secondary1)">
+                {product.stock > 0 ? "En stock" : "Sin stock"}
+              </p>
+            </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="flex items-center justify-between rounded-full px-4 py-2 text-lg font-medium text-neutral-900 sm:w-40 border border-(--border-subtle)">
-                  <button
-                    type="button"
-                    onClick={handleDecrease}
-                    className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
-                    aria-label="Disminuir cantidad"
-                  >
-                    <Minus className="size-4" aria-hidden />
-                  </button>
-                  <span>{quantity}</span>
-                  <button
-                    type="button"
-                    onClick={handleIncrease}
-                    className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
-                    aria-label="Aumentar cantidad"
-                  >
-                    <Plus className="size-4" aria-hidden />
-                  </button>
-                </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex items-center justify-between rounded-full px-4 py-2 text-lg font-medium text-neutral-900 sm:w-40 border border-(--border-subtle)">
                 <button
                   type="button"
+<<<<<<< HEAD
+                  onClick={handleDecrease}
+                  className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
+                  aria-label="Disminuir cantidad"
+=======
                   disabled={product.stock <= 0}
                   onClick={() => {
                     if (!isAuthenticated) {
@@ -347,16 +259,40 @@ export const ProductDetailPage = () => {
                     }
                   }}
                   className="w-full rounded-full border border-(--color-primary1) px-6 py-2 text-base font-medium text-(--color-primary1) transition hover:bg-(--color-primary1) hover:text-(--color-light) disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
                 >
-                  Agregar al carrito
+                  <Minus className="size-4" aria-hidden />
+                </button>
+                <span>{quantity}</span>
+                <button
+                  type="button"
+                  onClick={handleIncrease}
+                  className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
+                  aria-label="Aumentar cantidad"
+                >
+                  <Plus className="size-4" aria-hidden />
                 </button>
               </div>
-
-              <section className="space-y-2 border-t border-(--color-secondary2) pt-4">
-                <p className="text-xs uppercase tracking-[0.25em] text-(--color-secondary1)">SKU {product.sku}</p>
-                <Accordion sections={sections} />
-              </section>
+              <button
+                type="button"
+                disabled={product.stock <= 0}
+                onClick={() => {
+                  if (!addToCart) return;
+                  addToCart(product);
+                  if (quantity > 1 && updateQuantity) {
+                    updateQuantity(product.id, quantity);
+                  }
+                }}
+                className="w-full rounded-full border border-(--color-primary1) px-6 py-2 text-base font-medium text-(--color-primary1) transition hover:bg-(--color-primary1) hover:text-(--color-light) disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
+              >
+                Agregar al carrito
+              </button>
             </div>
+
+            <section className="space-y-2 border-t border-(--color-secondary2) pt-4">
+              <p className="text-xs uppercase tracking-[0.25em] text-(--color-secondary1)">SKU {product.sku}</p>
+              <Accordion sections={sections} />
+            </section>
           </div>
         </article>
       </main>

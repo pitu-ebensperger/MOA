@@ -1,6 +1,10 @@
+<<<<<<< HEAD
+import { pool } from "../../database/config.js";
+=======
 import { productsModel } from "../models/productsModel.js";
 import { categoriesModel } from "../models/categoriesModel.js";
 import { AppError, UnauthorizedError, ForbiddenError } from "../utils/error.utils.js";
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
 
 /**
  * Controlador para gestión de productos

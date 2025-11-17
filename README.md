@@ -2,22 +2,10 @@
 
 ### Usuarios para frontend testing:
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
-- **demo@moa.cl / demo@moal.cl** (contraseña: demo o admin o 123456) 
+- **demo@moa.cl** (contraseña: demo o admin o 123456) 
 - **cliente@mail.com** (contraseña: demo o admin o 123456)
- 
-### Tarjetas de prueba Webpay (integración)
-Usa estas tarjetas ficticias mientras trabajas con el ambiente de integración. No requieren fecha de expiración válida: puedes ingresar cualquier combinación razonable.
 
-| Tipo | Tarjeta | CVV | Resultado esperado |
-| --- | --- | --- | --- |
-| VISA | 4051 8856 0044 6623 | 123 | Aprobada |
-| AMEX | 3700 0000 0002 032 | 1234 | Aprobada |
-| MASTERCARD | 5186 0595 5959 0568 | 123 | Rechazada |
-| Redcompra | 4051 8842 3993 7763 | 123 | Aprobada (si se permite débito) |
-| Redcompra | 4511 3466 6003 7060 | 123 | Aprobada (si se permite débito) |
-| Redcompra | 5186 0085 4123 3829 | 123 | Rechazada (si se permite débito) |
-| Prepago VISA | 4051 8860 0005 6590 | 123 | Aprobada |
-| Prepago MASTERCARD | 5186 1741 1062 9480 | 123 | Rechazada |
+
 
 > Los mocks están habilitados por defecto en `frontend/.env`  
 > Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
@@ -70,7 +58,7 @@ Ejecutar: `npm run -w backend dev`
 
 - Dejar en componentes si es un elemento genérico o si aparece en 2+ páginas.
 
----
+-------------------------------------------------------
 
 ## Requerimientos
 
@@ -129,3 +117,32 @@ Ejecutar: `npm run -w backend dev`
      (b) ¿Qué fue lo que más disfrutaste de desarrollar tu proyecto? Ya sea del proceso, del resultado o de aquello que te haya entregado mayor satisfacción.
      (c) ¿De qué manera crees que la metodología de aprendizaje fue un aporte para el resultado obtenido? Para responder, mira hacia atrás y reflexiona sobre tu aprendizaje, la metodología de estudio, el trabajo colaborativo, entre otras cosas.
    - Cada estudiante debe subir su propio video, esta debe subirse en la sesión de la tutoría, específicamente en el documento con nombre “Video Proyecto”.
+
+
+
+-----------------------------------
+
+## Testing (jest)
+
+Correr tests:
+**Frontend** cd frontend && npm test
+**Backend** cd backend && npm test
+
+
+
+
+
+ 
+### Tarjetas de prueba Webpay (integración)
+Usa estas tarjetas ficticias mientras trabajas con el ambiente de integración. No requieren fecha de expiración válida: puedes ingresar cualquier combinación razonable.
+
+| Tipo | Tarjeta | CVV | Resultado esperado |
+| --- | --- | --- | --- |
+| VISA | 4051 8856 0044 6623 | 123 | Aprobada |
+| AMEX | 3700 0000 0002 032 | 1234 | Aprobada |
+| MASTERCARD | 5186 0595 5959 0568 | 123 | Rechazada |
+| Redcompra | 4051 8842 3993 7763 | 123 | Aprobada (si se permite débito) |
+| Redcompra | 4511 3466 6003 7060 | 123 | Aprobada (si se permite débito) |
+| Redcompra | 5186 0085 4123 3829 | 123 | Rechazada (si se permite débito) |
+| Prepago VISA | 4051 8860 0005 6590 | 123 | Aprobada |
+| Prepago MASTERCARD | 5186 1741 1062 9480 | 123 | Rechazada |

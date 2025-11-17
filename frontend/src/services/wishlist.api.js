@@ -1,12 +1,32 @@
 import { apiClient } from '@/services/api-client.js'
 
-/**
- * Wishlist API Service
- * Gestión de la lista de deseos
+/**<<<<<<< HEAD
+import { apiClient } from './api-client.js';
+
+export const wishlistApi = {
+  // GET /wishlist - Obtener wishlist del usuario autenticado
+  async getWishlist() {
+    const data = await apiClient.private.get('/wishlist');
+    return data;
+  },
+
+  // POST /wishlist/add - Agregar producto a wishlist
+  async addToWishlist(productId) {
+    const data = await apiClient.private.post('/wishlist/add', { productId });
+    return data;
+  },
+
+  // DELETE /wishlist/remove/:productId - Remover producto de wishlist
+  async removeFromWishlist(productId) {
+    const data = await apiClient.private.delete(`/wishlist/remove/${productId}`);
+    return data;
+  }
+};
  */
+
+
 export const wishlistApi = {
   /**
-   * Obtener wishlist del usuario autenticado
    * GET /wishlist
    */
   get: async () => {
@@ -20,7 +40,6 @@ export const wishlistApi = {
   },
 
   /**
-   * Agregar producto a la wishlist
    * POST /wishlist/add
    * @param {number} productId - ID del producto
    */
@@ -37,9 +56,8 @@ export const wishlistApi = {
   },
 
   /**
-   * Quitar producto de la wishlist
    * DELETE /wishlist/remove/:productId
-   * @param {number} productId - ID del producto a eliminar
+   * @param {number} productId r
    */
   remove: async (productId) => {
     try {
@@ -52,9 +70,8 @@ export const wishlistApi = {
   },
 
   /**
-   * Verificar si un producto está en la wishlist
    * (Implementado del lado cliente comparando con la lista completa)
-   * @param {number} productId - ID del producto a verificar
+   * @param {number} productId 
    */
   contains: async (productId) => {
     try {
@@ -71,7 +88,7 @@ export const wishlistApi = {
 
   /**
    * Toggle producto en wishlist (agregar si no está, quitar si está)
-   * @param {number} productId - ID del producto
+   * @param {number} productId 
    */
   toggle: async (productId) => {
     try {

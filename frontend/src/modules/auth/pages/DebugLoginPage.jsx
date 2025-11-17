@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
+<<<<<<< HEAD
+import { authApi } from '../../../services/auth.api.js'
+import { env } from '../../../config/env.js'
+import SimpleLoginTest from '../../../components/debug/SimpleLoginTest.jsx';
+=======
 import { authApi } from '@/services/auth.api.js'
 import { env } from '@/config/env.js'
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
 
 export default function DebugLoginPage() {
   const [result, setResult] = useState(null);
@@ -40,7 +46,12 @@ export default function DebugLoginPage() {
   const testUsers = [
     { email: 'admin@moa.cl', password: 'admin' },
     { email: 'demo@moa.cl', password: 'demo' },
+<<<<<<< HEAD
+    { email: 'cliente@mail.com', password: 'demo' },
+    { email: 'juan@test.com', password: '123456' }
+=======
     { email: 'cliente@mail.com', password: 'demo' }
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
   ];
 
   return (
@@ -48,6 +59,11 @@ export default function DebugLoginPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-center">🔍 Debug Login MOA</h1>
         
+<<<<<<< HEAD
+        <SimpleLoginTest />
+        
+=======
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
         <div className="bg-white p-6 rounded-lg shadow mb-8">
           <h2 className="text-xl font-semibold mb-4">Configuración Actual</h2>
           <pre className="bg-gray-100 p-4 rounded text-sm">
@@ -61,7 +77,11 @@ export default function DebugLoginPage() {
 
         <div className="bg-white p-6 rounded-lg shadow mb-8">
           <h2 className="text-xl font-semibold mb-4">Pruebas Rápidas</h2>
+<<<<<<< HEAD
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+=======
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
             {testUsers.map((user) => (
               <button
                 key={user.email}
@@ -146,4 +166,8 @@ export default function DebugLoginPage() {
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
