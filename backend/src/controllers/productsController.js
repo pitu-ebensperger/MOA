@@ -25,7 +25,6 @@ export async function getProducts(req, res) {
         weight,
         specs,
         categoria_id AS "fk_category_id",
-        collection_id AS "fk_collection_id",
         created_at AS "createdAt",
         updated_at AS "updatedAt"
       FROM productos
@@ -68,7 +67,6 @@ export async function getProductById(req, res) {
         weight,
         specs,
         categoria_id AS "fk_category_id",
-        collection_id AS "fk_collection_id",
         created_at AS "createdAt",
         updated_at AS "updatedAt"
       FROM productos

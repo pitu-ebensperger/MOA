@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, Ban } from "lucide-react";
+import CustomerDrawer from "../components/CustomerDrawer.jsx";
+import OrdersDrawer from "../components/OrdersDrawer.jsx";
 import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
 import {
   TableToolbar,
@@ -22,28 +24,56 @@ import {
   DropdownMenuTrigger,
 } from "../../../components/ui/radix/DropdownMenu.jsx";
 import { customersDb } from "../../../mocks/database/customers.js";
+import { ordersDb } from "../../../mocks/database/orders.js";
 import { formatDate_ddMMyyyy } from "../../../utils/date.js";
-
-const CUSTOMER_STATUS_OPTIONS = [
-  { label: "Todos los estados", value: "" },
-  { label: "Activo", value: "active" },
-  { label: "Inactivo", value: "inactive" },
-];
 
 export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [onlyOptIn, setOnlyOptIn] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
   const [condensed, setCondensed] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [breadcrumb, setBreadcrumb] = useState(null); // Para mostrar de dónde viene la orden
 
   const limit = 20;
-  const customers = customersDb?.users ?? [];
+
+  // Helper para cargar una orden completa con sus relaciones
+  const loadFullOrder = (order) => {
+    const items = ordersDb.orderItems.filter((item) => item.orderId === order.id);
+    const payment = ordersDb.payments.find((p) => p.id === order.paymentId);
+    const shipment = ordersDb.shipping.find((s) => s.id === order.shipmentId);
+    const address = customersDb.addresses.find((a) => a.id === order.addressId);
+    const user = customersDb.users.find((u) => u.id === order.userId);
+
+    return {
+      ...order,
+      items,
+      payment,
+      shipment,
+      address,
+      userName: user ? `${user.firstName} ${user.lastName}` : "—",
+      userEmail: user?.email ?? "—",
+      userPhone: user?.phone ?? "—",
+    };
+  };
+
+  const handleViewOrder = (order) => {
+    const fullOrder = loadFullOrder(order);
+    const customer = selectedCustomer;
+    setBreadcrumb(customer ? `${customer.firstName} ${customer.lastName}` : null);
+    setSelectedOrder(fullOrder);
+  };
+
+  const handleCloseOrder = () => {
+    setSelectedOrder(null);
+    setBreadcrumb(null);
+  };
 
   // Filtrado de datos
   const filteredData = useMemo(() => {
-    let filtered = [...customers];
+    const customersList = customersDb?.users ?? [];
+    let filtered = [...customersList];
 
     // Búsqueda por nombre o email
     if (search) {
@@ -55,23 +85,8 @@ export default function CustomersPage() {
       );
     }
 
-    // Filtro de opt-in
-    if (onlyOptIn) {
-      filtered = filtered.filter((c) => c.marketingOptIn);
-    }
-
-    // Filtro por estado (simulado)
-    if (statusFilter) {
-      // Como no tenemos campo status real, usamos marketingOptIn como proxy
-      if (statusFilter === "active") {
-        filtered = filtered.filter((c) => c.marketingOptIn);
-      } else if (statusFilter === "inactive") {
-        filtered = filtered.filter((c) => !c.marketingOptIn);
-      }
-    }
-
     return filtered;
-  }, [customers, search, onlyOptIn, statusFilter]);
+  }, [search]);
 
   // Paginación
   const total = filteredData.length;
@@ -118,22 +133,6 @@ export default function CustomersPage() {
         },
       },
       {
-        id: "marketing",
-        header: "Marketing",
-        cell: ({ row }) => {
-          const customer = row.original;
-          return (
-            <div className="px-1 py-2">
-              {customer.marketingOptIn ? (
-                <Badge variant="success" size="sm">Opt-in</Badge>
-              ) : (
-                <Badge variant="neutral" size="sm">Sin permiso</Badge>
-              )}
-            </div>
-          );
-        },
-      },
-      {
         accessorKey: "createdAt",
         header: "Registro",
         cell: ({ row }) => {
@@ -167,8 +166,7 @@ export default function CustomersPage() {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem
                     onSelect={() => {
-                      console.log("Ver perfil:", customer);
-                      // TODO: Abrir modal o navegar a detalle
+                      setSelectedCustomer(customer);
                     }}
                   >
                     <Eye className="mr-2 h-4 w-4" />
@@ -208,8 +206,6 @@ export default function CustomersPage() {
 
   const clearAll = () => {
     setSearch("");
-    setStatusFilter("");
-    setOnlyOptIn(false);
     setActiveTags([]);
     setPage(1);
   };
@@ -226,45 +222,12 @@ export default function CustomersPage() {
           placeholder="Buscar por nombre, email…"
         />
         <ToolbarSpacer />
-        <FilterSelect
-          label="Estado"
-          value={statusFilter}
-          onChange={(v) => {
-            setStatusFilter(v);
-            setPage(1);
-            if (v) {
-              setActiveTags((tags) => [
-                {
-                  key: "status",
-                  value: v,
-                  label: `Estado: ${CUSTOMER_STATUS_OPTIONS.find((o) => o.value === v)?.label ?? v}`,
-                },
-                ...tags.filter((t) => t.key !== "status"),
-              ]);
-            } else {
-              setActiveTags((tags) => tags.filter((t) => t.key !== "status"));
-            }
-          }}
-          options={CUSTOMER_STATUS_OPTIONS}
-        />
-        <ToolbarSpacer />
-        <QuickFilterPill
-          active={onlyOptIn}
-          onClick={() => {
-            setOnlyOptIn((v) => !v);
-            setPage(1);
-          }}
-        >
-          Solo Opt-in
-        </QuickFilterPill>
-        <ToolbarSpacer />
         <FilterTags
           tags={activeTags}
           onRemove={(tag) => {
             setActiveTags((tags) =>
               tags.filter((t) => !(t.key === tag.key && t.value === tag.value))
             );
-            if (tag.key === "status") setStatusFilter("");
           }}
         />
         <div className="ml-auto flex items-center gap-2">
@@ -301,7 +264,7 @@ export default function CustomersPage() {
         </div>
       </TableToolbar>
     ),
-    [search, statusFilter, onlyOptIn, activeTags, condensed]
+  [search, activeTags, condensed]
   );
 
   return (
@@ -330,6 +293,21 @@ export default function CustomersPage() {
         toolbar={toolbar}
         condensed={condensed}
         variant="card"
+  />
+
+      {/* Drawers */}
+      <CustomerDrawer
+        open={!!selectedCustomer && !selectedOrder}
+        customer={selectedCustomer}
+        onClose={() => setSelectedCustomer(null)}
+        onViewOrder={handleViewOrder}
+      />
+
+      <OrdersDrawer
+        open={!!selectedOrder}
+        order={selectedOrder}
+        onClose={handleCloseOrder}
+        breadcrumb={breadcrumb}
       />
     </div>
   );

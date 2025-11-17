@@ -45,15 +45,6 @@ export const createCategoryMatcher = (categories = []) => {
   };
 };
 
-export const matchesCollection = (p, collectionId) => {
-  if (!collectionId) return true;
-  const pid = p?.fk_collection_id;
-  if (pid == null) return false;
-  const target = toNum(collectionId);
-  if (target !== null) return Number(pid) === target;
-  return s(pid).toLowerCase() === s(collectionId).toLowerCase();
-};
-
 export const matchesPrice = (p, minPrice, maxPrice) => {
   const price = Number(p.price ?? 0);
   if (Number.isFinite(minPrice) && price < minPrice) return false;

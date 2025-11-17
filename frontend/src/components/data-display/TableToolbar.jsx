@@ -4,11 +4,11 @@ import { SelectSm, SelectGhost } from "../ui/Select.jsx";
 import { Button, IconButton } from "../ui/Button.jsx";
 import { cx } from "@utils/ui-helpers.js";
 import { Search, Filter, LayoutGrid, Rows, ChevronDown, Columns as ColumnsIcon, X } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../ui/radix/DropdownMenu.jsx";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/radix/DropdownMenu.jsx";
 
 export function TableToolbar({ children, className }) {
   return (
-    <div className={cx("flex w-full flex-wrap items-center gap-2", className)}>
+    <div className={cx("flex w-full flex-wrap items-center gap-2 text-sm", className)}>
       {children}
     </div>
   );
@@ -37,7 +37,7 @@ export function FilterSelect({
 }) {
   return (
     <div className={cx("flex items-center gap-2", className)}>
-  {label && <span className="text-xs text-(--color-secondary2)">{label}</span>}
+      {label && <span className="text-xs text-(--color-secondary2)">{label}</span>}
       <SelectGhost size="sm" value={value} onChange={(e) => onChange?.(e.target.value)} options={options} placeholder={placeholder} />
     </div>
   );
@@ -127,16 +127,30 @@ export function ColumnsMenuButton({ table, label = "Columnas" }) {
   const columns = table.getAllLeafColumns?.() ?? [];
   const hideable = columns.filter((col) => col?.getCanHide?.());
   if (!hideable.length) return null;
+  const resolveLabel = (col) => {
+    const header = col.columnDef?.header;
+    if (typeof header === "string" && header.trim()) return header.trim();
+    const metaLabel = col.columnDef?.meta?.label;
+    if (typeof metaLabel === "string" && metaLabel.trim()) return metaLabel.trim();
+    if (typeof col.columnDef?.accessorKey === "string") return col.columnDef.accessorKey;
+    return col.id ?? "col";
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button appearance="ghost" iconLeft={<ColumnsIcon size={16} />}>{label}</Button>
+        <IconButton
+          icon={<ColumnsIcon size={16} />}
+          aria-label={label}
+          title={label}
+          appearance="ghost"
+          intent="neutral"
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {hideable.map((col) => {
           const id = col.id;
           const visible = col.getIsVisible?.();
-          const name = col.columnDef?.header ?? id;
+          const name = resolveLabel(col);
           return (
             <DropdownMenuItem
               key={id}
@@ -146,7 +160,7 @@ export function ColumnsMenuButton({ table, label = "Columnas" }) {
               }}
               className="justify-between"
             >
-              <span className="truncate text-(--color-secondary2)">{typeof name === "string" ? name : id}</span>
+              <span className="truncate text-(--color-secondary2)">{name}</span>
               <input type="checkbox" aria-label={`Mostrar ${id}`} checked={!!visible} onChange={() => col.toggleVisibility?.(!visible)} />
             </DropdownMenuItem>
           );

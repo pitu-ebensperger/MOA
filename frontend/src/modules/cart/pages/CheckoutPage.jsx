@@ -333,7 +333,7 @@ export const CheckoutPage = () => {
               className: "text-[var(--color-primary1)]",
             })}
           >
-            Explorar colecciones
+            Explorar catálogo
           </Link>
         </Card>
       )}

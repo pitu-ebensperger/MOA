@@ -142,11 +142,6 @@ export const CartPage = () => {
                             <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
                               SKU {item.sku ?? "—"}
                             </p>
-                            {item?.collection && (
-                              <Badge className="mt-2 text-[0.6rem] tracking-[0.4em]">
-                                {item.collection}
-                              </Badge>
-                            )}
                           </div>
                         </div>
 
@@ -340,8 +335,7 @@ export const CartPage = () => {
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-[var(--color-primary2)]">Tu carrito está vacío</h2>
             <p className="text-sm text-[var(--color-text-secondary)] max-w-md">
-              Explora las colecciones MOA, guarda tus favoritos y podrás retomar el checkout cuando
-              quieras.
+              Explora el catálogo MOA, guarda tus favoritos y podrás retomar el checkout cuando quieras.
             </p>
           </div>
           <Link

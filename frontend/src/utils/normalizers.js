@@ -51,8 +51,6 @@ export const normalizeProduct = (p = {}) => {
     createdAt: p.createdAt ?? null,
     updatedAt: p.updatedAt ?? null,
     fk_category_id: p.fk_category_id ?? null,
-    fk_collection_id: p.fk_collection_id ?? null,
-    collection: p.collection ?? null,
   };
 };
 

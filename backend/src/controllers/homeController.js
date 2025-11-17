@@ -32,7 +32,6 @@ export async function getHome(req, res) {
         weight,
         specs,
         categoria_id AS "fk_category_id",
-        collection_id AS "fk_collection_id",
         created_at AS "createdAt",
         updated_at AS "updatedAt"
       FROM productos
@@ -46,14 +45,14 @@ export async function getHome(req, res) {
       editorialSections: [
         {
           id: "atelier-story",
-          title: "Colección Atelier",
+          title: "Atelier en calma",
           description:
-            "Geometrías curvas, tapices de lino y maderas certificadas. La colección Atelier celebra lo artesanal con una mirada contemporánea.",
+            "Geometrías curvas, tapices de lino y maderas certificadas que celebran lo artesanal con una mirada contemporánea.",
           image:
             "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1600&auto=format&fit=crop",
           cta: {
             label: "Ver piezas destacadas",
-            href: `/productos?collection=coleccion-atelier`,
+            href: `/productos`,
           },
         },
         {

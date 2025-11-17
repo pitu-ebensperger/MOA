@@ -43,7 +43,7 @@ export const CATEGORIES = [
     slug: "decoracion",
     nombre: "Decoración",
     descripcion:
-      "Colecciones que aportan estilo y personalidad a cada rincón del hogar.",
+      "Accesorios y objetos que aportan estilo y personalidad a cada rincón del hogar.",
     cover_image:
       "https://images.unsplash.com/photo-1514053026555-49ce8886ae41?auto=format&fit=crop",
   },

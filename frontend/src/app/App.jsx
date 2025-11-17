@@ -35,7 +35,6 @@ import OrdersPage from '../modules/admin/pages/orders/OrdersPage.jsx'
 import AdminProductsPage from '../modules/admin/pages/AdminProductsPage.jsx'
 import CustomersPage from '../modules/admin/pages/CustomersPage.jsx'
 import AdminSettingsPage from '../modules/admin/pages/AdminSettingsPage.jsx'
-import AdminCollectionsPage from '../modules/admin/pages/AdminCollectionsPage.jsx'
 
 import { ScrollToTop } from '../components/layout/ScrollToTop.jsx'
 
@@ -79,7 +78,6 @@ export const App = () => {
             <Route path={admin.test} element={<EntornoAdmin> <AdminTestPage /> </EntornoAdmin>} />
             <Route path={admin.orders} element={<EntornoAdmin> <OrdersPage /> </EntornoAdmin>} />
             <Route path={admin.products} element={<EntornoAdmin> <AdminProductsPage /> </EntornoAdmin>} />
-            <Route path={admin.collections} element={<EntornoAdmin> <AdminCollectionsPage /> </EntornoAdmin>} />
             <Route path={admin.customers} element={<EntornoAdmin> <CustomersPage /> </EntornoAdmin>} />
             <Route path={admin.settings} element={<EntornoAdmin> <AdminSettingsPage /> </EntornoAdmin>} />
           </Route>

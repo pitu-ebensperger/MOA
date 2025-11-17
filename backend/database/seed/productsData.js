@@ -21,7 +21,6 @@ export const PRODUCTS = [
     dimensions: { height: 82, width: 220, length: 95, unit: "cm" },
     weight: { value: 48, unit: "kg" },
     fk_category_id: 1,
-    fk_collection_id: 1100,
     compareAtPrice: null,
   },
   {
@@ -44,8 +43,6 @@ export const PRODUCTS = [
     dimensions: { height: 58, width: 45, length: 40, unit: "cm" },
     weight: { value: 14, unit: "kg" },
     fk_category_id: 3,
-    fk_collection_id: 3101,
-    collection: "Dormitorio Cálido",
     compareAtPrice: null,
   },
   {
@@ -68,8 +65,6 @@ export const PRODUCTS = [
     dimensions: { height: 60, width: 48, length: 38, unit: "cm" },
     weight: { value: 12, unit: "kg" },
     fk_category_id: 3,
-    fk_collection_id: 3102,
-    collection: "Dormitorio Cálido",
     compareAtPrice: null,
   },
   {
@@ -93,8 +88,6 @@ export const PRODUCTS = [
     dimensions: { height: 30, width: 30, length: 30, unit: "cm" },
     weight: { value: 4, unit: "kg" },
     fk_category_id: 4,
-    fk_collection_id: 4100,
-    collection: "Iluminación Escultórica",
     compareAtPrice: null,
     specs: { voltage: "220-240V", socket: "E27" },
   },
@@ -119,8 +112,6 @@ export const PRODUCTS = [
     dimensions: { height: 45, width: 25, length: 25, unit: "cm" },
     weight: { value: 3, unit: "kg" },
     fk_category_id: 4,
-    fk_collection_id: 4101,
-    collection: "Iluminación Escultórica",
     compareAtPrice: null,
     specs: { voltage: "220-240V", socket: "E14" },
   },
@@ -145,7 +136,6 @@ export const PRODUCTS = [
     dimensions: { height: 75, width: 140, length: 70, unit: "cm" },
     weight: { value: 34, unit: "kg" },
     fk_category_id: 5,
-    fk_collection_id: 5100,
     compareAtPrice: null,
   },
   {
@@ -169,8 +159,6 @@ export const PRODUCTS = [
     dimensions: { height: 3, width: 90, length: 90, unit: "cm" },
     weight: { value: 8, unit: "kg" },
     fk_category_id: 6,
-    fk_collection_id: 6100,
-    collection: "Decoración Curada",
     compareAtPrice: null,
   },
 
@@ -193,7 +181,6 @@ export const PRODUCTS = [
     material: "Fibra natural",
     color: "fibra natural",
     fk_category_id: 6,
-    fk_collection_id: 6300,
     compareAtPrice: null,
   },
   {
@@ -215,7 +202,6 @@ export const PRODUCTS = [
     material: "Madera maciza",
     color: "madera clara",
     fk_category_id: 5,
-    fk_collection_id: 5300,
     compareAtPrice: null,
   },
   {
@@ -237,7 +223,6 @@ export const PRODUCTS = [
     material: "Madera maciza",
     color: "madera natural",
     fk_category_id: 2,
-    fk_collection_id: 2100,
     compareAtPrice: null,
   },
   {
@@ -259,7 +244,6 @@ export const PRODUCTS = [
     material: "Madera reciclada",
     color: "madera envejecida",
     fk_category_id: 2,
-    fk_collection_id: 2100,
     compareAtPrice: null,
   },
   {
@@ -289,7 +273,6 @@ export const PRODUCTS = [
     material: "Madera natural y rejilla tejida",
     color: "madera clara y beige natural",
     fk_category_id: 1,
-    fk_collection_id: 1200,
     compareAtPrice: null,
   },
   {
@@ -311,7 +294,6 @@ export const PRODUCTS = [
     material: "Madera de roble natural",
     color: "madera clara natural",
     fk_category_id: 1,
-    fk_collection_id: 1300, // Mesas de centro
     compareAtPrice: null,
   },
   {
@@ -341,7 +323,6 @@ export const PRODUCTS = [
     material: "Lino natural y madera de roble",
     color: "beige lino",
     fk_category_id: 3,
-    fk_collection_id: 3100, // Camas
     compareAtPrice: null,
   },
   {
@@ -365,7 +346,6 @@ export const PRODUCTS = [
     material: "Estructura metálica con acabado negro mate",
     color: "negro mate",
     fk_category_id: 1,
-    fk_collection_id: 1500, // Almacenamiento / libreros
     compareAtPrice: null,
   },
   {
@@ -395,7 +375,6 @@ export const PRODUCTS = [
     material: "Madera natural y estructura metálica negra",
     color: "madera clara y negro",
     fk_category_id: 5,
-    fk_collection_id: 5100, // Escritorios
     compareAtPrice: null,
   },
   {
@@ -424,7 +403,6 @@ export const PRODUCTS = [
     material: "Tela tapizada y base metálica cromada",
     color: "verde oliva",
     fk_category_id: 5,
-    fk_collection_id: 5200, // Sillas de oficina
     compareAtPrice: null,
   },
   {
@@ -453,7 +431,6 @@ export const PRODUCTS = [
     material: "Cerámica y lino natural",
     color: "marfil claro",
     fk_category_id: 4,
-    fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
   {
@@ -482,7 +459,6 @@ export const PRODUCTS = [
     material: "Metal con acabado cobre satinado",
     color: "cobre satinado",
     fk_category_id: 4,
-    fk_collection_id: 4100, // Lámparas de techo
     compareAtPrice: null,
   },
   {
@@ -511,7 +487,6 @@ export const PRODUCTS = [
     material: "Metal con acabado cobre pulido",
     color: "cobre brillante",
     fk_category_id: 4,
-    fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
   {
@@ -540,7 +515,6 @@ export const PRODUCTS = [
     material: "Metal acabado cobre envejecido",
     color: "cobre envejecido",
     fk_category_id: 4,
-    fk_collection_id: 4300, // Lámparas de pie
     compareAtPrice: null,
   },
   {
@@ -569,7 +543,6 @@ export const PRODUCTS = [
     material: "Madera curvada y tela tapizada",
     color: "madera natural y negro",
     fk_category_id: 1,
-    fk_collection_id: 1200, // Sillones / asientos
     compareAtPrice: null,
   },
   {
@@ -598,7 +571,6 @@ export const PRODUCTS = [
     material: "Madera maciza con acabado natural",
     color: "madera envejecida",
     fk_category_id: 2,
-    fk_collection_id: 2200, // Sillas de comedor
     compareAtPrice: null,
   },
   {
@@ -627,7 +599,6 @@ export const PRODUCTS = [
     material: "Cera, cerámica mate y papel decorativo",
     color: "blanco y negro",
     fk_category_id: 6,
-    fk_collection_id: 6200, // Accesorios decorativos
     compareAtPrice: null,
   },
   {
@@ -657,7 +628,6 @@ export const PRODUCTS = [
     material: "Cerámica esmaltada",
     color: "blanco y dorado trigo",
     fk_category_id: 6,
-    fk_collection_id: 6200, // Accesorios decorativos
     compareAtPrice: null,
   },
   {
@@ -687,7 +657,6 @@ export const PRODUCTS = [
     material: "Madera maciza con acabado natural",
     color: "madera clara",
     fk_category_id: 3,
-    fk_collection_id: 3200, // Veladores
     compareAtPrice: null,
   },
   {
@@ -716,7 +685,6 @@ export const PRODUCTS = [
     material: "Metal con acabado bronce envejecido",
     color: "bronce oscuro",
     fk_category_id: 4,
-    fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
   {
@@ -745,7 +713,6 @@ export const PRODUCTS = [
     material: "Cerámica y vidrio opalino",
     color: "blanco cálido",
     fk_category_id: 4,
-    fk_collection_id: 4200, // Lámparas de mesa
     compareAtPrice: null,
   },
   {
@@ -774,7 +741,6 @@ export const PRODUCTS = [
     material: "Metal y vidrio",
     color: "negro con pantalla transparente",
     fk_category_id: 4,
-    fk_collection_id: 4300, // Lámparas de piso
     compareAtPrice: null,
   },
   {
@@ -802,7 +768,6 @@ export const PRODUCTS = [
     material: "Metal acabado dorado cepillado",
     color: "dorado cálido",
     fk_category_id: 4,
-    fk_collection_id: 4400, // Apliques murales
     compareAtPrice: null,
   },
   {
@@ -831,7 +796,6 @@ export const PRODUCTS = [
     material: "Cuero sintético y metal",
     color: "caramelo y negro",
     fk_category_id: 5,
-    fk_collection_id: 5200, // Sillas de oficina
     compareAtPrice: null,
   },
   {
@@ -861,7 +825,6 @@ export const PRODUCTS = [
     material: "Madera natural y follaje sintético",
     color: "madera clara y verde hoja",
     fk_category_id: 6,
-    fk_collection_id: 6100, // Plantas
     compareAtPrice: null,
   },
   {
@@ -890,7 +853,6 @@ export const PRODUCTS = [
     material: "Madera natural con acabado mate",
     color: "madera clara",
     fk_category_id: 2,
-    fk_collection_id: 2100, // Mesas de comedor
     compareAtPrice: null,
   },
 ];

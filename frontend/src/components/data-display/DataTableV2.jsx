@@ -32,6 +32,7 @@ export function DataTableV2({
   variant = "card",
   condensed = false,
   toolbar,
+  maxHeight,
   onCommitEdit, // (rowOriginal, changes) => void
   onSelectionChange, // (selectedRowsOriginal[]) => void
 }) {
@@ -132,6 +133,10 @@ export function DataTableV2({
     ? "rounded-3xl border border-(--color-border) bg-white/95 p-4 shadow-sm"
     : "border border-(--color-border) rounded-xl overflow-hidden";
 
+  const tableScrollStyle = maxHeight
+    ? { maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight }
+    : undefined;
+
   const toolbarContent = typeof toolbar === "function" ? toolbar(table) : toolbar;
 
   return (
@@ -139,7 +144,11 @@ export function DataTableV2({
       {toolbarContent && <div className="mb-3">{toolbarContent}</div>}
       <div className={containerClasses}>
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <div
+            className={`min-w-full${maxHeight ? " overflow-y-auto" : ""}`}
+            style={tableScrollStyle}
+          >
+            <table className="min-w-full text-sm">
             <thead>
               {headerGroups.map((hg) => (
                 <tr key={hg.id} className="text-(--color-secondary2)">
@@ -229,6 +238,7 @@ export function DataTableV2({
               ))}
             </tbody>
           </table>
+          </div>
         </div>
         {showPagination && (<div className="mt-3"><Pagination page={page} pageSize={pageSize} total={total} onPageChange={onPageChange} /></div>)}
       </div>
@@ -256,6 +266,7 @@ DataTableV2.propTypes = {
   variant: PropTypes.oneOf(["card", "plain"]),
   condensed: PropTypes.bool,
   toolbar: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
+  maxHeight: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onCommitEdit: PropTypes.func,
   onSelectionChange: PropTypes.func,
 };

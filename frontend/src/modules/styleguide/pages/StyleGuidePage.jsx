@@ -165,9 +165,9 @@ const SAMPLE_CATEGORIES = [
     coverImage: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1000&auto=format&fit=crop",
   },
   {
-    id: "coleccion-verde",
-    name: "Colección Verde",
-    slug: "coleccion-verde",
+    id: "paleta-verde",
+    name: "Paleta Verde",
+    slug: "paleta-verde",
     coverImage: "https://images.unsplash.com/photo-1465804570320-27f4b51b41bc?q=80&w=1000&auto=format&fit=crop",
   },
 ];
@@ -621,7 +621,7 @@ function UsagePanel({ items }) {
 }
 
 function FontDisplayLab() {
-  const defaultHeroTitle = "Colección Respirar 2024";
+  const defaultHeroTitle = "Campaña Respirar 2024";
   const defaultHeroSubtitle = "objetos calmados para el ritual diario";
   const defaultProductTitle = "Set de tazas esmalte mate";
   const defaultProductSubtitle = "Nogal · edición limitada";
@@ -753,12 +753,11 @@ export function StyleGuidePage() {
   const [tableCategory, setTableCategory] = useState("");
   const [activeTags, setActiveTags] = useState([]);
   const [quickTab, setQuickTab] = useState("all");
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [condensed, setCondensed] = useState(false);
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
   const [ordersDrawerOpen, setOrdersDrawerOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const pageSize = 5;
 
   const handleTabChange = (tabId) => {
     const basePath = tabId === DEFAULT_TAB ? "/style-guide" : `/style-guide/${tabId}`;

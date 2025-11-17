@@ -32,6 +32,8 @@
   --btn-line-height: 1.15;
   --btn-border-width: 1px;
   --btn-gap: 0.55rem;
+  --btn-icon-gap-left: 0.6rem;
+  --btn-icon-gap-right: 0.6rem;
 
   --btn-motion-distance: 6px;
 }
@@ -358,16 +360,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--btn-icon-size-current);
+  width: auto;
   height: var(--btn-icon-size-current);
 }
 
 .btn-icon-left {
-  margin-right: 0.6rem;
+  margin-right: var(--btn-icon-gap-left, 0.6rem);
 }
 
 .btn-icon-right {
-  margin-left: 0.6rem;
+  margin-left: var(--btn-icon-gap-right, 0.6rem);
 }
 
 .btn-spinner {
