@@ -6,10 +6,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+
 app.use(express.json());
 app.use(cors());
 
-/* ----------------------------------------------------------------------------------------------------------- */
+/* ----------------------------- Rutas ----------------------------- */
 
 import categoriesRouter from "./routes/categoriesRoutes.js";
 import productsRouter from "./routes/productsRoutes.js";
@@ -33,9 +34,16 @@ app.use(paymentRoutes);
 app.use(orderRoutes);
 app.use(configRoutes);
 
+// Ruta base para tests
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "API funcionando" });
+});
+
 app.use(errorHandler);
 app.use(home);
 app.use(wishlistRoutes);
 app.use(cartRoutes);
 
 export default app;
+
+/*-- NOTA : Para correr backend ahora es "node server.js"--*/
