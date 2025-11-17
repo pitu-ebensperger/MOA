@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -11,6 +12,11 @@ import {
   PackageCheck,
 } from "lucide-react";
 import { useCartContext } from "../../../context/cart-context.js";
+=======
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { useCartContext } from "../../../context/cart-context.js";
+import { Button } from "../../../components/ui/Button.jsx";
+>>>>>>> Stashed changes
 import { Price } from "../../../components/data-display/Price.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 import { resolveProductPrice } from "../../products/utils/products.js";

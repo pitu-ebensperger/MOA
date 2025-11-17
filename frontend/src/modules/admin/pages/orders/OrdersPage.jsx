@@ -18,6 +18,7 @@ import { Button } from "../../../../components/ui/Button.jsx";
 import { useAdminOrders } from "../../hooks/useAdminOrders.js";
 import { buildOrderColumns } from "../../utils/ordersColumns.jsx";
 import OrdersDrawer from "../../components/OrdersDrawer.jsx";
+import { ordersApi } from "../../../../services/orders.api.js";
 
 const ORDER_STATUS_OPTIONS = [
   { label: "Todos los estados", value: "" },
@@ -55,12 +56,15 @@ export default function OrdersPage() {
           // await ordersApi.updateStatus(order.id, newStatus);
           refetch();
         },
-        onCancel: (order) => {
-          if (window.confirm(`¿Estás seguro de cancelar la orden ${order.number}?`)) {
-            console.log("Cancelar orden:", order.number);
-            // TODO: Implementar llamada a API para cancelar
-            // await ordersApi.cancel(order.id);
+        onCancel: async (order) => {
+          if (!window.confirm(`¿Estás seguro de cancelar la orden ${order.number}?`)) return;
+
+          try {
+            await ordersApi.cancel(order.id);
             refetch();
+          } catch (error) {
+            console.error("Error al cancelar la orden:", error);
+            window.alert("No se pudo cancelar la orden. Intenta nuevamente.");
           }
         },
       }),
@@ -165,6 +169,7 @@ export default function OrdersPage() {
         </div>
       </div>
 
+<<<<<<< Updated upstream
       {/* Tabla con toolbar integrado */}
       <DataTableV2
         columns={columns}
@@ -178,6 +183,52 @@ export default function OrdersPage() {
         condensed={condensed}
         variant="card"
       />
+=======
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-3 rounded-2xl border border-(--border-subtle) bg-(--surface-subtle) px-4 py-3">
+        <div className="min-w-[200px] flex-1">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            placeholder="Buscar por número, cliente…"
+            className="w-full rounded-full border border-(--border-subtle) bg-white px-3 py-1.5 text-sm"
+          />
+        </div>
+
+        <div className="w-full sm:w-[200px]">
+          <select
+            value={status}
+            onChange={(e) => {
+              setStatus(e.target.value);
+              setPage(1);
+            }}
+            className="w-full rounded-full border border-(--border-subtle) bg-white px-3 py-1.5 text-sm"
+          >
+            <option value="">Todos los estados</option>
+            <option value="fulfilled">Completada</option>
+            <option value="pending">Pendiente</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Tabla */}
+      <div className="admin-table-surface">
+        <TanstackDataTable
+          columns={columns}
+          data={items}
+          loading={isLoading}
+          page={page}
+          pageSize={limit}
+          total={total}
+          onPageChange={setPage}
+        />
+      </div>
+>>>>>>> Stashed changes
 
       {/* Drawer detalle */}
       <OrdersDrawer

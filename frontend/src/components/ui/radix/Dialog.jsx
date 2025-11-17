@@ -60,12 +60,20 @@ export function DialogContent({ children, className, variant = "center", placeme
 export function DialogHeader({ title, description }) {
   return (
     <div className="mb-3">
+<<<<<<< Updated upstream
+      {title && <h3 className="text-lg font-semibold text-(--color-primary1)">{title}</h3>}
+      {description && <p className="text-sm text-(--color-secondary2)">{description}</p>}
+=======
+      {title && <h3 className="text-lg font-semibold text-[var(--color-primary1)]">{title}</h3>}
+      {description && <p className="text-sm text-[var(--color-secondary2)]">{description}</p>}
+>>>>>>> Stashed changes
+    </div>
+  );
+export function DialogHeader({ title, description }) {
+  return (
+    <div className="mb-3">
       {title && <h3 className="text-lg font-semibold text-(--color-primary1)">{title}</h3>}
       {description && <p className="text-sm text-(--color-secondary2)">{description}</p>}
     </div>
   );
-}
-
-export function DialogClose({ children, asChild = true }) {
-  return <DialogPrimitive.Close asChild={asChild}>{children}</DialogPrimitive.Close>;
 }

@@ -101,7 +101,6 @@ export default function OrdersDrawer({ open, order, onClose }) {
 
         {/* Contenido scrollable */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
-
           {/* Secciones en acordeón */}
           <Accordion
             className="divide-y divide-(--color-border) rounded-2xl border border-(--color-border) bg-white shadow-sm"

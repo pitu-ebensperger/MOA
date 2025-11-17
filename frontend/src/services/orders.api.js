@@ -153,6 +153,32 @@ const mockOrdersApi = {
 
     return buildMockOrderView(found);
   },
+
+  async cancel(id) {
+    if (!id) throw new Error("order id is required");
+
+    await delay();
+
+    const idx = ordersDb.orders.findIndex(
+      (o) => String(o.id) === String(id) || String(o.number) === String(id),
+    );
+
+    if (idx === -1) {
+      const err = new Error("Order not found");
+      err.status = 404;
+      throw err;
+    }
+
+    const updated = {
+      ...ordersDb.orders[idx],
+      status: "cancelled",
+      updatedAt: new Date().toISOString(),
+    };
+
+    ordersDb.orders[idx] = updated;
+
+    return buildMockOrderView(updated);
+  },
 };
 
 /* Remote implementation --------------------------------------------------------------------------------------------- */
@@ -183,6 +209,16 @@ const remoteOrdersApi = {
     );
 
     return normalizeOrder(data, data);
+  },
+
+  async cancel(id) {
+    if (!id) throw new Error("order id is required");
+
+    const data = await apiClient.private.post(
+      `${API_PATHS.admin.orders}/${id}/cancel`,
+    );
+
+    return data ? normalizeOrder(data, data) : null;
   },
 };
 

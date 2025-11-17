@@ -1,6 +1,8 @@
 //path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
 import React, { useState, useMemo } from "react";
 import { Plus, RefreshCw } from "lucide-react";
+import ProductDetailDrawer from "../components/ProductDetailDrawer.jsx";
+import ProductDrawer from "../components/ProductDrawer.jsx";
 
 import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
 import {
@@ -29,6 +31,8 @@ export default function ProductsAdminPage() {
   const [onlyLowStock, setOnlyLowStock] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
   const [condensed, setCondensed] = useState(false);
+  const [selectedProductView, setSelectedProductView] = useState(null);
+  const [selectedProductEdit, setSelectedProductEdit] = useState(null);
 
   const limit = DEFAULT_PAGE_SIZE;
 
@@ -51,16 +55,26 @@ export default function ProductsAdminPage() {
       buildProductColumns({
         categoryMap,
         onView: (product) => {
-          console.log("view product", product);
+          setSelectedProductView(product);
         },
         onEdit: (product) => {
-          console.log("edit product", product);
+          setSelectedProductEdit(product);
+        },
+        onDuplicate: (product) => {
+          console.log("duplicate product", product);
+          // TODO: Implement duplicate logic
+          // Create a copy with new SKU and set to draft status
+          refetch();
         },
         onDelete: (product) => {
-          console.log("delete product", product);
+          if (confirm(`¿Estás seguro de eliminar "${product.name}"?`)) {
+            console.log("delete product", product);
+            // TODO: Call API to delete product
+            refetch();
+          }
         },
       }),
-    [categoryMap],
+    [categoryMap, refetch],
   );
 
   const clearAll = () => {
@@ -171,6 +185,26 @@ export default function ProductsAdminPage() {
         toolbar={toolbar}
         condensed={condensed}
         variant="card"
+      />
+
+      {/* Drawers */}
+      <ProductDetailDrawer
+        open={!!selectedProductView}
+        product={selectedProductView}
+        onClose={() => setSelectedProductView(null)}
+        categoryMap={categoryMap}
+      />
+
+      <ProductDrawer
+        open={!!selectedProductEdit}
+        product={selectedProductEdit}
+        onClose={() => setSelectedProductEdit(null)}
+        onSave={(data) => {
+          console.log("Save product:", data);
+          // TODO: Implement save logic
+          setSelectedProductEdit(null);
+          refetch();
+        }}
       />
     </div>
   );

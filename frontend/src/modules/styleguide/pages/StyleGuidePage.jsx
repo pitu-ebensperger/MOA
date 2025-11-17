@@ -10,7 +10,11 @@ import { SearchBar } from "../../../components/ui/SearchBar.jsx";
 import CategoriesCard from "../../categories/components/CategoriesCard.jsx";
 import ProductCard from "../../products/components/ProductCard.jsx";
 import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
+<<<<<<< Updated upstream
 import { TableToolbar, TableSearch, FilterSelect, FilterTags, ToolbarSpacer, QuickFilterPill, FilterTabs, FilterMenuButton, LayoutToggleButton, ColumnsMenuButton, ClearFiltersButton } from "../../../components/data-display/TableToolbar.jsx";
+=======
+import { TableToolbar, TableSearch, FilterSelect, FilterTags, ToolbarSpacer, QuickFilterPill, FilterTabs, FilterMenuButton, LayoutToggleButton } from "../../../components/data-display/TableToolbar.jsx";
+>>>>>>> Stashed changes
 import { Price } from "../../../components/data-display/Price.jsx";
 import { Breadcrumbs } from "../../../components/layout/Breadcrumbs.jsx";
 import { API_PATHS } from "../../../config/api-paths.js";
@@ -867,6 +871,7 @@ export function StyleGuidePage() {
     return tableData.slice(start, end);
   }, [tableData, page, pageSize]);
 
+<<<<<<< Updated upstream
   const clearAll = () => {
     setQuickTab("all");
     setTableSearch("");
@@ -877,6 +882,9 @@ export function StyleGuidePage() {
   };
 
   const DATA_DISPLAY_TOOLBAR = useMemo(() => (table) => (
+=======
+  const DATA_DISPLAY_TOOLBAR = useMemo(() => (
+>>>>>>> Stashed changes
     <TableToolbar>
       <FilterTabs
         tabs={[{ label: "Todos", value: "all" }, { label: "Destacados", value: "featured" }]}
@@ -927,8 +935,11 @@ export function StyleGuidePage() {
       />
       <div className="ml-auto flex items-center gap-2">
         <FilterMenuButton onClick={() => setFiltersModalOpen(true)} />
+<<<<<<< Updated upstream
         {table ? <ColumnsMenuButton table={table} /> : null}
         <ClearFiltersButton onClear={clearAll} />
+=======
+>>>>>>> Stashed changes
         <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
         <Button appearance="ghost">Exportar</Button>
         <Button intent="primary">Nuevo</Button>
@@ -1474,7 +1485,11 @@ export function StyleGuidePage() {
               </div>
               <div className="rounded-2xl border border-[var(--color-border)] bg-white/95 p-4">
                 <p className="mb-3 text-xs text-[var(--color-secondary2)]">Toolbar separada + tabla sin Card</p>
+<<<<<<< Updated upstream
                 <div className="mb-2">{DATA_DISPLAY_TOOLBAR()}</div>
+=======
+                <div className="mb-2">{DATA_DISPLAY_TOOLBAR}</div>
+>>>>>>> Stashed changes
                 <DataTableV2 columns={tableColumns} data={tableData} loading={false} condensed={condensed} variant="plain" />
               </div>
               <div className="rounded-2xl border border-[var(--color-border)] bg-white/95 p-4">
