@@ -5,7 +5,6 @@ import ProductDetailDrawer from "../components/ProductDetailDrawer.jsx";
 import ProductDrawer from "../components/ProductDrawer.jsx";
 
 import { DataTableV2 } from "../../../components/data-display/DataTableV2.jsx";
-import { TableSearch } from "../../../components/data-display/TableToolbar.jsx";
 // Toolbar pieces used in separate ProductsToolbar component
 import ProductsToolbar from "./ProductsToolbar.jsx";
 import { Button } from "../../../components/ui/Button.jsx";
@@ -14,16 +13,8 @@ import { productsApi } from "../../../services/products.api.js";
 import { useAdminProducts } from "../hooks/useAdminProducts.js";
 import { useCategories } from "../../products/hooks/useCategories.js";
 import { buildProductColumns } from "../utils/ProductsColumns.jsx";
-import { DEFAULT_PAGE_SIZE, LOW_STOCK_THRESHOLD } from "../../../config/constants.js";
+import { DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
 import { PRODUCT_STATUS_OPTIONS } from "../../../config/status-options.js";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../../components/shadcn/ui/index.js";
-import { LOW_STOCK_THRESHOLD } from "../../../config/constants.js";
 
 export default function ProductsAdminPage() {
   const [page, setPage] = useState(1);
@@ -133,7 +124,7 @@ export default function ProductsAdminPage() {
   ]);
 
   // Tag removal logic extracted for lint (avoid deep nesting)
-  const handleRemoveTag = (tag) => {
+  const handleRemoveTag = useCallback((tag) => {
     if (tag.key === "status") {
       handleStatusFilterChange("");
       return;
@@ -143,7 +134,7 @@ export default function ProductsAdminPage() {
       return;
     }
     setActiveTags((tags) => tags.filter((t) => !(t.key === tag.key && t.value === tag.value)));
-  };
+  }, [handleStatusFilterChange, handleCategoryFilterChange]);
 
   // Render toolbar (external component) with stable reference for lint compliance
   const renderToolbar = useCallback(

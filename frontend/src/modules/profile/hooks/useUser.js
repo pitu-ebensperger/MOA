@@ -42,7 +42,7 @@ export const useUser = () => {
 
   useEffect(() => {
     fetchProfile();
-  }, [authUser, fetchProfile]);
+  }, [fetchProfile]);
 
   return { profile, loading, error, fetchProfile, updateProfile };
 };
