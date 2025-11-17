@@ -169,7 +169,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-<<<<<<< Updated upstream
       {/* Tabla con toolbar integrado */}
       <DataTableV2
         columns={columns}
@@ -183,52 +182,6 @@ export default function OrdersPage() {
         condensed={condensed}
         variant="card"
       />
-=======
-      {/* Filtros */}
-      <div className="flex flex-wrap gap-3 rounded-2xl border border-(--border-subtle) bg-(--surface-subtle) px-4 py-3">
-        <div className="min-w-[200px] flex-1">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
-            }}
-            placeholder="Buscar por número, cliente…"
-            className="w-full rounded-full border border-(--border-subtle) bg-white px-3 py-1.5 text-sm"
-          />
-        </div>
-
-        <div className="w-full sm:w-[200px]">
-          <select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-            className="w-full rounded-full border border-(--border-subtle) bg-white px-3 py-1.5 text-sm"
-          >
-            <option value="">Todos los estados</option>
-            <option value="fulfilled">Completada</option>
-            <option value="pending">Pendiente</option>
-            <option value="cancelled">Cancelada</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Tabla */}
-      <div className="admin-table-surface">
-        <TanstackDataTable
-          columns={columns}
-          data={items}
-          loading={isLoading}
-          page={page}
-          pageSize={limit}
-          total={total}
-          onPageChange={setPage}
-        />
-      </div>
->>>>>>> Stashed changes
 
       {/* Drawer detalle */}
       <OrdersDrawer

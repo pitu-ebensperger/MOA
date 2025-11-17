@@ -60,20 +60,25 @@ export function DialogContent({ children, className, variant = "center", placeme
 export function DialogHeader({ title, description }) {
   return (
     <div className="mb-3">
-<<<<<<< Updated upstream
       {title && <h3 className="text-lg font-semibold text-(--color-primary1)">{title}</h3>}
       {description && <p className="text-sm text-(--color-secondary2)">{description}</p>}
-=======
-      {title && <h3 className="text-lg font-semibold text-[var(--color-primary1)]">{title}</h3>}
-      {description && <p className="text-sm text-[var(--color-secondary2)]">{description}</p>}
->>>>>>> Stashed changes
     </div>
   );
-export function DialogHeader({ title, description }) {
+}
+
+export function DialogClose({ children, asChild = true, className }) {
+  if (asChild) {
+    return <DialogPrimitive.Close asChild>{children}</DialogPrimitive.Close>;
+  }
+
   return (
-    <div className="mb-3">
-      {title && <h3 className="text-lg font-semibold text-(--color-primary1)">{title}</h3>}
-      {description && <p className="text-sm text-(--color-secondary2)">{description}</p>}
-    </div>
+    <DialogPrimitive.Close
+      className={cx(
+        "inline-flex h-9 items-center justify-center rounded-full border border-(--color-border) px-4 text-sm font-medium text-(--color-primary1) transition hover:border-(--color-primary1) hover:text-(--color-primary1) focus:outline-none focus:ring-2 focus:ring-(--color-primary1)/40 focus:ring-offset-2",
+        className,
+      )}
+    >
+      {children}
+    </DialogPrimitive.Close>
   );
 }

@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart } from "lucide-react";
@@ -42,12 +41,6 @@ const paymentOptions = [
   { value: "card", label: "Tarjeta crédito / débito" },
   { value: "link", label: "Link de pago" },
 ];
-=======
-import { Trash2 } from "lucide-react";
-import { useCartContext } from "../../../context/cart-context.js";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
-import { Price } from "../../../components/data-display/Price.jsx";
->>>>>>> Stashed changes
 
 export const CheckoutPage = () => {
   const { cartItems, total, removeFromCart, clearCart } = useCartContext();
@@ -103,19 +96,9 @@ export const CheckoutPage = () => {
                     <Label required>Nombre completo</Label>
                     <Input placeholder="Andrea Muñoz" autoComplete="name" />
                   </div>
-<<<<<<< Updated upstream
                   <div className="space-y-2">
                     <Label required>Correo</Label>
                     <Input type="email" placeholder="andrea@estudio.cl" autoComplete="email" />
-=======
-
-                  <div>
-                    <h2 className="text-primary2 font-semibold">{item.name}</h2>
-                    <p className="text-dark text-sm">{item.description}</p>
-                    <p className="text-primary1 font-bold mt-2">
-                      <Price value={itemPrice} />
-                    </p>
->>>>>>> Stashed changes
                   </div>
                   <div className="space-y-2">
                     <Label required>Teléfono</Label>
@@ -129,7 +112,6 @@ export const CheckoutPage = () => {
               </CardContent>
             </Card>
 
-<<<<<<< Updated upstream
             <Card>
               <CardHeader>
                 <CardTitle>Entrega y pago</CardTitle>
@@ -331,26 +313,6 @@ export const CheckoutPage = () => {
               </CardFooter>
             </Card>
           </aside>
-=======
-        {/* Resumen */}
-        <div className="bg-secondary2 rounded-2xl p-6 w-full md:w-80 shadow-md">
-          <p className="text-dark text-sm mb-2">
-            Resumen de compra — {cartItems.length} producto{cartItems.length !== 1 && "s"}
-          </p>
-          <hr className="border-secondary1 mb-4" />
-          <div className="flex justify-between items-center mb-6">
-            <span className="text-primary2 font-medium">TOTAL</span>
-            <span className="text-2xl font-bold text-primary1">
-              <Price value={total} />
-            </span>
-          </div>
-          <button
-            onClick={handlePay}
-            className="bg-primary1 text-light w-full py-3 rounded-lg hover:bg-primary2 transition"
-          >
-            Pagar
-          </button>
->>>>>>> Stashed changes
         </div>
       ) : (
         <Card className="flex flex-col items-center gap-6 border-dashed py-16 text-center">

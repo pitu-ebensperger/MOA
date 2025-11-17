@@ -391,3 +391,5 @@ export function ProductDrawer({
     </Modal>
   );
 }
+
+export default ProductDrawer;
