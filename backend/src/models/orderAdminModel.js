@@ -226,6 +226,8 @@ const updateOrderStatus = async (ordenId, updates = {}) => {
     fecha_pago,
     fecha_envio,
     fecha_entrega_real,
+    numero_seguimiento,
+    empresa_envio,
   } = updates;
 
   // Construir query dinámicamente solo con campos proporcionados
@@ -266,6 +268,18 @@ const updateOrderStatus = async (ordenId, updates = {}) => {
   if (fecha_entrega_real !== undefined) {
     fields.push(`fecha_entrega_real = $${paramIndex}`);
     params.push(fecha_entrega_real);
+    paramIndex++;
+  }
+
+  if (numero_seguimiento !== undefined) {
+    fields.push(`numero_seguimiento = $${paramIndex}`);
+    params.push(numero_seguimiento);
+    paramIndex++;
+  }
+
+  if (empresa_envio !== undefined) {
+    fields.push(`empresa_envio = $${paramIndex}`);
+    params.push(empresa_envio);
     paramIndex++;
   }
 

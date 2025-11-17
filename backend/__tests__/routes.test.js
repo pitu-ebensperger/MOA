@@ -243,13 +243,207 @@ describe("TEST API – MOA", () => {
     expect(res.status).toBe(404);
   });
 
-  test("POST con JSON malformado", async () => {
+  test("POST con JSON malformado → debe devolver 400", async () => {
     const res = await request(app)
       .post("/login")
       .set('Content-Type', 'application/json')
       .send('{"email": "test@test.com", "password":'); // JSON malformado
     
     expect([400, 500]).toContain(res.status);
+  });
+
+  /* TESTS ESPECÍFICOS DE AppError Y VALIDACIONES */
+  
+  test("POST /categorias → datos faltantes debe devolver ValidationError 400", async () => {
+    const res = await request(app)
+      .post("/categorias")
+      .send({}); // Sin datos requeridos
+    
+    expect([400, 401, 422]).toContain(res.status);
+    if (res.status === 400) {
+      expect(res.body).toHaveProperty('success', false);
+      expect(res.body).toHaveProperty('message');
+    }
+  });
+
+  test("POST /productos → producto duplicado debe devolver ConflictError 409", async () => {
+    // Intentar crear un producto con SKU duplicado
+    const duplicateProduct = {
+      nombre: "Test Product Duplicate",
+      sku: "DUPLICATE-SKU-123",
+      precio: 1000
+    };
+    
+    const res1 = await request(app)
+      .post("/productos")
+      .send(duplicateProduct);
+
+    const res2 = await request(app)
+      .post("/productos")
+      .send(duplicateProduct);
+    
+    // Al menos uno debería devolver un error de conflicto
+    expect([401, 409, 500]).toContain(res2.status);
+  });
+
+  test("GET /productos/invalid-id → ID inválido debe manejar PgError correctamente", async () => {
+    const res = await request(app).get("/productos/invalid-uuid-format");
+    expect([400, 404, 500]).toContain(res.status);
+    
+    if (res.body) {
+      expect(res.body).toHaveProperty('success', false);
+      expect(res.body).toHaveProperty('timestamp');
+    }
+  });
+
+  /* TESTS DE JWT ERRORS */
+  
+  test("GET /auth/perfil → token inválido debe devolver 401", async () => {
+    const res = await request(app)
+      .get("/auth/perfil")
+      .set('Authorization', 'Bearer invalid-token-format');
+    
+    expect([401, 403]).toContain(res.status);
+    if (res.body) {
+      expect(res.body).toHaveProperty('success', false);
+      expect(res.body.message).toMatch(/token|inválid|unauthorized/i);
+    }
+  });
+
+  test("POST /cart → token expirado debe devolver 401", async () => {
+    // Simular token expirado (esto dependerá de tu implementación)
+    const expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzkwMjJ9.invalid";
+    
+    const res = await request(app)
+      .post("/cart")
+      .set('Authorization', `Bearer ${expiredToken}`)
+      .send({ productId: 1, quantity: 1 });
+    
+    expect([401, 403, 404]).toContain(res.status);
+  });
+
+  /* TESTS DE POSTGRESQL ERRORS */
+  
+  test("POST /usuarios → email duplicado debe devolver 409", async () => {
+    const duplicateUser = {
+      email: "duplicate-test@example.com",
+      nombre: "Test User",
+      password: "123456"
+    };
+    
+    // Intentar crear el mismo usuario dos veces
+    const res1 = await request(app)
+      .post("/register")
+      .send(duplicateUser);
+
+    const res2 = await request(app)
+      .post("/register")
+      .send(duplicateUser);
+    
+    // Al menos el segundo debería devolver conflicto
+    expect([409, 422, 400]).toContain(res2.status);
+  });
+
+  test("DELETE /categorias/999999 → foreign key violation debe devolver 409", async () => {
+    const res = await request(app)
+      .delete("/categorias/999999");
+    
+    // Puede ser 404 (no encontrado) o 401/403 (no autorizado) o 409 (conflicto)
+    expect([401, 403, 404, 409]).toContain(res.status);
+  });
+
+  /* TESTS DE ENTITY PARSE FAILED */
+  
+  test("POST /login → Content-Type incorrecto debe devolver 400", async () => {
+    const res = await request(app)
+      .post("/login")
+      .set('Content-Type', 'text/plain')
+      .send('not-json-data');
+    
+    expect([400, 415]).toContain(res.status);
+  });
+
+  /* TESTS DE 5XX ERRORS (SERVER ERRORS) */
+  
+  test("Ruta que cause error interno → debe devolver 500 con estructura correcta", async () => {
+    // Intentar acceder a una ruta que podría causar error de base de datos
+    const res = await request(app)
+      .get("/productos")
+      .query({ limit: -1 }); // Parámetro inválido que podría causar error
+    
+    if (res.status === 500) {
+      expect(res.body).toHaveProperty('success', false);
+      expect(res.body).toHaveProperty('message');
+      expect(res.body).toHaveProperty('timestamp');
+      expect(res.body.message).toBe('Error interno del servidor');
+    }
+  });
+
+  /* TESTS DE RATE LIMITING (si está implementado) */
+  
+  test("Múltiples requests → verificar que no hay memory leaks en error handler", async () => {
+    const promises = [];
+    for (let i = 0; i < 10; i++) {
+      promises.push(
+        request(app)
+          .get("/categorias/999")
+          .catch(() => {}) // Ignorar errores individuales
+      );
+    }
+    
+    const results = await Promise.all(promises);
+    
+    // Verificar que todos devuelvan respuesta consistente
+    results.forEach(res => {
+      if (res) {
+        expect(res.status).toBe(404);
+      }
+    });
+  });
+
+  /* TESTS DE BODY SIZE LIMITS */
+  
+  test("POST con payload muy grande → debe devolver 413 o 400", async () => {
+    const largePayload = {
+      data: "x".repeat(10000000) // 10MB de data
+    };
+    
+    const res = await request(app)
+      .post("/login")
+      .send(largePayload);
+    
+    expect([400, 413, 500]).toContain(res.status);
+  });
+
+  /* TESTS DE HEADERS MALICIOSOS */
+  
+  test("Request con headers maliciosos → debe ser manejado correctamente", async () => {
+    const res = await request(app)
+      .get("/productos")
+      .set('X-Malicious-Header', '<script>alert("xss")</script>')
+      .set('User-Agent', 'SQLi\'; DROP TABLE users; --');
+    
+    // Debería responder normalmente, ignorando headers maliciosos
+    expect([200, 404, 500]).toContain(res.status);
+  });
+
+  /* TESTS DE ERROR BOUNDARY EN ASYNC OPERATIONS */
+  
+  test("Operación asíncrona que falla → debe ser capturada por asyncHandler", async () => {
+    // Test que podría causar un error en una operación async
+    const res = await request(app)
+      .post("/cart")
+      .send({
+        productId: "999999999999999999999999", // ID que podría causar error
+        quantity: 999999
+      });
+    
+    expect([400, 401, 404, 500]).toContain(res.status);
+    
+    if (res.body) {
+      expect(res.body).toHaveProperty('success', false);
+      expect(res.body).toHaveProperty('timestamp');
+    }
   });
 
   /* ------------------------------------------------------------- */

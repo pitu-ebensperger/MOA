@@ -11,6 +11,7 @@ router.get("/admin/pedidos/stats", verifyAdmin, asyncHandler(orderAdminControlle
 router.get("/admin/pedidos", verifyAdmin, asyncHandler(orderAdminController.getAllOrders));
 router.get("/admin/pedidos/:id", verifyAdmin, asyncHandler(orderAdminController.getOrderById));
 router.patch("/admin/pedidos/:id/estado", verifyAdmin, asyncHandler(orderAdminController.updateOrderStatus));
+router.put("/api/admin/orders/:id/status", verifyAdmin, asyncHandler(orderAdminController.updateOrderStatus));
 router.post("/admin/pedidos/:id/seguimiento", verifyAdmin, asyncHandler(orderAdminController.addTrackingInfo));
 router.patch("/admin/pedidos/:id/notas", verifyAdmin, asyncHandler(orderAdminController.updateInternalNotes));
 

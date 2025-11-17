@@ -168,7 +168,6 @@ export const Footer = () => {
               </Link>{" "}
               · Todos los derechos reservados.
             </p>
-            <p className="text-neutral-400">Diseño y desarrollo en Santiago, Chile</p>
           </div>
         </div>
       </div>

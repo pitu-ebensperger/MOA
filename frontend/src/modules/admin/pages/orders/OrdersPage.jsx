@@ -44,6 +44,17 @@ export default function OrdersPage() {
     search,
   });
 
+  const handleOrderUpdate = useCallback((orderId) => {
+    // Refetch the data to show updated information
+    refetch();
+    
+    // Optionally, you could also update the selected order if it's currently open
+    if (selectedOrder && selectedOrder.id === orderId) {
+      // This will refresh the data shown in the drawer
+      refetch();
+    }
+  }, [refetch, selectedOrder]);
+
   const handleUpdateOrderStatus = useCallback(
     async (order, newStatus) => {
       const targetId = order?.id ?? order?.number;
@@ -193,6 +204,7 @@ export default function OrdersPage() {
         open={!!selectedOrder}
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
+        onOrderUpdate={handleOrderUpdate}
       />
     </div>
   );

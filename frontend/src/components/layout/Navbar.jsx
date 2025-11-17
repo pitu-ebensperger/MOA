@@ -84,7 +84,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   // Detectar scroll para cambiar opacidad del navbar
   useEffect(() => {
     const handleScroll = () => {
-      const scrollThreshold = 100; // Después de 100px de scroll
+      const scrollThreshold = 80; // Después de 80px de scroll
       setIsScrolled(window.scrollY > scrollThreshold);
     };
 
@@ -163,7 +163,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     <>
       <div className={`nav-container shadow-md fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b animate-slide-down transition-all duration-300 ${
         isScrolled 
-          ? 'bg-color-light/95 backdrop-blur-lg shadow-xl' 
+          ? 'bg-color-light backdrop-blur-lg shadow-xl' 
           : 'bg-color-light/80'
       }`}>
         <div className="max-w-7xl mx-auto px-6 py-4">

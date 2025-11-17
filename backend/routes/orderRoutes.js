@@ -1,5 +1,6 @@
 import { Router } from "express";
 import orderController from "../src/controllers/orderController.js";
+import orderAdminController from "../src/controllers/orderAdminController.js";
 import { verifyAdmin } from "../src/middleware/verifyAdmin.js";
 import { verifyToken } from "../src/middleware/tokenMiddleware.js";
 import { asyncHandler } from "../src/utils/error.utils.js";
@@ -15,7 +16,7 @@ router.delete("/api/orders/:id", verifyToken, orderController.cancelOrder);
 router.put(
   "/api/admin/orders/:id/status",
   verifyAdmin,
-  asyncHandler(orderController.updateOrderStatus)
+  asyncHandler(orderAdminController.updateOrderStatus)
 );
 
 export default router;

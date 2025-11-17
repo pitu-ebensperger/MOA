@@ -36,17 +36,11 @@ import {
 const buildItemImage = (item) =>
   item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
 
-const paymentOptions = [
-  { value: "transfer", label: "Transferencia bancaria" },
-  { value: "card", label: "Tarjeta crédito / débito" },
-  { value: "link", label: "Link de pago" },
-];
-
 export const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cartItems, total, removeFromCart, clearCart } = useCartContext();
   const { addresses, defaultAddress } = useAddresses();
-  const { paymentMethods, defaultPaymentMethod } = usePaymentMethods();
+  const { paymentMethods, defaultPaymentMethod, formatPaymentMethod } = usePaymentMethods();
   
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [selectedAddressId, setSelectedAddressId] = useState(defaultAddress?.direccion_id || null);
@@ -89,6 +83,16 @@ export const CheckoutPage = () => {
 
   const handleAddressChange = (field, value) => {
     setNewAddress(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePaymentChange = (value) => {
+    if (!value) {
+      setSelectedPaymentId(null);
+      return;
+    }
+
+    const numericId = Number(value);
+    setSelectedPaymentId(Number.isNaN(numericId) ? null : numericId);
   };
 
   const handlePay = async () => {
@@ -157,7 +161,7 @@ export const CheckoutPage = () => {
   return (
     <main className="page container-px mx-auto max-w-6xl py-12">
       <header className="mb-10 space-y-3">
-        <Badge variant="accent" className="bg-[var(--color-primary3)] text-[var(--color-text-on-dark)]">
+        <Badge variant="accent" className="bg-(--color-primary3) text-[var(--color-text-on-dark)]">
           Paso final
         </Badge>
         <div>
@@ -293,16 +297,21 @@ export const CheckoutPage = () => {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label required>Método de pago</Label>
-                    <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                    <Select value={selectedPaymentId?.toString()} onValueChange={handlePaymentChange} disabled={!paymentMethods.length}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un método" />
                       </SelectTrigger>
                       <SelectContent>
-                        {paymentOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
+                        {paymentMethods.map((method) => {
+                          const methodId = method.metodo_pago_id ?? method.id;
+                          if (!methodId) return null;
+                          const label = formatPaymentMethod(method) || method.nombre || "Método de pago";
+                          return (
+                            <SelectItem key={methodId} value={methodId.toString()}>
+                              {label}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>

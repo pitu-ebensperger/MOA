@@ -1,17 +1,90 @@
-import React from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx";
 import { Price } from "@/components/data-display/Price.jsx";
 import { StatusPill } from "@/components/ui/StatusPill.jsx";
 import { Pill } from "@/components/ui/Pill.jsx";
+import { Button } from "@/components/ui/Button.jsx";
+import { Input } from "@/components/ui/Input.jsx";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/shadcn/ui/select.jsx";
+import { Textarea } from "@/components/shadcn/ui/textarea.jsx";
+import { Accordion } from "@/components/ui/Accordion.jsx";
 import { formatDate_ddMMyyyy } from "@/utils/date.js";
-import { CalendarDays, PackageCheck, Truck, ChevronRight } from "lucide-react";
+import { CalendarDays, PackageCheck, Truck, ChevronRight, Edit, Save, X, AlertCircle } from "lucide-react";
 import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx";
+import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
 
 // Helpers pequeños para no ensuciar el JSX
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
 const safeText = (v) => (v == null || v === "" ? "–" : v);
 
-export default function OrdersDrawer({ open, order, onClose, breadcrumb = null }) {
+export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, onOrderUpdate }) {
+  // Estado para edición de orden
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    estado_pago: '',
+    estado_envio: '',
+    numero_seguimiento: '',
+    empresa_envio: '',
+    notas_internas: ''
+  });
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateError, setUpdateError] = useState(null);
+
+  // Inicializar form cuando cambia la orden
+  React.useEffect(() => {
+    if (order) {
+      setEditForm({
+        estado_pago: order.estado_pago || '',
+        estado_envio: order.estado_envio || '',
+        numero_seguimiento: order.shipment?.trackingNumber || order.shipment?.trackingNumero || '',
+        empresa_envio: order.shipment?.carrier || '',
+        notas_internas: order.notas_internas || ''
+      });
+    }
+  }, [order]);
+
+  // Manejar cambios en el formulario
+  const handleFormChange = (field, value) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Manejar actualización de estado
+  const handleStatusUpdate = async () => {
+    if (!order?.id) return;
+
+    setIsUpdating(true);
+    setUpdateError(null);
+
+    try {
+      await ordersAdminApi.updateOrderStatus(order.id, editForm);
+      
+      // Llamar callback para actualizar la orden en el componente padre
+      if (onOrderUpdate) {
+        onOrderUpdate(order.id);
+      }
+      
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      setUpdateError(error.message || 'Error al actualizar el estado de la orden');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Cancelar edición
+  const handleCancelEdit = () => {
+    setEditForm({
+      estado_pago: order.estado_pago || '',
+      estado_envio: order.estado_envio || '',
+      numero_seguimiento: order.shipment?.trackingNumber || order.shipment?.trackingNumero || '',
+      empresa_envio: order.shipment?.carrier || '',
+      notas_internas: order.notas_internas || ''
+    });
+    setIsEditing(false);
+    setUpdateError(null);
+  };
+
   // Si no hay orden seleccionada, no mostramos nada
   if (!open || !order) return null;
 
@@ -126,6 +199,189 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null }
           <Accordion
             className="divide-y divide-(--color-border) rounded-2xl border border-(--color-border) bg-white shadow-sm"
             sections={[
+              {
+                key: "status-management",
+                title: "Gestión de estados",
+                defaultOpen: true,
+                render: () => (
+                  <div className="space-y-4">
+                    {/* Encabezado con botón editar */}
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-(--color-text)">Estados de la orden</h4>
+                      <div className="flex gap-2">
+                        {!isEditing ? (
+                          <Button
+                            appearance="outline"
+                            intent="primary"
+                            size="sm"
+                            onClick={() => setIsEditing(true)}
+                            className="flex items-center gap-1.5"
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                            Editar estados
+                          </Button>
+                        ) : (
+                          <div className="flex gap-2">
+                            <Button
+                              appearance="outline"
+                              intent="neutral"
+                              size="sm"
+                              onClick={handleCancelEdit}
+                              disabled={isUpdating}
+                              className="flex items-center gap-1.5"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              Cancelar
+                            </Button>
+                            <Button
+                              appearance="outline"
+                              intent="success"
+                              size="sm"
+                              onClick={handleStatusUpdate}
+                              disabled={isUpdating}
+                              className="flex items-center gap-1.5"
+                            >
+                              <Save className="h-3.5 w-3.5" />
+                              {isUpdating ? 'Guardando...' : 'Guardar'}
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Error de actualización */}
+                    {updateError && (
+                      <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+                        <AlertCircle className="h-4 w-4" />
+                        {updateError}
+                      </div>
+                    )}
+
+                    {/* Formulario de estados */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {/* Estado de pago */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-(--color-text-muted) uppercase tracking-wide">
+                          Estado de pago
+                        </label>
+                        {!isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <Pill variant={order.estado_pago === 'pagado' ? 'success' : order.estado_pago === 'fallido' ? 'error' : 'info'}>
+                              {order.estado_pago || '–'}
+                            </Pill>
+                          </div>
+                        ) : (
+                          <Select value={editForm.estado_pago} onValueChange={(value) => handleFormChange('estado_pago', value)}>
+                            <SelectTrigger className="h-9">
+                              <SelectValue placeholder="Seleccionar estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pendiente">Pendiente</SelectItem>
+                              <SelectItem value="procesando">Procesando</SelectItem>
+                              <SelectItem value="pagado">Pagado</SelectItem>
+                              <SelectItem value="fallido">Fallido</SelectItem>
+                              <SelectItem value="reembolsado">Reembolsado</SelectItem>
+                              <SelectItem value="cancelado">Cancelado</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+
+                      {/* Estado de envío */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-(--color-text-muted) uppercase tracking-wide">
+                          Estado de envío
+                        </label>
+                        {!isEditing ? (
+                          <div className="flex items-center gap-2">
+                            <Pill variant={order.estado_envio === 'entregado' ? 'success' : order.estado_envio === 'devuelto' ? 'error' : 'info'}>
+                              {order.estado_envio || '–'}
+                            </Pill>
+                          </div>
+                        ) : (
+                          <Select value={editForm.estado_envio} onValueChange={(value) => handleFormChange('estado_envio', value)}>
+                            <SelectTrigger className="h-9">
+                              <SelectValue placeholder="Seleccionar estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="preparacion">Preparación</SelectItem>
+                              <SelectItem value="empaquetado">Empaquetado</SelectItem>
+                              <SelectItem value="enviado">Enviado</SelectItem>
+                              <SelectItem value="en_transito">En tránsito</SelectItem>
+                              <SelectItem value="entregado">Entregado</SelectItem>
+                              <SelectItem value="devuelto">Devuelto</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+
+                      {/* Número de seguimiento */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-(--color-text-muted) uppercase tracking-wide">
+                          Número de seguimiento
+                        </label>
+                        {!isEditing ? (
+                          <p className="text-sm font-mono text-(--color-text)">
+                            {order.shipment?.trackingNumber || order.shipment?.trackingNumero || '–'}
+                          </p>
+                        ) : (
+                          <Input
+                            value={editForm.numero_seguimiento}
+                            onChange={(e) => handleFormChange('numero_seguimiento', e.target.value)}
+                            placeholder="Ej: CHXP123456789"
+                            className="font-mono text-sm"
+                          />
+                        )}
+                      </div>
+
+                      {/* Empresa de courier */}
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-(--color-text-muted) uppercase tracking-wide">
+                          Empresa de courier
+                        </label>
+                        {!isEditing ? (
+                          <p className="text-sm text-(--color-text)">
+                            {order.shipment?.carrier || '–'}
+                          </p>
+                        ) : (
+                          <Select value={editForm.empresa_envio} onValueChange={(value) => handleFormChange('empresa_envio', value)}>
+                            <SelectTrigger className="h-9">
+                              <SelectValue placeholder="Seleccionar courier" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Chilexpress">Chilexpress</SelectItem>
+                              <SelectItem value="Blue Express">Blue Express</SelectItem>
+                              <SelectItem value="Starken">Starken</SelectItem>
+                              <SelectItem value="Correos de Chile">Correos de Chile</SelectItem>
+                              <SelectItem value="Retiro en tienda">Retiro en tienda</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Notas internas */}
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-(--color-text-muted) uppercase tracking-wide">
+                        Notas internas (Solo visible para admin)
+                      </label>
+                      {!isEditing ? (
+                        <p className="text-sm text-(--color-text) whitespace-pre-wrap">
+                          {order.notas_internas || 'Sin notas'}
+                        </p>
+                      ) : (
+                        <Textarea
+                          value={editForm.notas_internas}
+                          onChange={(e) => handleFormChange('notas_internas', e.target.value)}
+                          placeholder="Agregar notas internas para el equipo..."
+                          rows={3}
+                          className="resize-none text-sm"
+                        />
+                      )}
+                    </div>
+                  </div>
+                ),
+              },
               {
                 key: "tracking",
                 title: "Seguimiento del pedido",
@@ -316,7 +572,7 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null }
                   <DlRow label="Fecha de envío">{safeDate(shippedAt)}</DlRow>
                   <DlRow label="Fecha de entrega">{safeDate(deliveredAt)}</DlRow>
                   <DlRow label={`Dirección${address?.label ? ` (${address.label})` : ""}`}>
-                    <span className="break-words">{fullAddress ?? "–"}</span>
+                    <span className="wrap-break-word">{fullAddress ?? "–"}</span>
                   </DlRow>
                 </Dl>
               </section>

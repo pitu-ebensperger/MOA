@@ -4,6 +4,7 @@ import WishlistSection from '../components/WishlistSection.jsx';
 import OrderSection from '../components/MyOrdersSection.jsx';
 import { useProducts } from '../../products/hooks/useProducts.js';
 import { useAuth } from "../../../context/auth-context.js";
+import { wishlistApi } from '../../../services/wishlist.api.js';
 
 const PROFILE_PRODUCT_FILTERS = Object.freeze({ limit: 12 });
 
@@ -14,10 +15,7 @@ export const ProfilePage = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:3000/wishlist", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
+    wishlistApi.getWishlist()
       .then(data => {
         console.log("Wishlist cargada:", data);
         setWishlistItems(data.items || []);

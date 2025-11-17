@@ -38,3 +38,12 @@ export const getAllUsers = async () => {
     throw error;
   }
 };
+
+/**
+ * API objeto que agrupa todas las funciones de usuarios
+ */
+export const usersApi = {
+  getUserById,
+  updateUser,
+  getAllUsers
+};

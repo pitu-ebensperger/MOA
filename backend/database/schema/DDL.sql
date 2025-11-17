@@ -1,4 +1,4 @@
--- Active: 1730684071005@@127.0.0.1@5432@moa
+-- Active: 1763403221678@@127.0.0.1@5432@moa
 CREATE DATABASE moa;
 
 \c moa;
@@ -10,8 +10,8 @@ CREATE TABLE usuarios (
     email TEXT UNIQUE NOT NULL,
     telefono TEXT,
     password_hash TEXT NOT NULL,
-    rol TEXT,
-    rol_code TEXT,
+    rol TEXT DEFAULT 'user',
+    rol_code TEXT DEFAULT 'USER',
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 

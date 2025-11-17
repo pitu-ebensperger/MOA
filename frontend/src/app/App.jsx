@@ -22,6 +22,7 @@ import ResetPasswordPage from '@/modules/auth/pages/ResetPasswordPage.jsx'
 import { ProfilePage } from '@/modules/profile/pages/ProfilePage.jsx'
 import { WishlistPage } from '@/modules/profile/pages/WishlistPage.jsx'
 import { StyleGuidePage } from '@/modules/styleguide/pages/StyleGuidePage.jsx'
+import { OrderConfirmationPage } from '@/modules/orders/pages/OrderConfirmationPage.jsx'
 
 import ContactPage from '@/modules/support/pages/ContactPage.jsx';
 import { FAQPage } from '@/modules/support/pages/FAQPage.jsx'
@@ -34,7 +35,7 @@ import { AdminRoute } from '@/modules/auth/hooks/useAuth.jsx'
 import EntornoAdmin from '@/modules/admin/components/EntornoAdmin.jsx'
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage.jsx'
 // import AdminTestPage from '@/modules/admin/pages/AdminTestPage.jsx'
-import OrdersAdminPage from '@/modules/admin/pages/OrdersAdminPage.jsx'
+import OrdersAdminPage from '@/modules/admin/pages/orders/OrdersAdminPageV2.jsx'
 import AdminProductsPage from '@/modules/admin/pages/AdminProductsPage.jsx'
 import AdminCategoriesPage from '@/modules/admin/pages/AdminCategoriesPage.jsx'
 import CustomersPage from '@/modules/admin/pages/CustomersPage.jsx'
@@ -59,39 +60,82 @@ export const App = () => {
         <ScrollToTop />
         <main className='main w-full'>
           <Routes>
-          <Route path='/' element={<HomePage />} />
-          <Route path={home.landing} element={<HomePage />} />
-          <Route path='/cart' element={<CartPage />} />
-          <Route path='/checkout' element={<CheckoutPage />} />
-          <Route path={products.categories} element={<CategoriesPage />} />
-          <Route path={products.products} element={<ProductsPage />} />
-          <Route path={products.productDetail(':id')} element={<ProductDetailPage />} />
-          <Route path={auth.login} element={<LoginPage />} />
-          <Route path="/debug-login" element={<DebugLoginPage />} />
-          <Route path={auth.register} element={<RegisterPage />} />
-          <Route path={auth.forgot} element={<ForgotPasswordPage />} />
-          <Route path={auth.reset} element={<ResetPasswordPage />} />
-          <Route path={auth.profile} element={<ProfilePage />} />
-          <Route path='/wishlist' element={<WishlistPage />} />         
-          <Route path={support.contact} element={<ContactPage />} /> 
-          <Route path={support.privacy} element={<PrivacyPage />} /> 
-          <Route path={support.terms} element={<TermsPage />} /> 
-          <Route path={support.faq} element={<FAQPage />} /> 
-          <Route path={support.returns} element={<ReturnsAndExchangesPage />} /> 
-          <Route path='*' element={<NotFoundPage />} />
+            <Route path='/' element={<HomePage />} />
+            <Route path={home.landing} element={<HomePage />} />
+            <Route path='/cart' element={<CartPage />} />
+            <Route path='/checkout' element={<CheckoutPage />} />
+            <Route path='/order-confirmation/:orderCode' element={<OrderConfirmationPage />} />
+            <Route path={products.categories} element={<CategoriesPage />} />
+            <Route path={products.products} element={<ProductsPage />} />
+            <Route path={products.productDetail(':id')} element={<ProductDetailPage />} />
+            <Route path={auth.login} element={<LoginPage />} />
+            <Route path='/debug-login' element={<DebugLoginPage />} />
+            <Route path={auth.register} element={<RegisterPage />} />
+            <Route path={auth.forgot} element={<ForgotPasswordPage />} />
+            <Route path={auth.reset} element={<ResetPasswordPage />} />
+            <Route path={auth.profile} element={<ProfilePage />} />
+            <Route path='/wishlist' element={<WishlistPage />} />
+            <Route path={support.contact} element={<ContactPage />} />
+            <Route path={support.privacy} element={<PrivacyPage />} />
+            <Route path={support.terms} element={<TermsPage />} />
+            <Route path={support.faq} element={<FAQPage />} />
+            <Route path={support.returns} element={<ReturnsAndExchangesPage />} />
+            <Route path='*' element={<NotFoundPage />} />
 
-          <Route element={<AdminRoute />}>
-            <Route path={admin.dashboard} element={<EntornoAdmin> <AdminDashboardPage /> </EntornoAdmin>} />
-            {/* <Route path={admin.test} element={<EntornoAdmin> <AdminTestPage /> </EntornoAdmin>} /> */}
-            <Route path={admin.orders} element={<EntornoAdmin> <OrdersAdminPage /> </EntornoAdmin>} />
-            <Route path={admin.products} element={<EntornoAdmin> <AdminProductsPage /> </EntornoAdmin>} />
-            <Route path={admin.categories} element={<EntornoAdmin> <AdminCategoriesPage /> </EntornoAdmin>} />
-            <Route path={admin.customers} element={<EntornoAdmin> <CustomersPage /> </EntornoAdmin>} />
-            <Route path={admin.settings} element={<EntornoAdmin> <AdminSettingsPage /> </EntornoAdmin>} />
-          </Route>
+            <Route element={<AdminRoute />}>
+              <Route
+                path={admin.dashboard}
+                element={
+                  <EntornoAdmin>
+                    <AdminDashboardPage />
+                  </EntornoAdmin>
+                }
+              />
+              {/* <Route path={admin.test} element={<EntornoAdmin> <AdminTestPage /> </EntornoAdmin>} /> */}
+              <Route
+                path={admin.orders}
+                element={
+                  <EntornoAdmin>
+                    <OrdersAdminPage />
+                  </EntornoAdmin>
+                }
+              />
+              <Route
+                path={admin.products}
+                element={
+                  <EntornoAdmin>
+                    <AdminProductsPage />
+                  </EntornoAdmin>
+                }
+              />
+              <Route
+                path={admin.categories}
+                element={
+                  <EntornoAdmin>
+                    <AdminCategoriesPage />
+                  </EntornoAdmin>
+                }
+              />
+              <Route
+                path={admin.customers}
+                element={
+                  <EntornoAdmin>
+                    <CustomersPage />
+                  </EntornoAdmin>
+                }
+              />
+              <Route
+                path={admin.settings}
+                element={
+                  <EntornoAdmin>
+                    <AdminSettingsPage />
+                  </EntornoAdmin>
+                }
+              />
+            </Route>
 
-          <Route path='/style-guide/*' element={<StyleGuidePage />} />
-        </Routes>
+            <Route path='/style-guide/*' element={<StyleGuidePage />} />
+          </Routes>
         </main>
         {!isAdminRoute && <Footer />}
       </div>

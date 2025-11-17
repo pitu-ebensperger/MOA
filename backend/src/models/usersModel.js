@@ -5,14 +5,16 @@ import { nanoid } from "nanoid";
 export const createUserModel = async (nombre, email, telefono, password) => {
   const publicId = nanoid();
   const hashedPassword = bcrypt.hashSync(password, 10);
+  const defaultRole = "user";
+  const defaultRoleCode = "USER";
 
   const sqlQuery = {
     text: `
-        INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING usuario_id, public_id, nombre, email, telefono, creado_en
+        INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING usuario_id, public_id, nombre, email, telefono, rol, rol_code, creado_en
         `,
-    values: [publicId, nombre, email, telefono, hashedPassword],
+    values: [publicId, nombre, email, telefono, hashedPassword, defaultRole, defaultRoleCode],
   };
 
   const response = await pool.query(sqlQuery);

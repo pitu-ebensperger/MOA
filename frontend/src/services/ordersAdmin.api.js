@@ -41,6 +41,25 @@ export const ordersAdminApi = {
   },
 
   /**
+   * Actualizar estado completo de una orden (Admin)
+   * PUT /api/admin/orders/:id/status
+   * @param {string|number} ordenId - ID de la orden
+   * @param {Object} data - Datos de actualización completos
+   * @param {string} [data.estado_pago] - Estado de pago
+   * @param {string} [data.estado_envio] - Estado de envío
+   * @param {string} [data.numero_seguimiento] - Número de seguimiento
+   * @param {string} [data.empresa_envio] - Empresa de envío/courier
+   * @param {string} [data.notas_internas] - Notas internas del admin
+   * @returns {Promise<Object>} Orden actualizada
+   */
+  updateOrderStatus: (ordenId, data) => {
+    if (!ordenId) {
+      throw new Error('ID de orden es requerido');
+    }
+    return apiClient.put(`/api/admin/orders/${ordenId}/status`, data);
+  },
+
+  /**
    * Agregar información de tracking
    * @param {string|number} ordenId - ID de la orden
    * @param {Object} data - Datos de tracking

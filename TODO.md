@@ -1,3 +1,4 @@
+-- Active: 1763403221678@@127.0.0.1@5432@pitu
 # TODO - MOA Project
 
 **Última actualización:** 17 de noviembre, 2025
@@ -6,16 +7,12 @@
 
 ## ✅ COMPLETADOS RECIENTEMENTE
 
-- ~~Reemplazar todos los imports del frontend por el alias `@/`~~ ✅ COMPLETADO (17 nov 2025)
-  - 145 archivos actualizados, ~800+ imports convertidos
-  - Documentado en `docs/CONVERSION_IMPORTS_ALIAS.md`
-  - Compilación exitosa sin errores
-  - Sistema completo de checkout funcionando
-  - Modelos, controladores y rutas de órdenes creados
+- ~~Reemplazar todos los imports del frontend por el alias `@/`~~ ✅ 
+- 
 - Añadir validaciones PropTypes para los componentes clave de perfil y checkout ✅ COMPLETADO (hoy)
-  - `OrderStatusTimeline.jsx`, `AddressesSection.jsx`, `CheckoutPage.jsx` y `MyOrdersSection.jsx` ahora declaran formas esperadas
-  - Protege datos de orden, dirección y productos antes de renderizar Timeline, formularios y listado
-  - Mejora la confiabilidad sin migrar aún a TypeScript
+- 
+- Checkout actualizado (hoy)
+  - `CheckoutPage.jsx` reemplaza el badge `bg-[var(--color-primary3)]` por `bg-(--color-primary3)` y usa el selector de `paymentMethods` del contexto (`formatPaymentMethod`/`selectedPaymentId`) en lugar de estados y `paymentOptions` no usados.
 
 - Renovamos la navegación admin y wishlist (hoy)
   - `AdminSidebar.jsx` y `Navbar.jsx` usan rutas reales (`API_PATHS`) y el menú de perfil lleva a la pestaña correcta `/perfil?tab=orders`.
@@ -89,13 +86,7 @@
   - **Endpoint:** PUT `/api/admin/orders/:id/status`
 
 ### Linting
-- Corregir warnings de linting en `CheckoutPage.jsx`:
-  - **Reemplazar:** 26 clases CSS `bg-[var(--color-primary3)]` → `bg-(--color-primary3)`
-  - **Eliminar o usar:** Variables no usadas
-    - `paymentMethods` (línea 48)
-    - `setSelectedPaymentId` (línea 52)
-    - `paymentMethod` (línea 295)
-    - `setPaymentMethod` (línea 295)
+- ✅ Se reemplazaron las clases `bg-[var(--color-primary3)]` por `bg-(--color-primary3)` y ahora el selector de métodos de pago reutiliza `paymentMethods`/`setSelectedPaymentId` desde el contexto, eliminando las referencias a estados no usados.
 
 ### Checkout context
 - Rebuild the payment context by destructuring the tuple from `createStrictContext`, exporting the strict hook, and wrapping `App` (or `AddressProvider`) with the now-correct `PaymentProvider` so `usePaymentMethods` is usable in the checkout flow.

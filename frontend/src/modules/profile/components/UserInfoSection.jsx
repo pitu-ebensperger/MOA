@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../../context/auth-context.js'
+import { authApi } from '../../../services/auth.api.js'
+import { usersApi } from '../../../services/users.api.js'
 
 const UserInfoSection = () => {
   const { user, token } = useAuth();  
@@ -12,29 +14,40 @@ const UserInfoSection = () => {
     telefono: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
-    console.log("UseEffect ejecutado -> user:", user, "token:", token);
+    console.log("🔍 UserInfoSection useEffect ejecutado -> user:", user, "token:", token);
 
-    if (!user?.id || !token) return;
+    if (!token) {
+      console.log("❌ No hay token, no se puede cargar el perfil");
+      return;
+    }
 
-    fetch(`http://localhost:3000/usuario/${user.id}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`, 
-      },
-    })
-      .then((res) => res.json())
+    console.log("✅ Token encontrado, cargando perfil desde backend...");
+    setLoading(true);
+    setError(null);
+
+    // Usar authApi.profile() que obtiene perfil por token, sin necesidad de user.id
+    authApi.profile()
       .then((data) => {
-        console.log("Datos cargados:", data);
+        console.log("✅ Datos cargados exitosamente desde backend:", data);
 
         setForm({
           nombre: data.nombre || "",
           email: data.email || "",
           telefono: data.telefono || "",
         });
+        setLoading(false);
       })
-      .catch((err) => console.error("Error cargando usuario:", err));
-  }, [user, token]);
+      .catch((err) => {
+        console.error("❌ Error cargando usuario:", err);
+        console.error("Error details:", err.message, err.status, err.data);
+        setError(err);
+        setLoading(false);
+      });
+  }, [token]); // Solo depende del token, user se actualiza desde el AuthContext
 
   const handleChange = (e) => {
     setForm({
@@ -45,31 +58,18 @@ const UserInfoSection = () => {
 
   const handleSaveClick = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/usuario/${user.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,  
-        },
-        body: JSON.stringify({
-          nombre: form.nombre,
-          telefono: form.telefono,
-        }),
+      const updatedUser = await usersApi.updateUser(user.id, {
+        nombre: form.nombre,
+        telefono: form.telefono,
       });
 
-      if (!res.ok) {
-        console.error("Error al actualizar:", res.status);
-        return;
-      }
+      console.log("Usuario actualizado:", updatedUser);
 
-      const data = await res.json();
-      console.log("Usuario actualizado:", data);
-
-      if (data.user) {
+      if (updatedUser.user) {
         setForm({
-          nombre: data.user.nombre,
-          email: data.user.email,
-          telefono: data.user.telefono,
+          nombre: updatedUser.user.nombre,
+          email: updatedUser.user.email,
+          telefono: updatedUser.user.telefono,
         });
       }
 
@@ -91,7 +91,19 @@ const UserInfoSection = () => {
         </div>
 
         <div className="w-1/3">
-          <h2 className="text-2xl mb-4">@{form.nombre}</h2>
+          {loading && (
+            <div className="text-blue-600 mb-4">
+              🔄 Cargando datos del usuario desde backend...
+            </div>
+          )}
+
+          {error && (
+            <div className="text-red-600 mb-4">
+              ❌ Error cargando datos: {error.message || "Error desconocido"}
+            </div>
+          )}
+
+          <h2 className="text-2xl mb-4">@{form.nombre || "Cargando..."}</h2>
 
           <form className="flex flex-col gap-2">
             <input

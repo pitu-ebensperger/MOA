@@ -83,6 +83,7 @@ const getOrderById = async (req, res) => {
 /**
  * Actualizar estado de una orden (Admin)
  * PATCH /admin/pedidos/:id/estado
+ * PUT /api/admin/orders/:id/status
  */
 const updateOrderStatus = async (req, res) => {
   try {
@@ -94,10 +95,12 @@ const updateOrderStatus = async (req, res) => {
       fecha_pago,
       fecha_envio,
       fecha_entrega_real,
+      numero_seguimiento,
+      empresa_envio,
     } = req.body;
 
     // Validar que al menos un campo esté presente
-    if (!estado_pago && !estado_envio && !notas_internas && !fecha_pago && !fecha_envio && !fecha_entrega_real) {
+    if (!estado_pago && !estado_envio && !notas_internas && !fecha_pago && !fecha_envio && !fecha_entrega_real && !numero_seguimiento && !empresa_envio) {
       return res.status(400).json({
         success: false,
         message: 'Debe proporcionar al menos un campo para actualizar',
@@ -121,6 +124,15 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
+    // Validar empresas de envío válidas
+    const validEmpresasEnvio = ['Chilexpress', 'Blue Express', 'Starken', 'Correos de Chile', 'Retiro en tienda'];
+    if (empresa_envio && !validEmpresasEnvio.includes(empresa_envio)) {
+      return res.status(400).json({
+        success: false,
+        message: `Empresa de envío inválida. Valores permitidos: ${validEmpresasEnvio.join(', ')}`,
+      });
+    }
+
     // Verificar que la orden existe
     const existingOrder = await orderAdminModel.getOrderByIdAdmin(id);
     if (!existingOrder) {
@@ -138,6 +150,8 @@ const updateOrderStatus = async (req, res) => {
       fecha_pago,
       fecha_envio,
       fecha_entrega_real,
+      numero_seguimiento,
+      empresa_envio,
     });
 
     res.status(200).json({

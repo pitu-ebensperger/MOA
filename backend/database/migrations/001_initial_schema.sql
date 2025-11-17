@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email TEXT UNIQUE NOT NULL,
     telefono TEXT,
     password_hash TEXT NOT NULL,
-    rol TEXT DEFAULT 'CLIENTE',
-    rol_code TEXT DEFAULT 'CLIENTE',
+    rol TEXT DEFAULT 'user',
+    rol_code TEXT DEFAULT 'USER',
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
