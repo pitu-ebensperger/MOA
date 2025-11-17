@@ -19,11 +19,22 @@ const navItems = [
 export default function EntornoAdmin({ children }) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const [isExpanded, setIsExpanded] = usePersistentState("moa.admin.sidebarExpanded", {
-    initialValue: true,
-    parser: (value) => value === "true",
-    serializer: (value) => String(Boolean(value)),
-  });
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  // Cargar preferencia desde localStorage
+  useEffect(() => {
+    if (typeof globalThis !== "undefined" && globalThis.localStorage) {
+      const raw = globalThis.localStorage.getItem("moa.admin.sidebarExpanded");
+      if (raw != null) setIsExpanded(raw === "true");
+    }
+  }, []);
+
+  // Persistir preferencia
+  useEffect(() => {
+    if (typeof globalThis !== "undefined" && globalThis.localStorage) {
+      globalThis.localStorage.setItem("moa.admin.sidebarExpanded", String(isExpanded));
+    }
+  }, [isExpanded]);
 
  
 

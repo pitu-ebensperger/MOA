@@ -2,7 +2,6 @@ import React from "react";
 import { Dialog, DialogContent } from "../../../components/ui/radix/Dialog.jsx";
 import { Price } from "../../../components/data-display/Price.jsx";
 import { StatusPill } from "../../../components/ui/StatusPill.jsx";
-import { Accordion } from "../../../components/ui/Accordion.jsx";
 import { Pill } from "../../../components/ui/Pill.jsx";
 import { formatDate_ddMMyyyy } from "../../../utils/date.js";
 import { CalendarDays, PackageCheck, Truck } from "lucide-react";
@@ -64,6 +63,17 @@ export default function OrdersDrawer({ open, order, onClose }) {
     { key: "delivered", label: "Entregada", date: deliveredAt, icon: PackageCheck },
   ];
 
+  // Micro description list rows (menos cajas, mejor legibilidad)
+  const Dl = ({ children, className = "" }) => (
+    <dl className={`divide-(--color-border) ${className}`}>{children}</dl>
+  );
+  const DlRow = ({ label, children }) => (
+    <div className="grid grid-cols-3 gap-3 py-2">
+      <dt className="col-span-1 text-[11px] uppercase tracking-wide text-(--color-text-muted)">{label}</dt>
+      <dd className="col-span-2 text-sm leading-6">{children}</dd>
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
@@ -74,7 +84,7 @@ export default function OrdersDrawer({ open, order, onClose }) {
       >
         <div className="flex h-full flex-col bg-(--color-neutral2) text-(--color-text)">
         {/* Header (sticky) */}
-  <header className="sticky top-0 z-10 flex items-center justify-between border-b border-(--color-border) bg-white/90 px-6 py-4 backdrop-blur">
+  <header className="sticky top-0 z-10 flex items-center justify-between border-b border-(--color-border) bg-white/90 px-7 py-5 backdrop-blur">
           <div className="min-w-0">
             <p className="text-[11px] font-medium uppercase tracking-wide text-(--color-text-muted)">
               Orden
@@ -128,19 +138,9 @@ export default function OrdersDrawer({ open, order, onClose }) {
                             <Price value={item.unitPrice ?? 0} />
                           </div>
                         </div>
-                      ))}
-                    </div>
-
-                    {/* Totales */}
-                    <div className="mt-2 space-y-1 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-(--color-text-muted)">Subtotal</span>
-                        <span className="tabular-nums"><Price value={subtotal ?? 0} /></span>
-                      </div>
-                      {!!order.tax && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-(--color-text-muted)">Impuestos</span>
-                          <span className="tabular-nums"><Price value={order.tax} /></span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{safeText(item.name)}</p>
+                          <p className="text-xs text-(--color-text-muted)">{item.quantity ?? 1} uds</p>
                         </div>
                       )}
                       <div className="flex items-center justify-between">
@@ -225,7 +225,10 @@ export default function OrdersDrawer({ open, order, onClose }) {
                             <p className="mt-1 text-xs text-(--color-text-muted)">Tracking: <span className="font-mono">{tracking}</span></p>
                           )}
                         </div>
-                      </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
                       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div className="rounded-md border border-(--color-border) bg-white px-3 py-2">
@@ -242,11 +245,79 @@ export default function OrdersDrawer({ open, order, onClose }) {
                         </div>
                       </div>
                     </div>
+                  </Dl>
+                </div>
+              </div>
+            </section>
+
+            {/* Col derecha: Meta (envío / cliente / pago) */}
+            <aside className="md:col-span-4">
+              {/* Envío y entrega */}
+              <section className="mb-8">
+                <h3 className="mb-3 text-sm font-semibold">Envío y entrega</h3>
+                {/* Stepper */}
+                <div className="relative">
+                  <ol className="flex items-center justify-between gap-2">
+                    {steps.map((s, idx) => {
+                      const active = idx <= shippingCurrentStep;
+                      const Icon = s.icon;
+                      return (
+                        <li key={s.key} className="flex min-w-0 flex-1 flex-col items-center">
+                          <div className={`flex h-7 w-7 items-center justify-center rounded-full border text-[11px] ${active ? "bg-(--color-primary1) text-white border-(--color-primary1)" : "bg-white text-(--color-text-muted) border-(--color-border)"}`}>
+                            <Icon className={`h-4 w-4 ${active ? "text-white" : "text-(--color-text-muted)"}`} />
+                          </div>
+                          <span className={`mt-1 text-[11px] ${active ? "text-(--color-primary1)" : "text-(--color-text-muted)"}`}>{s.label}</span>
+                          <span className="mt-0.5 text-[10px] text-(--color-text-muted)">{safeDate(s.date)}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <div className="pointer-events-none absolute left-[calc(1.75rem)] right-[calc(1.75rem)] top-3 h-px bg-(--color-border)">
+                    <div className="h-full bg-(--color-primary1) transition-all" style={{ width: `${(shippingCurrentStep / (steps.length - 1)) * 100}%` }} />
                   </div>
-                ),
-              },
-            ]}
-          />
+                </div>
+
+                {/* Datos de envío (lista simple) */}
+                <Dl className="mt-4">
+                  <DlRow label="Carrier">
+                    <span className="font-medium">{safeText(deliveryService)}</span>
+                    <span className="ml-2 align-middle"><Pill variant={deliveredAt ? "success" : shippingStatus === "cancelled" ? "error" : "info"}>{safeText(shippingStatus)}</Pill></span>
+                  </DlRow>
+                  {tracking && (
+                    <DlRow label="Tracking"><span className="font-mono text-[13px] text-(--color-text-muted)">{tracking}</span></DlRow>
+                  )}
+                  <DlRow label="Fecha de envío">{safeDate(shippedAt)}</DlRow>
+                  <DlRow label="Fecha de entrega">{safeDate(deliveredAt)}</DlRow>
+                  <DlRow label={`Dirección${address?.label ? ` (${address.label})` : ""}`}>
+                    <span className="break-words">{fullAddress ?? "–"}</span>
+                  </DlRow>
+                </Dl>
+              </section>
+
+              {/* Cliente */}
+              <section className="mb-8">
+                <h3 className="mb-3 text-sm font-semibold">Cliente</h3>
+                <Dl>
+                  <DlRow label="Nombre">{safeText(userName)}</DlRow>
+                  <DlRow label="Email"><span className="text-(--color-primary1)">{safeText(userEmail)}</span></DlRow>
+                  <DlRow label="Teléfono">{safeText(userPhone)}</DlRow>
+                </Dl>
+              </section>
+
+              {/* Pago */}
+              <section>
+                <h3 className="mb-3 text-sm font-semibold">Pago</h3>
+                <Dl>
+                  <DlRow label="Método">{safeText(paymentMethod)}</DlRow>
+                  {payment?.status && (
+                    <DlRow label="Estado">
+                      <Pill variant={payment.status === "captured" ? "success" : payment.status === "failed" ? "error" : "info"}>{payment.status}</Pill>
+                    </DlRow>
+                  )}
+                </Dl>
+              </section>
+            </aside>
+          </div>
         </div>
 
         </div>

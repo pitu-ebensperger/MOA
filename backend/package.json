@@ -8,6 +8,7 @@
     "start": "node index.js",
     "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
     "seed:categories": "node database/seed/categoriesSeed.js",
+    "seed:products": "node database/seed/productsSeed.js",
     "seed:users": "node database/seed/usersSeed.js"
   },
   "dependencies": {

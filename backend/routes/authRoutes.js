@@ -5,7 +5,13 @@ import { checkLoginCredentials } from "../src/middleware/credentialsMiddleware.j
 
 const router = Router();
 
+// Mantiene /login para autenticación
 router.post("/login", checkLoginCredentials, loginUser);
-router.get("/usuarios", verifyToken, getUser);
+
+// Nuevo endpoint alineado con frontend para perfil autenticado
+router.get("/auth/perfil", verifyToken, getUser);
+
+// Alias singular /usuario (más semántico que plural, devuelve 1 usuario)
+router.get("/usuario", verifyToken, getUser);
 
 export default router;
