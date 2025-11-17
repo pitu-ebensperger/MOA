@@ -10,7 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from '@/components/ui/radix/Dialog.jsx';
 import { Input } from '@/components/shadcn/ui/input.jsx'
@@ -322,7 +321,7 @@ export const AddressesSection = () => {
   const handleAdd = async (data) => {
     try {
       await addAddress(data);
-      setDialogOpen(false);
+      closeDialog();
     } catch (err) {
       console.error('Error al agregar dirección:', err);
     }
@@ -331,8 +330,7 @@ export const AddressesSection = () => {
   const handleEdit = async (data) => {
     try {
       await updateAddress(editingAddress.direccion_id, data);
-      setDialogOpen(false);
-      setEditingAddress(null);
+      closeDialog();
     } catch (err) {
       console.error('Error al actualizar dirección:', err);
     }
@@ -354,7 +352,7 @@ export const AddressesSection = () => {
     }
   };
 
-  const openEditDialog = (address) => {
+  const openDialog = (address = null) => {
     setEditingAddress(address);
     setDialogOpen(true);
   };
@@ -376,20 +374,21 @@ export const AddressesSection = () => {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Mis Direcciones</h2>
-        <Dialog open={dialogOpen} onOpenChange={closeDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Agregar dirección
-            </Button>
-          </DialogTrigger>
+        <Button onClick={() => openDialog()}>
+          <Plus className="w-4 h-4 mr-2" />
+          Agregar dirección
+        </Button>
+      </div>
+
+      {dialogOpen && (
+        <Dialog open={dialogOpen} onOpenChange={(open) => !open && closeDialog()}>
           <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingAddress ? 'Editar dirección' : 'Nueva dirección'}
               </DialogTitle>
               <DialogDescription>
-                {editingAddress 
+                {editingAddress
                   ? 'Modifica los datos de tu dirección'
                   : 'Completa los datos de tu nueva dirección de envío'
                 }
@@ -402,7 +401,7 @@ export const AddressesSection = () => {
             />
           </DialogContent>
         </Dialog>
-      </div>
+      )}
 
       {error && (
         <div className="p-4 border border-destructive bg-destructive/10 text-destructive rounded-lg">
@@ -416,21 +415,21 @@ export const AddressesSection = () => {
           <p className="text-muted-foreground mb-4">
             No tienes direcciones guardadas
           </p>
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={() => openDialog()}>
             <Plus className="w-4 h-4 mr-2" />
             Agregar tu primera dirección
           </Button>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {addresses.map(address => (
-            <AddressCard
-              key={address.direccion_id}
-              address={address}
-              onEdit={openEditDialog}
-              onDelete={handleDelete}
-              onSetDefault={handleSetDefault}
-            />
+            {addresses.map(address => (
+              <AddressCard
+                key={address.direccion_id}
+                address={address}
+                onEdit={openDialog}
+                onDelete={handleDelete}
+                onSetDefault={handleSetDefault}
+              />
           ))}
         </div>
       )}

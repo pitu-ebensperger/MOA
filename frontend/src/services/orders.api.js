@@ -249,13 +249,14 @@ const remoteOrdersApi = {
     return data ? normalizeOrder(data, data) : null;
   },
 
-  async updateStatus(id, status) {
+  async updateStatus(id, updates = {}) {
     if (!id) throw new Error("order id is required");
+    const status = updates?.status;
     if (!status) throw new Error("status is required");
 
-    const payload = await apiClient.private.put(
-      `/api/admin/orders/${id}/status`,
-      { status }
+    const payload = await apiClient.private.patch(
+      `${API_PATHS.admin.orders}/${id}/estado`,
+      { estado_envio: status }
     );
 
     const orderData = payload?.data ?? payload;

@@ -10,10 +10,12 @@ const normalizeRoleValue = (value) =>
   typeof value === "string" ? value.trim().toLowerCase() : ""
 
 const ADMIN_ROLE_ALIASES = new Set(["admin", "administrador"])
+const DEMO_ADMIN_EMAIL = "demo@moa.cl";
 
 // Utilidad: detectar rol admin con tolerancia a cambios de backend
 export const isAdminRole = (user) =>
   !!user &&
-  [user?.role, user?.rol, user?.role_code, user?.rol_code]
-    .map(normalizeRoleValue)
-    .some((value) => ADMIN_ROLE_ALIASES.has(value));
+  (typeof user.email === "string" && user.email.trim().toLowerCase() === DEMO_ADMIN_EMAIL ||
+    [user?.role, user?.rol, user?.role_code, user?.rol_code]
+      .map(normalizeRoleValue)
+      .some((value) => ADMIN_ROLE_ALIASES.has(value)));

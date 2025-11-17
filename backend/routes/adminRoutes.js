@@ -46,6 +46,9 @@ router.delete("/admin/productos/:id", verifyAdmin, (req, res) => {
 router.get("/admin/usuarios", verifyAdmin, asyncHandler(AdminController.getUsers));
 router.put("/admin/usuarios/:id/rol", verifyAdmin, asyncHandler(AdminController.updateUserRole));
 
+router.post("/admin/clientes", verifyAdmin, asyncHandler(AdminController.createCustomer));
+router.patch("/admin/clientes/:id", verifyAdmin, asyncHandler(AdminController.updateCustomer));
+
 // === RUTAS DE CONFIGURACIÓN ADMIN ===
 router.get("/admin/configuracion", verifyAdmin, asyncHandler(AdminController.getStoreConfig));
 router.put("/admin/configuracion", verifyAdmin, asyncHandler(AdminController.updateStoreConfig));

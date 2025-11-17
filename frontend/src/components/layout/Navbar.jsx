@@ -28,6 +28,13 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, logout, user } = useAuth();
 
+  // Close search when location changes
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setIsMenuOpen(false);
+    setIsProfileDropdownOpen(false);
+  }, [location.pathname]);
+
   useEffect(() => {
     if (!location.hash) return;
     const targetId = location.hash.replace("#", "");
@@ -50,6 +57,22 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Close search bar with Escape key
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsSearchOpen(false);
+        setIsMenuOpen(false);
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isSearchOpen || isMenuOpen || isProfileDropdownOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isSearchOpen, isMenuOpen, isProfileDropdownOpen]);
 
   // Detectar scroll para cambiar opacidad del navbar
   useEffect(() => {
@@ -83,13 +106,18 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     setIsMenuOpen(false);
   };
 
+  const handleSearchClose = () => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+  };
+
   const handleSearchSubmit = (event) => {
     event.preventDefault();
     const trimmed = searchQuery.trim();
     if (!trimmed) return;
     navigate(`${API_PATHS.products.products}?search=${encodeURIComponent(trimmed)}`);
     handleNavigate("products");
-    setIsSearchOpen(false);
+    handleSearchClose();
   };
 
   const handleSearchChange = (event) => setSearchQuery(event.target.value);
@@ -413,7 +441,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
       value={searchQuery}
       onChange={handleSearchChange}
       onSubmit={handleSearchSubmit}
-      onClose={() => setIsSearchOpen(false)}
+      onClose={handleSearchClose}
     />
     </>
   );
