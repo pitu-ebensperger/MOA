@@ -1,4 +1,4 @@
-import pool from "../../database/config.js";
+import { pool } from "../../database/config.js";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 

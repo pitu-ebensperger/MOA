@@ -1,4 +1,4 @@
-import pool from "../../database/config.js";
+import { pool } from "../../database/config.js";
 
 export const getOrCreateCart = async (userId) => {
   const queryGet = `
