@@ -34,6 +34,8 @@
   - **Crea:** Tablas `direcciones` y `metodos_pago` con triggers
   - **Documentado en:** `docs/FLUJO_COMPRA_COMPLETO.md`
   
+- TODO: definir el sistema de identificadores (si no se usará `uuid-ossp`, eliminar esa extensión del schema y normalizar `public_id`)
+
 - ~~Incluir y combinar DDL de direcciones/pagos en esquema consolidado (DDL.sql principal)~~ ✅
   - Se agregaron las tablas y triggers a `backend/database/schema/DDL.sql` (direcciones y metodos_pago)
   - Se creó migración `002_addresses_payments.sql` y `003_sync_addresses_payments_constraints.sql` para entornos ya existentes
@@ -93,6 +95,9 @@
 - Rebuild the payment context by destructuring the tuple from `createStrictContext`, exporting the strict hook, and wrapping `App` (or `AddressProvider`) with the now-correct `PaymentProvider` so `usePaymentMethods` is usable in the checkout flow.
 - Define a real `paymentMethod` state in `CheckoutPage` (or reuse `selectedPaymentId`) before rendering the `<Select>` at line 295, and align it with `paymentOptions` so the form no longer references an undefined variable.
 
+### Autenticación
+- TODO: Añadir validaciones completas a los formularios de los procesos de auth (login, registro, olvidé mi contraseña y cambio de contraseña) para evitar payloads inválidos, mostrar feedback de campos obligatorios, y extender tanto en frontend como en backend el manejo de errores relacionado con credenciales y formatos.
+
 ### Manejo de errores y páginas
 - Auditar y documentar el middleware `errorHandler` en `backend/src/utils/error.utils.js` y su registro al final de `backend/index.js`, incluyendo el orden de routers (`home`, `auth`, `wishlist`, `cart`, etc.) para asegurarse de que `AppError`, `ValidationError` y los manejadores de errores de PostgreSQL/JWT (más el caso `entity.parse.failed`) devuelven siempre respuestas consistentes.
   - El helper `buildErrorResponse` centraliza `success: false`, `message` y `timestamp`, `handlePgError` y `handleJwtError` traducen códigos 23505/23503/22P02 y errores de tokens, y `errorHandler` cubre rutas desconocidas y errores no operacionales con 500.
@@ -141,6 +146,9 @@
     - API: https://www.starken.cl/developers
     - Tracking automático
   - **Implementar:** Webhook o cron job para actualizar estados
+
+### UX / Interacciones suaves
+- TODO: Añadir scroll suave a las listas principales (productos, órdenes y direcciones) para mejorar la navegación en pantallas largas; revisar componentes afectados (`ProductList`, `MyOrdersSection`, `AddressesSection`, etc.) y decidir si se gestiona vía CSS (`scroll-behavior: smooth`) o utilitarios JS para efectos más complejos.
 
 ### API Admin para Estados
 - Implementar endpoint de actualización de estados:
