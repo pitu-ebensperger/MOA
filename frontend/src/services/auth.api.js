@@ -18,10 +18,14 @@ export const authApi = {
     return res
   },
 
-  async profile(userId) {
-    const endpoint = userId ? API_PATHS.auth.profileUpdate(userId) : API_PATHS.auth.profile
-    const res = await apiClient.get(endpoint)
-    return res
+  // GET /auth/profile o /usuario (requiere token)
+  profile: async (userId) => {
+    // Si no se especifica userId, usa endpoint /usuario que obtiene por token
+    const endpoint = userId 
+      ? buildProfilePath(userId)
+      : '/usuario';
+    const res = await apiClient.private.get(endpoint)
+    return res?.data ?? res
   },
 
   async requestPasswordReset(payload = {}) {

@@ -90,6 +90,7 @@ const UserInfoSection = () => {
           <i className="fa-solid fa-user text-8xl"></i>
         </div>
 
+<<<<<<< HEAD
         <div className="w-1/3">
           {loading && (
             <div className="text-blue-600 mb-4">
@@ -104,8 +105,22 @@ const UserInfoSection = () => {
           )}
 
           <h2 className="text-2xl mb-4">@{form.nombre || "Cargando..."}</h2>
+=======
+      <div className="w-1/3">
+        {loading && (
+          <div className="text-blue-600 mb-4">
+            🔄 Cargando datos del usuario desde backend...
+          </div>
+        )}
+>>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 
-          <form className="flex flex-col gap-2">
+        {error && (
+          <div className="text-red-600 mb-4">
+            ❌ Error cargando datos: {error.message || "Error desconocido"}
+          </div>
+        )}
+
+        <h2 className="text-2xl mb-4">@{form.nombre || "Cargando..."}</h2>          <form className="flex flex-col gap-2">
             <input
               type="text"
               name="nombre"

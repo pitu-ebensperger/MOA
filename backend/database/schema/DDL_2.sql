@@ -82,7 +82,11 @@ COMMENT ON COLUMN metodos_pago.ultimos_digitos IS 'SOLO los últimos 4 dígitos 
 COMMENT ON COLUMN metodos_pago.token_externo IS 'Token seguro de la pasarela de pago para procesar transacciones';
 COMMENT ON COLUMN metodos_pago.activo IS 'Permite desactivar métodos sin eliminarlos (ej: tarjeta expirada)';
 
+<<<<<<< HEAD:backend/database/schema/DDL_2.sql
 -- EXTENSIÓN TABLA ORDENES
+=======
+-- TABLA PEDIDOS
+>>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27:backend/database/schema/DDL_DIRECCIONES_PAGOS.sql
 ALTER TABLE ordenes 
     ADD COLUMN IF NOT EXISTS direccion_id BIGINT REFERENCES direcciones(direccion_id),
     ADD COLUMN IF NOT EXISTS metodo_pago_id BIGINT REFERENCES metodos_pago(metodo_pago_id);

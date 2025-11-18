@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+<<<<<<< HEAD
 import webhookController from "./src/controllers/webhookController.js";
 import { errorHandler, AppError, NotFoundError } from "./src/utils/error.utils.js";
 
@@ -18,6 +19,12 @@ app.post(
 
 // Middleware global
 app.use(express.json({ limit: '10mb' })); // Límite de payload
+=======
+dotenv.config();
+
+const app = express();
+app.use(express.json());
+>>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 app.use(cors());
 
 /* ----------------------------- Rutas ----------------------------- */
@@ -28,6 +35,7 @@ import userRoutes from "./routes/usersRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+<<<<<<< HEAD
 import addressRoutes from "./routes/addressRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
@@ -65,7 +73,22 @@ app.use((req, res, next) => {
 
 // Middleware de manejo de errores (debe ser el último)
 app.use(errorHandler);
+=======
+import { errorHandler } from "./src/utils/error.utils.js";
+import home from "./routes/homeRoutes.js";
 
-export default app;
+app.use(categoriesRouter);
+app.use(productsRouter);
+app.use(userRoutes);
+app.use(authRoutes);
+app.use(wishlistRoutes);
+app.use(cartRoutes);
+app.use(home);
+>>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 
-/*-- NOTA : Para correr backend ahora es "node server.js"--*/
+app.use(errorHandler);
+
+let PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en puerto ${PORT}`);
+});

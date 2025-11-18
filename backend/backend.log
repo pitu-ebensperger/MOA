@@ -1,0 +1,1124 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+Servidor corriendo en puerto 4000
+Base de datos conectada con éxito { now: 2025-11-17T19:44:51.316Z }
+[2025-11-17T19:47:32.763Z] GET /usuario/7 UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at param (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:600:14)
+    at param (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:610:14)
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:664:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:47:32.761Z'
+}
+UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3)
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+[2025-11-17T19:47:46.435Z] GET /usuario/7 UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at param (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:600:14)
+    at param (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:610:14)
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:664:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:47:46.435Z'
+}
+UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3)
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+[2025-11-17T19:48:50.197Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:48:50.196Z'
+}
+[2025-11-17T19:49:59.458Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:49:59.458Z'
+}
+[2025-11-17T19:51:57.348Z] GET /usuario UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:51:57.342Z'
+}
+UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3)
+[2025-11-17T19:51:57.702Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:51:57.702Z'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+[2025-11-17T19:53:21.254Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:53:21.253Z'
+}
+[2025-11-17T19:53:21.279Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:53:21.279Z'
+}
+[2025-11-17T19:54:38.098Z] GET /usuario UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:54:38.092Z'
+}
+UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3)
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+[2025-11-17T19:54:38.391Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:54:38.382Z'
+}
+[2025-11-17T19:57:03.236Z] GET /usuario UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:57:03.234Z'
+}
+UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3)
+[2025-11-17T19:57:03.365Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:57:03.365Z'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+[2025-11-17T19:58:15.305Z] GET /usuario UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:58:15.304Z'
+}
+UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3)
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+[2025-11-17T19:58:15.478Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:58:15.478Z'
+}
+[2025-11-17T19:58:26.068Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:58:26.064Z'
+}
+[2025-11-17T19:58:26.098Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:58:26.096Z'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+[2025-11-17T19:59:19.932Z] GET /usuario UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T19:59:19.931Z'
+}
+[2025-11-17T20:02:59.769Z] GET /usuario UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3) {
+  statusCode: 401,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T20:02:59.768Z'
+}
+UnauthorizedError: El token debe estar presente
+    at verifyToken (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/middleware/tokenMiddleware.js:15:13)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/route.js:117:3)
+    at handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:435:11)
+    at Layer.handleRequest (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/lib/layer.js:152:17)
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:295:15
+    at processParams (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:582:12)
+    at next (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:291:5)
+    at Function.handle (/Users/pitu/Desktop/Entregas/MOA/node_modules/router/index.js:186:3)
+[2025-11-17T20:02:59.894Z] GET /usuario NotFoundError: Usuario no encontrado
+    at getUser (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/authController.js:58:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  statusCode: 404,
+  isOperational: true,
+  errors: null,
+  timestamp: '2025-11-17T20:02:59.894Z'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en addToCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addItemToCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:53:20)
+    at async addToCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:33:18) {
+  length: 112,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '18',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en addWishlistItem: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addWishlistItemModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:43:20)
+    at async addWishlistItem (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:32:18) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '20',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en addWishlistItem: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addWishlistItemModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:43:20)
+    at async addWishlistItem (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:32:18) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '20',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getCartItems (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:38:20)
+    at async getCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:12:20) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '179',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en addToCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addItemToCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:53:20)
+    at async addToCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:33:18) {
+  length: 112,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '18',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en addToCart: error: relation "carrito_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async addItemToCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/cartModel.js:53:20)
+    at async addToCart (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/cartController.js:33:18) {
+  length: 112,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '18',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}
+Error en getWishlist: error: relation "wishlist_items" does not exist
+    at /Users/pitu/Desktop/Entregas/MOA/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getWishlistModel (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/models/wishlistModel.js:11:20)
+    at async getWishlist (file:///Users/pitu/Desktop/Entregas/MOA/backend/src/controllers/wishlistController.js:11:19) {
+  length: 113,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '26',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1452',
+  routine: 'parserOpenTable'
+}

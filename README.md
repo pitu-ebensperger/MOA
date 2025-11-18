@@ -2,10 +2,16 @@
 
 ### Usuarios para frontend testing:
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
-- **demo@moa.cl / demo@moal.cl** (contraseña: demo o admin o 123456) 
+- **demo@moa.cl** (contraseña: demo o admin o 123456) 
 - **cliente@mail.com** (contraseña: demo o admin o 123456)
+<<<<<<< HEAD
  
 #
+=======
+
+
+
+>>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 > Los mocks están habilitados por defecto en `frontend/.env`  
 > Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
 
@@ -62,7 +68,7 @@ npm run seed:products --workspace backend
 
 - Dejar en componentes si es un elemento genérico o si aparece en 2+ páginas.
 
----
+-------------------------------------------------------
 
 ## Requerimientos
 
@@ -124,11 +130,28 @@ npm run seed:products --workspace backend
 
 
 
+<<<<<<< HEAD
 
 
 
 
 ## Tarjetas de prueba Webpay (integración)
+=======
+-----------------------------------
+
+## Testing (jest)
+
+Correr tests:
+**Frontend** cd frontend && npm test
+**Backend** cd backend && npm test
+
+
+
+
+
+ 
+### Tarjetas de prueba Webpay (integración)
+>>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 Usa estas tarjetas ficticias mientras trabajas con el ambiente de integración. No requieren fecha de expiración válida: puedes ingresar cualquier combinación razonable.
 
 | Tipo | Tarjeta | CVV | Resultado esperado |

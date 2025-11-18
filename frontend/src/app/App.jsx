@@ -15,11 +15,19 @@ import { CartPage } from '@/modules/cart/pages/CartPage.jsx'
 import { CheckoutPage } from '@/modules/cart/pages/CheckoutPage.jsx'
 import { CartDrawer } from '@/modules/cart/components/CartDrawer.jsx'
 
+<<<<<<< HEAD
+import RegisterPage from '../modules/auth/pages/RegisterPage.jsx'
+import LoginPage from '../modules/auth/pages/LoginPage.jsx'
+import ForgotPasswordPage from '../modules/auth/pages/ForgotPasswordPage.jsx'
+import ResetPasswordPage from '../modules/auth/pages/ResetPasswordPage.jsx'
+import DebugLoginPage from '../modules/auth/pages/DebugLoginPage.jsx'
+=======
 import RegisterPage from '@/modules/auth/pages/RegisterPage.jsx'
 import LoginPage from '@/modules/auth/pages/LoginPage.jsx'
 import DebugLoginPage from '@/modules/auth/pages/DebugLoginPage.jsx'
 import ForgotPasswordPage from '@/modules/auth/pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from '@/modules/auth/pages/ResetPasswordPage.jsx'
+>>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
 
 import { ProfilePage } from '@/modules/profile/pages/ProfilePage.jsx'
 import { WishlistPage } from '@/modules/profile/pages/WishlistPage.jsx'
@@ -66,6 +74,7 @@ export const App = () => {
             <ScrollToTop />
             <main className='main w-full'>
           <Routes>
+<<<<<<< HEAD
             <Route path='/' element={<HomePage />} />
             <Route path={home.landing} element={<HomePage />} />
             <Route path='/cart' element={<CartPage />} />
@@ -87,6 +96,29 @@ export const App = () => {
             <Route path={support.faq} element={<FAQPage />} />
             <Route path={support.returns} element={<ReturnsAndExchangesPage />} />
             <Route path='*' element={<NotFoundPage />} />
+=======
+          <Route path='/' element={<HomePage />} />
+          <Route path={home.landing} element={<HomePage />} />
+          <Route path='/cart' element={<CartPage />} />
+          <Route path='/checkout' element={<CheckoutPage />} />
+          <Route path={products.categories} element={<CategoriesPage />} />
+          <Route path={products.products} element={<ProductsPage />} />
+          <Route path={products.productDetail(':id')} element={<ProductDetailPage />} />
+          <Route path={auth.login} element={<LoginPage />} />
+          <Route path="/debug-login" element={<DebugLoginPage />} />
+          <Route path={auth.register} element={<RegisterPage />} />
+          <Route path={auth.forgot} element={<ForgotPasswordPage />} />
+          <Route path={auth.reset} element={<ResetPasswordPage />} />
+          <Route path="/debug-login" element={<DebugLoginPage />} />
+          <Route path={auth.profile} element={<ProfilePage />} />
+          <Route path='/wishlist' element={<WishlistPage />} />         
+          <Route path={support.contact} element={<ContactPage />} /> 
+          <Route path={support.privacy} element={<PrivacyPage />} /> 
+          <Route path={support.terms} element={<TermsPage />} /> 
+          <Route path={support.faq} element={<FAQPage />} /> 
+          <Route path={support.returns} element={<ReturnsAndExchangesPage />} /> 
+          <Route path='*' element={<NotFoundPage />} />
+>>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 
             <Route element={<AdminRoute />}>
               <Route

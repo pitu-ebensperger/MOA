@@ -3,6 +3,7 @@ import {
   addItemToCart,
   removeItemFromCart,
   clearCart,
+  updateCartItemQuantity,
 } from "../models/cartModel.js";
 
 export const getCart = async (req, res) => {
@@ -57,6 +58,38 @@ export const removeFromCart = async (req, res) => {
   } catch (error) {
     console.error("Error en removeFromCart:", error);
     return res.status(500).json({ error: "Error al eliminar producto" });
+  }
+};
+
+export const updateCartItem = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { producto_id, cantidad } = req.body;
+
+    if (!producto_id) {
+      return res.status(400).json({ error: "Falta producto_id" });
+    }
+
+    const parsedQuantity = Number(cantidad);
+    if (Number.isNaN(parsedQuantity)) {
+      return res.status(400).json({ error: "Cantidad inválida" });
+    }
+
+    if (parsedQuantity <= 0) {
+      await removeItemFromCart(userId, producto_id);
+      return res.json({ message: "Producto eliminado" });
+    }
+
+    const updated = await updateCartItemQuantity(
+      userId,
+      producto_id,
+      parsedQuantity
+    );
+
+    return res.json({ item: updated });
+  } catch (error) {
+    console.error("Error en updateCartItem:", error);
+    return res.status(500).json({ error: "Error al actualizar cantidad" });
   }
 };
 
