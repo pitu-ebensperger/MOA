@@ -3,6 +3,7 @@ import {
   addItemToCart,
   removeItemFromCart,
   clearCart,
+  updateItemQuantity,
 } from "../models/cartModel.js";
 
 export const getCart = async (req, res) => {
@@ -70,5 +71,25 @@ export const emptyCart = async (req, res) => {
   } catch (error) {
     console.error("Error en emptyCart:", error);
     return res.status(500).json({ error: "Error al vaciar carrito" });
+  }
+};
+
+export const updateQuantity = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { producto_id, cantidad } = req.body;
+
+    if (!producto_id || !cantidad) {
+      return res
+        .status(400)
+        .json({ error: "producto_id y cantidad son requeridos" });
+    }
+
+    const item = await updateItemQuantity(userId, producto_id, cantidad);
+
+    return res.json({ ok: true, item });
+  } catch (err) {
+    console.error("ERROR updateQuantity:", err);
+    return res.status(500).json({ error: "No se pudo actualizar la cantidad" });
   }
 };

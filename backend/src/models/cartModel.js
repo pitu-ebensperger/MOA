@@ -28,15 +28,32 @@ export const getCartItems = async (userId) => {
       ci.precio_unit,
       p.nombre,
       p.slug,
+      p.sku,
       p.precio_cents,
-      p.img_url
+      p.img_url,
+      p.gallery
     FROM carrito_items ci
     JOIN productos p ON p.producto_id = ci.producto_id
     WHERE ci.carrito_id = $1;
   `;
 
   const { rows } = await pool.query(query, [cart.carrito_id]);
-  return { cart_id: cart.carrito_id, items: rows };
+
+  const normalizedItems = rows.map((item) => ({
+    cartItemId: item.carrito_item_id,
+    id: item.producto_id,
+    quantity: item.cantidad,
+    price: item.precio_unit,
+
+    name: item.nombre,
+    slug: item.slug,
+    sku: item.sku,
+    priceCents: item.precio_cents,
+    imgUrl: item.img_url,
+    gallery: item.gallery || [],
+  }));
+
+  return { cart_id: cart.carrito_id, items: normalizedItems };
 };
 
 export const addItemToCart = async (userId, productId, cantidad = 1) => {
@@ -81,4 +98,23 @@ export const clearCart = async (userId) => {
   ]);
 
   return { ok: true };
+};
+
+export const updateItemQuantity = async (userId, productId, cantidad) => {
+  const cart = await getOrCreateCart(userId);
+
+  const query = `
+    UPDATE carrito_items
+    SET cantidad = $3
+    WHERE carrito_id = $1 AND producto_id = $2
+    RETURNING *;
+  `;
+
+  const { rows } = await pool.query(query, [
+    cart.carrito_id,
+    productId,
+    cantidad,
+  ]);
+
+  return rows[0];
 };
