@@ -58,8 +58,8 @@ app.use(orderRoutes);       // Rutas de órdenes (/orders)
 app.use(adminRoutes);       // Rutas de admin (/admin/*)
 app.use(configRoutes);      // Rutas de configuración (/config)
 
-// Manejo de rutas no encontradas
-app.all("*", (req, res, next) => {
+// Manejo de rutas no encontradas - debe estar después de todas las rutas
+app.use((req, res, next) => {
   next(new NotFoundError(`La ruta ${req.originalUrl} no existe`));
 });
 

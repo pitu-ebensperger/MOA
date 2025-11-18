@@ -1,9 +1,6 @@
-import bcrypt from "bcryptjs";
 import pool from "../config.js";
 import { CUSTOMERS } from "./customersData.js";
-
-const DEFAULT_CUSTOMER_PASSWORD = process.env.DEFAULT_USER_PASSWORD || "ClienteMOA123!";
-const passwordHash = bcrypt.hashSync(DEFAULT_CUSTOMER_PASSWORD, 10);
+import { CUSTOMER_PASSWORD_HASH } from "./passwordUtils.js";
 
 async function seedCustomers() {
   try {
@@ -27,7 +24,7 @@ async function seedCustomers() {
         customer.nombre,
         customer.email,
         customer.telefono,
-        passwordHash,
+        CUSTOMER_PASSWORD_HASH,
         "cliente",
         "CLIENTE",
         customer.creadoEn,

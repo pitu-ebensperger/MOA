@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createStrictContext } from '@/context/createStrictContext'
 import { useAuth } from '@/context/auth-context'
 import {
@@ -9,14 +9,15 @@ import {
   deletePaymentMethod,
 } from '@/services/payment.api';
 
-const PaymentContext = createStrictContext('PaymentContext');
+const [PaymentContext, usePaymentMethodsStrict] = createStrictContext('Payment', {
+  displayName: 'PaymentContext',
+  errorMessage: 'usePaymentMethods debe usarse dentro de PaymentProvider',
+});
 
 /**
  * Hook para usar el contexto de métodos de pago
  */
-export const usePaymentMethods = () => {
-  return useContext(PaymentContext);
-};
+export const usePaymentMethods = usePaymentMethodsStrict;
 
 export const PaymentProvider = ({ children }) => {
   const { user } = useAuth();

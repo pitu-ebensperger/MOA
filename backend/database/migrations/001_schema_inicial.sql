@@ -1,19 +1,11 @@
--- =====================================================
--- MIGRACIÓN INICIAL - SCHEMA COMPLETO MOA
--- =====================================================
--- Versión: 001
--- Fecha: 2025-11-17
--- Descripción: Schema inicial completo para el sistema MOA
--- =====================================================
+--SCHEMA INICIAL---------------------------------------------
 
 -- Extensiones necesarias
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; --esto te instala una extension (si no la tienes) que genera strings largos unicos pa usar como id
 
--- =====================================================
 -- 1. TABLAS PRINCIPALES
--- =====================================================
 
--- Tabla de usuarios
+-- Usuarios
 CREATE TABLE IF NOT EXISTS usuarios (
     usuario_id BIGSERIAL PRIMARY KEY,
     public_id TEXT UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
@@ -26,7 +18,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
--- Tabla de categorías
+-- Categorias
 CREATE TABLE IF NOT EXISTS categorias (
     categoria_id SMALLSERIAL PRIMARY KEY,
     nombre TEXT NOT NULL,
@@ -35,7 +27,7 @@ CREATE TABLE IF NOT EXISTS categorias (
     cover_image TEXT
 );
 
--- Tabla de productos
+-- Productos
 CREATE TABLE IF NOT EXISTS productos (
     producto_id BIGSERIAL PRIMARY KEY,
     public_id TEXT UNIQUE NOT NULL DEFAULT uuid_generate_v4(),
@@ -62,10 +54,7 @@ CREATE TABLE IF NOT EXISTS productos (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- =====================================================
--- 2. CONFIGURACIÓN DE TIENDA
--- =====================================================
-
+-- 2. CONFIGURACIÓN ADMIN TIENDA -------------------------------------
 CREATE TABLE IF NOT EXISTS configuracion_tienda (
     id SERIAL PRIMARY KEY,
     -- Información de la tienda
@@ -89,11 +78,9 @@ CREATE TABLE IF NOT EXISTS configuracion_tienda (
     CONSTRAINT uq_single_config CHECK (id = 1) -- Solo permitir un registro
 );
 
--- =====================================================
 -- 3. DIRECCIONES Y MÉTODOS DE PAGO
--- =====================================================
 
--- Tabla de direcciones
+-- Direcciones
 CREATE TABLE IF NOT EXISTS direcciones (
     direccion_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES usuarios(usuario_id) ON DELETE CASCADE,
@@ -113,7 +100,7 @@ CREATE TABLE IF NOT EXISTS direcciones (
     actualizado_en TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Tabla de métodos de pago
+-- Métodos de pago
 CREATE TABLE IF NOT EXISTS metodos_pago (
     metodo_pago_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES usuarios(usuario_id) ON DELETE CASCADE,
@@ -134,11 +121,9 @@ CREATE TABLE IF NOT EXISTS metodos_pago (
     actualizado_en TIMESTAMPTZ DEFAULT NOW()
 );
 
--- =====================================================
--- 4. CARRITO Y WISHLIST
--- =====================================================
+--4. CARRITO Y WISHLIST ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
--- Tabla de carritos
+-- Carritos
 CREATE TABLE IF NOT EXISTS carritos (
     carrito_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT REFERENCES usuarios (usuario_id),
@@ -146,7 +131,7 @@ CREATE TABLE IF NOT EXISTS carritos (
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
--- Tabla de items del carrito
+-- Items Carrito
 CREATE TABLE IF NOT EXISTS carrito_items (
     carrito_id BIGINT REFERENCES carritos (carrito_id),
     producto_id BIGINT REFERENCES productos (producto_id),
@@ -154,7 +139,7 @@ CREATE TABLE IF NOT EXISTS carrito_items (
     PRIMARY KEY (carrito_id, producto_id)
 );
 
--- Tabla de wishlist
+-- Wishlist
 CREATE TABLE IF NOT EXISTS wishlists (
     wishlist_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT REFERENCES usuarios (usuario_id),
@@ -162,7 +147,7 @@ CREATE TABLE IF NOT EXISTS wishlists (
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
--- Tabla de items de wishlist
+-- Items Wishlist
 CREATE TABLE IF NOT EXISTS wishlist_items (
     wishlist_id BIGINT REFERENCES wishlists (wishlist_id),
     producto_id BIGINT REFERENCES productos (producto_id),
@@ -170,11 +155,9 @@ CREATE TABLE IF NOT EXISTS wishlist_items (
     PRIMARY KEY (wishlist_id, producto_id)
 );
 
--- =====================================================
--- 5. ÓRDENES Y VENTAS
--- =====================================================
+-- 5. PEDIDOS Y VENTAS -------------------------------------------------
 
--- Tabla de órdenes
+-- Pedidos
 CREATE TABLE IF NOT EXISTS ordenes (
     orden_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT REFERENCES usuarios (usuario_id),
@@ -184,7 +167,7 @@ CREATE TABLE IF NOT EXISTS ordenes (
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
--- Tabla de items de orden
+-- Items Pedido
 CREATE TABLE IF NOT EXISTS orden_items (
     orden_id BIGINT REFERENCES ordenes (orden_id),
     producto_id BIGINT REFERENCES productos (producto_id),
@@ -193,37 +176,33 @@ CREATE TABLE IF NOT EXISTS orden_items (
     PRIMARY KEY (orden_id, producto_id)
 );
 
--- =====================================================
--- 6. ÍNDICES
--- =====================================================
+-- 6. ÍNDICES -------------------------------------------------
 
--- Índices para usuarios
+-- Ind Usuarios
 CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
 CREATE INDEX IF NOT EXISTS idx_usuarios_public_id ON usuarios(public_id);
 
--- Índices para productos
+-- Ind Usuarios Productos
 CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria_id);
 CREATE INDEX IF NOT EXISTS idx_productos_slug ON productos(slug);
 CREATE INDEX IF NOT EXISTS idx_productos_sku ON productos(sku);
 CREATE INDEX IF NOT EXISTS idx_productos_status ON productos(status);
 
--- Índices para direcciones
+-- Ind Direcciones
 CREATE INDEX IF NOT EXISTS idx_direcciones_usuario ON direcciones(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_direcciones_predeterminada ON direcciones(usuario_id, es_predeterminada);
 
--- Índices para métodos de pago
+-- Ind Métodos de Pago
 CREATE INDEX IF NOT EXISTS idx_metodos_pago_usuario ON metodos_pago(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_metodos_pago_predeterminado ON metodos_pago(usuario_id, es_predeterminado);
 CREATE INDEX IF NOT EXISTS idx_metodos_pago_activo ON metodos_pago(activo);
 
--- Índices para configuración
+-- Ind Configuración
 CREATE INDEX IF NOT EXISTS idx_configuracion_actualizado ON configuracion_tienda(actualizado_en DESC);
 
--- =====================================================
--- 7. TRIGGERS Y FUNCIONES
--- =====================================================
+-- 7. FUNCIONES Y GATILLANTES -------------------------------------------------
 
--- Función para actualizar timestamp
+-- Timestamp Update
 CREATE OR REPLACE FUNCTION actualizar_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -232,30 +211,28 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Trigger para configuración
+-- Trigger Configuración
 DROP TRIGGER IF EXISTS trigger_actualizar_configuracion ON configuracion_tienda;
 CREATE TRIGGER trigger_actualizar_configuracion
     BEFORE UPDATE ON configuracion_tienda
     FOR EACH ROW
     EXECUTE FUNCTION actualizar_timestamp();
 
--- Trigger para direcciones
+-- Trigger Direcciones
 DROP TRIGGER IF EXISTS trigger_actualizar_direcciones ON direcciones;
 CREATE TRIGGER trigger_actualizar_direcciones
     BEFORE UPDATE ON direcciones
     FOR EACH ROW
     EXECUTE FUNCTION actualizar_timestamp();
 
--- Trigger para métodos de pago
+-- Trigger Métodos de Pago
 DROP TRIGGER IF EXISTS trigger_actualizar_metodos_pago ON metodos_pago;
 CREATE TRIGGER trigger_actualizar_metodos_pago
     BEFORE UPDATE ON metodos_pago
     FOR EACH ROW
     EXECUTE FUNCTION actualizar_timestamp();
 
--- =====================================================
--- 8. DATOS INICIALES
--- =====================================================
+-- 8. DATOS INICIALES -------------------------------------------------
 
 -- Insertar usuario admin
 INSERT INTO usuarios (public_id, nombre, email, password_hash, rol, rol_code)
@@ -278,9 +255,7 @@ INSERT INTO configuracion_tienda (
     'https://twitter.com/moastudio'
 ) ON CONFLICT (id) DO NOTHING;
 
--- =====================================================
--- COMENTARIOS Y DOCUMENTACIÓN
--- =====================================================
+-- COMENTARIOS -------------------------------------------------
 
 COMMENT ON TABLE usuarios IS 'Tabla de usuarios del sistema';
 COMMENT ON TABLE categorias IS 'Categorías de productos';

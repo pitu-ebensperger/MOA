@@ -21,7 +21,7 @@
     "seed:carts": "node database/seed/cartSeed.js",
     "seed:orders": "node database/seed/ordersSeed.js",
     "seed:order-items": "node database/seed/orderItemsSeed.js",
-    "seed:all": "npm run seed:categories && npm run seed:products && npm run seed:customers && npm run seed:addresses && npm run seed:payment-methods && npm run seed:wishlists && npm run seed:carts && npm run seed:orders && npm run seed:order-items"
+    "seed:all": "npm run seed:categories && npm run seed:products && npm run seed:customers && npm run seed:payment-methods && npm run seed:wishlists && npm run seed:carts && npm run seed:orders && npm run seed:order-items"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

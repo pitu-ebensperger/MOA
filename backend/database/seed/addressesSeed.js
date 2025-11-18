@@ -1,5 +1,58 @@
 import pool from "../config.js";
 import { ADDRESSES } from "./addressesData.js";
+import { CUSTOMERS } from "./customersData.js";
+import { CUSTOMER_PASSWORD_HASH } from "./passwordUtils.js";
+
+const customerLookup = new Map(
+  CUSTOMERS.map((customer) => [customer.publicId, customer])
+);
+
+async function ensureCustomerUsuario(publicId) {
+  const customer = customerLookup.get(publicId);
+  if (!customer) return null;
+
+  try {
+    const insertResult = await pool.query(
+      `
+      INSERT INTO usuarios (
+        public_id, nombre, email, telefono,
+        password_hash, rol, rol_code, creado_en
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, COALESCE($8, now())
+      )
+      ON CONFLICT (public_id) DO NOTHING
+      RETURNING usuario_id
+    `,
+      [
+        customer.publicId,
+        customer.nombre,
+        customer.email,
+        customer.telefono,
+        CUSTOMER_PASSWORD_HASH,
+        "cliente",
+        "CLIENTE",
+        customer.creadoEn,
+      ]
+    );
+
+    if (insertResult.rowCount) {
+      return insertResult.rows[0].usuario_id;
+    }
+
+    const existing = await pool.query(
+      "SELECT usuario_id FROM usuarios WHERE public_id = $1",
+      [publicId]
+    );
+
+    return existing.rows[0]?.usuario_id ?? null;
+  } catch (error) {
+    console.error(
+      `Error creando el usuario '${publicId}' antes de insertar direcciones:`,
+      error.message
+    );
+    return null;
+  }
+}
 
 async function seedDirecciones() {
   try {
@@ -9,12 +62,14 @@ async function seedDirecciones() {
         [address.userId]
       );
 
-      if (!userRes.rowCount) {
+      let usuarioId = userRes.rowCount
+        ? userRes.rows[0].usuario_id
+        : await ensureCustomerUsuario(address.userId);
+
+      if (!usuarioId) {
         console.warn(`Usuario '${address.userId}' no encontrado para la dirección '${address.externalId}'`);
         continue;
       }
-
-      const usuarioId = userRes.rows[0].usuario_id;
       const existing = await pool.query(
         `
         SELECT direccion_id FROM direcciones

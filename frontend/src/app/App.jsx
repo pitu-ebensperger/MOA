@@ -4,6 +4,7 @@ import { Navbar } from '@/components/layout/Navbar.jsx'
 import { Footer } from '@/components/layout/Footer.jsx'
 import { API_PATHS } from '@/config/api-paths.js'
 import { AddressProvider } from '@/context/AddressContext.jsx'
+import { PaymentProvider } from '@/context/PaymentContext.jsx'
 import ErrorBoundary from '@/components/error/ErrorBoundary.jsx'
 
 import { HomePage } from '@/modules/home/pages/HomePage.jsx'
@@ -57,12 +58,13 @@ export const App = () => {
 
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
-      <AddressProvider>
-      <div className="min-h-screen w-full overflow-x-hidden bg-(--color-light)">
-        {!isAdminRoute && <Navbar />}
-        {!isAdminRoute && <CartDrawer />}
-        <ScrollToTop />
-        <main className='main w-full'>
+      <PaymentProvider>
+        <AddressProvider>
+          <div className="min-h-screen w-full overflow-x-hidden bg-(--color-light)">
+            {!isAdminRoute && <Navbar />}
+            {!isAdminRoute && <CartDrawer />}
+            <ScrollToTop />
+            <main className='main w-full'>
           <Routes>
             <Route path='/' element={<HomePage />} />
             <Route path={home.landing} element={<HomePage />} />
@@ -147,9 +149,10 @@ export const App = () => {
             <Route path="/error/504" element={<ServerErrorPage statusCode={504} />} />
           </Routes>
         </main>
-        {!isAdminRoute && <Footer />}
-      </div>
-    </AddressProvider>
+            {!isAdminRoute && <Footer />}
+          </div>
+        </AddressProvider>
+      </PaymentProvider>
     </ErrorBoundary>
   )
 }

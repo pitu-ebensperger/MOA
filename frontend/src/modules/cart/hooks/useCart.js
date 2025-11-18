@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useAuth } from "@/context/auth-context.js"
+import { cartApi } from "@/services/cart.api.js"
 
 const CART_STORAGE_KEY = "cart";
 
@@ -15,10 +16,7 @@ export const useCart = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:3000/cart", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    cartApi.get()
       .then((data) => {
         if (Array.isArray(data.items)) {
           const normalized = data.items.map((item) => ({
@@ -37,24 +35,7 @@ export const useCart = () => {
     if (!token) return alert("Debes iniciar sesión para usar el carrito");
 
     try {
-      const res = await fetch("http://localhost:3000/cart/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          producto_id: product.id,
-          cantidad: 1,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        console.error("ERROR al agregar al carrito:", data);
-        return;
-      }
+      await cartApi.add(product.id, 1);
 
       setCartItems((prevCart) => {
         const existing = prevCart.find((item) => item.id === product.id);
@@ -74,20 +55,7 @@ export const useCart = () => {
 
   const removeFromCart = async (productId) => {
     try {
-      const res = await fetch(
-        `http://localhost:3000/cart/remove/${productId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!res.ok) {
-        console.error("ERROR eliminando");
-        return;
-      }
+      await cartApi.remove(productId);
 
       setCartItems((prevCart) =>
         prevCart.filter((item) => item.id !== productId)
@@ -101,22 +69,7 @@ export const useCart = () => {
     if (quantity <= 0) return removeFromCart(productId);
 
     try {
-      const res = await fetch("http://localhost:3000/cart/update", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          producto_id: productId,
-          cantidad: quantity,
-        }),
-      });
-
-      if (!res.ok) {
-        console.error("ERROR actualizando cantidad");
-        return;
-      }
+      await cartApi.updateQuantity(productId, quantity);
 
       setCartItems((prevCart) =>
         prevCart.map((item) =>
@@ -130,15 +83,7 @@ export const useCart = () => {
 
   const clearCart = async () => {
     try {
-      const res = await fetch("http://localhost:3000/cart/clear", {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) {
-        console.error("Error limpiando carrito");
-        return;
-      }
+      await cartApi.clear();
 
       setCartItems([]);
     } catch (err) {

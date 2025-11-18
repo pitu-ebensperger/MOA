@@ -9,7 +9,9 @@ const pool = new pg.Pool({
     password: DB_PASSWORD,
     database: DB_DATABASE,
     port: DB_PORT,
-    allowExitOnIdle: true
+    max: 20, // Máximo de conexiones en el pool
+    idleTimeoutMillis: 30000, // 30 segundos antes de cerrar conexión inactiva
+    connectionTimeoutMillis: 2000, // 2 segundos para establecer conexión
 })
 
 // Test de conexión

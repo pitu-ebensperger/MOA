@@ -3,6 +3,16 @@ import { PAYMENT_METHODS } from "./paymentMethodsData.js";
 
 async function seedPaymentMethods() {
   try {
+    const paymentStatusMap = {
+      pending: 'pendiente',
+      processing: 'procesando',
+      paid: 'pagado',
+      succeeded: 'pagado',
+      completed: 'pagado',
+      failed: 'fallido',
+      canceled: 'cancelado',
+      cancelled: 'cancelado',
+    };
     const defaultFlag = new Set();
 
     for (const method of PAYMENT_METHODS) {
@@ -24,8 +34,8 @@ async function seedPaymentMethods() {
         ? method.authorizationCode.slice(-4)
         : "0000";
 
-      const statusKey = method.status?.toLowerCase() ?? "pending";
-      const estadoPago = paymentStatusMap[statusKey] ?? "pendiente";
+  const statusKey = method.status?.toLowerCase() ?? "pending";
+  const estadoPago = paymentStatusMap[statusKey] ?? "pendiente";
 
       const metadata = {
         cuotas: method.cuotas,

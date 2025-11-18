@@ -13,7 +13,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-6 lg:py-8">
-      {/* Título de la página */}
+      {/* Título de la página 
       <header className="mb-6 lg:mb-8">
         <h1 className="text-3xl font-bold text-primary1 mb-2">
           Configuración
@@ -22,7 +22,7 @@ export default function AdminSettingsPage() {
           Ajusta las preferencias generales del panel de administración.
         </p>
       </header>
-
+*/}
       {/* Tabs con underline */}
       <div className="border-b border-neutral-200 mb-6">
         <nav

@@ -25,6 +25,11 @@ Ejecutar: `npm run -w backend dev`
 - npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
   -npm run seed:products --workspace backend (correr para agregar productos iniciales)
 
+
+npm run seed:users --workspace backend
+npm run seed:categories --workspace backend
+npm run seed:products --workspace backend
+
 ### Stripe (pasarela de pago)
 
 - Define las variables de entorno `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` para habilitar la pasarela de Stripe en modo sandbox o producción.

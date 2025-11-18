@@ -8,13 +8,13 @@
 ## ✅ COMPLETADOS RECIENTEMENTE
 
 - ~~Reemplazar todos los imports del frontend por el alias `@/`~~ ✅ 
-- 
-- Añadir validaciones PropTypes para los componentes clave de perfil y checkout ✅ COMPLETADO (hoy)
-- 
-- Checkout actualizado (hoy)
-  - `CheckoutPage.jsx` reemplaza el badge `bg-[var(--color-primary3)]` por `bg-(--color-primary3)` y usa el selector de `paymentMethods` del contexto (`formatPaymentMethod`/`selectedPaymentId`) en lugar de estados y `paymentOptions` no usados.
 
-- Renovamos la navegación admin y wishlist (hoy)
+- ~~Añadir validaciones PropTypes para los componentes clave de perfil y checkout ✅ COMPLETADO (hoy)~~
+
+- ~~Checkout actualizado (hoy)~~
+  - ~~ `CheckoutPage.jsx` reemplaza el badge `bg-[var(--color-primary3)]` por `bg-(--color-primary3)` y usa el selector de `paymentMethods` del contexto (`formatPaymentMethod`/`selectedPaymentId`) en lugar de estados y `paymentOptions` no usados.~~
+
+- ~~Renovamos la navegación admin y wishlist (hoy)~~
   - `AdminSidebar.jsx` y `Navbar.jsx` usan rutas reales (`API_PATHS`) y el menú de perfil lleva a la pestaña correcta `/perfil?tab=orders`.
   - Los botones “Agregar al carro” de `Profile -> Card.jsx` invocan `addToCart`/login en lugar de ser decorativos, y `ProfilePage.jsx` puede inicializar la pestaña correcta según `location.state.initialTab`.
   - `OrdersPage.jsx` y `ordersApi.updateStatus` permiten cambiar estados de pedido contra mocks o API real y refrescan la vista; `CustomersPage.jsx` gestiona creación, edición, cambios de estado y desactivación directamente desde el panel.
@@ -34,9 +34,10 @@
   - **Crea:** Tablas `direcciones` y `metodos_pago` con triggers
   - **Documentado en:** `docs/FLUJO_COMPRA_COMPLETO.md`
   
-- Incluir y combinar DDL de direcciones/pagos en esquema consolidado (DDL.sql principal)
-  - Evitar tener dos archivos SQL separados
-  - Facilitar setup inicial de base de datos
+- ~~Incluir y combinar DDL de direcciones/pagos en esquema consolidado (DDL.sql principal)~~ ✅
+  - Se agregaron las tablas y triggers a `backend/database/schema/DDL.sql` (direcciones y metodos_pago)
+  - Se creó migración `002_addresses_payments.sql` y `003_sync_addresses_payments_constraints.sql` para entornos ya existentes
+  - Ahora el setup inicial y las migraciones crean todo lo necesario de una sola vez
 
 ### Testing
 - **[BLOQUEANTE]** Probar flujo de compra end-to-end:
@@ -93,8 +94,13 @@
 - Define a real `paymentMethod` state in `CheckoutPage` (or reuse `selectedPaymentId`) before rendering the `<Select>` at line 295, and align it with `paymentOptions` so the form no longer references an undefined variable.
 
 ### Manejo de errores y páginas
-- Auditar y documentar el middleware `errorHandler` en `backend/src/utils/error.utils.js` y su registro en `backend/index.js` (orden de routers `home`, `wishlist`, `cart`, etc.) para asegurar respuestas consistentes (revisar `AppError`, `ValidationError`, errores de PG/JWT) y añadir pruebas en `backend/__tests__/routes.test.js` que disparen 4xx/5xx sobre esas rutas.
-- Crear o actualizar la experiencia de usuario cuando ocurren errores críticos (`ServerErrorPage.jsx`, `ErrorBoundary` o fallback en `App.jsx`) manteniendo `NotFoundPage.jsx` como la ruta `*` actual y documentar qué errores usan cada vista.
+- Auditar y documentar el middleware `errorHandler` en `backend/src/utils/error.utils.js` y su registro al final de `backend/index.js`, incluyendo el orden de routers (`home`, `auth`, `wishlist`, `cart`, etc.) para asegurarse de que `AppError`, `ValidationError` y los manejadores de errores de PostgreSQL/JWT (más el caso `entity.parse.failed`) devuelven siempre respuestas consistentes.
+  - El helper `buildErrorResponse` centraliza `success: false`, `message` y `timestamp`, `handlePgError` y `handleJwtError` traducen códigos 23505/23503/22P02 y errores de tokens, y `errorHandler` cubre rutas desconocidas y errores no operacionales con 500.
+- Añadir/actualizar pruebas en `backend/__tests__/routes.test.js` para garantizar respuestas 4xx/5xx sobre las rutas principales y capturar `AppError`/`ValidationError`/PG/JWT.
+  - Los tests ejercen login, carrito, wishlist, categorías, productos, admin y pagos sin token y con payload inválidos, además de rutas generadoras de 5xx, JSON malformado, `entity.parse.failed` y errores de JWT.
+- Crear o actualizar la experiencia de usuario cuando ocurren errores críticos en el frontend (`ServerErrorPage.jsx`, `ErrorBoundary` o fallback en `App.jsx`) manteniendo `NotFoundPage.jsx` como la ruta `*` actual, y documentar qué errores aterrizan en cada vista.
+  - `ErrorBoundary` rodea toda `App` y ofrece fallback con recarga, reporte y detalles técnicos (solo en DEV).
+  - Las rutas `/error/500`, `/error/502`, `/error/503`, `/error/504` usan `ServerErrorPage` para mostrar títulos/recursos distintos y manejan fallback offline/`errorCode=0`; `App.jsx` mantiene `NotFoundPage` en la ruta `*` para rutas no declaradas.
 
 ---
 
@@ -271,6 +277,7 @@ Antes de llevar a producción, verificar:
 - [ ] Emails de confirmación configurados
 - [ ] Ajustar el tiempo de expiración del JWT en backend y documentarlo antes del deploy (IMPORTANTE)
 - [ ] Variables de entorno configuradas (DB, API keys, etc.)
+- [ ] Cambiar el entorno de ejecución de modo desarrollo a producción y validar la configuración resultante
 - [ ] Build de producción exitoso (`npm run build`)
 - [ ] HTTPS configurado
 - [ ] Backup de base de datos configurado

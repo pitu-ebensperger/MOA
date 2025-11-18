@@ -543,10 +543,9 @@ export const productsController = {
   }
 };
 
-// Mantener compatibilidad con las exportaciones existentes
-export const { getProducts, getProduct: getProductById } = productsController;
-
-// Funciones individuales para compatibilidad
+// Exportaciones individuales para compatibilidad con las rutas
+export const getProducts = productsController.getProducts;
+export const getProductById = productsController.getProduct;
 export const getProductBySlug = productsController.getProductBySlug;
 export const createProduct = productsController.createProduct;
 export const updateProduct = productsController.updateProduct;

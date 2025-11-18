@@ -213,6 +213,15 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
   return payload;
 }
 
+// Cliente auxiliar para rutas públicas/privadas
+const createSubClient = (authOverride) => ({
+  get: (path, opts = {}) => request(path, { ...opts, method: "GET", auth: authOverride }),
+  post: (path, data, opts = {}) => request(path, { ...opts, method: "POST", data, auth: authOverride }),
+  put: (path, data, opts = {}) => request(path, { ...opts, method: "PUT", data, auth: authOverride }),
+  patch: (path, data, opts = {}) => request(path, { ...opts, method: "PATCH", data, auth: authOverride }),
+  delete: (path, opts = {}) => request(path, { ...opts, method: "DELETE", auth: authOverride }),
+});
+
 // Cliente API simple con auto-detección de autenticación
 export const apiClient = {
   get:    (path, opts = {})       => request(path, { ...opts, method: "GET" }),
@@ -220,4 +229,6 @@ export const apiClient = {
   put:    (path, data, opts = {}) => request(path, { ...opts, method: "PUT", data }),
   patch:  (path, data, opts = {}) => request(path, { ...opts, method: "PATCH", data }),
   delete: (path, opts = {})       => request(path, { ...opts, method: "DELETE" }),
+  public: createSubClient(false),
+  private: createSubClient(true),
 };

@@ -5,9 +5,7 @@ describe("TEST API – MOA", () => {
   let authToken = null;
   let testProductId = null;
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE RUTAS BÁSICAS */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE RUTAS BÁSICAS ------------------------------------------------------------- */
   
   test("GET / → debe responder 200", async () => {
     const res = await request(app).get("/");
@@ -15,9 +13,7 @@ describe("TEST API – MOA", () => {
     expect(res.body).toHaveProperty('message', 'API funcionando');
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE AUTENTICACIÓN */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE AUTENTICACIÓN  ------------------------------------------------------------- */
 
   test("POST /login → credenciales inválidas debe devolver 401", async () => {
     const res = await request(app)
@@ -37,9 +33,7 @@ describe("TEST API – MOA", () => {
     expect([401, 403]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE CATEGORÍAS */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE CATEGORÍAS ------------------------------------------------------------- */
 
   test("GET /categorias → debe responder 200", async () => {
     const res = await request(app).get("/categorias");
@@ -55,9 +49,7 @@ describe("TEST API – MOA", () => {
     expect(res.status).toBe(404);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE PRODUCTOS */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE PRODUCTOS ------------------------------------------------------------- */
 
   test("GET /productos → debe responder 200", async () => {
     const res = await request(app).get("/productos");
@@ -84,9 +76,7 @@ describe("TEST API – MOA", () => {
     expect([404, 500]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE RUTAS ADMIN (SIN TOKEN) */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE RUTAS ADMIN (SIN TOKEN)  ------------------------------------------------------------- */
 
   test("POST /admin/categorias → sin token debe devolver 401", async () => {
     const res = await request(app)
@@ -119,9 +109,7 @@ describe("TEST API – MOA", () => {
     expect([401, 403]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE VALIDACIÓN */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE VALIDACIÓN ------------------------------------------------------------- */
 
   test("POST /login → sin email debe devolver 400", async () => {
     const res = await request(app)
@@ -147,9 +135,7 @@ describe("TEST API – MOA", () => {
     expect([400, 401]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE CARRITO (SIN AUTENTICACIÓN) */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE CARRITO (SIN AUTENTICACIÓN)  ------------------------------------------------------------- */
 
   test("GET /cart → sin token debe devolver 401", async () => {
     const res = await request(app).get("/cart");
@@ -164,9 +150,7 @@ describe("TEST API – MOA", () => {
     expect([401, 403, 404]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE WISHLIST (SIN AUTENTICACIÓN) */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE WISHLIST (SIN AUTENTICACIÓN)  ------------------------------------------------------------- */
 
   test("GET /wishlist → sin token debe devolver 401", async () => {
     const res = await request(app).get("/wishlist");
@@ -181,9 +165,7 @@ describe("TEST API – MOA", () => {
     expect([401, 403, 404]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE DIRECCIONES (SIN AUTENTICACIÓN) */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE DIRECCIONES (SIN AUTENTICACIÓN)  ------------------------------------------------------------- */
 
   test("GET /api/addresses → sin token debe devolver 401", async () => {
     const res = await request(app).get("/api/addresses");
@@ -198,9 +180,7 @@ describe("TEST API – MOA", () => {
     expect([401, 403, 404]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE ÓRDENES (SIN AUTENTICACIÓN) */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE ÓRDENES (SIN AUTENTICACIÓN)  ------------------------------------------------------------- */
 
   test("GET /orders → sin token debe devolver 401", async () => {
     const res = await request(app).get("/orders");
@@ -215,9 +195,7 @@ describe("TEST API – MOA", () => {
     expect([401, 403, 404]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE FILTROS Y PAGINACIÓN */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE FILTROS Y PAGINACIÓN ------------------------------------------------------------- */
 
   test("GET /productos?page=1 → paginación debe funcionar", async () => {
     const res = await request(app).get("/productos?page=1");
@@ -234,9 +212,7 @@ describe("TEST API – MOA", () => {
     expect([200, 404, 500]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE MANEJO DE ERRORES */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE MANEJO DE ERRORES ------------------------------------------------------------- */
 
   test("GET /ruta-inexistente → debe devolver 404", async () => {
     const res = await request(app).get("/ruta-inexistente");
@@ -333,11 +309,11 @@ describe("TEST API – MOA", () => {
     
     // Intentar crear el mismo usuario dos veces
     const res1 = await request(app)
-      .post("/register")
+      .post("/registro")
       .send(duplicateUser);
 
     const res2 = await request(app)
-      .post("/register")
+      .post("/registro")
       .send(duplicateUser);
     
     // Al menos el segundo debería devolver conflicto
@@ -379,7 +355,7 @@ describe("TEST API – MOA", () => {
     }
   });
 
-  /* TESTS DE RATE LIMITING (si está implementado) */
+  /* TESTS DE RATE LIMITING */
   
   test("Múltiples requests → verificar que no hay memory leaks en error handler", async () => {
     const promises = [];
@@ -446,18 +422,14 @@ describe("TEST API – MOA", () => {
     }
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE CONFIGURACIÓN */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE CONFIGURACIÓN ------------------------------------------------------------- */
 
   test("GET /config → configuración debe estar disponible", async () => {
     const res = await request(app).get("/config");
     expect([200, 404, 500]).toContain(res.status);
   });
 
-  /* ------------------------------------------------------------- */
-  /* TESTS DE RUTAS DE PAGO (SIN AUTENTICACIÓN) */
-  /* ------------------------------------------------------------- */
+  /* TESTS DE RUTAS DE PAGO (SIN AUTENTICACIÓN) ------------------------------------------------------------- */
 
   test("POST /payment → sin token debe devolver 401", async () => {
     const res = await request(app)
@@ -466,5 +438,7 @@ describe("TEST API – MOA", () => {
     
     expect([401, 403, 404]).toContain(res.status);
   });
+
+  
 
 });

@@ -1,6 +1,7 @@
 import { usePersistentState } from "../../../hooks/usePersistentState.js";
 import { useAuth } from "../../../context/auth-context.js";
 import { useEffect } from "react";
+import { wishlistApi } from "@/services/wishlist.api.js";
 
 const WISHLIST_STORAGE_KEY = "wishlist";
 
@@ -14,10 +15,7 @@ export const useWishlist = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:3000/wishlist", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    wishlistApi.get()
       .then((data) => {
         if (Array.isArray(data.items)) {
           setWishlist(data.items);
@@ -30,19 +28,7 @@ export const useWishlist = () => {
     if (!token) return alert("Debes iniciar sesión para usar favoritos ❤️");
 
     try {
-      const res = await fetch("http://localhost:3000/wishlist/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ productId: product.id }),
-      });
-
-      if (!res.ok) {
-        console.error("Error al agregar a wishlist", await res.text());
-        return;
-      }
+      await wishlistApi.add(product.id);
 
       setWishlist((prev) => [...prev, { producto_id: product.id, ...product }]);
     } catch (error) {
@@ -54,18 +40,7 @@ export const useWishlist = () => {
     if (!token) return alert("Debes iniciar sesión");
 
     try {
-      const res = await fetch(
-        `http://localhost:3000/wishlist/remove/${productId}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (!res.ok) {
-        console.error("Error al eliminar de wishlist");
-        return;
-      }
+      await wishlistApi.remove(productId);
 
       setWishlist((prev) =>
         prev.filter((item) => item.producto_id !== productId)

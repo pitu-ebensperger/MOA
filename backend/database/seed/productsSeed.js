@@ -72,6 +72,26 @@ async function seedProducts() {
           $13, $14, $15, $16, $17, $18,
           $19, $20
         )
+        ON CONFLICT (slug) DO UPDATE SET
+          public_id = EXCLUDED.public_id,
+          categoria_id = EXCLUDED.categoria_id,
+          nombre = EXCLUDED.nombre,
+          sku = EXCLUDED.sku,
+          precio_cents = EXCLUDED.precio_cents,
+          compare_at_price_cents = EXCLUDED.compare_at_price_cents,
+          stock = EXCLUDED.stock,
+          status = EXCLUDED.status,
+          descripcion = EXCLUDED.descripcion,
+          descripcion_corta = EXCLUDED.descripcion_corta,
+          img_url = EXCLUDED.img_url,
+          gallery = EXCLUDED.gallery,
+          badge = EXCLUDED.badge,
+          tags = EXCLUDED.tags,
+          color = EXCLUDED.color,
+          material = EXCLUDED.material,
+          dimensions = EXCLUDED.dimensions,
+          weight = EXCLUDED.weight,
+          specs = EXCLUDED.specs
         RETURNING producto_id;
       `;
 
