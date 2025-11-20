@@ -242,18 +242,6 @@ const getOrdersByDateRange = async (fechaDesde, fechaHasta, options = {}) => {
   return rows;
 };
 
-const updateInternalNotes = async (ordenId, notas) => {
-  const query = `
-    UPDATE ordenes 
-    SET notas_internas = $1
-    WHERE orden_id = $2
-    RETURNING *
-  `;
-
-  const { rows } = await pool.query(query, [notas, ordenId]);
-  return rows[0];
-};
-
 const orderAdminModel = {
   getAllOrders,
   getOrderByIdAdmin,
@@ -261,7 +249,6 @@ const orderAdminModel = {
   addTrackingInfo,
   getOrderStats,
   getOrdersByDateRange,
-  updateInternalNotes,
 };
 
 export default orderAdminModel;

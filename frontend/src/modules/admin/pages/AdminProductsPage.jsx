@@ -159,7 +159,6 @@ export default function ProductsAdminPage() {
     <div className="flex flex-col gap-4">
       <AdminPageHeader
         title="Productos"
-        subtitle="Administra el catálogo y el inventario de la tienda MOA."
         actions={
           <Button
             appearance="solid"

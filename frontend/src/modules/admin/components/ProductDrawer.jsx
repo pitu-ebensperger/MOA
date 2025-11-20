@@ -7,7 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/
 import { Button } from "@/components/ui/Button.jsx";
 import { Input, Textarea } from "@/components/ui/Input.jsx";
 import { Select } from "@/components/ui/Select.jsx";
+import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";
 import { ProductShape, CategoryShape } from "@/utils/propTypes.js";
+import { Save, Trash2, X } from "lucide-react";
 
 const STATUS_VALUES = ["activo", "sin_stock", "borrador"];
 
@@ -60,6 +62,14 @@ const toNumOrNull = (value) => {
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 };
+
+const DIMENSION_UNIT_OPTIONS = [
+  { value: "cm", label: "Centímetros (cm)" },
+  { value: "mm", label: "Milímetros (mm)" },
+  { value: "m", label: "Metros (m)" },
+  { value: "in", label: "Pulgadas (in)" },
+  { value: "ft", label: "Pies (ft)" },
+];
 
 const getDefaultValues = () => ({ ...DEFAULT_FORM_VALUES });
 
@@ -152,9 +162,6 @@ export function ProductDrawer({
             <h2 className="text-lg font-semibold text-(--text-strong)">
               {initial ? "Editar producto" : "Nuevo producto"}
             </h2>
-            <p className="text-xs text-(--text-secondary1)">
-              Completa la información para mantener el catálogo actualizado.
-            </p>
           </DialogHeader>
 
           <div className="flex-1 space-y-4 overflow-y-auto pr-1 hide-scrollbar">
@@ -297,48 +304,68 @@ export function ProductDrawer({
                   placeholder="cm"
                   {...register("dimLength")}
                 />
-                <Input
+                <Select
                   label="Unidad"
                   size="sm"
                   {...register("dimUnit")}
-                  placeholder="cm"
+                  options={DIMENSION_UNIT_OPTIONS}
+                  placeholder="Selecciona unidad"
+                  fullWidth
                 />
               </div>
             </div>
           </div>
 
-          <DialogFooter className="flex flex-col gap-3 pt-4">
-            {initial && (
-              <Button
-                type="button"
-                appearance="ghost"
-                intent="error"
-                size="sm"
-                onClick={() => onDelete?.(initial)}
+          <DialogFooter className="flex items-center justify-between gap-3 pt-4">
+            <div className="flex items-center gap-2">
+              {initial && (
+                <TooltipNeutral label="Eliminar producto" position="top">
+                  <Button
+                    type="button"
+                    appearance="ghost"
+                    intent="error"
+                    size="sm"
+                    leadingIcon={<Trash2 className="h-4 w-4" />}
+                    onClick={() => onDelete?.(initial)}
+                  >
+                    Eliminar producto
+                  </Button>
+                </TooltipNeutral>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <TooltipNeutral label="Cerrar sin guardar" position="top">
+                <Button
+                  type="button"
+                  appearance="soft"
+                  intent="neutral"
+                  size="sm"
+                  leadingIcon={<X className="h-4 w-4" />}
+                  onClick={onClose}
+                  className="text-(--text-strong)"
+                >
+                  Cancelar
+                </Button>
+              </TooltipNeutral>
+              <TooltipNeutral
+                label={initial ? "Guardar cambios" : "Guardar producto"}
+                position="top"
               >
-                Eliminar producto
-              </Button>
-            )}
-            <div className="flex flex-wrap justify-end gap-2">
-              <Button
-                type="button"
-                appearance="ghost"
-                intent="neutral"
-                size="sm"
-                onClick={onClose}
-                className="text-(--text-strong)"
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                appearance="solid"
-                intent="primary"
-                size="sm"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Guardando..." : initial ? "Guardar cambios" : "Guardar producto"}
-              </Button>
+                <Button
+                  type="submit"
+                  appearance="solid"
+                  intent="primary"
+                  size="sm"
+                  leadingIcon={<Save className="h-4 w-4" />}
+                  disabled={isSubmitting}
+                  style={{
+                    "--btn-gap": "0.35rem",
+                    "--btn-icon-gap-left": "0.35rem",
+                  }}
+                >
+                  {isSubmitting ? "Guardando..." : initial ? "Guardar cambios" : "Guardar producto"}
+                </Button>
+              </TooltipNeutral>
             </div>
           </DialogFooter>
         </form>

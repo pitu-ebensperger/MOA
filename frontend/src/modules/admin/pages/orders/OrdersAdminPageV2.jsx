@@ -89,13 +89,17 @@ const getStatusColor = (estado, tipo) => {
 function StatsCard({ title, value, subtitle, icon, color = 'primary' }) {
   const Icon = icon;
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-sm font-medium text-neutral-600">{title}</p>
+    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">{title}</p>
         {Icon && <Icon className={`h-5 w-5 text-${color}`} />}
       </div>
-      <p className="text-2xl font-bold text-neutral-900">{value}</p>
-      {subtitle && <p className="text-xs text-neutral-500 mt-1">{subtitle}</p>}
+      <p className="mt-2 text-2xl font-semibold text-neutral-900">{value}</p>
+      {subtitle && (
+        <p className="text-[10px] uppercase tracking-wide text-neutral-400 mt-1">
+          {subtitle}
+        </p>
+      )}
     </div>
   );
 }
@@ -421,7 +425,6 @@ function OrderDetailsModal({ order, onClose }) {
 function EditStatusModal({ order, onClose, onSave }) {
   const [estado_pago, setEstadoPago] = useState(order?.estado_pago || '');
   const [estado_envio, setEstadoEnvio] = useState(order?.estado_envio || '');
-  const [notas_internas, setNotasInternas] = useState(order?.notas_internas || '');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async () => {
@@ -430,7 +433,6 @@ function EditStatusModal({ order, onClose, onSave }) {
       await onSave(order.orden_id, {
         estado_pago,
         estado_envio,
-        notas_internas,
       });
       onClose();
     } catch (error) {
@@ -495,17 +497,6 @@ function EditStatusModal({ order, onClose, onSave }) {
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-neutral-700">
-              Notas Internas
-            </label>
-            <textarea
-              value={notas_internas}
-              onChange={(e) => setNotasInternas(e.target.value)}
-              className="w-full min-h-[100px] p-3 border border-neutral-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Notas internas para el equipo..."
-            />
-          </div>
         </div>
 
         <div className="border-t border-neutral-200 p-6 flex gap-3 justify-end">
@@ -625,7 +616,6 @@ export default function OrdersAdminPage() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Gestión de Pedidos"
-        subtitle="Administra y realiza seguimiento de todas las órdenes de la tienda."
         actions={
           <Button
             appearance="outline"

@@ -53,10 +53,10 @@ export default function EntornoAdmin({ children }) {
   }, []);
 
   return (
-    <div className="admin-shell admin-page min-h-screen bg-(--background) text-body" data-admin-context>
+    <div className="admin-shell admin-page min-h-screen max-h-screen overflow-hidden bg-(--background) text-body" data-admin-context>
       <header className="h-0" />
 
-      <div className="flex min-h-screen relative items-stretch h-full">
+      <div className="flex min-h-screen max-h-screen relative items-stretch h-full">
         <aside
           className={`${isExpanded ? "w-56" : "w-20"} sticky top-0 self-start flex flex-col items-center h-full min-h-screen bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
         >
@@ -235,7 +235,7 @@ export default function EntornoAdmin({ children }) {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-auto p-8 bg-(--background)">
+        <main className="flex-1 overflow-auto p-8 bg-(--background) max-h-screen">
           {children}
         </main>
       </div>

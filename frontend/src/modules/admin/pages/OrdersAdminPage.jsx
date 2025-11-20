@@ -196,9 +196,9 @@ function ChangeHistoryModal({ order, onClose }) {
       id: 3,
       timestamp: new Date(Date.now() - 7200000).toISOString(),
       user: 'Admin Usuario',
-      action: 'Notas internas actualizadas',
+      action: 'Estado de envío actualizado',
       details: 'Cliente solicitó entrega urgente',
-      field: 'notas_internas',
+      field: 'estado_envio',
     },
   ];
 
@@ -293,7 +293,6 @@ function EditStatusModal({ order, onClose, onSave }) {
   const [formData, setFormData] = useState({
     estado_pago: order.estado_pago || '',
     estado_envio: order.estado_envio || '',
-    notas_internas: order.notas_internas || '',
   });
 
   const handleSubmit = async (e) => {
@@ -369,19 +368,6 @@ function EditStatusModal({ order, onClose, onSave }) {
                 </option>
               ))}
             </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-neutral-700">
-              Notas Internas
-            </label>
-            <textarea
-              value={formData.notas_internas}
-              onChange={(e) => setFormData({ ...formData, notas_internas: e.target.value })}
-              rows={4}
-              className="w-full rounded-2xl border border-neutral-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary1/20 focus:border-primary1"
-              placeholder="Notas internas (solo visible para admins)"
-            />
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -666,21 +652,10 @@ function OrderDetailModal({ orderId, onClose }) {
             </div>
           </div>
 
-          {/* Notas */}
-          {(order.notas_cliente || order.notas_internas) && (
-            <div className="space-y-4">
-              {order.notas_cliente && (
-                <div className="rounded-2xl border border-neutral-200 p-6">
-                  <h3 className="text-sm font-semibold text-neutral-700 mb-2">Notas del Cliente</h3>
-                  <p className="text-sm text-neutral-600">{order.notas_cliente}</p>
-                </div>
-              )}
-              {order.notas_internas && (
-                <div className="rounded-2xl border border-warning/30 bg-warning/10 p-6">
-                  <h3 className="text-sm font-semibold text-warning mb-2">Notas Internas (Admin)</h3>
-                  <p className="text-sm text-warning/80">{order.notas_internas}</p>
-                </div>
-              )}
+          {order.notas_cliente && (
+            <div className="rounded-2xl border border-neutral-200 p-6">
+              <h3 className="text-sm font-semibold text-neutral-700 mb-2">Notas del Cliente</h3>
+              <p className="text-sm text-neutral-600">{order.notas_cliente}</p>
             </div>
           )}
         </div>
@@ -852,7 +827,6 @@ export default function OrdersAdminPage() {
     <section className="space-y-6">
       <AdminPageHeader
         title="Gestión de Pedidos"
-        subtitle="Supervisa y gestiona cada orden que llega a la tienda."
         icon={<Package className="h-8 w-8 text-primary1" />}
         actions={
           <div className="flex items-center gap-3">

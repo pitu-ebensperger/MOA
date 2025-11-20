@@ -7,7 +7,6 @@ import { Pill } from "@/components/ui/Pill.jsx";
 import { Button } from "@/components/ui/Button.jsx";
 import { Input } from "@/components/ui/Input.jsx";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/shadcn/ui/select.jsx";
-import { Textarea } from "@/components/shadcn/ui/textarea.jsx";
 import { Accordion } from "@/components/ui/Accordion.jsx";
 import { formatDate_ddMMyyyy } from "@/utils/date.js";
 import { CalendarDays, PackageCheck, Truck, ChevronRight, Edit, Save, X, AlertCircle } from "lucide-react";
@@ -27,7 +26,6 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
     estado_envio: '',
     numero_seguimiento: '',
     empresa_envio: '',
-    notas_internas: ''
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateError, setUpdateError] = useState(null);
@@ -40,7 +38,6 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
         estado_envio: order.estado_envio || '',
         numero_seguimiento: order.shipment?.trackingNumber || order.shipment?.trackingNumero || '',
         empresa_envio: order.shipment?.carrier || '',
-        notas_internas: order.notas_internas || ''
       });
     }
   }, [order]);
@@ -81,7 +78,6 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
       estado_envio: order.estado_envio || '',
       numero_seguimiento: order.shipment?.trackingNumber || order.shipment?.trackingNumero || '',
       empresa_envio: order.shipment?.carrier || '',
-      notas_internas: order.notas_internas || ''
     });
     setIsEditing(false);
     setUpdateError(null);
@@ -362,25 +358,6 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
                       </div>
                     </div>
 
-                    {/* Notas internas */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-(--color-text-muted) uppercase tracking-wide">
-                        Notas internas (Solo visible para admin)
-                      </label>
-                      {!isEditing ? (
-                        <p className="text-sm text-(--color-text) whitespace-pre-wrap">
-                          {order.notas_internas || 'Sin notas'}
-                        </p>
-                      ) : (
-                        <Textarea
-                          value={editForm.notas_internas}
-                          onChange={(e) => handleFormChange('notas_internas', e.target.value)}
-                          placeholder="Agregar notas internas para el equipo..."
-                          rows={3}
-                          className="resize-none text-sm"
-                        />
-                      )}
-                    </div>
                   </div>
                 ),
               },

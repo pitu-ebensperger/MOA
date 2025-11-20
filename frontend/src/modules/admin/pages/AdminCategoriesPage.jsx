@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit3, Trash2 } from "lucide-react";
+import { Plus, Edit3, Trash2, Check, X } from "lucide-react";
 
 import { categoriesApi } from "@/services/categories.api.js";
 import { Button } from "@/components/ui/Button.jsx";
@@ -225,7 +225,6 @@ export default function AdminCategoriesPage() {
     <div className="space-y-6">
       <AdminPageHeader
         title="Categorías"
-        subtitle="Gestiona las categorías visibles en la tienda y mantén coherencia con los productos."
         actions={
           <Button
             size="sm"
@@ -278,9 +277,6 @@ export default function AdminCategoriesPage() {
               <h2 className="text-lg font-semibold text-(--text-strong)">
                 {activeCategory ? "Editar categoría" : "Nueva categoría"}
               </h2>
-              <p className="text-xs text-(--text-secondary1)">
-                Mantén el slug único y en minúsculas con guiones para la URL.
-              </p>
             </DialogHeader>
 
             <div className="flex-1 space-y-4">
@@ -339,23 +335,24 @@ export default function AdminCategoriesPage() {
               )}
             </div>
 
-            <DialogFooter className="flex flex-col gap-2 pt-4">
-              <div className="flex items-center justify-between gap-3">
-            <Button
-              type="button"
-              appearance="ghost"
-              intent="neutral"
-              onClick={handleCloseDrawer}
-              className="text-(--text-strong)"
-            >
-              Cancelar
-            </Button>
-
+            <DialogFooter className="pt-4">
+              <div className="flex w-full justify-end gap-3">
+                <Button
+                  type="button"
+                  appearance="ghost"
+                  intent="neutral"
+                  onClick={handleCloseDrawer}
+                  className="text-(--text-strong)"
+                  leadingIcon={<X className="h-4 w-4" />}
+                >
+                  Cancelar
+                </Button>
                 <Button
                   type="submit"
                   appearance="solid"
                   intent="primary"
                   disabled={isSaving}
+                  leadingIcon={<Check className="h-4 w-4" />}
                 >
                   {isSaving ? "Guardando..." : activeCategory ? "Actualizar categoría" : "Guardar categoría"}
                 </Button>

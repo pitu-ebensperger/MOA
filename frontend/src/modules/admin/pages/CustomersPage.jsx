@@ -520,7 +520,6 @@ export default function CustomersPage() {
     <div className="flex flex-col gap-4">
       <AdminPageHeader
         title="Clientes"
-        subtitle={`Gestiona la comunidad de usuarios registrados en MOA. ${totalCustomers} clientes en total.`}
       />
 
       {/* Tabla con toolbar integrado */}
@@ -535,6 +534,7 @@ export default function CustomersPage() {
             onPageChange={setPage}
             toolbar={toolbar}
             variant="card"
+            maxHeight="520px"
           />
       ) : (
         <div>

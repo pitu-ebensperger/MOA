@@ -13,7 +13,6 @@ router.get("/admin/pedidos/:id", verifyAdmin, asyncHandler(orderAdminController.
 router.patch("/admin/pedidos/:id/estado", verifyAdmin, asyncHandler(orderAdminController.updateOrderStatus));
 router.put("/api/admin/orders/:id/status", verifyAdmin, asyncHandler(orderAdminController.updateOrderStatus));
 router.post("/admin/pedidos/:id/seguimiento", verifyAdmin, asyncHandler(orderAdminController.addTrackingInfo));
-router.patch("/admin/pedidos/:id/notas", verifyAdmin, asyncHandler(orderAdminController.updateInternalNotes));
 
 // === RUTAS DE ANALYTICS ADMIN ===
 router.get("/admin/analytics/dashboard", verifyAdmin, asyncHandler(AdminController.getDashboardMetrics));

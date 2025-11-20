@@ -236,54 +236,12 @@ const getOrderStats = async (req, res) => {
 };
 
 
-//TODO: revisar si internal notes va a ir o si se elimina
-
-const updateInternalNotes = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { notas_internas } = req.body;
-
-    if (notas_internas === undefined) {
-      return res.status(400).json({
-        success: false,
-        message: 'notas_internas es requerido',
-      });
-    }
-
-    // Verificar que la orden existe
-    const existingOrder = await orderAdminModel.getOrderByIdAdmin(id);
-    if (!existingOrder) {
-      return res.status(404).json({
-        success: false,
-        message: 'Orden no encontrada',
-      });
-    }
-
-    const updatedOrder = await orderAdminModel.updateInternalNotes(id, notas_internas);
-
-    res.status(200).json({
-      success: true,
-      message: 'Notas internas actualizadas exitosamente',
-      data: updatedOrder,
-    });
-
-  } catch (error) {
-    console.error('Error actualizando notas internas:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al actualizar notas internas',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-    });
-  }
-};
-
 const orderAdminController = {
   getAllOrders,
   getOrderById,
   updateOrderStatus,
   addTrackingInfo,
   getOrderStats,
-  updateInternalNotes,
 };
 
 export default orderAdminController;

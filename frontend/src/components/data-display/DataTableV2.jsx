@@ -127,7 +127,11 @@ export function DataTableV2({
 
   const headerGroups = table.getHeaderGroups();
   const visibleRows = table.getRowModel().rows;
-  const showPagination = manualPaginationEnabled && Number.isFinite(total);
+  const totalPages =
+    manualPaginationEnabled && Number.isFinite(total) && Number.isFinite(pageSize) && pageSize > 0
+      ? Math.max(1, Math.ceil(total / pageSize))
+      : undefined;
+  const showPagination = manualPaginationEnabled && Number.isFinite(totalPages);
 
   const containerClasses = variant === "card"
     ? "rounded-3xl border border-(--color-border) bg-white/95 p-4 shadow-sm"
@@ -240,7 +244,16 @@ export function DataTableV2({
           </table>
           </div>
         </div>
-        {showPagination && (<div className="mt-3"><Pagination page={page} pageSize={pageSize} total={total} onPageChange={onPageChange} /></div>)}
+        {showPagination && (
+          <div className="mt-3">
+            <Pagination
+              page={page}
+              totalItems={total}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

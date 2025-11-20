@@ -49,7 +49,6 @@ export const ordersAdminApi = {
    * @param {string} [data.estado_envio] - Estado de envío
    * @param {string} [data.numero_seguimiento] - Número de seguimiento
    * @param {string} [data.empresa_envio] - Empresa de envío/courier
-   * @param {string} [data.notas_internas] - Notas internas del admin
    * @returns {Promise<Object>} Orden actualizada
    */
   updateOrderStatus: (ordenId, data) => {
@@ -87,18 +86,4 @@ export const ordersAdminApi = {
     return apiClient.get('/admin/pedidos/stats', { params });
   },
 
-  /**
-   * Actualizar notas internas de una orden
-   * @param {string|number} ordenId - ID de la orden
-   * @param {string} notes - Notas internas
-   * @returns {Promise<Object>} Resultado de la operación
-   */
-  updateNotes: (ordenId, notes) => {
-    if (!ordenId) {
-      throw new Error('ID de orden es requerido');
-    }
-    return apiClient.patch(`/admin/pedidos/${ordenId}/notas`, {
-      notas_internas: notes
-    });
-  },
 };
