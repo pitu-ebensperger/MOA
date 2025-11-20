@@ -3,6 +3,9 @@ node_modules
 **/node_modules
 
 
+package-lock.json
+
+
 .vite
 **/.vite
 
@@ -31,3 +34,9 @@ docs/misDOCS/
 snapshots/**
 # Local-only UI sandboxes
 frontend/src/modules/admin/pages/AdminTestPage.local.jsx
+
+
+dist/
+frontend/dist/
+package-lock.json
+**/package-lock.json
