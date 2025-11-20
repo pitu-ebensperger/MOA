@@ -1,10 +1,11 @@
-//path/src/modules/admin/components/ProductDrawer.jsx
 import React, { useEffect } from "react";
+import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Modal } from "@/components/ui/Modal.jsx"
 import { Trash2 } from "lucide-react";
+import { ProductShape, CategoryShape } from "@/utils/propTypes.js";
 
 const STATUS_VALUES = ["activo", "sin_stock", "borrador"];
 
@@ -372,5 +373,14 @@ export function ProductDrawer({
     </Modal>
   );
 }
+
+ProductDrawer.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onDelete: PropTypes.func,
+  initial: ProductShape,
+  categories: PropTypes.arrayOf(CategoryShape),
+};
 
 export default ProductDrawer;

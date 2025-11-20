@@ -6,7 +6,7 @@ import { buildQueryString } from "@/utils/https.js"
 import { toNum } from "@/utils/number.js"
 import { paginate } from "@/utils/pagination.js"
 
-import { customersDb } from "@/mocks/database/customers.js"
+import { usersDb } from "@/mocks/database/users.js"
 import { ordersDb } from "@/mocks/database/orders.js"
 
 
@@ -51,13 +51,13 @@ function buildMockOrderView(order) {
   const payment = ordersDb.payments.find((p) => p.id === order.paymentId) ?? null;
   const shipment = ordersDb.shipping.find((s) => s.id === order.shipmentId) ?? null;
   const user =
-    (customersDb?.users ?? []).find(
+    (usersDb?.users ?? []).find(
       (u) => String(u.id) === String(order.userId ?? ""),
     ) ?? null;
-  const addressDirect = (customersDb?.addresses ?? []).find(
+  const addressDirect = (usersDb?.addresses ?? []).find(
     (a) => String(a.id) === String(order.addressId ?? ""),
   ) ?? null;
-  const userDefaultAddress = (customersDb?.addresses ?? []).find(
+  const userDefaultAddress = (usersDb?.addresses ?? []).find(
     (a) => String(a.userId) === String(order.userId ?? "") && a.isDefault,
   ) ?? null;
 

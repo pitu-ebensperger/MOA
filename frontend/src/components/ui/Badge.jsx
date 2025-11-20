@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { cx } from "@/utils/ui-helpers.js"
 import { BADGE_VARIANTS, BADGE_SIZES } from "@/config/ui-tokens.js"
 
@@ -31,5 +32,12 @@ export function Badge({
     </span>
   );
 }
+
+Badge.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(Object.keys(BADGE_VARIANTS)),
+  size: PropTypes.oneOf(Object.keys(BADGE_SIZES)),
+  className: PropTypes.string,
+};
 
 export default Badge;

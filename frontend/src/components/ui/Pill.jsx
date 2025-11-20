@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import clsx from "clsx";
 import { PILL_STYLES } from "@/config/ui-tokens.js"
 
@@ -16,5 +17,11 @@ export function Pill({ children, variant = "neutral", className = "" }) {
     </span>
   );
 }
+
+Pill.propTypes = {
+  children: PropTypes.node.isRequired,
+  variant: PropTypes.oneOf(Object.keys(PILL_STYLES)),
+  className: PropTypes.string,
+};
 
 export default Pill;

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { ShoppingCart, Menu, User, X, Search, LogOut, Heart, Package, LayoutDashboard } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -27,7 +28,7 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
   const [searchQuery, setSearchQuery] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, isAdmin, logout, user } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
 
   // Close search when location changes
   useEffect(() => {
@@ -452,3 +453,8 @@ export function Navbar({ onNavigate, cartItemCount = 0 }) {
     </>
   );
 }
+
+Navbar.propTypes = {
+  onNavigate: PropTypes.func,
+  cartItemCount: PropTypes.number,
+};

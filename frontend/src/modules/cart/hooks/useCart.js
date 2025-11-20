@@ -1,17 +1,7 @@
-<<<<<<< HEAD
-import { useEffect, useMemo } from "react";
-import { usePersistentState } from "../../../hooks/usePersistentState.js";
-import { useAuth } from "../../../context/auth-context.js";
-import { cartApi } from "../../../services/cart.api.js";
-=======
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useAuth } from "@/context/auth-context.js"
-<<<<<<< HEAD
 import { cartApi } from "@/services/cart.api.js"
-=======
->>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 
 const CART_STORAGE_KEY = "cart";
 
@@ -25,17 +15,6 @@ export const useCart = () => {
 
   const isSessionReady = Boolean(token) && status === "authenticated";
 
-<<<<<<< HEAD
-    cartApi.get()
-      .then((data) => {
-        if (Array.isArray(data.items)) {
-          const normalized = data.items.map((item) => ({
-            id: item.producto_id,
-            quantity: item.cantidad,
-            price: item.precio_unit,
-            ...item,
-          }));
-=======
   const ensureAuthenticated = () => {
     if (isSessionReady) return true;
     alert("Debes iniciar sesión y esperar a que tu sesión se confirme para usar el carrito");
@@ -64,7 +43,6 @@ export const useCart = () => {
 
         if (Array.isArray(data?.items)) {
           const normalized = data.items.map(normalizeCartItem);
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
           setCartItems(normalized);
         }
       } catch (err) {
@@ -83,12 +61,8 @@ export const useCart = () => {
     if (!productId) return;
 
     try {
-<<<<<<< HEAD
-      await cartApi.add(product.id, 1);
-=======
       const response = await cartApi.addToCart(productId, 1);
       const normalized = response?.item ? normalizeCartItem(response.item) : null;
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 
       setCartItems((prevCart) => {
         const existing = prevCart.find((item) => item.id === productId);
@@ -115,12 +89,7 @@ export const useCart = () => {
 
   const executeRemoveFromCart = async (productId) => {
     try {
-<<<<<<< HEAD
-      await cartApi.remove(productId);
-
-=======
       await cartApi.removeFromCart(productId);
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
       setCartItems((prevCart) =>
         prevCart.filter((item) => item.id !== productId)
       );
@@ -139,15 +108,6 @@ export const useCart = () => {
     if (quantity <= 0) return executeRemoveFromCart(productId);
 
     try {
-<<<<<<< HEAD
-      await cartApi.updateQuantity(productId, quantity);
-
-      setCartItems((prevCart) =>
-        prevCart.map((item) =>
-          item.id === productId ? { ...item, quantity } : item
-        )
-      );
-=======
       const response = await cartApi.updateQuantity(productId, quantity);
       const normalized = response?.item ? normalizeCartItem(response.item) : null;
 
@@ -164,7 +124,6 @@ export const useCart = () => {
           )
         );
       }
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
     } catch (err) {
       console.error("Error updateQuantity:", err);
     }
@@ -173,12 +132,7 @@ export const useCart = () => {
   const clearCart = async () => {
     if (!ensureAuthenticated()) return;
     try {
-<<<<<<< HEAD
-      await cartApi.clear();
-
-=======
       await cartApi.clearCart();
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
       setCartItems([]);
     } catch (err) {
       console.error("Error clearCart:", err);

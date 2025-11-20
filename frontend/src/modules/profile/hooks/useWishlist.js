@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { usePersistentState } from "../../../hooks/usePersistentState.js";
 import { useAuth } from "../../../context/auth-context.js";
-<<<<<<< HEAD
-import { useEffect } from "react";
-import { wishlistApi } from "@/services/wishlist.api.js";
-=======
 import { wishlistApi } from "../../../services/wishlist.api.js";
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 
 const WISHLIST_STORAGE_KEY = "wishlist";
 
@@ -21,7 +16,7 @@ export const useWishlist = () => {
 
   const ensureAuthenticated = () => {
     if (isSessionReady) return true;
-    alert("Debes iniciar sesión para usar favoritos ❤️");
+    alert("Debes iniciar sesión para usar favoritos");
     return false;
   };
 
@@ -32,16 +27,6 @@ export const useWishlist = () => {
       return;
     }
 
-<<<<<<< HEAD
-    wishlistApi.get()
-      .then((data) => {
-        if (Array.isArray(data.items)) {
-          setWishlist(data.items);
-        }
-      })
-      .catch((err) => console.error("Error cargando wishlist:", err));
-  }, [token]);
-=======
     let cancelled = false;
     setIsLoading(true);
 
@@ -62,7 +47,6 @@ export const useWishlist = () => {
       cancelled = true;
     };
   }, [isSessionReady, setWishlist]);
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 
   const addToWishlist = async (product) => {
     if (!ensureAuthenticated()) return;
@@ -70,14 +54,8 @@ export const useWishlist = () => {
     if (!productId) return;
 
     try {
-<<<<<<< HEAD
-      await wishlistApi.add(product.id);
-
-      setWishlist((prev) => [...prev, { producto_id: product.id, ...product }]);
-=======
       await wishlistApi.addToWishlist(productId);
       setWishlist((prev) => [...prev, { producto_id: productId, ...product }]);
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
     } catch (error) {
       console.error("Error wishlist add:", error);
     }
@@ -87,12 +65,7 @@ export const useWishlist = () => {
     if (!ensureAuthenticated()) return;
 
     try {
-<<<<<<< HEAD
-      await wishlistApi.remove(productId);
-
-=======
       await wishlistApi.removeFromWishlist(productId);
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
       setWishlist((prev) =>
         prev.filter(
           (item) => item.producto_id !== productId && item.id !== productId

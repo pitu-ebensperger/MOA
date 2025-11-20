@@ -29,7 +29,7 @@ import { Skeleton } from "@/components/ui/Skeleton.jsx"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs.jsx"
 import { formatCurrencyCLP } from "@/utils/currency.js"
-import { formatDate_ddMMyyyy, relativeTime } from "@/utils/date.js"
+import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { ORDER_STATUS_MAP } from "@/config/status-maps.js"
 import { API_PATHS } from "@/config/api-paths.js"
 
@@ -121,7 +121,8 @@ const MetricCard = ({
   );
 };
 
-const QuickActionCard = ({ label, description, icon: Icon, to, variant = "default" }) => {
+const QuickActionCard = ({ label, description, icon, to, variant = "default" }) => {
+  const Icon = icon;
   const variants = {
     default: "border-neutral-200 hover:border-primary1/30 hover:bg-primary4/20",
     primary: "border-primary1/30 bg-primary4/10 hover:bg-primary4/30",
@@ -136,7 +137,7 @@ const QuickActionCard = ({ label, description, icon: Icon, to, variant = "defaul
       className={`h-auto p-6 flex-col items-start space-y-3 text-left transition-all ${variants[variant]}`}
     >
       <div className="flex items-center gap-3 w-full">
-        <Icon className="h-6 w-6 text-primary1" />
+        {Icon && <Icon className="h-6 w-6 text-primary1" />}
         <div className="flex-1">
           <p className="font-semibold text-neutral-800">{label}</p>
           {description && (

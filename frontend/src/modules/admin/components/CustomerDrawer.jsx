@@ -1,11 +1,13 @@
 import React, { useMemo } from "react";
+import PropTypes from "prop-types";
 import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { Price } from "@/components/data-display/Price.jsx"
 import { Mail, Phone, Calendar, MapPin, ShoppingBag, Package } from "lucide-react";
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { ordersDb } from "@/mocks/database/orders.js"
-import { customersDb } from "@/mocks/database/customers.js"
+import { usersDb } from "@/mocks/database/users.js"
+import { UserShape } from "@/utils/propTypes.js";
 
 const safeText = (v) => (v == null || v === "" ? "–" : v);
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
@@ -73,7 +75,7 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
 
   const customerAddresses = useMemo(() => {
     if (!id) return [];
-    return customersDb.addresses.filter((addr) => addr.userId === id);
+    return usersDb.addresses.filter((addr) => addr.userId === id);
   }, [id]);
 
   // Early return AFTER hooks (evita warning de hooks condicionales)
@@ -266,3 +268,9 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
     </Dialog>
   );
 }
+
+CustomerDrawer.propTypes = {
+  open: PropTypes.bool.isRequired,
+  customer: UserShape,
+  onClose: PropTypes.func.isRequired,
+};

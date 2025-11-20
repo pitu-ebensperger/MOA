@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { cx } from "@/utils/ui-helpers.js"
 
 
@@ -160,6 +161,28 @@ const internalId = React.useId();
     </div>
   );
 }
+
+Select.propTypes = {
+  id: PropTypes.string,
+  label: PropTypes.string,
+  placeholder: PropTypes.string,
+  helperText: PropTypes.string,
+  error: PropTypes.string,
+  fullWidth: PropTypes.bool,
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
+  variant: PropTypes.oneOf(["neutral", "primary", "ghost"]),
+  name: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: PropTypes.func,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ),
+  disabled: PropTypes.bool,
+  required: PropTypes.bool,
+};
 
 /* Atajo Variantes */
 

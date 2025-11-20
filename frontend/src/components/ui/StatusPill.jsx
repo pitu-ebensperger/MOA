@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import Pill from "@/components/ui/Pill.jsx"
 import {
   PRODUCT_STATUS_MAP,
@@ -31,3 +32,9 @@ export function StatusPill({ status, domain = "order", className = "" }) {
     </Pill>
   );
 }
+
+StatusPill.propTypes = {
+  status: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  domain: PropTypes.oneOf(["product", "order", "payment", "shipment", "user"]),
+  className: PropTypes.string,
+};

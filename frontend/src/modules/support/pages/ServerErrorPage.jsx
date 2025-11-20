@@ -119,7 +119,7 @@ export const ServerErrorPage = ({
       } else {
         throw new Error('Server still unavailable');
       }
-    } catch (_error) {
+    } catch {
       alerts.close();
       
       if (retryCount >= 3) {

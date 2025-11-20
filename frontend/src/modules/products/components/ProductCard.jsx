@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
@@ -5,6 +6,7 @@ import { Price } from "@/components/data-display/Price.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { useAuth } from "@/context/auth-context.js"
+import { ProductShape } from "@/utils/propTypes.js"
 
 import { Button } from "@/components/ui/Button.jsx"
 import Badge from "@/components/ui/Badge.jsx"
@@ -211,5 +213,15 @@ export default function ProductCard({
     </article>
   );
 }
+
+ProductCard.propTypes = {
+  product: ProductShape,
+  onAddToCart: PropTypes.func,
+  onToggleWishlist: PropTypes.func,
+  isInWishlist: PropTypes.bool,
+  onViewDetails: PropTypes.func,
+  showBadge: PropTypes.bool,
+  badgeText: PropTypes.string,
+};
 
 export { ProductCard };

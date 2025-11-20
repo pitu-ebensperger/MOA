@@ -18,7 +18,7 @@ import { PRODUCT_STATUS_OPTIONS } from "@/config/status-options.js"
 
 export default function ProductsAdminPage() {
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
+  const [search] = useState("");
   const [status, setStatus] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [onlyLowStock, setOnlyLowStock] = useState(false);
@@ -138,7 +138,7 @@ export default function ProductsAdminPage() {
 
   // Render toolbar (external component) with stable reference for lint compliance
   const renderToolbar = useCallback(
-    (table) => (
+    () => (
       <ProductsToolbar
         onlyLowStock={onlyLowStock}
         onToggleLowStock={() => {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx";
 import { Price } from "@/components/data-display/Price.jsx";
 import { StatusPill } from "@/components/ui/StatusPill.jsx";
@@ -12,6 +13,7 @@ import { formatDate_ddMMyyyy } from "@/utils/date.js";
 import { CalendarDays, PackageCheck, Truck, ChevronRight, Edit, Save, X, AlertCircle } from "lucide-react";
 import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx";
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
+import { OrderShape } from "@/utils/propTypes.js";
 
 // Helpers pequeños para no ensuciar el JSX
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
@@ -607,3 +609,11 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
     </Dialog>
   );
 }
+
+OrdersDrawer.propTypes = {
+  open: PropTypes.bool.isRequired,
+  order: OrderShape,
+  onClose: PropTypes.func.isRequired,
+  breadcrumb: PropTypes.node,
+  onOrderUpdate: PropTypes.func,
+};

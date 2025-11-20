@@ -97,7 +97,7 @@ export default function OrdersPage() {
   );
 
   const toolbar = useMemo(
-    () => (table) => (
+    () => (
       <TableToolbar>
         <TableSearch
           value={search}

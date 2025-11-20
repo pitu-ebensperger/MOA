@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { cx } from "@/utils/ui-helpers.js"
 
 /* Spinner -------------------------------------------------------------------------- */
@@ -60,6 +61,13 @@ export function Spinner({
   );
 }
 
+Spinner.propTypes = {
+  size: PropTypes.oneOf(["xs", "sm", "md", "lg", "xl"]),
+  color: PropTypes.oneOf(["primary", "secondary", "white", "current"]),
+  label: PropTypes.string,
+  className: PropTypes.string,
+};
+
 /* Variantes derivadas  -------------------------------------------------------------------------- */
 
 export const SpinnerXs = (props) => <Spinner {...props} size="xs" />;
@@ -100,6 +108,12 @@ export function SpinnerOverlay({
     </div>
   );
 }
+
+SpinnerOverlay.propTypes = {
+  message: PropTypes.string,
+  size: PropTypes.oneOf(["xs", "sm", "md", "lg", "xl"]),
+  className: PropTypes.string,
+};
 
 /* Dots Loader  -------------------------------------------------------------------------- */
 
@@ -147,3 +161,9 @@ export function DotsLoader({
     </div>
   );
 }
+
+DotsLoader.propTypes = {
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
+  color: PropTypes.oneOf(["primary", "secondary", "current"]),
+  className: PropTypes.string,
+};

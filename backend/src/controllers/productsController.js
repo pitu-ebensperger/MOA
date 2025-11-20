@@ -1,18 +1,11 @@
-<<<<<<< HEAD
 import { pool } from "../../database/config.js";
-=======
 import { productsModel } from "../models/productsModel.js";
 import { categoriesModel } from "../models/categoriesModel.js";
 import { AppError, UnauthorizedError, ForbiddenError } from "../utils/error.utils.js";
->>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
 
-/**
- * Controlador para gestión de productos
- */
+
 export const productsController = {
-  /**
-   * Obtener todos los productos con filtros y paginación
-   */
+  /*productos con filtros y paginación */
   async getProducts(req, res, next) {
     try {
       const {
@@ -28,7 +21,6 @@ export const productsController = {
         sortOrder
       } = req.query;
 
-      // Validar parámetros
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
 
@@ -73,9 +65,7 @@ export const productsController = {
     }
   },
 
-  /**
-   * Obtener producto por ID o public_id
-   */
+  /*producto por ID o public_id */
   async getProduct(req, res, next) {
     try {
       const { id } = req.params;
@@ -104,9 +94,7 @@ export const productsController = {
     }
   },
 
-  /**
-   * Obtener producto por slug (para el frontend público)
-   */
+  /* Obtener producto por slug (para el frontend público)  */
   async getProductBySlug(req, res, next) {
     try {
       const { slug } = req.params;
@@ -117,7 +105,6 @@ export const productsController = {
         throw new AppError('Producto no encontrado', 404);
       }
 
-      // Solo mostrar productos activos en la vista pública
       if (product.status !== 'activo' && !req.user?.isAdmin) {
         throw new AppError('Producto no disponible', 404);
       }
@@ -131,9 +118,7 @@ export const productsController = {
     }
   },
 
-  /**
-   * Crear nuevo producto (solo admin)
-   */
+  /* Crear nuevo producto (admin)*/
   async createProduct(req, res, next) {
     try {
       const {

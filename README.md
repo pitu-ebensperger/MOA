@@ -4,28 +4,20 @@
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
 - **demo@moa.cl** (contraseña: demo o admin o 123456) 
 - **cliente@mail.com** (contraseña: demo o admin o 123456)
-<<<<<<< HEAD
  
 #
-=======
-
-
-
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 > Los mocks están habilitados por defecto en `frontend/.env`  
 > Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
 
 
 ## Estructura del repositorio
 
-_Cada carpeta gestiona su propio node_modules locales, instalar dependencias antes de ejecutar_
-**`frontend/`**
-Instalar: `npm i -w frontend paquete`
-Ejecutar: `npm run dev` | `npm run preview` | `npm run test` | `npm run lint`
+Cada carpeta gestiona su propio node_modules locales, desde la raíz instalar dependencias antes de ejecutar
 
-**`backend/`**
-Instalar: `npm i -w backend paquete`
-Ejecutar: `npm run -w backend dev`
+Instalar: `npm install`
+Ejecutar frontend:  `npm run -w frontend dev`
+Ejecutar backend: `npm run -w backend dev`
+
 
 - npm run seed:users --workspace backend (asegura la cuenta `admin@moa.cl/admin123`)
 - npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
@@ -36,11 +28,6 @@ npm run seed:users --workspace backend
 npm run seed:categories --workspace backend
 npm run seed:products --workspace backend
 
-### Stripe (pasarela de pago)
-
-- Define las variables de entorno `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` para habilitar la pasarela de Stripe en modo sandbox o producción.
-- La API expone el endpoint `/webhooks/stripe`, que Stripe usará para enviar confirmaciones asincrónicas.
-- Puedes usar las credenciales de prueba de Stripe y los números de tarjeta `4242 4242 4242 4242` para simular cobros sin mover dinero real; recuerda cambiar a claves reales para producción.
 
 **`docs/`**
 
@@ -130,13 +117,6 @@ npm run seed:products --workspace backend
 
 
 
-<<<<<<< HEAD
-
-
-
-
-## Tarjetas de prueba Webpay (integración)
-=======
 -----------------------------------
 
 ## Testing (jest)
@@ -146,12 +126,14 @@ Correr tests:
 **Backend** cd backend && npm test
 
 
+### Stripe (pasarela de pago)
 
-
+- Define las variables de entorno `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` para habilitar la pasarela de Stripe en modo sandbox o producción.
+- La API expone el endpoint `/webhooks/stripe`, que Stripe usará para enviar confirmaciones asincrónicas.
+- Puedes usar las credenciales de prueba de Stripe y los números de tarjeta `4242 4242 4242 4242` para simular cobros sin mover dinero real; recuerda cambiar a claves reales para producción.
 
  
 ### Tarjetas de prueba Webpay (integración)
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
 Usa estas tarjetas ficticias mientras trabajas con el ambiente de integración. No requieren fecha de expiración válida: puedes ingresar cualquier combinación razonable.
 
 | Tipo | Tarjeta | CVV | Resultado esperado |

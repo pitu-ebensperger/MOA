@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import { twMerge } from "tailwind-merge";
 
 export function Modal({
@@ -125,3 +126,18 @@ export function Modal({
     </div>
   );
 }
+
+Modal.propTypes = {
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func,
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+  children: PropTypes.node,
+  placement: PropTypes.oneOf(["center", "right"]),
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
+  showCloseButton: PropTypes.bool,
+  closeOnOverlayClick: PropTypes.bool,
+  className: PropTypes.string,
+  headerClassName: PropTypes.string,
+  bodyClassName: PropTypes.string,
+  footer: PropTypes.node,
+};

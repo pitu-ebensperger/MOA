@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { formatCurrencyCLP } from "@/utils/currency.js"
 
 export const Price = ({
@@ -21,4 +22,11 @@ export const Price = ({
       {formatted}
     </span>
   );
+};
+
+Price.propTypes = {
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  currency: PropTypes.string,
+  locale: PropTypes.string,
+  className: PropTypes.string,
 };

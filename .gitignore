@@ -25,6 +25,8 @@ snapshots/*.json
 scripts/*.jsx
 scripts/*.js
 src/scripts/**.js
+frontend/scripts/**.js
+backend/scripts/**.js
 
 **/styleguide/StyleGuidePage.jsx
 

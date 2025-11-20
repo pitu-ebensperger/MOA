@@ -1,8 +1,4 @@
-#!/usr/bin/env node
-
-// Script para verificar que los mocks de autenticación funcionan correctamente
-// Uso: node test-auth-mock.js
-
+/* eslint-env node */
 import { mockAuthApi } from '../src/mocks/api/auth.js';
 import { env } from '../src/config/env.js';
 
@@ -68,9 +64,11 @@ async function runTests() {
 }
 
 // Error handling
-process.on('unhandledRejection', (error) => {
+const nodeProcess = globalThis.process;
+
+nodeProcess?.on('unhandledRejection', (error) => {
   console.error('❌ Error no manejado:', error.message);
-  process.exit(1);
+  nodeProcess?.exit(1);
 });
 
 runTests().catch(console.error);

@@ -85,12 +85,13 @@ const getStatusColor = (estado, tipo) => {
 };
 
 // Componente de tarjeta de estadísticas
-function StatsCard({ title, value, subtitle, icon: Icon, color = 'primary' }) {
+function StatsCard({ title, value, subtitle, icon, color = 'primary' }) {
+  const Icon = icon;
   return (
     <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between mb-2">
         <p className="text-sm font-medium text-neutral-600">{title}</p>
-        <Icon className={`h-5 w-5 text-${color}`} />
+        {Icon && <Icon className={`h-5 w-5 text-${color}`} />}
       </div>
       <p className="text-2xl font-bold text-neutral-900">{value}</p>
       {subtitle && <p className="text-xs text-neutral-500 mt-1">{subtitle}</p>}

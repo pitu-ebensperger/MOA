@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { cx } from "@/utils/ui-helpers.js"
 
 /* Tamaños & Variantes  -------------------------------------------------------------------------- */
@@ -176,6 +177,27 @@ export function Input({
     </div>
   );
 }
+
+Input.propTypes = {
+  id: PropTypes.string,
+  label: PropTypes.string,
+  placeholder: PropTypes.string,
+  helperText: PropTypes.string,
+  error: PropTypes.string,
+  fullWidth: PropTypes.bool,
+  size: PropTypes.oneOf(["sm", "md", "lg"]),
+  variant: PropTypes.oneOf(["neutral", "primary", "ghost"]),
+  type: PropTypes.string,
+  name: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
+  disabled: PropTypes.bool,
+  required: PropTypes.bool,
+  leftIcon: PropTypes.node,
+  rightIcon: PropTypes.node,
+  className: PropTypes.string,
+};
 
 /* Variantes derivadas  -------------------------------------------------------------------------- */
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs.jsx"
 import { Accordion } from "@/components/ui/Accordion.jsx"
@@ -11,7 +11,6 @@ import { useCategories } from "@/modules/products/hooks/useCategories.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { Minus, Plus, Recycle, ShieldCheck, Truck } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
-import { useAuth } from "@/context/auth-context.js"
 
 const initialState = {
   product: null,
@@ -43,8 +42,6 @@ export const ProductDetailPage = () => {
   const [state, setState] = useState(initialState);
   const [quantity, setQuantity] = useState(1);
   const { addToCart, updateQuantity } = useCartContext() ?? {};
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
   const productsBasePath = API_PATHS.products.products;
 
   const baseBreadcrumbItems = [
@@ -241,25 +238,9 @@ export const ProductDetailPage = () => {
               <div className="flex items-center justify-between rounded-full px-4 py-2 text-lg font-medium text-neutral-900 sm:w-40 border border-(--border-subtle)">
                 <button
                   type="button"
-<<<<<<< HEAD
                   onClick={handleDecrease}
-                  className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
-                  aria-label="Disminuir cantidad"
-=======
-                  disabled={product.stock <= 0}
-                  onClick={() => {
-                    if (!isAuthenticated) {
-                      navigate(API_PATHS.auth.login);
-                      return;
-                    }
-                    if (!addToCart) return;
-                    addToCart(product);
-                    if (quantity > 1 && updateQuantity) {
-                      updateQuantity(product.id, quantity);
-                    }
-                  }}
                   className="w-full rounded-full border border-(--color-primary1) px-6 py-2 text-base font-medium text-(--color-primary1) transition hover:bg-(--color-primary1) hover:text-(--color-light) disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
->>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
+                  aria-label="Disminuir cantidad"
                 >
                   <Minus className="size-4" aria-hidden />
                 </button>

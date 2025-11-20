@@ -19,7 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../../components/ui/radix/DropdownMenu.jsx";
-import { customersDb } from "@/mocks/database/customers.js"
+import { usersDb } from "@/mocks/database/users.js"
 import { ordersDb } from "@/mocks/database/orders.js"
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
@@ -107,8 +107,8 @@ export default function CustomersPage() {
     const items = ordersDb.orderItems.filter((item) => item.orderId === order.id);
     const payment = ordersDb.payments.find((p) => p.id === order.paymentId);
     const shipment = ordersDb.shipping.find((s) => s.id === order.shipmentId);
-    const address = customersDb.addresses.find((a) => a.id === order.addressId);
-    const user = customersDb.users.find((u) => u.id === order.userId);
+    const address = usersDb.addresses.find((a) => a.id === order.addressId);
+    const user = usersDb.users.find((u) => u.id === order.userId);
 
     return {
       ...order,

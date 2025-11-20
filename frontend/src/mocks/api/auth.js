@@ -1,5 +1,23 @@
 import { usersDb } from "@/mocks/database/users.js"
 
+const getUserAddresses = (userId) =>
+  usersDb.addresses.filter((address) => address.userId === userId)
+
+const fallbackUsername = (user) => user.username || user.email?.split("@")[0] || null
+
+const buildSessionUser = (user) => ({
+  id: user.id,
+  username: fallbackUsername(user),
+  firstName: user.firstName,
+  lastName: user.lastName,
+  email: user.email,
+  role: user.role ?? "CLIENTE",
+  avatar: user.avatar,
+  phone: user.phone,
+  addresses: getUserAddresses(user.id),
+  stats: user.stats,
+})
+
 // Mock Auth API
 export const mockAuthApi = {
   // POST /auth/login
@@ -26,17 +44,7 @@ export const mockAuthApi = {
 
     return {
       token,
-      user: {
-        id: user.id,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        phone: user.phone,
-        addresses: user.addresses || [],
-      },
+      user: buildSessionUser(user),
     };
   },
 
@@ -78,18 +86,7 @@ export const mockAuthApi = {
       throw new Error("Usuario no encontrado");
     }
 
-    return {
-      id: user.id,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      phone: user.phone,
-      addresses: user.addresses || [],
-      stats: user.stats,
-    };
+    return buildSessionUser(user);
   },
 
   // POST /auth/forgot-password

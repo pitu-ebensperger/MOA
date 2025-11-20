@@ -1,5 +1,7 @@
+import PropTypes from "prop-types";
 import ProductCard from "@/modules/products/components/ProductCard.jsx"
 import { useWishlist } from "@/modules/profile/hooks/useWishlist.js"
+import { ProductShape } from "@/utils/propTypes.js"
 
 export default function ProductGallery({ products = [], onAddToCart }) {
   const { wishlist, toggleWishlist } = useWishlist();
@@ -35,4 +37,8 @@ export default function ProductGallery({ products = [], onAddToCart }) {
   );
 }
 
+ProductGallery.propTypes = {
+  products: PropTypes.arrayOf(ProductShape),
+  onAddToCart: PropTypes.func,
+};
 

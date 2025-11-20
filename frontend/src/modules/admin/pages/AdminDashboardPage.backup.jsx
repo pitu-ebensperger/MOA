@@ -68,8 +68,6 @@ export default function AdminDashboardPage() {
     const outOfStockItems = 3; // Productos sin stock
 
     // Datos simulados para el reporte de ventas
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
     const lastMonthRevenue = 2450000; // Simulado
     const currentMonthRevenue = revenue;
     const growthPercentage = lastMonthRevenue > 0 

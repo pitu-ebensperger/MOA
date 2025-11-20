@@ -90,6 +90,10 @@
 
 ### Linting
 - ✅ Se reemplazaron las clases `bg-[var(--color-primary3)]` por `bg-(--color-primary3)` y ahora el selector de métodos de pago reutiliza `paymentMethods`/`setSelectedPaymentId` desde el contexto, eliminando las referencias a estados no usados.
+- 📝 Próximos pasos recomendados
+  1. Migrar las constantes/exportaciones compartidas de `AddressContext.jsx` y `PaymentContext.jsx` a archivos separados para mantener compatibilidad con fast refresh.
+  2. Normalizar los `useMemo`/`useEffect` en `CustomersPage.jsx` e incluir `handleOpenEditDialog`/`handleStatusChange` y la lista de dependencias adecuada para evitar warnings de exhaustividad.
+  3. Ajustar `UserInfoSection.jsx` para que el efecto que depende de `user` incluya al usuario en su arreglo de dependencias o reestructure el hook para evitar advertencias.
 
 ### Checkout context
 - Rebuild the payment context by destructuring the tuple from `createStrictContext`, exporting the strict hook, and wrapping `App` (or `AddressProvider`) with the now-correct `PaymentProvider` so `usePaymentMethods` is usable in the checkout flow.
@@ -98,8 +102,12 @@
 ### Autenticación
 - TODO: Añadir validaciones completas a los formularios de los procesos de auth (login, registro, olvidé mi contraseña y cambio de contraseña) para evitar payloads inválidos, mostrar feedback de campos obligatorios, y extender tanto en frontend como en backend el manejo de errores relacionado con credenciales y formatos.
 
+### Perfil
+- Revisar `frontend/src/modules/profile/components/UserInfoSection.jsx` y documentar mejoras o inconsistencias detectadas en la sección de información personal para priorizar los ajustes necesarios.
+
 ### Manejo de errores y páginas
 - Auditar y documentar el middleware `errorHandler` en `backend/src/utils/error.utils.js` y su registro al final de `backend/index.js`, incluyendo el orden de routers (`home`, `auth`, `wishlist`, `cart`, etc.) para asegurarse de que `AppError`, `ValidationError` y los manejadores de errores de PostgreSQL/JWT (más el caso `entity.parse.failed`) devuelven siempre respuestas consistentes.
+- Revisar `homeController.js` (`backend/src/controllers/homeController.js`) para confirmar que la respuesta al landing no expone productos inactivos, limita la cantidad de filas devueltas y valida los campos que el frontend consume (categorías destacadas, productos, secciones editoriales).
   - El helper `buildErrorResponse` centraliza `success: false`, `message` y `timestamp`, `handlePgError` y `handleJwtError` traducen códigos 23505/23503/22P02 y errores de tokens, y `errorHandler` cubre rutas desconocidas y errores no operacionales con 500.
 - Añadir/actualizar pruebas en `backend/__tests__/routes.test.js` para garantizar respuestas 4xx/5xx sobre las rutas principales y capturar `AppError`/`ValidationError`/PG/JWT.
   - Los tests ejercen login, carrito, wishlist, categorías, productos, admin y pagos sin token y con payload inválidos, además de rutas generadoras de 5xx, JSON malformado, `entity.parse.failed` y errores de JWT.
@@ -272,6 +280,12 @@
 - Backend models: `/backend/src/models/orderModel.js`
 - Backend controllers: `/backend/src/controllers/orderController.js`
 - Frontend checkout: `/frontend/src/modules/cart/pages/CheckoutPage.jsx`
+
+## 🚀 PRÓXIMOS PASOS
+
+- Actualizar la documentación de mocks (README o `docs/MOCK_DATA.md`) para dejar constancia de que `usersDb` ahora incluye direcciones, wishlists y carritos que antes vivían en `customers.js`, y qué campos (role/stats/metadata) deben existir en los consumidores.
+- Recorrer el código que depende de `customersDb` (admin/orders/auth) y verificar que no quedan imports antiguos ni suposiciones sobre el shape anterior; ajustar cualquier helper o test que use `customersDb` o los campos `status`/`phone` que cambiaron.
+- Ejecutor pruebas específicas como `npm run test:auth` y un smoke test de `OrdersDrawer`/`CustomersPage` localmente para confirmar que la nueva estructura de `usersDb` satisface las vistas administrativas y los mocks de auth.
 
 ---
 
