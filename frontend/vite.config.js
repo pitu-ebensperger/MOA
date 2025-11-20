@@ -24,8 +24,6 @@ export default defineConfig(({ mode }) => {
     "/admin",
     "/pedidos",
     "/orders",
-    "/payment",
-    "/metodos-pago",
     "/usuario",
     "/user",
     "/config",
@@ -39,6 +37,12 @@ export default defineConfig(({ mode }) => {
         target: apiProxyTarget,
         changeOrigin: true,
         secure: false,
+        bypass(req) {
+          if (req.headers.accept?.includes("text/html")) {
+            return req.url;
+          }
+          return undefined;
+        },
       },
     ]),
   );

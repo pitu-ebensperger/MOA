@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/auth-context.js"
 import { API_PATHS } from "@/config/api-paths.js"
+import AdminUnauthorizedPage from "@/modules/support/pages/AdminUnauthorizedPage.jsx"
 
 
 export function ProtectedRoute() {
@@ -19,11 +20,11 @@ export function AdminRoute() {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to={API_PATHS.auth.login} replace state={{ from: location }} />;
+    return <AdminUnauthorizedPage type="auth" state={{ from: location }} />;
   }
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return <AdminUnauthorizedPage type="role" />;
   }
 
   return <Outlet />;

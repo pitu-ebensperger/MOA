@@ -1,13 +1,8 @@
 import pool from "../../database/config.js";
 
-/**
- * Modelo para gestión de categorías
- */
+
 export const categoriesModel = {
-  /**
-   * Obtener todas las categorías
-   * @returns {Promise<Array>} Lista de categorías
-   */
+
   async getAll() {
     const query = `
       SELECT 
@@ -23,11 +18,6 @@ export const categoriesModel = {
     return rows;
   },
 
-  /**
-   * Obtener categoría por ID
-   * @param {number} id - ID de la categoría
-   * @returns {Promise<Object|null>} Categoría o null
-   */
   async getById(id) {
     const query = `
       SELECT 
@@ -43,11 +33,6 @@ export const categoriesModel = {
     return rows[0] || null;
   },
 
-  /**
-   * Obtener categoría por slug
-   * @param {string} slug - Slug de la categoría
-   * @returns {Promise<Object|null>} Categoría o null
-   */
   async getBySlug(slug) {
     const query = `
       SELECT 
@@ -63,11 +48,6 @@ export const categoriesModel = {
     return rows[0] || null;
   },
 
-  /**
-   * Crear nueva categoría
-   * @param {Object} categoryData - Datos de la categoría
-   * @returns {Promise<Object>} Categoría creada
-   */
   async create(categoryData) {
     const { nombre, slug, descripcion, cover_image } = categoryData;
 
@@ -92,12 +72,6 @@ export const categoriesModel = {
     return rows[0];
   },
 
-  /**
-   * Actualizar categoría
-   * @param {number} id - ID de la categoría
-   * @param {Object} categoryData - Datos a actualizar
-   * @returns {Promise<Object|null>} Categoría actualizada o null
-   */
   async update(id, categoryData) {
     // Construir query dinámicamente solo con campos presentes
     const fields = [];
@@ -140,11 +114,6 @@ export const categoriesModel = {
     return rows[0] || null;
   },
 
-  /**
-   * Eliminar categoría
-   * @param {number} id - ID de la categoría
-   * @returns {Promise<boolean>} true si se eliminó, false si no
-   */
   async delete(id) {
     // Verificar si hay productos asociados
     const checkQuery = `
@@ -170,12 +139,6 @@ export const categoriesModel = {
     return rows.length > 0;
   },
 
-  /**
-   * Verificar si un slug ya existe (útil para validaciones)
-   * @param {string} slug - Slug a verificar
-   * @param {number} excludeId - ID a excluir (para updates)
-   * @returns {Promise<boolean>} true si existe, false si no
-   */
   async slugExists(slug, excludeId = null) {
     let query = `
       SELECT COUNT(*)::int as count 
@@ -193,11 +156,6 @@ export const categoriesModel = {
     return rows[0].count > 0;
   },
 
-  /**
-   * Contar productos por categoría
-   * @param {number} id - ID de la categoría
-   * @returns {Promise<number>} Cantidad de productos
-   */
   async countProducts(id) {
     const query = `
       SELECT COUNT(*)::int as count 

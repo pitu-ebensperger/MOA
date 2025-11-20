@@ -15,6 +15,7 @@ import { useCategories } from "@/modules/products/hooks/useCategories.js"
 import { buildProductColumns } from "@/modules/admin/utils/ProductsColumns.jsx"
 import { DEFAULT_PAGE_SIZE } from "@/config/constants.js"
 import { PRODUCT_STATUS_OPTIONS } from "@/config/status-options.js"
+import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 
 export default function ProductsAdminPage() {
   const [page, setPage] = useState(1);
@@ -156,17 +157,10 @@ export default function ProductsAdminPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold text-primary1 mb-2">
-            Productos
-          </h1>
-          <p className="text-sm text-(--text-weak)">
-            Administra el catálogo y el inventario de la tienda MOA.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      <AdminPageHeader
+        title="Productos"
+        subtitle="Administra el catálogo y el inventario de la tienda MOA."
+        actions={
           <Button
             appearance="solid"
             intent="primary"
@@ -182,8 +176,8 @@ export default function ProductsAdminPage() {
           >
             Nuevo producto
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Tabla con toolbar integrado */}
       <DataTableV2

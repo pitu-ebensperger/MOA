@@ -4,7 +4,6 @@ import { Navbar } from '@/components/layout/Navbar.jsx'
 import { Footer } from '@/components/layout/Footer.jsx'
 import { API_PATHS } from '@/config/api-paths.js'
 import { AddressProvider } from '@/context/AddressContext.jsx'
-import { PaymentProvider } from '@/context/PaymentContext.jsx'
 import ErrorBoundary from '@/components/error/ErrorBoundary.jsx'
 
 import { HomePage } from '@/modules/home/pages/HomePage.jsx'
@@ -32,7 +31,7 @@ import { ReturnsAndExchangesPage } from '@/modules/support/pages/ReturnsAndExcha
 import { NotFoundPage } from '@/modules/support/pages/NotFoundPage.jsx'
 import { ServerErrorPage } from '@/modules/support/pages/ServerErrorPage.jsx'
 
-import { AdminRoute } from '@/modules/auth/hooks/useAuth.jsx'
+import { AdminRoute, ProtectedRoute } from '@/modules/auth/hooks/useAuth.jsx'
 import EntornoAdmin from '@/modules/admin/components/EntornoAdmin.jsx'
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage.jsx'
 import OrdersAdminPage from '@/modules/admin/pages/orders/OrdersAdminPageV2.jsx'
@@ -55,8 +54,7 @@ export const App = () => {
 
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
-      <PaymentProvider>
-        <AddressProvider>
+      <AddressProvider>
           <div className="min-h-screen w-full overflow-x-hidden bg-(--color-light)">
             {!isAdminRoute && <Navbar />}
             {!isAdminRoute && <CartDrawer />}
@@ -75,8 +73,10 @@ export const App = () => {
           <Route path={auth.forgot} element={<ForgotPasswordPage />} />
           <Route path={auth.reset} element={<ResetPasswordPage />} />
           <Route path='/order-confirmation/:orderCode' element={<OrderConfirmationPage />} />
-          <Route path={auth.profile} element={<ProfilePage />} />
-          <Route path='/wishlist' element={<WishlistPage />} />         
+          <Route element={<ProtectedRoute />}>
+            <Route path={auth.profile} element={<ProfilePage />} />
+            <Route path='/wishlist' element={<WishlistPage />} />         
+          </Route>
           <Route path={support.contact} element={<ContactPage />} /> 
           <Route path={support.privacy} element={<PrivacyPage />} /> 
           <Route path={support.terms} element={<TermsPage />} /> 
@@ -105,7 +105,6 @@ export const App = () => {
             {!isAdminRoute && <Footer />}
           </div>
         </AddressProvider>
-      </PaymentProvider>
     </ErrorBoundary>
   )
 }

@@ -66,25 +66,6 @@ export const AddressShape = PropTypes.shape({
   is_default: PropTypes.bool,
 });
 
-/*PaymentMethod*/
-export const PaymentMethodShape = PropTypes.shape({
-  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  metodo_pago_id: PropTypes.number,
-  usuario_id: PropTypes.number,
-  tipo: PropTypes.string,
-  type: PropTypes.string,
-  proveedor: PropTypes.string,
-  provider: PropTypes.string,
-  token_externo: PropTypes.string,
-  external_token: PropTypes.string,
-  ultimos_digitos: PropTypes.string,
-  last_digits: PropTypes.string,
-  es_predeterminado: PropTypes.bool,
-  is_default: PropTypes.bool,
-  activo: PropTypes.bool,
-  active: PropTypes.bool,
-});
-
 /*User*/
 export const UserShape = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

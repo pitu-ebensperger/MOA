@@ -14,7 +14,7 @@ export const normalizeProduct = (p = {}) => {
   const rawCompareAtPrice = toNum(p.compareAtPrice) ?? toNum(p.compareAtPriceCents);
   const compareAtPrice = rawCompareAtPrice ? rawCompareAtPrice / 100 : null;
 
-  const imgUrl = p.imgUrl ?? null;
+  const imgUrl = p.imgUrl ?? p.imageUrl ?? null;
   const gallery = Array.isArray(p.gallery) && p.gallery.length ? p.gallery : (imgUrl ? [imgUrl] : []);
 
   const stock = toNum(p.stock);
@@ -54,7 +54,7 @@ export const normalizeProduct = (p = {}) => {
     specs: p.specs ?? null,
     createdAt: p.createdAt ?? null,
     updatedAt: p.updatedAt ?? null,
-    fk_category_id: p.fk_category_id ?? null,
+    fk_category_id: p.fk_category_id ?? p.categoryId ?? null,
   };
 };
 

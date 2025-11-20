@@ -1,15 +1,8 @@
 import pool from "../../database/config.js";
 import { nanoid } from "nanoid";
 
-/**
- * Modelo para gestión de productos
- */
 export const productsModel = {
-  /**
-   * Obtener todos los productos con paginación y filtros
-   * @param {Object} options - Opciones de consulta
-   * @returns {Promise<Object>} Productos paginados
-   */
+
   async getAll(options = {}) {
     const {
       page = 1,
@@ -84,11 +77,9 @@ export const productsModel = {
         p.slug AS slug,
         p.sku AS sku,
         p.precio_cents AS "priceCents",
-        p.compare_at_price_cents AS "compareAtPriceCents",
         p.stock AS stock,
         p.status AS status,
         p.descripcion AS description,
-        p.descripcion_corta AS "shortDescription",
         p.img_url AS "imageUrl",
         p.gallery AS gallery,
         p.badge AS badge,
@@ -97,7 +88,6 @@ export const productsModel = {
         p.material AS material,
         p.dimensions AS dimensions,
         p.weight AS weight,
-        p.specs AS specs,
         p.created_at AS "createdAt",
         p.updated_at AS "updatedAt"
       FROM productos p
@@ -138,11 +128,6 @@ export const productsModel = {
     };
   },
 
-  /**
-   * Obtener producto por ID
-   * @param {number} id - ID del producto
-   * @returns {Promise<Object|null>} Producto o null
-   */
   async getById(id) {
     const query = `
       SELECT 
@@ -155,11 +140,9 @@ export const productsModel = {
         p.slug AS slug,
         p.sku AS sku,
         p.precio_cents AS "priceCents",
-        p.compare_at_price_cents AS "compareAtPriceCents",
         p.stock AS stock,
         p.status AS status,
         p.descripcion AS description,
-        p.descripcion_corta AS "shortDescription",
         p.img_url AS "imageUrl",
         p.gallery AS gallery,
         p.badge AS badge,
@@ -168,7 +151,6 @@ export const productsModel = {
         p.material AS material,
         p.dimensions AS dimensions,
         p.weight AS weight,
-        p.specs AS specs,
         p.created_at AS "createdAt",
         p.updated_at AS "updatedAt"
       FROM productos p
@@ -179,11 +161,6 @@ export const productsModel = {
     return rows[0] || null;
   },
 
-  /**
-   * Obtener producto por public_id
-   * @param {string} publicId - Public ID del producto
-   * @returns {Promise<Object|null>} Producto o null
-   */
   async getByPublicId(publicId) {
     const query = `
       SELECT 
@@ -196,11 +173,9 @@ export const productsModel = {
         p.slug AS slug,
         p.sku AS sku,
         p.precio_cents AS "priceCents",
-        p.compare_at_price_cents AS "compareAtPriceCents",
         p.stock AS stock,
         p.status AS status,
         p.descripcion AS description,
-        p.descripcion_corta AS "shortDescription",
         p.img_url AS "imageUrl",
         p.gallery AS gallery,
         p.badge AS badge,
@@ -209,7 +184,6 @@ export const productsModel = {
         p.material AS material,
         p.dimensions AS dimensions,
         p.weight AS weight,
-        p.specs AS specs,
         p.created_at AS "createdAt",
         p.updated_at AS "updatedAt"
       FROM productos p
@@ -220,11 +194,6 @@ export const productsModel = {
     return rows[0] || null;
   },
 
-  /**
-   * Obtener producto por slug
-   * @param {string} slug - Slug del producto
-   * @returns {Promise<Object|null>} Producto o null
-   */
   async getBySlug(slug) {
     const query = `
       SELECT 
@@ -237,11 +206,9 @@ export const productsModel = {
         p.slug AS slug,
         p.sku AS sku,
         p.precio_cents AS "priceCents",
-        p.compare_at_price_cents AS "compareAtPriceCents",
         p.stock AS stock,
         p.status AS status,
         p.descripcion AS description,
-        p.descripcion_corta AS "shortDescription",
         p.img_url AS "imageUrl",
         p.gallery AS gallery,
         p.badge AS badge,
@@ -250,7 +217,6 @@ export const productsModel = {
         p.material AS material,
         p.dimensions AS dimensions,
         p.weight AS weight,
-        p.specs AS specs,
         p.created_at AS "createdAt",
         p.updated_at AS "updatedAt"
       FROM productos p
@@ -261,11 +227,6 @@ export const productsModel = {
     return rows[0] || null;
   },
 
-  /**
-   * Crear nuevo producto
-   * @param {Object} productData - Datos del producto
-   * @returns {Promise<Object>} Producto creado
-   */
   async create(productData) {
     const {
       categoria_id,
@@ -273,11 +234,9 @@ export const productsModel = {
       slug,
       sku,
       precio_cents,
-      compare_at_price_cents = null,
       stock = 0,
       status = 'activo',
       descripcion = null,
-      descripcion_corta = null,
       img_url = null,
       gallery = [],
       badge = [],
@@ -285,8 +244,7 @@ export const productsModel = {
       color = null,
       material = null,
       dimensions = null,
-      weight = null,
-      specs = null
+      weight = null
     } = productData;
 
     const publicId = nanoid();
@@ -294,17 +252,17 @@ export const productsModel = {
     const query = `
       INSERT INTO productos (
         public_id, categoria_id, nombre, slug, sku, precio_cents,
-        compare_at_price_cents, stock, status, descripcion, descripcion_corta,
-        img_url, gallery, badge, tags, color, material, dimensions, weight, specs
+        stock, status, descripcion,
+        img_url, gallery, badge, tags, color, material, dimensions, weight
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
       RETURNING producto_id AS id;
     `;
 
     const values = [
       publicId, categoria_id, nombre, slug, sku, precio_cents,
-      compare_at_price_cents, stock, status, descripcion, descripcion_corta,
-      img_url, gallery, badge, tags, color, material, dimensions, weight, specs
+      stock, status, descripcion,
+      img_url, gallery, badge, tags, color, material, dimensions, weight
     ];
 
     const { rows } = await pool.query(query, values);
@@ -314,12 +272,6 @@ export const productsModel = {
     return await this.getById(productId);
   },
 
-  /**
-   * Actualizar producto
-   * @param {number} id - ID del producto
-   * @param {Object} productData - Datos a actualizar
-   * @returns {Promise<Object|null>} Producto actualizado o null
-   */
   async update(id, productData) {
     // Construir query dinámicamente solo con campos presentes
     const fields = [];
@@ -332,11 +284,9 @@ export const productsModel = {
       slug: 'slug',
       sku: 'sku',
       precio_cents: 'precio_cents',
-      compare_at_price_cents: 'compare_at_price_cents',
       stock: 'stock',
       status: 'status',
       descripcion: 'descripcion',
-      descripcion_corta: 'descripcion_corta',
       img_url: 'img_url',
       gallery: 'gallery',
       badge: 'badge',
@@ -344,8 +294,7 @@ export const productsModel = {
       color: 'color',
       material: 'material',
       dimensions: 'dimensions',
-      weight: 'weight',
-      specs: 'specs'
+      weight: 'weight'
     };
 
     Object.keys(allowedFields).forEach(field => {
@@ -381,11 +330,6 @@ export const productsModel = {
     return await this.getById(id);
   },
 
-  /**
-   * Eliminar producto (soft delete cambiando status)
-   * @param {number} id - ID del producto
-   * @returns {Promise<boolean>} true si se eliminó, false si no
-   */
   async softDelete(id) {
     const query = `
       UPDATE productos
@@ -398,11 +342,6 @@ export const productsModel = {
     return rows.length > 0;
   },
 
-  /**
-   * Eliminar producto permanentemente
-   * @param {number} id - ID del producto
-   * @returns {Promise<boolean>} true si se eliminó, false si no
-   */
   async hardDelete(id) {
     // Verificar si hay órdenes asociadas
     const checkQuery = `
@@ -428,12 +367,6 @@ export const productsModel = {
     return rows.length > 0;
   },
 
-  /**
-   * Verificar si un slug ya existe
-   * @param {string} slug - Slug a verificar
-   * @param {number} excludeId - ID a excluir (para updates)
-   * @returns {Promise<boolean>} true si existe, false si no
-   */
   async slugExists(slug, excludeId = null) {
     let query = `
       SELECT COUNT(*)::int as count 
@@ -451,12 +384,6 @@ export const productsModel = {
     return rows[0].count > 0;
   },
 
-  /**
-   * Verificar si un SKU ya existe
-   * @param {string} sku - SKU a verificar
-   * @param {number} excludeId - ID a excluir (para updates)
-   * @returns {Promise<boolean>} true si existe, false si no
-   */
   async skuExists(sku, excludeId = null) {
     let query = `
       SELECT COUNT(*)::int as count 
@@ -474,12 +401,6 @@ export const productsModel = {
     return rows[0].count > 0;
   },
 
-  /**
-   * Actualizar stock de producto
-   * @param {number} id - ID del producto
-   * @param {number} quantity - Cantidad a agregar/quitar (negativo para restar)
-   * @returns {Promise<Object|null>} Producto actualizado o null
-   */
   async updateStock(id, quantity) {
     const query = `
       UPDATE productos
@@ -497,11 +418,6 @@ export const productsModel = {
     return await this.getById(id);
   },
 
-  /**
-   * Obtener productos con stock bajo
-   * @param {number} threshold - Umbral de stock bajo (default: 5)
-   * @returns {Promise<Array>} Productos con stock bajo
-   */
   async getLowStockProducts(threshold = 5) {
     const query = `
       SELECT 
@@ -521,10 +437,6 @@ export const productsModel = {
     return rows;
   },
 
-  /**
-   * Obtener estadísticas de productos
-   * @returns {Promise<Object>} Estadísticas
-   */
   async getStats() {
     const query = `
       SELECT 

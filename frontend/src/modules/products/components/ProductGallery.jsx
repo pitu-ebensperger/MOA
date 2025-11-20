@@ -1,16 +1,29 @@
 import PropTypes from "prop-types";
+import { Search } from "lucide-react";
 import ProductCard from "@/modules/products/components/ProductCard.jsx"
 import { useWishlist } from "@/modules/profile/hooks/useWishlist.js"
 import { ProductShape } from "@/utils/propTypes.js"
+import {
+  EmptyPlaceholder,
+  EmptyPlaceholderDescription,
+  EmptyPlaceholderIcon,
+  EmptyPlaceholderTitle,
+} from "@/components/shadcn/ui/empty-state.jsx";
 
 export default function ProductGallery({ products = [], onAddToCart }) {
   const { wishlist, toggleWishlist } = useWishlist();
 
   if (!Array.isArray(products) || products.length === 0) {
     return (
-      <div className="rounded-2xl border border-black/10 bg-white/70 p-6 text-center text-sm text-(--text-weak)">
-        No hay productos que coincidan con los filtros seleccionados.
-      </div>
+      <EmptyPlaceholder>
+        <EmptyPlaceholderIcon>
+          <Search className="h-6 w-6" />
+        </EmptyPlaceholderIcon>
+        <EmptyPlaceholderTitle>No hay productos por ahora</EmptyPlaceholderTitle>
+        <EmptyPlaceholderDescription>
+          Ajusta los filtros o prueba una búsqueda distinta para encontrar lo que necesitas.
+        </EmptyPlaceholderDescription>
+      </EmptyPlaceholder>
     );
   }
 
@@ -41,4 +54,3 @@ ProductGallery.propTypes = {
   products: PropTypes.arrayOf(ProductShape),
   onAddToCart: PropTypes.func,
 };
-

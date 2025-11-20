@@ -160,8 +160,6 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
       /\/addresses/,
       /\/pedidos/,
       /\/orders/,
-      /\/metodos-pago/,
-      /\/payment/,
       /\/usuario/,
       /\/user/,
     ];

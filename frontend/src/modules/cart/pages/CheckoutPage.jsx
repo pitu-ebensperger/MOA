@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
 import { useAddresses } from "@/context/useAddresses.js"
-import { usePaymentMethods } from "@/context/usePaymentMethods.js"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { Price } from "@/components/data-display/Price.jsx"
 import { API_PATHS } from "@/config/api-paths.js"
@@ -40,11 +39,8 @@ export const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cartItems, total, removeFromCart, clearCart } = useCartContext();
   const { addresses, defaultAddress } = useAddresses();
-  const { paymentMethods, defaultPaymentMethod, formatPaymentMethod } = usePaymentMethods();
-  
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [selectedAddressId, setSelectedAddressId] = useState(defaultAddress?.direccion_id || null);
-  const [selectedPaymentId, setSelectedPaymentId] = useState(defaultPaymentMethod?.metodo_pago_id || null);
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   
@@ -85,16 +81,6 @@ export const CheckoutPage = () => {
     setNewAddress(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePaymentChange = (value) => {
-    if (!value) {
-      setSelectedPaymentId(null);
-      return;
-    }
-
-    const numericId = Number(value);
-    setSelectedPaymentId(Number.isNaN(numericId) ? null : numericId);
-  };
-
   const handlePay = async () => {
     if (!hasItems) {
       alert("Tu carrito está vacío 🛒");
@@ -133,11 +119,6 @@ export const CheckoutPage = () => {
       else if (shippingMethod !== 'retiro') {
         checkoutData.usar_direccion_guardada = false;
         checkoutData.direccion_nueva = newAddress;
-      }
-
-      // Agregar método de pago si está seleccionado
-      if (selectedPaymentId) {
-        checkoutData.metodo_pago_id = selectedPaymentId;
       }
 
       const response = await createOrder(checkoutData);
@@ -296,24 +277,10 @@ export const CheckoutPage = () => {
                 )}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label required>Método de pago</Label>
-                    <Select value={selectedPaymentId?.toString()} onValueChange={handlePaymentChange} disabled={!paymentMethods.length}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un método" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {paymentMethods.map((method) => {
-                          const methodId = method.metodo_pago_id ?? method.id;
-                          if (!methodId) return null;
-                          const label = formatPaymentMethod(method) || method.nombre || "Método de pago";
-                          return (
-                            <SelectItem key={methodId} value={methodId.toString()}>
-                              {label}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                    <Label>Pago</Label>
+                    <p className="text-sm text-[var(--color-text-secondary)]">
+                      Coordinamos contigo la forma de pago más cómoda (factura, transferencia o link directo) después de confirmar el pedido.
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label>Notas al equipo</Label>

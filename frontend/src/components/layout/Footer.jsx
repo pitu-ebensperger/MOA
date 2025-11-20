@@ -91,7 +91,7 @@ export const Footer = () => {
           {/* Brand Section */}
           <div className="space-y-6">
             <Link to={API_PATHS.home.landing} aria-label="Ir al inicio" className="inline-flex">
-              <span className="text-4xl font-serif tracking-tight text-primary1">{storeConfig.nombre_tienda}</span>
+              <span className="text-xl font-serif tracking-tight text-primary1 mb-0">{storeConfig.nombre_tienda}</span>
             </Link>
             
             <p className="text-neutral-600 leading-relaxed">

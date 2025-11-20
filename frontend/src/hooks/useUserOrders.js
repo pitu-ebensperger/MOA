@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { getUserOrders, getOrderById } from '@/services/checkout.api.js';
 import { useAuth } from '@/context/auth-context.js';
 
-/**
- * Hook para manejar las órdenes del usuario autenticado
- */
+
 export const useUserOrders = (options = {}) => {
   const { user } = useAuth();
   const [orders, setOrders] = useState([]);
@@ -45,8 +43,16 @@ export const useUserOrders = (options = {}) => {
 
     } catch (err) {
       console.error('Error fetching user orders:', err);
-      setError('Error al cargar tus órdenes');
-      setOrders([]);
+      
+      // Si es error 401 (token expirado), retornar empty sin mostrar error
+      // El logout ya es manejado por api-client
+      if (err?.status === 401 || err?.response?.status === 401) {
+        setError(null);
+        setOrders([]);
+      } else {
+        setError('Error al cargar tus órdenes');
+        setOrders([]);
+      }
     } finally {
       setIsLoading(false);
     }

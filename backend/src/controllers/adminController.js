@@ -2,14 +2,8 @@ import pool from "../../database/config.js";
 import { NotFoundError, ValidationError, ForbiddenError } from "../utils/error.utils.js";
 import { createAdminCustomerModel, updateAdminCustomerModel } from "../models/usersModel.js";
 
-/**
- * Controlador para operaciones administrativas
- */
+
 export class AdminController {
-  
-  /**
-   * Obtener métricas del dashboard
-   */
   static async getDashboardMetrics(req, res, next) {
     try {
       // TODO: Implementar consultas reales a la base de datos
@@ -37,9 +31,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener analytics de ventas
-   */
   static async getSalesAnalytics(req, res, next) {
     try {
       const { period = 'month' } = req.query;
@@ -65,9 +56,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener métricas de conversión
-   */
   static async getConversionMetrics(req, res, next) {
     try {
       const { period = 'month' } = req.query;
@@ -90,9 +78,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener top productos
-   */
   static async getTopProducts(req, res, next) {
     try {
       const { limit = 10, period = 'month' } = req.query;
@@ -109,9 +94,7 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener analytics de categorías
-   */
+
   static async getCategoryAnalytics(req, res, next) {
     try {
       const { period = 'month' } = req.query;
@@ -128,9 +111,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener analytics de stock
-   */
   static async getStockAnalytics(req, res, next) {
     try {
       // TODO: Implementar consultas de stock
@@ -151,9 +131,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener distribución de órdenes
-   */
   static async getOrderDistribution(req, res, next) {
     try {
       const { period = 'week' } = req.query;
@@ -170,9 +147,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener lista de usuarios (solo admins)
-   */
   static async getUsers(req, res, next) {
     try {
       const { page = 1, limit = 20, search = '' } = req.query;
@@ -186,6 +160,7 @@ export class AdminController {
           email,
           telefono,
           rol,
+          status,
           rol_code AS "rolCode",
           creado_en AS "createdAt"
         FROM usuarios
@@ -230,12 +205,9 @@ export class AdminController {
     }
   }
 
-  /**
-   * Crear cliente manualmente (Admin)
-   */
   static async createCustomer(req, res, next) {
     try {
-      const { nombre, email, telefono, rol, password } = req.body;
+      const { nombre, email, telefono, rol, password, status } = req.body;
 
       if (!nombre || !email) {
         return res.status(400).json({
@@ -248,8 +220,9 @@ export class AdminController {
         nombre,
         email,
         telefono,
-        rol,
         password,
+        rol: rol || "cliente",
+        status: status || "activo",
       });
 
       res.status(201).json({
@@ -269,9 +242,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Actualizar cliente desde dashboard (Admin)
-   */
   static async updateCustomer(req, res, next) {
     try {
       const { id } = req.params;
@@ -290,9 +260,11 @@ export class AdminController {
         ...(telefono !== undefined ? { telefono } : {}),
       };
 
-      if (status) {
-        updates.rol = status;
-      } else if (rol) {
+      if (status !== undefined) {
+        updates.status = status;
+      }
+
+      if (rol) {
         updates.rol = rol;
       }
 
@@ -319,9 +291,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Actualizar rol de usuario
-   */
   static async updateUserRole(req, res, next) {
     try {
       const { id } = req.params;
@@ -331,7 +300,6 @@ export class AdminController {
         throw new ValidationError('Rol y código de rol son requeridos');
       }
 
-      // Verificar que el usuario existe
       const userCheck = await pool.query(
         'SELECT usuario_id FROM usuarios WHERE usuario_id = $1',
         [id]
@@ -341,12 +309,10 @@ export class AdminController {
         throw new NotFoundError('Usuario');
       }
 
-      // Evitar que un admin se quite sus propios privilegios
       if (parseInt(id) === req.user.id && rolCode.toLowerCase() !== 'admin') {
         throw new ForbiddenError('No puedes remover tus propios privilegios de administrador');
       }
 
-      // Actualizar rol
       const updateResult = await pool.query(
         `UPDATE usuarios 
          SET rol = $1, rol_code = $2 
@@ -365,9 +331,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Obtener configuración de la tienda
-   */
   static async getStoreConfig(req, res, next) {
     try {
       // TODO: Implementar tabla de configuraciones
@@ -391,9 +354,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * Actualizar configuración de la tienda
-   */
   static async updateStoreConfig(req, res, next) {
     try {
       const config = req.body;

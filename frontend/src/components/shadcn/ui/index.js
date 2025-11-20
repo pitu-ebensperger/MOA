@@ -23,3 +23,9 @@ export {
   SelectItem,
   SelectSeparator,
 } from "./select.jsx";
+export {
+  EmptyPlaceholder,
+  EmptyPlaceholderIcon,
+  EmptyPlaceholderTitle,
+  EmptyPlaceholderDescription,
+} from "./empty-state.jsx";

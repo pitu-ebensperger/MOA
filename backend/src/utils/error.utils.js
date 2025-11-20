@@ -107,7 +107,6 @@ export const errorHandler = (err, req, res, next) => {
 
   const error = err instanceof Error ? err : new Error(String(err ?? "Error desconocido"));
 
-  // eslint-disable-next-line no-console
   console.error(`[${timestamp()}] ${req.method} ${req.originalUrl}`, error);
 
   if (error instanceof AppError) {
@@ -140,7 +139,7 @@ export const errorHandler = (err, req, res, next) => {
   );
 };
 
-// Helper function for backwards compatibility
+
 export const handleError = (res, error, defaultMessage = 'Error interno del servidor') => {
   console.error('Error:', error);
   

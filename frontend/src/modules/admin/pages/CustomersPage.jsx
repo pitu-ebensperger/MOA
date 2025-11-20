@@ -4,23 +4,27 @@ import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3,
 import CustomerDrawer from "@/modules/admin/components/CustomerDrawer.jsx"
 import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
 import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
-import { TableToolbar, TableSearch, FilterTags, ToolbarSpacer, LayoutToggleButton } from "../../../components/data-display/TableToolbar.jsx";
+import { TableToolbar, TableSearch, FilterTags } from "../../../components/data-display/TableToolbar.jsx";
 import { Button, IconButton } from "@/components/ui/Button.jsx"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../components/ui/radix/DropdownMenu.jsx";
+import { USER_STATUS_MAP } from "@/config/status-maps.js";
 import { usersDb } from "@/mocks/database/users.js"
 import { ordersDb } from "@/mocks/database/orders.js"
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
+import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/radix/Dialog.jsx";
 import { Input } from "@/components/ui/Input.jsx";
 import { Pagination } from "@/components/ui/Pagination.jsx";
 import { customersAdminApi } from "@/services/customersAdmin.api.js";
+import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 
 const USER_STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
-  { value: "active", label: "Activo" },
-  { value: "inactive", label: "Inactivo" },
-  { value: "suspended", label: "Suspendido" },
+  ...Object.entries(USER_STATUS_MAP).map(([value, { label }]) => ({
+    value,
+    label,
+  })),
 ];
 
 const STATUS_FILTER_OPTIONS = USER_STATUS_OPTIONS.filter((option) => option.value);
@@ -32,7 +36,7 @@ const NEW_CUSTOMER_INITIAL = {
   lastName: "",
   email: "",
   phone: "",
-  status: STATUS_FILTER_OPTIONS[0]?.value ?? "active",
+  status: STATUS_FILTER_OPTIONS[0]?.value ?? "activo",
 };
 
 const getStatusLabel = (value) => STATUS_LABEL_MAP[value] ?? value;
@@ -54,7 +58,6 @@ export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  const [condensed, setCondensed] = useState(false);
   const [viewMode, setViewMode] = useState("list"); // "list" o "grid"
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -125,7 +128,8 @@ export default function CustomersPage() {
             newCustomerForm.firstName.trim(),
           email: newCustomerForm.email.trim(),
           telefono: newCustomerForm.phone.trim(),
-          rol: newCustomerForm.status || "activo",
+          status: newCustomerForm.status || "activo",
+          rol: "cliente",
         };
         const response = await customersAdminApi.create(payload);
         const createdCustomer = response?.data?.data ?? response?.data ?? response;
@@ -197,7 +201,7 @@ export default function CustomersPage() {
   const handleStatusChange = useCallback(
     async (customerId, newStatus) => {
       try {
-        await customersAdminApi.update(customerId, { rol: newStatus });
+        await customersAdminApi.update(customerId, { status: newStatus });
         refetchCustomers();
       } catch (error) {
         console.error("Error cambiando estado de cliente:", error);
@@ -297,7 +301,7 @@ export default function CustomersPage() {
         accessorKey: "status",
         header: () => (
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-(--color-text-muted)">Estado</span>
+            <span className="text-sm font-semibold text-(--text-strong)">Estado</span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <IconButton
@@ -421,7 +425,7 @@ export default function CustomersPage() {
                   <DropdownMenuItem
                     onSelect={() => {
                       if (confirm(`¿Desactivar a ${customer.nombre}?`)) {
-                        handleStatusChange(customer.id, "inactive");
+                        handleStatusChange(customer.id, "suspendido");
                       }
                     }}
                     className="text-(--color-error)"
@@ -458,44 +462,45 @@ export default function CustomersPage() {
           onChange={(v) => {
             setSearch(v);
             setPage(1);
-          }}
+          } }
           placeholder="Buscar por nombre, email…"
-          className="flex-1 max-w-md"
-        />
+          className="flex-1 max-w-2xl" />
         <FilterTags tags={activeStatusTags} onRemove={() => handleStatusFilter("")} />
         <div className="ml-auto flex items-center gap-2">
-          <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
-
           <div className="flex items-center gap-0.5 rounded-md border border-(--color-border) p-0.5">
-            <IconButton
-              appearance="ghost"
-              intent={viewMode === "list" ? "primary" : "neutral"}
-              size="sm"
-              icon={<Rows className="h-4 w-4" />}
-              onClick={() => setViewMode("list")}
-              aria-label="Vista lista"
-              className={viewMode === "list" ? "bg-(--color-primary1)/10" : ""}
-            />
-            <IconButton
-              appearance="ghost"
-              intent={viewMode === "grid" ? "primary" : "neutral"}
-              size="sm"
-              icon={<LayoutGrid className="h-4 w-4" />}
-              onClick={() => setViewMode("grid")}
-              aria-label="Vista grid"
-              className={viewMode === "grid" ? "bg-(--color-primary1)/10" : ""}
-            />
+            <TooltipNeutral label="List" position="bottom">
+              <IconButton
+                appearance="ghost"
+                intent={viewMode === "list" ? "primary" : "neutral"}
+                size="sm"
+                icon={<Rows className="h-4 w-4" />}
+                onClick={() => setViewMode("list")}
+                aria-label="Vista lista"
+                className={viewMode === "list" ? "bg-(--color-primary1)/10" : ""}
+              />
+            </TooltipNeutral>
+            <TooltipNeutral label="Grid" position="bottom">
+              <IconButton
+                appearance="ghost"
+                intent={viewMode === "grid" ? "primary" : "neutral"}
+                size="sm"
+                icon={<LayoutGrid className="h-4 w-4" />}
+                onClick={() => setViewMode("grid")}
+                aria-label="Vista grid"
+                className={viewMode === "grid" ? "bg-(--color-primary1)/10" : ""}
+              />
+            </TooltipNeutral>
           </div>
-
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={handleRefresh}
-            leadingIcon={<RefreshCw className="h-4 w-4" />}
-          >
-            Refrescar
-          </Button>
+          <TooltipNeutral label="Refrescar clientes" position="bottom">
+            <IconButton
+              appearance="ghost"
+              intent="neutral"
+              size="sm"
+              icon={<RefreshCw className="h-4 w-4" />}
+              onClick={handleRefresh}
+              aria-label="Refrescar clientes"
+            />
+          </TooltipNeutral>
           <Button
             appearance="solid"
             intent="primary"
@@ -508,37 +513,29 @@ export default function CustomersPage() {
         </div>
       </TableToolbar>
     ),
-    [search, activeStatusTags, viewMode, condensed, handleRefresh, handleStatusFilter]
+    [search, activeStatusTags, viewMode, handleRefresh, handleStatusFilter]
   );
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold text-primary1 mb-2">
-            Clientes
-          </h1>
-          <p className="text-sm text-(--text-weak)">
-            Gestiona la comunidad de usuarios registrados en MOA. {totalCustomers} clientes en total.
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        title="Clientes"
+        subtitle={`Gestiona la comunidad de usuarios registrados en MOA. ${totalCustomers} clientes en total.`}
+      />
 
       {/* Tabla con toolbar integrado */}
       {viewMode === "list" ? (
-        <DataTableV2
-          columns={columns}
-          data={filteredCustomers}
-          loading={isLoadingCustomers}
-          page={page}
-          pageSize={pageSize}
-          total={totalCustomers}
-          onPageChange={setPage}
-          toolbar={toolbar}
-          condensed={condensed}
-          variant="card"
-        />
+          <DataTableV2
+            columns={columns}
+            data={filteredCustomers}
+            loading={isLoadingCustomers}
+            page={page}
+            pageSize={pageSize}
+            total={totalCustomers}
+            onPageChange={setPage}
+            toolbar={toolbar}
+            variant="card"
+          />
       ) : (
         <div>
           {/* Toolbar */}

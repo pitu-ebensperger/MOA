@@ -1,5 +1,13 @@
 import pg from 'pg'
-import 'dotenv/config'
+import dotenv from 'dotenv'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
+// Cargar el .env desde el directorio backend
+dotenv.config({ path: join(__dirname, '..', '.env') })
 
 const { DB_HOST, DB_USER, DB_PASSWORD, DB_DATABASE, DB_PORT } = process.env
 

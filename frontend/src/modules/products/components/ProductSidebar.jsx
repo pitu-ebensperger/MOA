@@ -12,7 +12,7 @@ export function ProductSidebar({
 }) {
   return (
     <aside className="hidden lg:flex lg:w-72 lg:flex-col">
-      <div className="sticky top-28 rounded-3xl border border-(--line,#e3ddd3) bg-white/95 p-6 shadow-sm backdrop-blur">
+      <div className="flex min-h-[calc(100vh-5rem)] flex-col rounded-3xl border border-(--line,#e3ddd3) bg-white/95 p-6 shadow-sm backdrop-blur">
         <header className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-neutral-900">Filtros</h2>
           <button

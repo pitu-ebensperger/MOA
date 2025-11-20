@@ -10,14 +10,25 @@ const normalizeListResponse = (payload = {}) => {
     ? payload.items
     : Array.isArray(payload.products)
     ? payload.products
+    : Array.isArray(payload.data)
+    ? payload.data
     : [];
   const items = src.map(normalizeProduct);
-  const total = Number.isFinite(payload.total) ? payload.total : items.length;
+  const total = Number.isFinite(payload.total) 
+    ? payload.total 
+    : Number.isFinite(payload.pagination?.total)
+    ? payload.pagination.total
+    : items.length;
 
   const page = payload.page && typeof payload.page === "object"
     ? {
         offset: Number.isFinite(Number(payload.page.offset)) ? Number(payload.page.offset) : 0,
         limit: Number.isFinite(Number(payload.page.limit)) ? Number(payload.page.limit) : items.length,
+      }
+    : payload.pagination && typeof payload.pagination === "object"
+    ? {
+        offset: ((payload.pagination.page || 1) - 1) * (payload.pagination.limit || items.length),
+        limit: payload.pagination.limit || items.length,
       }
     : { offset: 0, limit: items.length };
 
@@ -32,7 +43,14 @@ const remoteProductsApi = {
   },
   async getById(id) {
     if (id == null) throw new Error("product id is required");
-    const data = await apiClient.public.get(API_PATHS.products.productDetail(id));
+    const response = await apiClient.public.get(`/productos/${id}`);
+    const data = response?.data ?? response;
+    return normalizeProduct(data);
+  },
+  async getBySlug(slug) {
+    if (!slug) throw new Error("product slug is required");
+    const response = await apiClient.public.get(`/producto/${slug}`);
+    const data = response?.data ?? response;
     return normalizeProduct(data);
   },
   async listCategories(params = {}) {
@@ -64,6 +82,11 @@ const mockProductsApi = {
   async getById(id) {
     if (id == null) throw new Error("product id is required");
     const data = await mockCatalogApi.getById(id);
+    return normalizeProduct(data);
+  },
+  async getBySlug(slug) {
+    if (!slug) throw new Error("product slug is required");
+    const data = await mockCatalogApi.getById(slug);
     return normalizeProduct(data);
   },
   async listCategories(params = {}) {

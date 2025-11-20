@@ -1,13 +1,42 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Modal } from "@/components/ui/Modal.jsx"
-import { Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/ui/radix/Dialog.jsx";
+import { Button } from "@/components/ui/Button.jsx";
+import { Input, Textarea } from "@/components/ui/Input.jsx";
+import { Select } from "@/components/ui/Select.jsx";
 import { ProductShape, CategoryShape } from "@/utils/propTypes.js";
 
 const STATUS_VALUES = ["activo", "sin_stock", "borrador"];
+
+const STATUS_OPTIONS = STATUS_VALUES.map((value) => ({
+  value,
+  label:
+    value === "activo"
+      ? "Activo"
+      : value === "sin_stock"
+        ? "Sin stock"
+        : "Borrador",
+}));
+
+const DEFAULT_FORM_VALUES = {
+  name: "",
+  sku: "",
+  price: 0,
+  stock: 0,
+  status: "activo",
+  fk_category_id: "",
+  imgUrl: "",
+  description: "",
+  color: "",
+  material: "",
+  dimHeight: "",
+  dimWidth: "",
+  dimLength: "",
+  dimUnit: "cm",
+};
 
 const productSchema = z.object({
   id: z.union([z.string(), z.number()]).optional(),
@@ -15,14 +44,12 @@ const productSchema = z.object({
   sku: z.string().min(2, "SKU requerido"),
   price: z.coerce.number().min(0, "Precio inválido"),
   stock: z.coerce.number().int().min(0, "Stock inválido"),
-  status: z.enum(STATUS_VALUES).default("activo"),
+  status: z.enum(STATUS_VALUES),
   fk_category_id: z.union([z.string(), z.number()]).nullable().optional(),
   imgUrl: z.string().url("URL inválida").or(z.literal("")).optional(),
   description: z.string().optional(),
   color: z.string().optional(),
   material: z.string().optional(),
-
-  // Dimensiones en el formulario (strings; luego las transformamos a números)
   dimHeight: z.string().optional(),
   dimWidth: z.string().optional(),
   dimLength: z.string().optional(),
@@ -34,11 +61,13 @@ const toNumOrNull = (value) => {
   return Number.isFinite(n) ? n : null;
 };
 
+const getDefaultValues = () => ({ ...DEFAULT_FORM_VALUES });
+
 export function ProductDrawer({
   open,
   onClose,
-  onSubmit, // (payload) => Promise<void>
-  onDelete, // (product) => void
+  onSubmit,
+  onDelete,
   initial,
   categories = [],
 }) {
@@ -46,45 +75,43 @@ export function ProductDrawer({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(productSchema),
-        defaultValues: {
-          name: "",
-          sku: "",
-          price: 0,
-          stock: 0,
-          status: "activo",
-          fk_category_id: "",
-          imgUrl: "",
-          description: "",
-          color: "",
-          material: "",
-      dimHeight: "",
-      dimWidth: "",
-      dimLength: "",
-      dimUnit: "cm",
-    },
+    defaultValues: getDefaultValues(),
   });
 
-  // Cargar datos iniciales (incluyendo dimensiones)
   useEffect(() => {
     if (!open) return;
 
-        if (initial) {
-          const dim = initial.dimensions || {};
-          reset({
-            ...initial,
-            fk_category_id: initial.fk_category_id ?? "",
-            dimHeight: dim.height ?? "",
-            dimWidth: dim.width ?? "",
-            dimLength: dim.length ?? "",
-            dimUnit: dim.unit ?? "cm",
-          });
+    if (initial) {
+      const dim = initial.dimensions || {};
+      reset({
+        ...initial,
+        fk_category_id: initial.fk_category_id ?? "",
+        dimHeight: dim.height ?? "",
+        dimWidth: dim.width ?? "",
+        dimLength: dim.length ?? "",
+        dimUnit: dim.unit ?? "cm",
+      });
     } else {
-      reset({});
+      reset(getDefaultValues());
     }
   }, [open, initial, reset]);
+
+  const imgUrl = watch("imgUrl");
+
+  const categoryOptions = useMemo(
+    () => [
+      { value: "", label: "Sin categoría" },
+      ...(categories ?? []).map((category) => ({
+        value: String(category.id ?? ""),
+        label: category.name ?? "Sin categoría",
+      })),
+    ],
+    [categories],
+  );
 
   const handleFormSubmit = async (data) => {
     const {
@@ -92,6 +119,7 @@ export function ProductDrawer({
       dimWidth,
       dimLength,
       dimUnit,
+      fk_category_id,
       ...rest
     } = data;
 
@@ -100,277 +128,222 @@ export function ProductDrawer({
     const length = toNumOrNull(dimLength);
     const unit = dimUnit || null;
 
-    let dimensions = null;
-    if (height !== null || width !== null || length !== null || unit) {
-      dimensions = { height, width, length, unit };
-    }
+    const dimensions =
+      height !== null || width !== null || length !== null || unit
+        ? { height, width, length, unit }
+        : null;
 
     const payload = {
       ...rest,
+      fk_category_id: fk_category_id || null,
       dimensions,
     };
 
     await onSubmit?.(payload);
   };
 
+  const previewImage = imgUrl?.trim();
+
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={initial ? "Editar producto" : "Nuevo producto"}
-      placement="right"
-      showCloseButton
-      closeOnOverlayClick={true}
-      bodyClassName="h-full max-h-full px-5 py-4"
-    >
-      <form
-        onSubmit={handleSubmit(handleFormSubmit)}
-        className="flex h-full flex-col gap-4"
-      >
-        {/* Contenido scrollable */}
-        <div className="hide-scrollbar flex-1 space-y-4 overflow-y-auto pr-1">
-          {/* Bloque: info principal */}
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Información básica
-            </h3>
-            <div className="space-y-3">
-              <label className="block text-sm">
-                <span className="mb-1 block">Nombre</span>
-                <input
-                  className="w-full rounded-md border px-3 py-2"
-                  {...register("name")}
-                />
-                {errors.name && (
-                  <em className="mt-0.5 block text-xs text-red-600">
-                    {errors.name.message}
-                  </em>
-                )}
-              </label>
+    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+      <DialogContent variant="drawer" placement="right" className="max-w-2xl rounded-tl-3xl rounded-bl-3xl">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="flex h-full flex-col gap-5 p-6">
+          <DialogHeader>
+            <h2 className="text-lg font-semibold text-(--text-strong)">
+              {initial ? "Editar producto" : "Nuevo producto"}
+            </h2>
+            <p className="text-xs text-(--text-secondary1)">
+              Completa la información para mantener el catálogo actualizado.
+            </p>
+          </DialogHeader>
 
+          <div className="flex-1 space-y-4 overflow-y-auto pr-1 hide-scrollbar">
+            {/* Información básica */}
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3 space-y-3">
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                Información básica
+              </h3>
+              <Input
+                label="Nombre"
+                {...register("name")}
+                error={errors.name?.message}
+                fullWidth
+              />
               <div className="grid grid-cols-2 gap-3">
-                <label className="block text-sm">
-                  <span className="mb-1 block">SKU</span>
-                  <input
-                    className="w-full rounded-md border px-3 py-2"
-                    {...register("sku")}
-                  />
-                  {errors.sku && (
-                    <em className="mt-0.5 block text-xs text-red-600">
-                      {errors.sku.message}
-                    </em>
-                  )}
-                </label>
+                <Input
+                  label="SKU"
+                  {...register("sku")}
+                  error={errors.sku?.message}
+                  fullWidth
+                />
+                <Select
+                  label="Estado"
+                  {...register("status")}
+                  options={STATUS_OPTIONS}
+                  fullWidth
+                />
+              </div>
+            </div>
 
-                <label className="block text-sm">
-                  <span className="mb-1 block">Estado</span>
-                  <select
-                    className="w-full rounded-md border px-3 py-2"
-                    {...register("status")}
-                  >
-                    <option value="activo">Activo</option>
-                    <option value="sin_stock">Sin stock</option>
-                    <option value="borrador">Borrador</option>
-                  </select>
-                </label>
+            {/* Inventario */}
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                Inventario
+              </h3>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <Input
+                  label="Precio"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  {...register("price")}
+                  error={errors.price?.message}
+                />
+                <Input
+                  label="Stock"
+                  type="number"
+                  min="0"
+                  step="1"
+                  {...register("stock")}
+                  error={errors.stock?.message}
+                />
+              </div>
+            </div>
+
+            {/* Clasificación */}
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                Clasificación
+              </h3>
+              <Select
+                label="Categoría"
+                {...register("fk_category_id")}
+                options={categoryOptions}
+                fullWidth
+              />
+            </div>
+
+            {/* Imagen */}
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3 space-y-3">
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                Imagen
+              </h3>
+              <Input
+                label="Imagen (URL)"
+                {...register("imgUrl")}
+                placeholder="https://..."
+                fullWidth
+              />
+              {previewImage && (
+                <div className="rounded-2xl border border-neutral-200 bg-[color:var(--color-neutral1)] px-3 py-2">
+                  <p className="text-xs font-semibold text-(--text-muted)">Previsualización</p>
+                  <div className="mt-2 h-32 w-full overflow-hidden rounded-2xl bg-(--surface-subtle)">
+                    <img
+                      src={previewImage}
+                      alt="Previsualización del producto"
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Características */}
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3 space-y-3">
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                Características
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Color" {...register("color")} />
+                <Input label="Material" {...register("material")} />
+              </div>
+              <Textarea
+                label="Descripción"
+                rows={4}
+                {...register("description")}
+                placeholder="Describe brevemente este producto"
+                fullWidth
+              />
+            </div>
+
+            {/* Dimensiones */}
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
+              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
+                Dimensiones
+              </h3>
+              <div className="mt-2 grid grid-cols-4 gap-3">
+                <Input
+                  label="Alto"
+                  size="sm"
+                  type="number"
+                  min="0"
+                  placeholder="cm"
+                  {...register("dimHeight")}
+                />
+                <Input
+                  label="Ancho"
+                  size="sm"
+                  type="number"
+                  min="0"
+                  placeholder="cm"
+                  {...register("dimWidth")}
+                />
+                <Input
+                  label="Largo"
+                  size="sm"
+                  type="number"
+                  min="0"
+                  placeholder="cm"
+                  {...register("dimLength")}
+                />
+                <Input
+                  label="Unidad"
+                  size="sm"
+                  {...register("dimUnit")}
+                  placeholder="cm"
+                />
               </div>
             </div>
           </div>
 
-          {/* Bloque: precios / stock */}
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Inventario
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block text-sm">
-                <span className="mb-1 block">Precio</span>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full rounded-md border px-3 py-2"
-                  {...register("price")}
-                />
-                {errors.price && (
-                  <em className="mt-0.5 block text-xs text-red-600">
-                    {errors.price.message}
-                  </em>
-                )}
-              </label>
-
-              <label className="block text-sm">
-                <span className="mb-1 block">Stock</span>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full rounded-md border px-3 py-2"
-                  {...register("stock")}
-                />
-                {errors.stock && (
-                  <em className="mt-0.5 block text-xs text-red-600">
-                    {errors.stock.message}
-                  </em>
-                )}
-              </label>
+          <DialogFooter className="flex flex-col gap-3 pt-4">
+            {initial && (
+              <Button
+                type="button"
+                appearance="ghost"
+                intent="error"
+                size="sm"
+                onClick={() => onDelete?.(initial)}
+              >
+                Eliminar producto
+              </Button>
+            )}
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                appearance="ghost"
+                intent="neutral"
+                size="sm"
+                onClick={onClose}
+                className="text-(--text-strong)"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                appearance="solid"
+                intent="primary"
+                size="sm"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Guardando..." : initial ? "Guardar cambios" : "Guardar producto"}
+              </Button>
             </div>
-          </div>
-
-          {/* Bloque: categorización */}
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Clasificación
-            </h3>
-            <div className="space-y-3">
-              <label className="block text-sm">
-                <span className="mb-1 block">Categoría</span>
-                <select
-                  className="w-full rounded-md border px-3 py-2"
-                  {...register("fk_category_id")}
-                >
-                  <option value="">Sin categoría</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-          </div>
-
-          {/* Bloque: imagen */}
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Imagen
-            </h3>
-            <label className="block text-sm">
-              <span className="mb-1 block">Imagen (URL)</span>
-              <input
-                className="w-full rounded-md border px-3 py-2"
-                {...register("imgUrl")}
-              />
-              {errors.imgUrl && (
-                <em className="mt-0.5 block text-xs text-red-600">
-                  {errors.imgUrl.message}
-                </em>
-              )}
-            </label>
-          </div>
-
-          {/* Bloque: características */}
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Características
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block text-sm">
-                <span className="mb-1 block">Color</span>
-                <input
-                  className="w-full rounded-md border px-3 py-2"
-                  {...register("color")}
-                />
-              </label>
-              <label className="block text-sm">
-                <span className="mb-1 block">Material</span>
-                <input
-                  className="w-full rounded-md border px-3 py-2"
-                  {...register("material")}
-                />
-              </label>
-            </div>
-
-            <label className="mt-3 block text-sm">
-              <span className="mb-1 block">Descripción</span>
-              <textarea
-                rows={4}
-                className="w-full rounded-md border px-3 py-2"
-                {...register("description")}
-              />
-            </label>
-          </div>
-
-          {/* Bloque: dimensiones */}
-          <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Dimensiones
-            </h3>
-            <div className="grid grid-cols-4 gap-3">
-              <label className="block text-xs">
-                <span className="mb-1 block">Alto</span>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full rounded-md border px-2 py-1.5 text-sm"
-                  placeholder="cm"
-                  {...register("dimHeight")}
-                />
-              </label>
-              <label className="block text-xs">
-                <span className="mb-1 block">Ancho</span>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full rounded-md border px-2 py-1.5 text-sm"
-                  placeholder="cm"
-                  {...register("dimWidth")}
-                />
-              </label>
-              <label className="block text-xs">
-                <span className="mb-1 block">Largo</span>
-                <input
-                  type="number"
-                  min="0"
-                  className="w-full rounded-md border px-2 py-1.5 text-sm"
-                  placeholder="cm"
-                  {...register("dimLength")}
-                />
-              </label>
-              <label className="block text-xs">
-                <span className="mb-1 block">Unidad</span>
-                <input
-                  className="w-full rounded-md border px-2 py-1.5 text-sm"
-                  placeholder="cm"
-                  {...register("dimUnit")}
-                />
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer: Guardar / Eliminar */}
-        <div className="mt-3 flex justify-between gap-2 border-t border-neutral-100 pt-3">
-          {initial ? (
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 rounded-md border border-red-200 px-3 py-2 text-xs text-red-600 hover:bg-red-50"
-              onClick={() => onDelete?.(initial)}
-            >
-              <Trash2 className="h-4 w-4" />
-              Eliminar
-            </button>
-          ) : (
-            <span />
-          )}
-
-          <div className="flex gap-2">
-            <button
-              type="button"
-              className="rounded-md border px-3 py-2 text-sm"
-              onClick={onClose}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-md bg-(--color-primary1) px-3 py-2 text-sm text-white hover:opacity-90 disabled:opacity-50"
-            >
-              {isSubmitting ? "Guardando…" : "Guardar"}
-            </button>
-          </div>
-        </div>
-      </form>
-    </Modal>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

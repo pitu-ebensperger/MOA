@@ -12,6 +12,39 @@ const ADMIN_PROFILE = {
   rol_code: "ADMIN",
 };
 
+async function cleanupNonAdminUsers() {
+  const { rows: extraUsers } = await pool.query(
+    "SELECT usuario_id FROM usuarios WHERE email <> $1",
+    [ADMIN_PROFILE.email]
+  );
+
+  if (!extraUsers.length) {
+    return;
+  }
+
+  const extraIds = extraUsers.map((row) => row.usuario_id);
+  const cleanupQueries = [
+    {
+      text: "UPDATE configuracion_tienda SET actualizado_por = NULL WHERE actualizado_por = ANY($1)",
+      values: [extraIds],
+    },
+    { text: "DELETE FROM ordenes WHERE usuario_id = ANY($1)", values: [extraIds] },
+    { text: "DELETE FROM carritos WHERE usuario_id = ANY($1)", values: [extraIds] },
+    { text: "DELETE FROM wishlists WHERE usuario_id = ANY($1)", values: [extraIds] },
+    { text: "DELETE FROM metodos_pago WHERE usuario_id = ANY($1)", values: [extraIds] },
+    { text: "DELETE FROM direcciones WHERE usuario_id = ANY($1)", values: [extraIds] },
+    { text: "DELETE FROM usuarios WHERE usuario_id = ANY($1)", values: [extraIds] },
+  ];
+
+  for (const query of cleanupQueries) {
+    await pool.query(query.text, query.values);
+  }
+
+  console.log(
+    `Eliminados ${extraIds.length} usuario(s) extra y sus referencias asociadas`
+  );
+}
+
 async function seedAdminUser() {
   const passwordHash = bcrypt.hashSync(ADMIN_PROFILE.password, 10);
   const sql = `
@@ -36,6 +69,7 @@ async function seedAdminUser() {
 
   try {
     await pool.query(sql, values);
+    await cleanupNonAdminUsers();
     console.log(`Usuario administrador '${ADMIN_PROFILE.email}' asegurado`);
     process.exit(0);
   } catch (error) {

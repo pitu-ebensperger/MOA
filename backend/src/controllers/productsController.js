@@ -219,9 +219,6 @@ export const productsController = {
     }
   },
 
-  /**
-   * Actualizar producto (solo admin)
-   */
   async updateProduct(req, res, next) {
     try {
       const { id } = req.params;
@@ -331,9 +328,6 @@ export const productsController = {
     }
   },
 
-  /**
-   * Eliminar producto (soft delete por defecto, solo admin)
-   */
   async deleteProduct(req, res, next) {
     try {
       const { id } = req.params;
@@ -383,9 +377,6 @@ export const productsController = {
     }
   },
 
-  /**
-   * Actualizar stock de producto (solo admin)
-   */
   async updateStock(req, res, next) {
     try {
       const { id } = req.params;
@@ -438,9 +429,6 @@ export const productsController = {
     }
   },
 
-  /**
-   * Obtener productos con stock bajo (solo admin)
-   */
   async getLowStockProducts(req, res, next) {
     try {
       const { threshold = 5 } = req.query;
@@ -462,9 +450,6 @@ export const productsController = {
     }
   },
 
-  /**
-   * Obtener estadísticas de productos (solo admin)
-   */
   async getProductStats(req, res, next) {
     try {
       const stats = await productsModel.getStats();
@@ -486,9 +471,6 @@ export const productsController = {
     }
   },
 
-  /**
-   * Buscar productos (público)
-   */
   async searchProducts(req, res, next) {
     try {
       const {

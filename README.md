@@ -3,11 +3,10 @@
 ### Usuarios para frontend testing:
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
 - **demo@moa.cl** (contraseña: demo o admin o 123456) 
-- **cliente@mail.com** (contraseña: demo o admin o 123456)
+- **cliente@mail.cl** (contraseña: demo o admin o 123456)
  
 #
-> Los mocks están habilitados por defecto en `frontend/.env`  
-> Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
+> Los mocks están deshabilitados por defecto en `frontend/.env`. Para activarlos define `VITE_USE_MOCKS=true`.
 
 
 ## Estructura del repositorio
@@ -17,16 +16,16 @@ Cada carpeta gestiona su propio node_modules locales, desde la raíz instalar de
 Instalar: `npm install`
 Ejecutar frontend:  `npm run -w frontend dev`
 Ejecutar backend: `npm run -w backend dev`
-
+`npm run db` / `npm run db:reset` 
+`npm run seed:all`
 
 - npm run seed:users --workspace backend (asegura la cuenta `admin@moa.cl/admin123`)
+- npm run seed:clients --workspace backend (agrega clientes de ejemplo; usa `CLIENTS_PASSWORD` si quieres cambiar la contraseña)
 - npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
-  -npm run seed:products --workspace backend (correr para agregar productos iniciales)
-
-
-npm run seed:users --workspace backend
-npm run seed:categories --workspace backend
-npm run seed:products --workspace backend
+- npm run seed:products --workspace backend (correr para agregar productos iniciales)
+- npm run seed:addresses --workspace backend (agrega direcciones ejemplo para cada cliente)
+- npm run seed:carts --workspace backend (prehistoria carritos con items)
+- npm run seed:wishlists --workspace backend (agrega listas de deseos de ejemplo)
 
 
 **`docs/`**

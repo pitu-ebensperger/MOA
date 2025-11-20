@@ -11,17 +11,15 @@
     "migrate": "node scripts/migrate.js",
     "migration": "node scripts/runMigration.js",
     "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
+    "db:reset": "psql -U postgres -f database/schema/DDL.sql",
     "seed:categories": "node database/seed/categoriesSeed.js",
     "seed:products": "node database/seed/productsSeed.js",
     "seed:users": "node database/seed/usersSeed.js",
-    "seed:customers": "node database/seed/customersSeed.js",
+    "seed:clients": "node database/seed/clientsSeed.js",
     "seed:addresses": "node database/seed/addressesSeed.js",
-    "seed:payment-methods": "node database/seed/paymentMethodsSeed.js",
-    "seed:wishlists": "node database/seed/wishlistSeed.js",
-    "seed:carts": "node database/seed/cartSeed.js",
-    "seed:orders": "node database/seed/ordersSeed.js",
-    "seed:order-items": "node database/seed/orderItemsSeed.js",
-    "seed:all": "npm run seed:categories && npm run seed:products && npm run seed:customers && npm run seed:payment-methods && npm run seed:wishlists && npm run seed:carts && npm run seed:orders && npm run seed:order-items"
+    "seed:carts": "node database/seed/cartsSeed.js",
+    "seed:wishlists": "node database/seed/wishlistsSeed.js",
+    "seed:all": "npm run seed:users && npm run seed:clients && npm run seed:categories && npm run seed:products && npm run seed:addresses && npm run seed:carts && npm run seed:wishlists"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import UserInfoSection from '../components/UserInfoSection.jsx';
 import WishlistSection from '../components/WishlistSection.jsx';
 import OrderSection from '../components/MyOrdersSection.jsx';
-import { useProducts } from '../../products/hooks/useProducts.js';
+import { useUserOrders } from '../../../hooks/useUserOrders.js';
 import { useAuth } from "../../../context/auth-context.js";
 import { wishlistApi } from '../../../services/wishlist.api.js';
-
-const PROFILE_PRODUCT_FILTERS = Object.freeze({ limit: 12 });
 
 export const ProfilePage = () => {
   const { token } = useAuth();
@@ -24,10 +22,10 @@ export const ProfilePage = () => {
   }, [token]);
 
   const {
-    products = [],
+    orders = [],
     isLoading,
     error,
-  } = useProducts(PROFILE_PRODUCT_FILTERS);
+  } = useUserOrders({ limit: 4 });
 
   return (
     <div>
@@ -40,7 +38,7 @@ export const ProfilePage = () => {
       />
 
       <OrderSection 
-        products={products} 
+        orders={orders} 
         isLoading={isLoading} 
         error={error} 
       />

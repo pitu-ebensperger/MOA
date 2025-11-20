@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Edit3, Trash2 } from "lucide-react";
 
@@ -14,6 +14,8 @@ import {
 import { Input, Textarea } from "@/components/ui/Input.jsx";
 import { buildCategoryColumns } from "@/modules/admin/utils/categoriesColumns.jsx";
 import { useAdminCategories, ADMIN_CATEGORIES_QUERY_KEY } from "@/modules/admin/hooks/useAdminCategories.js";
+import { DEFAULT_PAGE_SIZE } from "@/config/constants.js";
+import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 
 const slugPattern = /^[a-z0-9-]+$/;
 
@@ -46,6 +48,22 @@ export default function AdminCategoriesPage() {
   const [pageAlert, setPageAlert] = useState(null);
 
   const columns = useMemo(() => buildCategoryColumns(), []);
+  const categoriesPageSize = DEFAULT_PAGE_SIZE;
+  const categoriesList = useMemo(() => categories ?? [], [categories]);
+  const totalCategories = categoriesList.length;
+  const maxPage = Math.max(1, Math.ceil(totalCategories / categoriesPageSize));
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    if (page > maxPage) {
+      setPage(maxPage);
+    }
+  }, [page, maxPage]);
+
+  const paginatedCategories = useMemo(() => {
+    const start = (page - 1) * categoriesPageSize;
+    return categoriesList.slice(start, start + categoriesPageSize);
+  }, [categoriesList, page, categoriesPageSize]);
 
   const showAlert = useCallback((message, type = "success") => {
     setPageAlert({ message, type });
@@ -205,24 +223,21 @@ export default function AdminCategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold text-(--text-strong)">Categorías</h1>
-          <p className="text-sm text-(--text-secondary1)">
-            Gestiona las categorías visibles en la tienda y mantén coherencia con los
-            productos.
-          </p>
-        </div>
-        <Button
-          size="sm"
-          appearance="solid"
-          intent="primary"
-          leadingIcon={<Plus className="h-4 w-4" />}
-          onClick={openCreateDrawer}
-        >
-          Crear Categoría
-        </Button>
-      </header>
+      <AdminPageHeader
+        title="Categorías"
+        subtitle="Gestiona las categorías visibles en la tienda y mantén coherencia con los productos."
+        actions={
+          <Button
+            size="sm"
+            appearance="solid"
+            intent="primary"
+            leadingIcon={<Plus className="h-4 w-4" />}
+            onClick={openCreateDrawer}
+          >
+            Crear Categoría
+          </Button>
+        }
+      />
 
       {pageAlert && (
         <div
@@ -244,11 +259,16 @@ export default function AdminCategoriesPage() {
 
       <DataTableV2
         columns={columns}
-        data={categories}
+        data={paginatedCategories}
         loading={isLoading}
         emptyMessage="No hay categorías registradas"
         rowActions={rowActions}
         variant="card"
+        maxHeight="calc(100vh - 260px)"
+        page={page}
+        pageSize={categoriesPageSize}
+        total={totalCategories}
+        onPageChange={setPage}
       />
 
       <Dialog open={isDrawerOpen} onOpenChange={(open) => !open && handleCloseDrawer()}>
@@ -321,14 +341,15 @@ export default function AdminCategoriesPage() {
 
             <DialogFooter className="flex flex-col gap-2 pt-4">
               <div className="flex items-center justify-between gap-3">
-                <Button
-                  type="button"
-                  appearance="ghost"
-                  intent="neutral"
-                  onClick={handleCloseDrawer}
-                >
-                  Cancelar
-                </Button>
+            <Button
+              type="button"
+              appearance="ghost"
+              intent="neutral"
+              onClick={handleCloseDrawer}
+              className="text-(--text-strong)"
+            >
+              Cancelar
+            </Button>
 
                 <Button
                   type="submit"

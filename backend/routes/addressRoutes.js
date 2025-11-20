@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getUserAddresses,
   getAddressById,
+  getDefaultAddress,
   createAddress,
   updateAddress,
   setDefaultAddress,
@@ -11,22 +12,27 @@ import { verifyToken } from "../src/middleware/tokenMiddleware.js";
 
 const router = Router();
 
-// GET / Obtener todas las direcciones del usuario
-router.get("/direcciones", verifyToken, getUserAddresses);
+// Todas las rutas de direcciones requieren autenticación
 
-// GET / Obtener una dirección específica
-router.get("/direcciones/:id", verifyToken, getAddressById);
+// Obtener todas las direcciones del usuario
+router.get("/api/direcciones", verifyToken, getUserAddresses);
 
-// POST / Crear nueva dirección
-router.post("/direcciones", verifyToken, createAddress);
+// Obtener dirección predeterminada
+router.get("/api/direcciones/predeterminada", verifyToken, getDefaultAddress);
 
-// PATCH / Actualizar dirección
-router.patch("/direcciones/:id", verifyToken, updateAddress);
+// Obtener dirección por ID
+router.get("/api/direcciones/:id", verifyToken, getAddressById);
 
-// PATCH / Establecer como predeterminada
-router.patch("/direcciones/:id/predeterminada", verifyToken, setDefaultAddress);
+// Crear nueva dirección
+router.post("/api/direcciones", verifyToken, createAddress);
 
-// DELETE / Eliminar dirección
-router.delete("/direcciones/:id", verifyToken, deleteAddress);
+// Actualizar dirección existente
+router.patch("/api/direcciones/:id", verifyToken, updateAddress);
+
+// Establecer dirección como predeterminada
+router.patch("/api/direcciones/:id/predeterminada", verifyToken, setDefaultAddress);
+
+// Eliminar dirección
+router.delete("/api/direcciones/:id", verifyToken, deleteAddress);
 
 export default router;

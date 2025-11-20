@@ -56,9 +56,9 @@ export default function EntornoAdmin({ children }) {
     <div className="admin-shell admin-page min-h-screen bg-(--background) text-body" data-admin-context>
       <header className="h-0" />
 
-      <div className="flex min-h-screen relative items-stretch">
+      <div className="flex min-h-screen relative items-stretch h-full">
         <aside
-          className={`${isExpanded ? "w-56" : "w-20"} flex flex-col items-center self-stretch min-h-screen bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
+          className={`${isExpanded ? "w-56" : "w-20"} sticky top-0 self-start flex flex-col items-center h-full min-h-screen bg-white border-r border-neutral-100 py-5 px-2.5 transition-[width,padding] duration-400 ease-in-out`}
         >
           <div className="mb-5 w-full grid grid-cols-3 items-center">
             <div />
@@ -157,7 +157,7 @@ export default function EntornoAdmin({ children }) {
               </nav>
             </div>
 
-            <div className="border-t border-neutral-200 px-2.5 py-4">
+            <div className="border-t border-neutral-200 px-2.5 py-4 flex flex-col gap-3">
               {isExpanded ? (
                 <Button
                   appearance="ghost"
@@ -189,8 +189,6 @@ export default function EntornoAdmin({ children }) {
                   </Button>
                 </TooltipNeutral>
               )}
-
-              <div className="my-3 h-px w-full bg-neutral-200" />
 
               {isExpanded ? (
                 <Button

@@ -37,7 +37,7 @@ const formatWeight = (weight) => {
 
 
 export const ProductDetailPage = () => {
-  const { id } = useParams();
+  const { id: slugOrId } = useParams();
   const { categories } = useCategories();
   const [state, setState] = useState(initialState);
   const [quantity, setQuantity] = useState(1);
@@ -50,7 +50,7 @@ export const ProductDetailPage = () => {
   ];
 
   useEffect(() => {
-    if (!id) {
+    if (!slugOrId) {
       setState({ product: null, isLoading: false, error: new Error("Producto no encontrado") });
       return;
     }
@@ -58,10 +58,12 @@ export const ProductDetailPage = () => {
     let cancelled = false;
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
+    // First fetch by slug to get the product with its ID
     productsApi
-      .getById(id)
+      .getBySlug(slugOrId)
       .then((product) => {
         if (cancelled) return;
+        // Now we have the product with its numeric ID for any future operations
         setState({ product, isLoading: false, error: null });
       })
       .catch((error) => {
@@ -72,7 +74,7 @@ export const ProductDetailPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [slugOrId]);
 
   const product = state.product;
   const categoryBreadcrumb = useMemo(() => {
@@ -110,6 +112,19 @@ export const ProductDetailPage = () => {
     if (!specs || typeof specs !== "object" || Array.isArray(specs)) return [];
     return Object.entries(specs);
   }, [product]);
+
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    const rawGallery = Array.isArray(product.gallery) ? product.gallery : [];
+    const filtered = rawGallery.filter(Boolean);
+    if (filtered.length) return filtered;
+    if (product.imgUrl) return [product.imgUrl];
+    if (product.imageUrl) return [product.imageUrl];
+    return [];
+  }, [product]);
+
+  const mainImage = galleryImages[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
+  const thumbnailImages = galleryImages.slice(1, 4);
 
   const highlights = [
     {
@@ -215,15 +230,46 @@ export const ProductDetailPage = () => {
   return (
     <>
       <main className="page container-px mx-auto max-w-6xl py-10 lg:py-14">
-        <div className="mb-6 text-neutral-500">
+        
+
+        <article className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
+          <div className="space-y-4 h-full">
+            <div className="relative flex h-full flex-col overflow-hidden rounded-[32px] bg-neutral-100 shadow-sm max-h-[580px]">
+              <img
+                src={mainImage}
+                alt={product.name ?? "Imagen del producto"}
+                className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            {thumbnailImages.length > 0 && (
+              <div className="grid gap-3 sm:grid-cols-3">
+                {thumbnailImages.map((imageUrl, index) => (
+                  <div
+                    key={`${imageUrl}-${index}`}
+                    className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white"
+                  >
+                    <img
+                      src={imageUrl}
+                      alt={`${product.name ?? "Producto"} - imagen ${index + 2}`}
+                      className="h-24 w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-6">
+            <div className="mb-6 text-neutral-500">
           <Breadcrumbs items={breadcrumbItems} className="text-sm font-light" />
         </div>
-
-        <article className="grid gap-10">
-          <div className="space-y-6">
             <div>
-              <h1 className="title-sans text-2xl text-(--color-secondary12) sm:text-3xl">{product.name}</h1>
-              <div className="mt-3 flex items-baseline gap-3">
+              <h1 className="title-sans text-xl leading-tight text-(--color-secondary12) sm:text-2xl sm:leading-tight">{product.name}</h1>
+              <div className="mt-0 flex items-baseline gap-3">
                 <Price value={product.price} className="text-3xl font-semibold text-(--color-secondary1)" />
                 {product.compareAtPrice && (
                   <Price value={product.compareAtPrice} className="text-base text-neutral-400 line-through" />
@@ -239,7 +285,7 @@ export const ProductDetailPage = () => {
                 <button
                   type="button"
                   onClick={handleDecrease}
-                  className="w-full rounded-full border border-(--color-primary1) px-6 py-2 text-base font-medium text-(--color-primary1) transition hover:bg-(--color-primary1) hover:text-(--color-light) disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto"
+                  className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
                   aria-label="Disminuir cantidad"
                 >
                   <Minus className="size-4" aria-hidden />

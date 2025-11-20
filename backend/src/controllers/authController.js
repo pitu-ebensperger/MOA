@@ -26,7 +26,7 @@ export const loginUser = async (req, res, next) => {
       { 
         id: user.usuario_id, 
         email: user.email,
-        role_code: user.role_code,
+        role_code: user.rol_code,
         rol: user.rol
       },
       JWT_SECRET,
@@ -43,7 +43,7 @@ export const loginUser = async (req, res, next) => {
         email: user.email,
         telefono: user.telefono,
         rol: user.rol,
-        role_code: user.role_code,
+        role_code: user.rol_code,
       },
     });
   } catch (error) {

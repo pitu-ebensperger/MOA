@@ -1,15 +1,8 @@
 import configModel from '../models/configModel.js';
 import { handleError } from '../utils/error.utils.js';
 
-/**
- * Controlador para gestionar la configuración de la tienda
- */
 const configController = {
-  /**
-   * Obtener la configuración actual de la tienda
-   * @route GET /api/config
-   * @access Public
-   */
+
   async getConfig(req, res) {
     try {
       const config = await configModel.getConfig();
@@ -24,11 +17,6 @@ const configController = {
     }
   },
 
-  /**
-   * Actualizar la configuración de la tienda
-   * @route PUT /api/config
-   * @access Private/Admin
-   */
   async updateConfig(req, res) {
     try {
       const userId = req.user?.id_usuario;
@@ -97,11 +85,6 @@ const configController = {
     }
   },
 
-  /**
-   * Inicializar configuración con valores por defecto
-   * @route POST /api/config/init
-   * @access Private/Admin
-   */
   async initializeConfig(req, res) {
     try {
       // Validar que el usuario sea admin

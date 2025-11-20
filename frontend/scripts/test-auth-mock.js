@@ -14,7 +14,7 @@ console.log('');
 const testUsers = [
   { email: 'admin@moa.cl', password: 'admin', expectedRole: 'ADMIN' },
   { email: 'demo@moa.cl', password: 'demo', expectedRole: 'CLIENTE' },
-  { email: 'cliente@mail.com', password: 'demo', expectedRole: 'CLIENTE' }
+  { email: 'cliente@mail.cl', password: 'demo', expectedRole: 'CLIENTE' }
 ];
 
 async function testLogin(credentials) {

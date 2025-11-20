@@ -1,9 +1,5 @@
 import orderAdminModel from "../models/orderAdminModel.js";
 
-/**
- * Obtener todas las órdenes con filtros (Admin)
- * GET /admin/pedidos
- */
 const getAllOrders = async (req, res) => {
   try {
     const {
@@ -48,10 +44,7 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-/**
- * Obtener orden por ID con todos los detalles (Admin)
- * GET /admin/pedidos/:id
- */
+/*GET /admin/pedidos/:id */
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -80,10 +73,8 @@ const getOrderById = async (req, res) => {
   }
 };
 
-/**
- * Actualizar estado de una orden (Admin)
- * PATCH /admin/pedidos/:id/estado
- * PUT /api/admin/orders/:id/status
+/*PATCH /admin/pedidos/:id/estado
+PUT /api/admin/orders/:id/status
  */
 const updateOrderStatus = async (req, res) => {
   try {
@@ -170,10 +161,7 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-/**
- * Agregar información de seguimiento (Admin)
- * POST /admin/pedidos/:id/seguimiento
- */
+/*POST /admin/pedidos/:id/seguimiento */
 const addTrackingInfo = async (req, res) => {
   try {
     const { id } = req.params;
@@ -223,10 +211,6 @@ const addTrackingInfo = async (req, res) => {
   }
 };
 
-/**
- * Obtener estadísticas de órdenes (Admin)
- * GET /admin/pedidos/stats
- */
 const getOrderStats = async (req, res) => {
   try {
     const { fecha_desde, fecha_hasta } = req.query;
@@ -251,10 +235,9 @@ const getOrderStats = async (req, res) => {
   }
 };
 
-/**
- * Actualizar notas internas de una orden (Admin)
- * PATCH /admin/pedidos/:id/notas
- */
+
+//TODO: revisar si internal notes va a ir o si se elimina
+
 const updateInternalNotes = async (req, res) => {
   try {
     const { id } = req.params;

@@ -25,6 +25,8 @@ router.get("/admin/analytics/stock", verifyAdmin, asyncHandler(AdminController.g
 router.get("/admin/analytics/orders/distribution", verifyAdmin, asyncHandler(AdminController.getOrderDistribution));
 
 // === RUTAS DE PRODUCTOS ADMIN ===
+router.get("/admin", verifyAdmin, asyncHandler(AdminController.getDashboardMetrics));
+
 router.get("/admin/productos", verifyAdmin, (req, res) => {
   res.status(501).json({ message: "Listado de productos admin no implementado" });
 });

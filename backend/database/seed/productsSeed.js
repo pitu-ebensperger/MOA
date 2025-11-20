@@ -13,15 +13,11 @@ function normalizeProduct(product) {
     sku: product.sku,
 
     precio_cents: product.price * 100,
-    compare_at_price_cents: product.compareAtPrice
-      ? product.compareAtPrice * 100
-      : null,
 
     stock: product.stock ?? 0,
     status: product.status ?? "activo",
 
     descripcion: product.description ?? null,
-    descripcion_corta: product.shortDescription ?? null,
 
     img_url: product.imgUrl ?? null,
     gallery: product.gallery ?? null,
@@ -34,7 +30,6 @@ function normalizeProduct(product) {
 
     dimensions: product.dimensions ? JSON.stringify(product.dimensions) : null,
     weight: product.weight ? JSON.stringify(product.weight) : null,
-    specs: product.specs ? JSON.stringify(product.specs) : null,
   };
 }
 
@@ -51,11 +46,9 @@ async function seedProducts() {
           slug,
           sku,
           precio_cents,
-          compare_at_price_cents,
           stock,
           status,
           descripcion,
-          descripcion_corta,
           img_url,
           gallery,
           badge,
@@ -63,14 +56,12 @@ async function seedProducts() {
           color,
           material,
           dimensions,
-          weight,
-          specs
+          weight
         )
         VALUES (
           $1, $2, $3, $4, $5, $6,
           $7, $8, $9, $10, $11, $12,
-          $13, $14, $15, $16, $17, $18,
-          $19, $20
+          $13, $14, $15, $16, $17
         )
         ON CONFLICT (slug) DO UPDATE SET
           public_id = EXCLUDED.public_id,
@@ -78,11 +69,9 @@ async function seedProducts() {
           nombre = EXCLUDED.nombre,
           sku = EXCLUDED.sku,
           precio_cents = EXCLUDED.precio_cents,
-          compare_at_price_cents = EXCLUDED.compare_at_price_cents,
           stock = EXCLUDED.stock,
           status = EXCLUDED.status,
           descripcion = EXCLUDED.descripcion,
-          descripcion_corta = EXCLUDED.descripcion_corta,
           img_url = EXCLUDED.img_url,
           gallery = EXCLUDED.gallery,
           badge = EXCLUDED.badge,
@@ -90,8 +79,7 @@ async function seedProducts() {
           color = EXCLUDED.color,
           material = EXCLUDED.material,
           dimensions = EXCLUDED.dimensions,
-          weight = EXCLUDED.weight,
-          specs = EXCLUDED.specs
+          weight = EXCLUDED.weight
         RETURNING producto_id;
       `;
 
@@ -102,11 +90,9 @@ async function seedProducts() {
         p.slug,
         p.sku,
         p.precio_cents,
-        p.compare_at_price_cents,
         p.stock,
         p.status,
         p.descripcion,
-        p.descripcion_corta,
         p.img_url,
         p.gallery,
         p.badge,
@@ -115,7 +101,6 @@ async function seedProducts() {
         p.material,
         p.dimensions,
         p.weight,
-        p.specs,
       ];
 
       const result = await pool.query(query, values);

@@ -29,6 +29,7 @@ import { Pagination } from '@/components/ui/Pagination.jsx';
 
 import { formatCurrencyCLP } from '@/utils/currency.js';
 import { formatDateTime } from '@/utils/date.js';
+import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 
 // Estados y opciones
 const ESTADOS_PAGO = [
@@ -622,17 +623,10 @@ export default function OrdersAdminPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-neutral-900">
-            Gestión de Pedidos
-          </h1>
-          <p className="text-neutral-600">
-            Administra y realiza seguimiento de todas las órdenes de la tienda
-          </p>
-        </div>
-        <div className="flex gap-3">
+      <AdminPageHeader
+        title="Gestión de Pedidos"
+        subtitle="Administra y realiza seguimiento de todas las órdenes de la tienda."
+        actions={
           <Button
             appearance="outline"
             intent="neutral"
@@ -642,8 +636,8 @@ export default function OrdersAdminPage() {
           >
             Exportar CSV
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Estadísticas */}
       {statsLoading ? (

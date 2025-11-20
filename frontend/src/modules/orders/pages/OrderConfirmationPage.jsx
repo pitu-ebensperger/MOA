@@ -166,7 +166,7 @@ export const OrderConfirmationPage = () => {
   const trackingUrl = getTrackingUrl(trackingNumber)
 
   const paymentLabel =
-    order?.payment?.provider ?? order?.metodo_pago_marca ?? order?.metodo_pago_tipo ?? "Método de pago"
+    order?.payment?.provider ?? "Pago por confirmar con nuestro equipo"
 
   const shippingMethod = order?.shipment?.carrier ?? order?.metodo_despacho ?? "Despacho estándar"
   return (

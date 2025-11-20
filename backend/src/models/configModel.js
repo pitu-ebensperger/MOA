@@ -1,13 +1,7 @@
 import pool from '../../database/config.js';
 
-/**
- * Modelo para gestionar la configuración de la tienda
- */
 const configModel = {
-  /**
-   * Obtener la configuración actual de la tienda
-   * @returns {Promise<Object>} Configuración de la tienda
-   */
+
   async getConfig() {
     try {
       const query = `
@@ -40,12 +34,6 @@ const configModel = {
     }
   },
 
-  /**
-   * Actualizar la configuración de la tienda
-   * @param {Object} configData - Datos de configuración a actualizar
-   * @param {number} userId - ID del usuario que realiza la actualización
-   * @returns {Promise<Object>} Configuración actualizada
-   */
   async updateConfig(configData, userId) {
     const client = await pool.connect();
     
@@ -105,10 +93,6 @@ const configModel = {
     }
   },
 
-  /**
-   * Inicializar configuración con valores por defecto (si no existe)
-   * @returns {Promise<Object>} Configuración creada
-   */
   async initializeConfig() {
     try {
       const checkQuery = 'SELECT id FROM configuracion_tienda WHERE id = 1';

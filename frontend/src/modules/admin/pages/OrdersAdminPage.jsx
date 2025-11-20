@@ -38,6 +38,7 @@ import { Badge } from '@/components/ui/Badge.jsx';
 import { Pagination } from '@/components/ui/Pagination.jsx';
 import { formatCurrencyCLP } from '@/utils/currency.js';
 import { formatDate_ddMMyyyy, formatDateTime, relativeTime } from '@/utils/date.js';
+import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 
 // Estados válidos
 const ESTADOS_PAGO = [
@@ -849,55 +850,50 @@ export default function OrdersAdminPage() {
 
   return (
     <section className="space-y-6">
-      {/* Header */}
-      <header className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <Package className="h-8 w-8 text-primary1" />
-            <h1 className="text-3xl font-bold text-primary1">
-              Gestión de Pedidos
-            </h1>
+      <AdminPageHeader
+        title="Gestión de Pedidos"
+        subtitle="Supervisa y gestiona cada orden que llega a la tienda."
+        icon={<Package className="h-8 w-8 text-primary1" />}
+        actions={
+          <div className="flex items-center gap-3">
+            <Button
+              appearance="ghost"
+              intent="neutral"
+              size="sm"
+              onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+              title={notificationsEnabled ? 'Desactivar notificaciones' : 'Activar notificaciones'}
+            >
+              {notificationsEnabled ? (
+                <Bell className="h-4 w-4" />
+              ) : (
+                <BellOff className="h-4 w-4" />
+              )}
+            </Button>
+
+            <Button
+              appearance="ghost"
+              intent="neutral"
+              size="sm"
+              onClick={fetchOrders}
+              disabled={loading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Actualizar
+            </Button>
+
+            <Button
+              appearance="solid"
+              intent="primary"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={orders.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Exportar CSV
+            </Button>
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-            title={notificationsEnabled ? 'Desactivar notificaciones' : 'Activar notificaciones'}
-          >
-            {notificationsEnabled ? (
-              <Bell className="h-4 w-4" />
-            ) : (
-              <BellOff className="h-4 w-4" />
-            )}
-          </Button>
-
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={fetchOrders}
-            disabled={loading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Actualizar
-          </Button>
-
-          <Button
-            appearance="solid"
-            intent="primary"
-            size="sm"
-            onClick={handleExportCSV}
-            disabled={orders.length === 0}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exportar CSV
-          </Button>
-        </div>
-      </header>
+        }
+      />
 
       {/* Estadísticas */}
       {stats && (
