@@ -38,6 +38,24 @@ function formatDate_ddMMyyyy(dateLike, fallback = '') {
   return `${p.day}/${p.month}/${p.year}`;
 }
 
+/** dd/MM/yyyy HH:mm (ej: 30/10/2025 14:30) */
+function formatDateTime(dateLike, fallback = '') {
+  const d = toDate(dateLike);
+  if (!d) return fallback;
+  
+  const dateFormatter = new Intl.DateTimeFormat(LOCALE, {
+    timeZone: TIME_ZONE,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  
+  return dateFormatter.format(d);
+}
+
 /** Relative time ("hace X días") */
 function relativeTime(fromDateLike, toDateLike = new Date(), fallback = '') {
   const from = toDate(fromDateLike);
@@ -68,4 +86,4 @@ function relativeTime(fromDateLike, toDateLike = new Date(), fallback = '') {
   return fallback;
 }
 
-export { formatDate_ddMMyyyy, relativeTime };
+export { formatDate_ddMMyyyy, formatDateTime, relativeTime };

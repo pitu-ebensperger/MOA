@@ -1,5 +1,5 @@
-import { ProductFiltersDrawer } from "./ProductFiltersDrawer.jsx";
-import { ProductSidebar } from "./ProductSidebar.jsx";
+import { ProductFiltersDrawer } from "@/modules/products/components/ProductFiltersDrawer.jsx"
+import { ProductSidebar } from "@/modules/products/components/ProductSidebar.jsx"
 
 export function ProductsFiltersPanel({
   categories,

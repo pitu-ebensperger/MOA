@@ -1,29 +1,53 @@
 export const API_PATHS = {
+  home: {
+    landing: "/home",
+  },
   auth: {
     login: "/login",
-    register: "/register",
-    profile: "/auth/profile",
-    forgot: '/auth/forgot-password',
-    reset: '/auth/reset-password',
+    register: "/registro",
+    profile: "/auth/perfil",
+    forgot: "/auth/olvidaste-contrasena",
+    reset: "/auth/restablecer-contrasena",
   },
-  catalog: {
-    products: "/catalog/products",
-    productDetail: (id) => `/catalog/products/${id}`,
-    categories: "/catalog/categories",
-    collections: "/catalog/collections",
+  products: {
+    products: "/productos",
+    productDetail: (id) => `/producto/${id}`,
+    categories: "/categorias",
   },
   cart: {
-    root: (userId) => `/users/${userId}/cart`,
-    checkout: (userId) => `/users/${userId}/checkout`,
+    root: (userId) => `/${userId}/cart`,
+    checkout: (userId) => `/${userId}/checkout`,
+  },
+  profile: {
+    root: (userId) => `/${userId}/perfil`,
   },
   orders: {
-    root: "/orders",
-    detail: (id) => `/orders/${id}`,
+    root: (userId) => `/${userId}/mis-pedidos`,
+    detail: (userId, orderId) => `/${userId}/mis-pedidos/${orderId}`,
   },
   wishlist: {
-    root: (userId) => `/users/${userId}/wishlist`,
+    root: (userId) => `/${userId}/wishlist`,
   },
-  home: {
-    landing: "/content/home",
+  support: {
+    contact: "/contacto",
+    faq: "/preguntas-frecuentes",
+    privacy: "/politica-de-privacidad",
+    terms: "/terminos-y-condiciones",
+    returns: "/cambios-y-devoluciones",
+  },
+  admin: {
+    dashboard: "/admin",
+    products: "/admin/productos",
+    categories: "/admin/categorias",
+    categoryDetail: (id) => `/admin/categorias/${id}`,
+    categoryProductsCount: (id) => `/admin/categorias/${id}/productos/count`,
+    orders: "/admin/pedidos",
+    customers: "/admin/usuarios",
+    createCustomer: "/admin/clientes",
+    updateCustomer: (id) => `/admin/clientes/${id}`,
+    settings: "/admin/configuraciones",
+    uiDemo: "/admin", // TODO: quitar alias temporal cuando UI demo tenga ruta propia
+    // Ruta de pruebas de componentes
+    test: "/admin/test",
   },
 };

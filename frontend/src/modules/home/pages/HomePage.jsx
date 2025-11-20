@@ -1,10 +1,13 @@
-import ContactSection from "../components/ContactSection.jsx";
-import HeroSection from "../components/HeroSection.jsx";
-import ProductsSection from "../components/ProductsSection.jsx";
-import { useHomeLanding } from "../hooks/useHomeLanding.js";
+import ContactSection from "@/modules/home/components/ContactSection.jsx"
+import HeroSection from "@/modules/home/components/HeroSection.jsx"
+import ProductsSection from "@/modules/home/components/ProductsSection.jsx"
+import { useHomeLanding } from "@/modules/home/hooks/useHomeLanding.js"
 
 export const HomePage = () => {
   const { home, isLoading, error } = useHomeLanding();
+  console.log('--------');
+  console.log(home)
+  console.log('--------');
 
   const categories = home?.categories ?? undefined;
   const featuredProducts = home?.featuredProducts ?? undefined;

@@ -1,7 +1,7 @@
 export const usersDb = {
   metadata: {
     lastSyncAt: "2024-04-18T08:00:00Z",
-    total: 2,
+    total: 3,
     adminCount: 1,
   },
   users: [
@@ -28,21 +28,50 @@ export const usersDb = {
       role: "CLIENTE",
       status: "activo",
       phone: "+56 9 8765 4321",
-      avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=400&h=400&fit=facearea",
       lastLoginAt: "2024-04-17T22:45:00Z",
       createdAt: "2023-08-12T16:25:00Z",
       addresses: [
         {
-          id: "addr-001",
+          address_id: "addr-001",
           label: "Casa",
           street: "Av. Italia 1024",
+          commune: "Santiago",
           city: "Santiago",
           region: "RM",
           country: "Chile",
+          postalcode: "7500000",
           isDefault: true,
         },
       ],
       stats: { orders: 8, lifetimeValue: 4_280_000 },
+    },
+    {
+      id: "usr-demo",
+      username: "demo",
+      firstName: "Usuario",
+      lastName: "Demo",
+      email: "demo@moa.cl",
+      role: "CLIENTE",
+      status: "activo",
+      phone: "+56 9 1234 5678",
+      avatar:
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&h=400&fit=facearea",
+      lastLoginAt: "2024-04-18T10:00:00Z",
+      createdAt: "2024-01-01T00:00:00Z",
+      addresses: [
+        {
+          address_id: "addr-demo",
+          label: "Casa",
+          street: "Av. Providencia 1234",
+          commune: "Providencia",
+          city: "Santiago",
+          region: "RM",
+          country: "Chile",
+          postalcode: "7500000",
+          isDefault: true,
+        },
+      ],
+      stats: { orders: 3, lifetimeValue: 150_000 },
     },
   ],
 };

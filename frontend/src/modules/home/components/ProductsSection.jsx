@@ -1,52 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import ProductCard from "../../products/components/ProductCard.jsx";
-import Button from "../../../components/ui/Button.jsx";
-import { matchesProductCategory } from "../../products/utils/product.js";
-import { ALL_CATEGORY_ID } from "../../../utils/constants.js";
-
-const normalizeProduct = (product, index) => {
-  const safeId = product?.id ?? `featured-${index}`;
-  const normalizedName = product?.name ?? product?.slug ?? `Producto ${index + 1}`;
-  const normalizedImage = product?.imgUrl ?? product?.gallery?.[0] ?? null;
-  const normalizedPrice = product?.price ?? 50000;
-
-  return {
-    ...product,
-    id: safeId,
-    name: normalizedName,
-    imgUrl: normalizedImage,
-    price: normalizedPrice,
-  };
-};
-
-const buildTabs = (categories) => {
-  const source =
-    Array.isArray(categories) && categories.length
-      ? categories.filter((category) => category?.parentId === null || category?.parentId === undefined)
-      : [];
-
-  const items = source
-    .map((category, index) => {
-      const filterValue = category?.id ?? category?.slug ?? `category-${index}`;
-      return {
-        id: String(category?.id ?? category?.slug ?? index),
-        label: category?.name ?? `Categoría ${index + 1}`,
-        value: filterValue,
-      };
-    })
-    .filter((item) => Boolean(item.label));
-
-  const hasAll = items.some((item) => String(item.value) === String(ALL_CATEGORY_ID));
-  const baseTabs = hasAll
-    ? items
-    : [{ id: ALL_CATEGORY_ID, label: "Todos", value: ALL_CATEGORY_ID }, ...items];
-
-  return baseTabs.length ? baseTabs : [{ id: ALL_CATEGORY_ID, label: "Todos", value: ALL_CATEGORY_ID }];
-};
+import { Link } from "react-router-dom";
+import ProductCard from "@/modules/products/components/ProductCard.jsx"
+import { Button } from "@/components/ui/Button.jsx"
+import { createCategoryMatcher } from "@/modules/products/utils/products.js"
+import { ALL_CATEGORY_ID } from "@/config/constants.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { buildCategoryTabs, normalizeFeaturedProduct } from "@/utils/normalizers.js"
 
 export default function ProductsSection({ products, categories }) {
-  const tabs = useMemo(() => buildTabs(categories), [categories]);
+  const tabs = useMemo(() => buildCategoryTabs(categories), [categories]);
   const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
+  const matchCategory = useMemo(
+    () => createCategoryMatcher(Array.isArray(categories) ? categories : []),
+    [categories],
+  );
 
   useEffect(() => {
     const fallbackValue = tabs[0]?.value ?? ALL_CATEGORY_ID;
@@ -58,12 +25,12 @@ export default function ProductsSection({ products, categories }) {
 
   const items = useMemo(() => {
     const source = Array.isArray(products) ? products : [];
-    const normalized = source.map(normalizeProduct);
+    const normalized = source.map((product, index) => normalizeFeaturedProduct(product, index));
     const filtered = normalized.filter((product) =>
-      matchesProductCategory(product, activeCategory),
+      matchCategory(product, activeCategory),
     );
     return filtered.slice(0, 4);
-  }, [products, activeCategory]);
+  }, [products, activeCategory, matchCategory]);
 
   return (
     <div className="space-y-8 p-10">
@@ -85,15 +52,15 @@ export default function ProductsSection({ products, categories }) {
               className={`group relative pb-3 font-garamond text-base tracking-wide transition-colors ${
                 isActive
                   ? "text-dark"
-                  : "text-(--color-secondary1,#6b4e2f) hover:text-(--color-primary-brown,#6b4e2f)"
+                  : "text-(--color-secondary1,#6b4e2f) hover:text-(--color-primary1,#6B5444)"
               }`}
             >
               {tab.label}
               <span
                 className={`pointer-events-none absolute bottom-0 left-0 right-0 h-0.5 rounded-full transition-colors ${
                   isActive
-                    ? "bg-(--color-primary-brown,#443114)"
-                    : "bg-transparent group-hover:bg-(--color-primary-brown,#c8a889)"
+                    ? "bg-(--color-primary1,#6B5444)"
+                    : "bg-transparent group-hover:bg-(--color-primary1,#c8a889)"
                 }`}
               />
             </button>
@@ -115,10 +82,14 @@ export default function ProductsSection({ products, categories }) {
 
       <div className="flex justify-center pt-1">
         <Button
-          to="/products"
-          variant="cta-outline"
+          as={Link}
+          to={API_PATHS.products.products}
+          appearance="outline"
+          intent="primary"
+          shape="pill"
+          motion={["lift", "icon-slide"]}
           size="md"
-          className="btn-cta-outline inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-dark hover:text-light"
+          className="gap-2 text-sm font-medium"
         >
           Ver más productos
           <span aria-hidden className="text-base leading-none btn-icon-right">&rarr;</span>

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, Heart, ShoppingCart } from "lucide-react";
-import { Price } from "../../../components/data-display/Price.jsx";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
+import { Price } from "@/components/data-display/Price.jsx"
+import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { useAuth } from "@/context/auth-context.js"
 
-import Button from "../../../components/ui/Button.jsx";
-import Badge from "../../../components/ui/Badge.jsx";
+import { Button } from "@/components/ui/Button.jsx"
+import Badge from "@/components/ui/Badge.jsx"
 
 export default function ProductCard({
   product = {},
@@ -19,11 +21,13 @@ export default function ProductCard({
   const { id, slug, price, name, imgUrl, gallery } = product;
 
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const displayTitle = name ?? slug ?? "Nombre Producto";
   const displayImage = imgUrl ?? gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
   const displayPrice = price ?? 50000;
   const productSlug = slug ?? (id ? String(id) : null);
-  const href = productSlug ? `/products/${productSlug}` : "/products";
+  const baseProductsPath = API_PATHS.products.products;
+  const href = productSlug ? API_PATHS.products.productDetail(productSlug) : baseProductsPath;
 
   const [isLiked, setIsLiked] = useState(Boolean(isInWishlist));
   const [isHovered, setIsHovered] = useState(false);
@@ -36,14 +40,12 @@ export default function ProductCard({
 
   const handleWishlistToggle = (event) => {
     event.preventDefault();
+    if (!isAuthenticated) {
+      navigate(API_PATHS.auth.login);
+      return;
+    }
     setIsLiked((prev) => !prev);
     onToggleWishlist(product);
-  };
-
-  const handleAddToCart = (event) => {
-    event.preventDefault();
-    onAddToCart(product);
-    setCartButtonPressed(true);
   };
 
   useEffect(() => {
@@ -155,32 +157,43 @@ export default function ProductCard({
       >
         <Button
           type="button"
-          variant="card-solid"
+          appearance="soft"
+          intent="primary"
+          elevation="md"
           size="md"
-          onClick={handleAddToCart}
-          className={`w-[160px] gap-3 transition-all ${
-            cartButtonPressed ? "scale-95 btn-card-solid-pressed" : ""
-          }`}
+          motion="lift"
+          onClick={() => {
+            if (!isAuthenticated) {
+              navigate(API_PATHS.auth.login);
+              return;
+            }
+            onAddToCart(product);
+          }}
+          leadingIcon={
+            <ShoppingCart
+              size={18}
+              className={cartButtonPressed ? "text-white" : "text-[var(--color-primary3)]"}
+            />
+          }
+          className={`w-[160px] gap-3 transition-all ${cartButtonPressed ? "scale-95" : ""}`}
         >
-          <ShoppingCart
-            size={18} className={`text-current btn-icon-left ${
-              cartButtonPressed ? "text-white" : "text-[#9e7e67]"}`}
-          />
-          <span>Agregar</span>
+          Agregar
         </Button>
 
         <Button
           type="button"
-          variant="card-outline"
+          appearance="outline"
+          intent="inverse"
           size="md"
+          motion="lift"
           onClick={handleViewDetails}
           disabled={!href}
+          leadingIcon={<Eye size={18} className="text-current" />}
           className={`w-[160px] gap-3 transition-all ${
-            detailsButtonPressed ? "scale-95 btn-card-outline-pressed" : "hover:bg-white/10"
+            detailsButtonPressed ? "scale-95" : "hover:bg-white/10"
           } ${!href ? "pointer-events-none opacity-40" : ""}`}
         >
-          <Eye size={18} className="text-current btn-icon-left" />
-          <span>Ver detalles</span>
+          Ver detalles
         </Button>
       </div>
 

@@ -2,8 +2,8 @@
 node_modules
 **/node_modules
 
-dist
-**/dist
+package-lock.json
+
 .vite
 **/.vite
 
@@ -11,7 +11,9 @@ dist
 **/.env
 .env.*.local
 **/.env.*.local
+.env copy
 
+snapshots/**
 snapshots/*.txt
 snapshots/*.json
 
@@ -20,6 +22,18 @@ snapshots/*.json
 .vscode/*
 !.vscode/extensions.json
 
+scripts/*.jsx
+scripts/*.js
+src/scripts/**.js
+
+**/styleguide/StyleGuidePage.jsx
+
+.copilot-temp
+
+docs/misDOCS/*.md
+
+dist/
+frontend/dist/
 package-lock.json
 **/package-lock.json
 

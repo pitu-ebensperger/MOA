@@ -1,5 +1,5 @@
 import Card from "./Card.jsx";
-import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../utils/constants.js";
+import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 
 const normalizeOrderProduct = (product, index) => {
   if (!product || typeof product !== "object") {

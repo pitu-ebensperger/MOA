@@ -1,6 +1,7 @@
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/Button.jsx'
 
 export function SearchBar({
   isOpen,
@@ -14,6 +15,18 @@ export function SearchBar({
   const inputRef = useRef(null);
   const bodyOverflowRef = useRef('');
   const portalTarget = typeof document !== 'undefined' ? document.body : null;
+
+  // Auto-close after 30 seconds as safety measure
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const timeoutId = setTimeout(() => {
+      console.warn('🕐 SearchBar auto-closed after 30 seconds for safety');
+      onClose?.();
+    }, 30000); // 30 segundos
+    
+    return () => clearTimeout(timeoutId);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -52,11 +65,15 @@ export function SearchBar({
 
   return createPortal(
     <div className="fixed inset-0 z-60 flex items-start justify-center px-4">
-      <button
-        type="button"
+      <div
+        className="absolute inset-0 z-10 bg-black/30 cursor-pointer"
+        onClick={(e) => {
+          // Solo cerrar si se hace clic directamente en el backdrop
+          if (e.target === e.currentTarget) {
+            onClose?.();
+          }
+        }}
         aria-label="Cerrar buscador"
-        className="absolute inset-0 z-10 bg-black/30"
-        onClick={() => onClose?.()}
       />
 
       <form
@@ -72,11 +89,24 @@ export function SearchBar({
           value={value}
           onChange={onChange}
         />
-        <button
+        <Button
           type="submit"
-          className="rounded-full bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800"
+          shape="pill"
+          size="sm"
+          motion="lift"
+          className="font-semibold"
         >
           {buttonLabel}
+        </Button>
+        
+        {/* Botón de cerrar visible */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="ml-2 p-2 text-neutral-400 hover:text-neutral-600 transition-colors rounded-full hover:bg-neutral-100"
+          aria-label="Cerrar buscador"
+        >
+          <X className="h-4 w-4" />
         </button>
       </form>
     </div>,

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
-import { useAuth } from '../../auth/hooks/useAuth.jsx';
-import { useRedirectAfterAuth } from '../../auth/hooks/useRedirectAuth.jsx';
-import { validateEmail, validatePassword } from '../../../utils/validators.js';
-import Button from '../../../components/ui/Button.jsx';
+import { useAuth, isAdminRole } from '@/context/auth-context.js'
+import { useRedirectAfterAuth } from '@/modules/auth/hooks/useRedirectAuth.jsx'
+import { Button } from '@/components/ui/Button.jsx'
+import { API_PATHS } from '@/config/api-paths.js'
 
 
 export default function LoginPage() {
@@ -15,27 +15,26 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones básicas
+/* // Validaciones básicas
     const ve = validateEmail(email);
     const vp = validatePassword(password, 6);
     const nextErrors = {};
-    if (!ve.ok) nextErrors.email = ve.error || 'Email no válido';
-    if (!vp.ok) nextErrors.password = vp.error || 'Contraseña inválida';
+    console.log(ve, vp)
+    if (!ve) nextErrors.email = ve.error || 'Email no válido';
+    if (!vp) nextErrors.password = vp.error || 'Contraseña inválida';
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return;
-
+    if (Object.keys(nextErrors).length) return; */
     try {
       setSubmitting(true);
       setServerError('');
-      await login({ email, password }); // AuthContext guarda token+user
-      redirect();                        // redirige por rol
+      const profile = await login({ email, password }); // AuthContext guarda token+user
+      redirect({ adminOverride: isAdminRole(profile) });                        // redirige por rol
     } catch (err) {
       setServerError(err?.data?.message || 'Credenciales inválidas');
     } finally {
@@ -66,13 +65,10 @@ export default function LoginPage() {
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full rounded-lg border px-3 py-2 outline-none transition
-                  ${errors.email ? 'border-red-400 focus:ring-2 ring-red-200' : 'border-neutral-300 focus:border-neutral-500 focus:ring-2 ring-neutral-200'}
-                `}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-500 focus:ring-2 ring-neutral-200"
                 placeholder="tu@email.com"
                 required
               />
-              {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -87,13 +83,10 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full rounded-lg border px-3 py-2 outline-none transition
-                  ${errors.password ? 'border-red-400 focus:ring-2 ring-red-200' : 'border-neutral-300 focus:border-neutral-500 focus:ring-2 ring-neutral-200'}
-                `}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-500 focus:ring-2 ring-neutral-200"
                 placeholder="••••••••"
                 required
               />
-              {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
             </div>
 
             {serverError && (
@@ -102,7 +95,8 @@ export default function LoginPage() {
             <div className='flex flex-col items-center justify-center w-full'> 
               <Button
                 type="submit"
-                variant="primary-round"
+                shape="pill"
+                motion="lift"
                 className="font-regular px-5 mt-2 mb-0 mx-0 disabled:opacity-60 disabled:cursor-not-allowed"
                 disabled={submitting}
               >
@@ -110,11 +104,11 @@ export default function LoginPage() {
             </Button>
 
                  <div className="mt-3 text-center">
-              <Link
-                type="button"
-                onClick={() => navigate('/forgot-password')}
-                className="text-sm text-muted no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] hover:text-medium transition-colors"
-              >
+                <Link
+                  type="button"
+                  onClick={() => navigate(API_PATHS.auth.forgot)}
+                  className="text-sm text-muted no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] hover:text-medium transition-colors"
+                >
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -125,7 +119,7 @@ export default function LoginPage() {
           <footer className="text-center mt-6 pt-6 border-t border-neutral-200">
             <p className="text-sm text-(--color-primary1) opacity-80">
               ¿No tienes una cuenta?{' '}
-              <Link to="/register" className="underline text-(--color-primary1) hover:opacity-80">
+                <Link to={API_PATHS.auth.register} className="underline text-(--color-primary1) hover:opacity-80">
                 Regístrate aquí
               </Link>
             </p>

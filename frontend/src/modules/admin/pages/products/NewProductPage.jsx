@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Container } from "../../../../components/layout/Container.jsx";
-import { Header } from "../../../../components/layout/Header.jsx";
-import Button from "../../../../components/ui/Button.jsx";
-import { productsApi } from "../../../products/services/products.api.js";
+import { Container } from "@/components/layout/Container.jsx"
+import { Header } from "@/components/layout/Header.jsx"
+import { Button } from "@/components/ui/Button.jsx"
+import { productsApi } from "@/services/products.api.js"
 
 const initialForm = {
   name: "",
@@ -100,7 +100,7 @@ export const NewProductPage = () => {
           </label>
 
           <div className="admin-form__actions">
-            <Button variant="secondary" type="button" onClick={() => setForm(initialForm)}>
+            <Button intent="secondary" type="button" onClick={() => setForm(initialForm)}>
               Limpiar
             </Button>
             <Button type="submit" disabled={isSubmitting}>

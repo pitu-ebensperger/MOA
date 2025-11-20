@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useAuth } from '../../auth/hooks/useAuth';
+import { useAuth } from '../../../context/auth-context.js';
 
 export const useUser = () => {
   const { user: authUser } = useAuth(); // traemos el usuario autenticado
