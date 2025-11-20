@@ -1,7 +1,6 @@
 import { apiClient } from '@/services/api-client.js'
 
 /**
-<<<<<<< HEAD
 import { apiClient } from "./api-client.js";
 
 export const cartApi = {
