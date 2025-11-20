@@ -1,5 +1,6 @@
 //path/src/modules/admin/components/ProductFiltersBar.jsx
 import React, { useMemo } from "react";
+import PropTypes from "prop-types";
 import { PRODUCT_STATUS_OPTIONS } from "@/config/status-options.js"
 
 export function ProductFilters({
@@ -104,3 +105,21 @@ export function ProductFilters({
     </div>
   );
 }
+
+ProductFilters.propTypes = {
+  categories: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      name: PropTypes.string,
+    }),
+  ),
+  value: PropTypes.shape({
+    q: PropTypes.string,
+    status: PropTypes.string,
+    categoryId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    minPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    maxPrice: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }),
+  onChange: PropTypes.func,
+  className: PropTypes.string,
+};

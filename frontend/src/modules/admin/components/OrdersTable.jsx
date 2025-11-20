@@ -1,3 +1,4 @@
+import PropTypes from "prop-types"
 import { TanstackDataTable } from "@/components/data-display/DataTable.jsx"
 import { Pagination } from "@/components/ui/Pagination.jsx"
 
@@ -23,3 +24,11 @@ export function OrdersTable({
     </div>
   );
 }
+
+OrdersTable.propTypes = {
+  data: PropTypes.array.isRequired,
+  columns: PropTypes.array.isRequired,
+  page: PropTypes.number.isRequired,
+  totalPages: PropTypes.number.isRequired,
+  onPageChange: PropTypes.func.isRequired,
+};

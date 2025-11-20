@@ -4,31 +4,14 @@ import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3,
 import CustomerDrawer from "@/modules/admin/components/CustomerDrawer.jsx"
 import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
 import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
-import {
-  TableToolbar,
-  TableSearch,
-  FilterTags,
-  ToolbarSpacer,
-  LayoutToggleButton,
-} from "../../../components/data-display/TableToolbar.jsx";
+import { TableToolbar, TableSearch, FilterTags, ToolbarSpacer, LayoutToggleButton } from "../../../components/data-display/TableToolbar.jsx";
 import { Button, IconButton } from "@/components/ui/Button.jsx"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../../../components/ui/radix/DropdownMenu.jsx";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../components/ui/radix/DropdownMenu.jsx";
 import { usersDb } from "@/mocks/database/users.js"
 import { ordersDb } from "@/mocks/database/orders.js"
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/radix/Dialog.jsx";
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/radix/Dialog.jsx";
 import { Input } from "@/components/ui/Input.jsx";
 import { Pagination } from "@/components/ui/Pagination.jsx";
 import { customersAdminApi } from "@/services/customersAdmin.api.js";

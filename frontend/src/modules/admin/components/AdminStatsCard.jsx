@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 // Tarjeta de resumen para stats
 export default function AdminStatsCard({ title, value, icon }) {
@@ -12,3 +13,9 @@ export default function AdminStatsCard({ title, value, icon }) {
     </div>
   );
 }
+
+AdminStatsCard.propTypes = {
+  title: PropTypes.string,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  icon: PropTypes.node,
+};

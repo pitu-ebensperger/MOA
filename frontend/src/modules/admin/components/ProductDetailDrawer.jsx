@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx"
 import { Price } from "@/components/data-display/Price.jsx"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
@@ -267,3 +268,10 @@ export default function ProductDetailDrawer({ open, product, onClose, categoryMa
     </Dialog>
   );
 }
+
+ProductDetailDrawer.propTypes = {
+  open: PropTypes.bool.isRequired,
+  product: PropTypes.object,
+  onClose: PropTypes.func,
+  categoryMap: PropTypes.object,
+};

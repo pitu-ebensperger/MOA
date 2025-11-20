@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 // Botón de acción para dashboard admin
 export default function AdminActionButton({ children, ...props }) {
@@ -11,3 +12,7 @@ export default function AdminActionButton({ children, ...props }) {
     </button>
   );
 }
+
+AdminActionButton.propTypes = {
+  children: PropTypes.node,
+};
