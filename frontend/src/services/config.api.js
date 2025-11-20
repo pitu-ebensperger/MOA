@@ -25,7 +25,7 @@ export const getStoreConfig = async () => {
  */
 export const updateStoreConfig = async (configData) => {
   try {
-    const response = await apiClient.put('/api/config', configData);
+    const response = await apiClient.private.put('/api/config', configData);
     return response.data;
   } catch (error) {
     console.error('Error al actualizar configuración:', error);
