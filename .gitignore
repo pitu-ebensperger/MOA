@@ -34,3 +34,7 @@ docs/misDOCS/*.md
 
 dist/
 frontend/dist/
+package-lock.json
+**/package-lock.json
+
+/backend
