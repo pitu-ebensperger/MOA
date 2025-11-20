@@ -2,19 +2,7 @@
 
 ### Usuarios para frontend testing:
 - **admin@moa.cl** (contraseña: admin o demo o 123456)
-- **demo@moa.cl** (contraseña: demo o admin o 123456) 
 - **cliente@mail.com** (contraseña: demo o admin o 123456)
-<<<<<<< HEAD
- 
-#
-=======
-
-
-
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
-> Los mocks están habilitados por defecto en `frontend/.env`  
-> Para usar con backend real, cambiar `VITE_USE_MOCKS=false`
-
 
 ## Estructura del repositorio
 
