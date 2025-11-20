@@ -20,4 +20,7 @@ snapshots/*.json
 .vscode/*
 !.vscode/extensions.json
 
+package-lock.json
+**/package-lock.json
+
 /backend
