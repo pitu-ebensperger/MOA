@@ -31,3 +31,6 @@ src/scripts/**.js
 .copilot-temp
 
 docs/misDOCS/*.md
+
+dist/
+frontend/dist/

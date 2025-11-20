@@ -1,122 +1,78 @@
-import { apiClient } from '@/services/api-client.js'
+import { apiClient } from "@/services/api-client.js"
 
-/**
-import { apiClient } from "./api-client.js";
+const requireUserId = (userId) => {
+  if (!userId) {
+    throw new Error("Se requiere un usuario autenticado para operar el carrito")
+  }
+  return userId
+}
 
-export const cartApi = {
-  async getCart() {
-    return apiClient.private.get("/cart");
-  },
+const buildCartPath = (userId, suffix = "") => `/carrito/${userId}${suffix}`
 
-  async addToCart(productId, cantidad = 1) {
-    return apiClient.private.post("/cart/add", {
-      producto_id: productId,
-      cantidad,
-    });
-  },
+const handleResponse = (response) => response?.data ?? response
 
-  async removeFromCart(productId) {
-    return apiClient.private.delete(`/cart/remove/${productId}`);
-  },
-
-  async updateQuantity(productId, cantidad) {
-    return apiClient.private.patch("/cart/update", {
-      producto_id: productId,
-      cantidad,
-    });
-  },
-
-  async clearCart() {
-    return apiClient.private.delete("/cart/clear");
-  },
-};
- */
-export const cartApi = {
-  /**
-   * Obtener carrito del usuario autenticado
-   * GET /cart
-   */
-  get: async () => {
-    try {
-      const response = await apiClient.private.get('/cart')
-      return response?.data || response
-    } catch (error) {
-      console.error('Error obteniendo carrito:', error)
-      throw error
-    }
-  },
-
-  /**
-   * Agregar producto al carrito
-   * POST /cart/add
-   * @param {number} productId - ID del producto
-   * @param {number} quantity - Cantidad (default: 1)
-   */
-  add: async (productId, quantity = 1) => {
-    try {
-      const response = await apiClient.private.post('/cart/add', {
-        producto_id: productId,
-        cantidad: quantity
-      })
-      return response?.data || response
-    } catch (error) {
-      console.error('Error agregando al carrito:', error)
-      throw error
-    }
-  },
-
-  /**
-   * Quitar producto del carrito
-   * DELETE /cart/remove/:productId
-   * @param {number} productId - ID del producto a eliminar
-   */
-  remove: async (productId) => {
-    try {
-      const response = await apiClient.private.delete(`/cart/remove/${productId}`)
-      return response?.data || response
-    } catch (error) {
-      console.error('Error eliminando del carrito:', error)
-      throw error
-    }
-  },
-
-  /**
-   * DELETE /cart/clear
-   */
-  clear: async () => {
-    try {
-      const response = await apiClient.private.delete('/cart/clear')
-      return response?.data || response
-    } catch (error) {
-      console.error('Error vaciando carrito:', error)
-      throw error
-    }
-  },
-
-  /**
-   * Actualizar cantidad de un item (implementado via remove + add)
-   * @param {number} productId - ID del producto
-   * @param {number} newQuantity - Nueva cantidad
-   */
-  updateQuantity: async (productId, newQuantity) => {
-    try {
-      // Primero eliminar el item
-      await cartApi.remove(productId)
-      // Luego agregarlo con la nueva cantidad
-      if (newQuantity > 0) {
-        return await cartApi.add(productId, newQuantity)
-      }
-      return { success: true, message: 'Item eliminado' }
-    } catch (error) {
-      console.error('Error actualizando cantidad:', error)
-      throw error
-    }
+export const getCart = async (userId) => {
+  requireUserId(userId)
+  try {
+    const response = await apiClient.private.get(buildCartPath(userId))
+    return handleResponse(response)
+  } catch (error) {
+    console.error("Error obteniendo carrito:", error)
+    throw error
   }
 }
 
-// Exports individuales opcionales
-export const getCart = cartApi.get
-export const addToCart = cartApi.add
-export const removeFromCart = cartApi.remove
-export const clearCart = cartApi.clear
-export const updateCartItemQuantity = cartApi.updateQuantity
+export const addItem = async (userId, item) => {
+  requireUserId(userId)
+  try {
+    const response = await apiClient.private.post(buildCartPath(userId, "/items"), item)
+    return handleResponse(response)
+  } catch (error) {
+    console.error("Error agregando un item al carrito:", error)
+    throw error
+  }
+}
+
+export const updateItem = async (userId, itemId, quantity) => {
+  requireUserId(userId)
+  try {
+    const response = await apiClient.private.put(
+      buildCartPath(userId, `/items/${itemId}`),
+      { quantity },
+    )
+    return handleResponse(response)
+  } catch (error) {
+    console.error("Error actualizando cantidad del carrito:", error)
+    throw error
+  }
+}
+
+export const removeItem = async (userId, itemId) => {
+  requireUserId(userId)
+  try {
+    const response = await apiClient.private.delete(buildCartPath(userId, `/items/${itemId}`))
+    return handleResponse(response)
+  } catch (error) {
+    console.error("Error eliminando item del carrito:", error)
+    throw error
+  }
+}
+
+export const clearCart = async (userId) => {
+  requireUserId(userId)
+  try {
+    const response = await apiClient.private.delete(buildCartPath(userId))
+    return handleResponse(response)
+  } catch (error) {
+    console.error("Error vaciando carrito:", error)
+    throw error
+  }
+}
+
+export const cartApi = {
+  getCart,
+  addItem,
+  updateItem,
+  removeItem,
+  clearCart,
+}

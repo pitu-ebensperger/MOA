@@ -1,53 +1,78 @@
-<<<<<<< HEAD
-import { useEffect, useMemo } from "react";
-import { usePersistentState } from "../../../hooks/usePersistentState.js";
-import { useAuth } from "../../../context/auth-context.js";
-import { cartApi } from "../../../services/cart.api.js";
-=======
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { usePersistentState } from "@/hooks/usePersistentState.js"
-import { useAuth } from "@/context/auth-context.js"
-<<<<<<< HEAD
-import { cartApi } from "@/services/cart.api.js"
-=======
->>>>>>> 1f15e21c52c718b283d1aba799e2a36e0803207e
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
+import { usePersistentState } from "@/hooks/usePersistentState.js";
+import { useAuth } from "@/context/auth-context.js";
+import { cartApi } from "@/services/cart.api.js";
 
 const CART_STORAGE_KEY = "cart";
 
-export const useCart = () => {
-  const { token, status } = useAuth();
+const normalizeCartItem = (item) => {
+  const quantity = Number(item?.quantity ?? item?.cantidad ?? 0) || 0;
+  const price =
+    Number(
+      item?.price ??
+        item?.precio ??
+        item?.precio_unit ??
+        item?.unitPrice ??
+        item?.valor ??
+        item?.precio_total ??
+        0,
+    ) || 0;
+  return {
+    ...item,
+    id: item?.id ?? item?.itemId ?? item?.productId,
+    productId:
+      item?.productId ?? item?.product_id ?? item?.producto_id ?? item?.sku,
+    quantity,
+    price,
+  };
+};
 
+const buildPayload = (product, quantity = 1) => {
+  if (!product) return null;
+  const productId = product?.id ?? product?.productId ?? product?.producto_id;
+  if (!productId) return null;
+  return {
+    productId,
+    quantity,
+    price:
+      Number(
+        product?.price ?? product?.precio ?? product?.precio_unit ?? product?.valor,
+      ) || 0,
+    name: product?.name ?? product?.titulo ?? product?.nombre,
+    image: product?.image ?? product?.thumbnail ?? product?.imgUrl,
+  };
+};
+
+export const useCart = () => {
+  const { user, token, status } = useAuth();
+  const userId = user?.id ?? user?.userId;
   const [cartItems, setCartItems] = usePersistentState(CART_STORAGE_KEY, {
     initialValue: [],
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const isSessionReady = Boolean(token) && status === "authenticated";
+  const isSessionReady =
+    Boolean(token) && status === "authenticated" && Boolean(userId);
 
-<<<<<<< HEAD
-    cartApi.get()
-      .then((data) => {
-        if (Array.isArray(data.items)) {
-          const normalized = data.items.map((item) => ({
-            id: item.producto_id,
-            quantity: item.cantidad,
-            price: item.precio_unit,
-            ...item,
-          }));
-=======
-  const ensureAuthenticated = () => {
+  const ensureAuthenticated = useCallback(() => {
     if (isSessionReady) return true;
-    alert("Debes iniciar sesión y esperar a que tu sesión se confirme para usar el carrito");
+    alert(
+      "Debes iniciar sesión y esperar a que tu sesión se confirme para usar el carrito",
+    );
     return false;
-  };
+  }, [isSessionReady]);
 
-  const normalizeCartItem = (item) => ({
-    id: item.producto_id ?? item.product_id ?? item.id,
-    quantity: Number(item.cantidad ?? item.quantity ?? 0),
-    price: Number(item.precio_unit ?? item.precio ?? item.price ?? 0),
-    ...item,
-  });
+  const syncCart = useCallback(
+    (cart) => {
+      const items = Array.isArray(cart?.items) ? cart.items : [];
+      if (!items.length) {
+        setCartItems([]);
+        return;
+      }
+      setCartItems(items.map(normalizeCartItem));
+    },
+    [setCartItems],
+  );
 
   useEffect(() => {
     if (!isSessionReady) {
@@ -59,14 +84,9 @@ export const useCart = () => {
 
     (async () => {
       try {
-        const data = await cartApi.getCart();
+        const cart = await cartApi.getCart(userId);
         if (cancelled) return;
-
-        if (Array.isArray(data?.items)) {
-          const normalized = data.items.map(normalizeCartItem);
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
-          setCartItems(normalized);
-        }
+        syncCart(cart);
       } catch (err) {
         console.error("Error cargando carrito:", err);
       }
@@ -75,115 +95,85 @@ export const useCart = () => {
     return () => {
       cancelled = true;
     };
-  }, [isSessionReady, setCartItems]);
+  }, [isSessionReady, userId, setCartItems, syncCart]);
 
-  const addToCart = async (product) => {
-    if (!ensureAuthenticated()) return;
-    const productId = product?.id ?? product?.producto_id;
-    if (!productId) return;
-
-    try {
-<<<<<<< HEAD
-      await cartApi.add(product.id, 1);
-=======
-      const response = await cartApi.addToCart(productId, 1);
-      const normalized = response?.item ? normalizeCartItem(response.item) : null;
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
-
-      setCartItems((prevCart) => {
-        const existing = prevCart.find((item) => item.id === productId);
-        if (normalized && existing) {
-          return prevCart.map((item) =>
-            item.id === productId
-              ? { ...item, quantity: normalized.quantity }
-              : item
-          );
-        }
-
-        const baseItem = normalized ?? { ...product, id: productId, quantity: 1 };
-        if (existing) {
-          return prevCart.map((item) =>
-            item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
-          );
-        }
-        return [...prevCart, baseItem];
-      });
-    } catch (err) {
-      console.error("Error addToCart:", err);
-    }
-  };
-
-  const executeRemoveFromCart = async (productId) => {
-    try {
-<<<<<<< HEAD
-      await cartApi.remove(productId);
-
-=======
-      await cartApi.removeFromCart(productId);
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
-      setCartItems((prevCart) =>
-        prevCart.filter((item) => item.id !== productId)
-      );
-    } catch (err) {
-      console.error("Error removeFromCart:", err);
-    }
-  };
-
-  const removeFromCart = async (productId) => {
-    if (!ensureAuthenticated()) return;
-    return executeRemoveFromCart(productId);
-  };
-
-  const updateQuantity = async (productId, quantity) => {
-    if (!ensureAuthenticated()) return;
-    if (quantity <= 0) return executeRemoveFromCart(productId);
-
-    try {
-<<<<<<< HEAD
-      await cartApi.updateQuantity(productId, quantity);
-
-      setCartItems((prevCart) =>
-        prevCart.map((item) =>
-          item.id === productId ? { ...item, quantity } : item
-        )
-      );
-=======
-      const response = await cartApi.updateQuantity(productId, quantity);
-      const normalized = response?.item ? normalizeCartItem(response.item) : null;
-
-      if (normalized) {
-        setCartItems((prevCart) =>
-          prevCart.map((item) =>
-            item.id === productId ? { ...item, quantity: normalized.quantity } : item
-          )
-        );
-      } else {
-        setCartItems((prevCart) =>
-          prevCart.map((item) =>
-            item.id === productId ? { ...item, quantity } : item
-          )
-        );
+  const addToCart = useCallback(
+    async (product, quantity = 1) => {
+      if (!ensureAuthenticated()) return;
+      const payload = buildPayload(product, quantity);
+      if (!payload) return;
+      try {
+        const cart = await cartApi.addItem(userId, payload);
+        syncCart(cart);
+      } catch (err) {
+        console.error("Error addToCart:", err);
       }
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
-    } catch (err) {
-      console.error("Error updateQuantity:", err);
-    }
-  };
+    },
+    [ensureAuthenticated, syncCart, userId],
+  );
 
-  const clearCart = async () => {
+  const executeRemoveFromCart = useCallback(
+    async (itemId) => {
+      try {
+        const cart = await cartApi.removeItem(userId, itemId);
+        if (cart) {
+          syncCart(cart);
+        } else {
+          setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+        }
+      } catch (err) {
+        console.error("Error removeFromCart:", err);
+      }
+    },
+    [syncCart, userId, setCartItems],
+  );
+
+  const removeFromCart = useCallback(
+    async (itemId) => {
+      if (!ensureAuthenticated()) return;
+      await executeRemoveFromCart(itemId);
+    },
+    [ensureAuthenticated, executeRemoveFromCart],
+  );
+
+  const updateQuantity = useCallback(
+    async (itemId, quantity) => {
+      if (!ensureAuthenticated()) return;
+      if (quantity <= 0) {
+        await executeRemoveFromCart(itemId);
+        return;
+      }
+      try {
+        const cart = await cartApi.updateItem(userId, itemId, quantity);
+        if (cart) {
+          syncCart(cart);
+        } else {
+          setCartItems((prevCart) =>
+            prevCart.map((item) =>
+              item.id === itemId ? { ...item, quantity } : item,
+            ),
+          );
+        }
+      } catch (err) {
+        console.error("Error updateQuantity:", err);
+      }
+    },
+    [ensureAuthenticated, executeRemoveFromCart, setCartItems, syncCart, userId],
+  );
+
+  const clearCart = useCallback(async () => {
     if (!ensureAuthenticated()) return;
     try {
-<<<<<<< HEAD
-      await cartApi.clear();
-
-=======
-      await cartApi.clearCart();
->>>>>>> e1167ca338806d8d62dfa2b2d9276167cb6a0d27
-      setCartItems([]);
+      const cart = await cartApi.clearCart(userId);
+      if (cart) {
+        syncCart(cart);
+      } else {
+        setCartItems([]);
+      }
     } catch (err) {
       console.error("Error clearCart:", err);
     }
-  };
+  }, [ensureAuthenticated, setCartItems, syncCart, userId]);
 
   const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
@@ -192,9 +182,7 @@ export const useCart = () => {
   const total = useMemo(
     () =>
       cartItems.reduce(
-        (acc, item) =>
-          acc +
-          (Number(item.price) || Number(item.precio_unit) || 0) * item.quantity,
+        (acc, item) => acc + (Number(item.price) || 0) * (item.quantity || 0),
         0,
       ),
     [cartItems],

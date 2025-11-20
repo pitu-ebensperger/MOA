@@ -31,16 +31,22 @@ export default defineConfig(({ mode }) => {
     "/api",
   ];
 
+  const createProxyConfig = () => ({
+    target: apiProxyTarget,
+    changeOrigin: true,
+    secure: false,
+    // Allow the dev server to serve HTML routes directly (avoid proxying `/login`, `/admin`, etc.)
+    bypass(req) {
+      if (req.method === "GET" && req.headers.accept?.includes("text/html")) {
+        return "/index.html"
+      }
+      return undefined
+    },
+  })
+
   const proxy = Object.fromEntries(
-    apiProxyPaths.map((pathname) => [
-      pathname,
-      {
-        target: apiProxyTarget,
-        changeOrigin: true,
-        secure: false,
-      },
-    ]),
-  );
+    apiProxyPaths.map((pathname) => [pathname, createProxyConfig()]),
+  )
 
   return {
     plugins: [
