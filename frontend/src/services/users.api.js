@@ -1,5 +1,4 @@
 import { apiClient } from './api-client.js';
-import { API_PATHS } from '../config/api-paths.js';
 
 export const usersApi = {
   // GET /usuario/:id - Obtener usuario por ID

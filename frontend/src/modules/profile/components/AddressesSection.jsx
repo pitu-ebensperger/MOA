@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { MapPin, Plus, Trash2, Star, StarOff, Edit } from 'lucide-react';
-import { useAddresses } from '@/context/AddressContext'
+import { useAddresses } from '@/context/useAddresses.js'
 import { Button } from '@/components/shadcn/ui/button.jsx'
 import {
   Dialog,

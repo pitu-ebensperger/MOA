@@ -32,10 +32,7 @@ export const cartApi = {
 };
  */
 export const cartApi = {
-  /**
-   * Obtener carrito del usuario autenticado
-   * GET /cart
-   */
+  /*GET /cart*/
   get: async () => {
     try {
       const response = await apiClient.private.get('/cart')
@@ -46,9 +43,7 @@ export const cartApi = {
     }
   },
 
-  /**
-   * Agregar producto al carrito
-   * POST /cart/add
+  /**POST /cart/add
    * @param {number} productId - ID del producto
    * @param {number} quantity - Cantidad (default: 1)
    */
@@ -65,9 +60,7 @@ export const cartApi = {
     }
   },
 
-  /**
-   * Quitar producto del carrito
-   * DELETE /cart/remove/:productId
+  /** DELETE /cart/remove/:productId
    * @param {number} productId - ID del producto a eliminar
    */
   remove: async (productId) => {
@@ -80,9 +73,7 @@ export const cartApi = {
     }
   },
 
-  /**
-   * DELETE /cart/clear
-   */
+  /*DELETE /cart/clear */
   clear: async () => {
     try {
       const response = await apiClient.private.delete('/cart/clear')

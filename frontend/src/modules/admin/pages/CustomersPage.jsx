@@ -97,7 +97,7 @@ export default function CustomersPage() {
   });
 
   const customersData = customersResponse?.data ?? null;
-  const customersList = customersData?.items ?? [];
+  const customersList = useMemo(() => customersData?.items ?? [], [customersData?.items]);
   const totalCustomers = customersData?.total ?? customersList.length;
   const pageSize = customersData?.pageSize ?? limit;
   const pageCount = Math.max(1, Math.ceil(totalCustomers / pageSize));
@@ -453,7 +453,7 @@ export default function CustomersPage() {
         },
       },
     ],
-    [customerOrders, handleStatusFilter, statusFilter]
+    [customerOrders, handleStatusFilter, statusFilter, handleOpenEditDialog, handleStatusChange]
   );
 
   const activeStatusTags = useMemo(() => {

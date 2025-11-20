@@ -76,8 +76,8 @@ const internalId = React.useId();
           className={cx(
             "text-xs font-medium",
             hasError
-              ? "text-[color:var(--color-error)]"
-              : "text-[color:var(--color-text-secondary)]"
+              ? "text-(--color-error)"
+              : "text-(--color-text-secondary)"
           )}
         >
           {label}

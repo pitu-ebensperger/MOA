@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
-import { useAddresses } from "@/context/AddressContext.jsx"
-import { usePaymentMethods } from "@/context/PaymentContext.jsx"
+import { useAddresses } from "@/context/useAddresses.js"
+import { usePaymentMethods } from "@/context/usePaymentMethods.js"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { Price } from "@/components/data-display/Price.jsx"
 import { API_PATHS } from "@/config/api-paths.js"

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { createStrictContext } from '@/context/createStrictContext'
 import { useAuth } from '@/context/auth-context'
+import { AddressContext } from './address-context-state.js'
 import {
   getAddresses,
   createAddress,
@@ -8,16 +8,6 @@ import {
   setDefaultAddress,
   deleteAddress,
 } from '@/services/address.api';
-
-const [AddressContext, useAddressesStrict] = createStrictContext('Address', {
-  displayName: 'AddressContext',
-  errorMessage: 'useAddresses debe usarse dentro de AddressProvider',
-});
-
-/**
- * Hook para usar el contexto de direcciones
- */
-export const useAddresses = useAddressesStrict;
 
 export const AddressProvider = ({ children }) => {
   const { user } = useAuth();

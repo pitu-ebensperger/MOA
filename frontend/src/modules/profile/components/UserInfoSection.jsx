@@ -47,7 +47,7 @@ const UserInfoSection = () => {
         setError(err);
         setLoading(false);
       });
-  }, [token]); // Solo depende del token, user se actualiza desde el AuthContext
+  }, [token, user]); // Solo depende del token, user se actualiza desde el AuthContext
 
   const handleChange = (e) => {
     setForm({
