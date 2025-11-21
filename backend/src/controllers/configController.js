@@ -1,6 +1,28 @@
 import configModel from '../models/configModel.js';
 import { handleError } from '../utils/error.utils.js';
 
+const ADMIN_ROLE_ALIASES = new Set(['admin', 'administrador']);
+const DEMO_ADMIN_EMAILS = new Set(['demo@moa.cl', 'demo@moal.cl']);
+
+const normalizeRoleValue = (value) =>
+  typeof value === 'string' ? value.trim().toLowerCase() : '';
+
+const userHasAdminRole = (user) => {
+  if (!user) return false;
+  const emailValue = typeof user.email === 'string' ? user.email.trim().toLowerCase() : '';
+  if (emailValue && DEMO_ADMIN_EMAILS.has(emailValue)) {
+    return true;
+  }
+
+  return ['rol', 'role', 'rol_code', 'role_code']
+    .map((field) => normalizeRoleValue(user?.[field]))
+    .some((value) => ADMIN_ROLE_ALIASES.has(value));
+};
+
+const canAccessAdminConfig = (req) => {
+  return Boolean(req.admin) || userHasAdminRole(req.user);
+};
+
 const configController = {
 
   async getConfig(req, res) {
@@ -19,7 +41,7 @@ const configController = {
 
   async updateConfig(req, res) {
     try {
-      const userId = req.user?.id_usuario;
+      const userId = req.user?.id_usuario ?? req.user?.usuario_id ?? req.user?.id;
       
       if (!userId) {
         return res.status(401).json({
@@ -28,8 +50,7 @@ const configController = {
         });
       }
 
-      // Validar que el usuario sea admin
-      if (!req.user?.es_admin) {
+      if (!canAccessAdminConfig(req)) {
         return res.status(403).json({
           success: false,
           message: 'No tienes permisos para realizar esta acción'
@@ -87,8 +108,7 @@ const configController = {
 
   async initializeConfig(req, res) {
     try {
-      // Validar que el usuario sea admin
-      if (!req.user?.es_admin) {
+      if (!canAccessAdminConfig(req)) {
         return res.status(403).json({
           success: false,
           message: 'No tienes permisos para realizar esta acción'

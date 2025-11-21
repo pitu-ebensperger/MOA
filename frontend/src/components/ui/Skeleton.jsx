@@ -10,7 +10,7 @@ export const Skeleton = React.forwardRef(({ className, ...props }, ref) => (
     role="status"
     aria-live="polite"
     className={cn(
-      "animate-pulse rounded-xl bg-[color:var(--color-neutral3)]/60",
+      "animate-pulse rounded-xl bg-(--color-neutral3)/60",
       className
     )}
     {...props}

@@ -36,21 +36,26 @@ const buildOrderStatusPayload = (order, status) => ({
 const createOrderFromCart = async (req, res) => {
   try {
     const usuarioId = getRequestUserId(req);
+    const { 
+      direccion_id, 
+      metodo_despacho = 'standard',
+      metodo_pago = 'transferencia',
+      notas_cliente,
+      contacto // { nombre, email, telefono }
+    } = req.body;
 
     // Obtener items del carrito
     const cartData = await getCartItems(usuarioId);
-    
     if (!cartData.items || cartData.items.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'El carrito está vacío',
-      });
+      return res.status(400).json({ success: false, message: 'El carrito está vacío' });
     }
 
-    // Calcular total desde los items del carrito
-    const total_cents = cartData.items.reduce((sum, item) => {
-      return sum + (item.precio_unit * item.cantidad);
-    }, 0);
+    // Calcular subtotal desde los items del carrito
+    const subtotal_cents = cartData.items.reduce((sum, item) => sum + (item.precio_unit * item.cantidad), 0);
+
+    // Calcular costo de envío según método
+    const envio_cents = metodo_despacho === 'express' ? 6900 : 0;
+    const total_cents = subtotal_cents + envio_cents;
 
     // Preparar items para la orden
     const items = cartData.items.map(item => ({
@@ -59,11 +64,18 @@ const createOrderFromCart = async (req, res) => {
       precio_unit: item.precio_unit,
     }));
 
-    // Crear orden básica (solo lo que existe en DDL actual)
+    // Crear orden con datos completos
     const orderData = {
       usuario_id: usuarioId,
-      items,
+      direccion_id: direccion_id || null,
+      metodo_despacho,
+      metodo_pago,
+      subtotal_cents,
+      envio_cents,
       total_cents,
+      items,
+      notas_cliente: notas_cliente || null,
+      contacto, // Pasamos contacto al modelo
     };
 
     const orden = await orderModel.createOrder(orderData);

@@ -80,87 +80,120 @@ const UserInfoSection = () => {
   };
 
   return (
-    <section>
-      <h2 className="font-italiana text-4xl text-dark mt-24 mb-10 flex justify-center">
-        Mi Perfil
-      </h2>
+    <section className="space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="font-serif text-4xl text-primary">Mi Perfil</h1>
+        <p className="text-text-secondary text-sm">Gestiona tu información personal</p>
+      </div>
 
-      <div className="flex justify-center gap-4">
-        <div className="w-1/3 profile-image">
-          <i className="fa-solid fa-user text-8xl"></i>
-        </div>
-
-        <div className="w-1/3">
-          {loading && (
-            <div className="text-blue-600 mb-4">
-              🔄 Cargando datos del usuario desde backend...
+      {/* Profile Card */}
+      <div className="bg-surface rounded-2xl shadow-sm border border-neutral-200 p-6 sm:p-8">
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Avatar Section */}
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-32 h-32 rounded-full bg-primary-soft flex items-center justify-center">
+              <i className="fa-solid fa-user text-5xl text-primary"></i>
             </div>
-          )}
-
-          {error && (
-            <div className="text-red-600 mb-4">
-              ❌ Error cargando datos: {error.message || "Error desconocido"}
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-primary">@{form.nombre || "Usuario"}</h2>
+              <p className="text-sm text-text-secondary">{form.email}</p>
             </div>
-          )}
-
-          <h2 className="text-2xl mb-4">@{form.nombre || "Cargando..."}</h2>
-
-        {error && (
-          <div className="text-red-600 mb-4">
-            ❌ Error cargando datos: {error.message || "Error desconocido"}
           </div>
-        )}
 
-        <h2 className="text-2xl mb-4">@{form.nombre || "Cargando..."}</h2>          <form className="flex flex-col gap-2">
-            <input
-              type="text"
-              name="nombre"
-              disabled={!isEditing}
-              value={form.nombre}
-              onChange={handleChange}
-              className="w-full border border-primary2 rounded px-4 py-2"
-            />
+          {/* Form Section */}
+          <div className="flex-1 space-y-6">
+            {loading && (
+              <div className="bg-primary-soft/20 border border-primary-soft rounded-lg p-4 text-center">
+                <p className="text-sm text-primary">Cargando información...</p>
+              </div>
+            )}
 
-            <input
-              type="email"
-              name="email"
-              disabled
-              value={form.email}
-              className="w-full border border-primary2 rounded px-4 py-2 bg-gray-100"
-            />
+            {error && (
+              <div className="bg-error/10 border border-error/30 rounded-lg p-4 text-center">
+                <p className="text-sm text-error">Error: {error.message || "No se pudo cargar la información"}</p>
+              </div>
+            )}
 
-            <input
-              type="tel"
-              name="telefono"
-              disabled={!isEditing}
-              value={form.telefono}
-              onChange={handleChange}
-              className="w-full border border-primary2 rounded px-4 py-2"
-            />
+            <form className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="nombre" className="block text-sm font-medium text-text">
+                  Nombre
+                </label>
+                <input
+                  id="nombre"
+                  type="text"
+                  name="nombre"
+                  disabled={!isEditing}
+                  value={form.nombre}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-neutral-300 bg-surface px-4 py-2.5 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-neutral-200 disabled:cursor-not-allowed"
+                  placeholder="Tu nombre"
+                />
+              </div>
 
-            <div className="flex justify-between gap-2 mt-4">
-              <button
-                type="button"
-                className="w-1/2 px-4 py-2 border border-primary2 text-primary2 rounded"
-                onClick={() => setIsEditing(true)}
-              >
-                Editar
-              </button>
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-text">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  name="email"
+                  disabled
+                  value={form.email}
+                  className="w-full rounded-lg border border-neutral-300 bg-neutral-200 px-4 py-2.5 text-text-secondary cursor-not-allowed"
+                  placeholder="tu@email.com"
+                />
+                <p className="text-xs text-text-muted">El email no se puede modificar</p>
+              </div>
 
-              <button
-                type="button"
-                className={`w-1/2 px-4 py-2 border border-primary2 rounded ${
-                  isEditing
-                    ? "text-primary2 hover:bg-primary2 hover:text-white"
-                    : "opacity-50 cursor-not-allowed"
-                }`}
-                onClick={handleSaveClick}
-                disabled={!isEditing}
-              >
-                Guardar
-              </button>
-            </div>
-          </form>
+              <div className="space-y-2">
+                <label htmlFor="telefono" className="block text-sm font-medium text-text">
+                  Teléfono
+                </label>
+                <input
+                  id="telefono"
+                  type="tel"
+                  name="telefono"
+                  disabled={!isEditing}
+                  value={form.telefono}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-neutral-300 bg-surface px-4 py-2.5 text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-neutral-200 disabled:cursor-not-allowed"
+                  placeholder="+56 9 1234 5678"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                {!isEditing ? (
+                  <button
+                    type="button"
+                    className="flex-1 px-6 py-2.5 bg-primary text-white rounded-lg font-medium transition-all hover:bg-primary-dark hover:shadow-md active:scale-95"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    Editar Perfil
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="flex-1 px-6 py-2.5 border border-neutral-300 text-text rounded-lg font-medium transition-all hover:bg-neutral-100 active:scale-95"
+                      onClick={() => setIsEditing(false)}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className="flex-1 px-6 py-2.5 bg-primary text-white rounded-lg font-medium transition-all hover:bg-primary-dark hover:shadow-md active:scale-95"
+                      onClick={handleSaveClick}
+                    >
+                      Guardar Cambios
+                    </button>
+                  </>
+                )}
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </section>

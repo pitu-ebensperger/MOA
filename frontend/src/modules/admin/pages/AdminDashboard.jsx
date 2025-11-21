@@ -25,12 +25,11 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex h-screen bg-moa-neutral-50">
-      {/* Sidebar */}
+    <div className="bg-moa-neutral-50 min-h-screen">
       <AdminSidebar />
 
       {/* Contenido principal */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="ml-64 flex min-h-screen flex-col overflow-hidden">
         {/* Header */}
         <AdminHeader />
 

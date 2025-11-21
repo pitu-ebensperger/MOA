@@ -86,4 +86,20 @@ export const ordersAdminApi = {
     return apiClient.get('/admin/pedidos/stats', { params });
   },
 
+  /**
+   * Exportar listado de órdenes filtradas
+   * @param {Object} [params={}] - Parámetros de filtro válidos
+   * @returns {Promise<Blob>} Archivo en formato blob
+   */
+  exportOrders: (params = {}, format = 'csv') => requestOrderExport(params, format),
+
+  exportToCSV: (params = {}) => requestOrderExport(params, 'csv'),
+
+};
+
+const requestOrderExport = (params = {}, format = 'csv') => {
+  return apiClient.get('/admin/pedidos/export', {
+    params: { ...params, format },
+    responseType: 'blob',
+  });
 };

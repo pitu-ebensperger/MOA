@@ -13,7 +13,22 @@ export const useProducts = (filters) => {
   const normalizedFilters = useMemo(() => normalizeFilters(filters), [filters]);
   const query = useQuery({
     queryKey: [...PRODUCTS_QUERY_KEY, normalizedFilters],
-    queryFn: () => productsApi.list(normalizedFilters),
+    queryFn: async () => {
+      const ts = Date.now();
+      console.log('[useProducts] Fetch start', { filters: normalizedFilters });
+      try {
+        const data = await productsApi.list(normalizedFilters);
+        console.log('[useProducts] Fetch success', { ms: Date.now() - ts, count: data?.items?.length });
+        return data;
+      } catch (err) {
+        console.error('[useProducts] Fetch error', {
+          message: err.message,
+          status: err.status,
+          data: err.data,
+        });
+        throw err;
+      }
+    },
     keepPreviousData: true,
     staleTime: 1000 * 60,
   });

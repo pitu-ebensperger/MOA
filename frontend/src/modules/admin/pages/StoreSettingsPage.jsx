@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Save, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { getStoreConfig, updateStoreConfig } from '@/services/config.api.js';
+import { Save, RefreshCw, AlertCircle, CheckCircle2, Factory, Store } from 'lucide-react';
+import { getStoreConfig, updateStoreConfig, initializeStoreConfig } from '@/services/config.api.js';
 import { Button } from '@/components/ui/Button.jsx';
 import { Input } from '@/components/ui/Input.jsx';
+import { Textarea } from '@/components/shadcn/ui/textarea.jsx';
+import AdminPageHeader from '@/modules/admin/components/AdminPageHeader.jsx';
 
 export const StoreSettingsPage = () => {
   const [config, setConfig] = useState({
@@ -20,6 +22,7 @@ export const StoreSettingsPage = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [initializing, setInitializing] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -69,10 +72,28 @@ export const StoreSettingsPage = () => {
     }
   };
 
+  const handleInitialize = async () => {
+    try {
+      setInitializing(true);
+      setError(null);
+      setSuccess(false);
+      const result = await initializeStoreConfig();
+      const configPayload = result?.data ?? result;
+      setConfig(configPayload);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      console.error('Error al inicializar configuración:', err);
+      setError(err.response?.data?.message || 'Error al inicializar la configuración.');
+    } finally {
+      setInitializing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96">
-        <div className="flex items-center gap-3 text-neutral-600">
+        <div className="flex items-center gap-3 text-primary">
           <RefreshCw className="h-6 w-6 animate-spin" />
           <span>Cargando configuración...</span>
         </div>
@@ -81,47 +102,74 @@ export const StoreSettingsPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-primary1 mb-2">
-          Configuración de la Tienda
-        </h1>
-        <p className="text-neutral-600">
-          Administra la información que se muestra en el footer y otras áreas del sitio
-        </p>
-      </div>
+    <div className="admin-page mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
+      <AdminPageHeader
+        icon={<Store className="h-5 w-5" />}
+        title="Configuración de la Tienda"
+        subtitle="Actualiza los datos básicos y de contacto que definen la identidad de la tienda."
+        actions={
+          <Button
+            type="button"
+            appearance="outline"
+            intent="neutral"
+            leftIcon={<Factory className="h-4 w-4" />}
+            onClick={handleInitialize}
+            disabled={initializing || saving}
+            loading={initializing}
+          >
+            Inicializar configuración
+          </Button>
+        }
+      />
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
-          <div className="flex-1">
-            <h3 className="font-semibold text-red-800 mb-1">Error</h3>
-            <p className="text-sm text-red-700">{error}</p>
+        <div className="space-y-2">
+          <div className="flex items-start gap-2 text-(--color-error)">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+            <div>
+              <h3 className="font-semibold leading-tight">¡Ups! Algo salió mal</h3>
+              <p className="text-sm leading-relaxed">
+                Ha ocurrido un error inesperado en la aplicación.
+              </p>
+            </div>
           </div>
+          {typeof error === 'string' && (
+            <p className="text-xs text-(--color-text-muted)">
+              {error}
+            </p>
+          )}
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
-          <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 rounded-2xl border border-(--color-success) bg-(--color-success)/10 p-4 text-(--color-success)">
+          <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
           <div className="flex-1">
-            <h3 className="font-semibold text-green-800 mb-1">¡Éxito!</h3>
-            <p className="text-sm text-green-700">Los cambios se guardaron correctamente</p>
+            <h3 className="font-semibold">¡Éxito!</h3>
+            <p className="text-sm">Los cambios se guardaron correctamente.</p>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Información Básica */}
-        <section className="bg-white rounded-xl border border-neutral-200 p-6">
-          <h2 className="text-xl font-semibold text-neutral-800 mb-6">
-            Información Básica
-          </h2>
+        <section className="rounded-3xl border border-(--border-subtle) bg-(--color-neutral2)/90 p-6 shadow-(--shadow-sm)">
+          <div className="mb-6 space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-(--text-secondary1)">
+              Identidad
+            </p>
+            <h2 className="text-xl font-semibold text-(--text-strong)">
+              Información básica
+            </h2>
+            <p className="text-sm text-(--text-secondary1)">
+              Define cómo se presenta la marca en los distintos puntos de contacto.
+            </p>
+          </div>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label htmlFor="nombre_tienda" className="block text-sm font-medium text-neutral-700 mb-2">
-                Nombre de la Tienda
+              <label htmlFor="nombre_tienda" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
+                Nombre de la tienda
               </label>
               <Input
                 id="nombre_tienda"
@@ -134,36 +182,43 @@ export const StoreSettingsPage = () => {
             </div>
 
             <div>
-              <label htmlFor="descripcion" className="block text-sm font-medium text-neutral-700 mb-2">
-                Descripción
+              <label htmlFor="descripcion" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
+                Descripción breve
               </label>
-              <textarea
+              <Textarea
                 id="descripcion"
                 name="descripcion"
                 value={config.descripcion}
                 onChange={handleChange}
-                rows={3}
-                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary1 focus:border-transparent"
                 placeholder="Descripción de la tienda"
                 required
+                className="bg-white text-(--color-primary2)"
               />
-              <p className="mt-1 text-sm text-neutral-500">
-                Esta descripción aparece en el footer del sitio
+              <p className="mt-2 text-sm text-(--color-text-muted)">
+                Este texto se muestra en el footer del sitio y en algunos módulos de comunicación.
               </p>
             </div>
           </div>
         </section>
 
         {/* Información de Contacto */}
-        <section className="bg-white rounded-xl border border-neutral-200 p-6">
-          <h2 className="text-xl font-semibold text-neutral-800 mb-6">
-            Información de Contacto
-          </h2>
+        <section className="rounded-3xl border border-(--border-subtle) bg-(--color-neutral2)/90 p-6 shadow-(--shadow-sm)">
+          <div className="mb-6 space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-(--text-secondary1)">
+              Contacto
+            </p>
+            <h2 className="text-xl font-semibold text-(--text-strong)">
+              Información de contacto
+            </h2>
+            <p className="text-sm text-(--text-secondary1)">
+              Estos datos alimentan las comunicaciones en el sitio, emails y material impreso.
+            </p>
+          </div>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label htmlFor="direccion" className="block text-sm font-medium text-neutral-700 mb-2">
-                Dirección
+              <label htmlFor="direccion" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
+                Dirección física
               </label>
               <Input
                 id="direccion"
@@ -175,9 +230,9 @@ export const StoreSettingsPage = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <label htmlFor="telefono" className="block text-sm font-medium text-neutral-700 mb-2">
+                <label htmlFor="telefono" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
                   Teléfono
                 </label>
                 <Input
@@ -191,7 +246,7 @@ export const StoreSettingsPage = () => {
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
+                <label htmlFor="email" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
                   Email
                 </label>
                 <Input
@@ -209,14 +264,22 @@ export const StoreSettingsPage = () => {
         </section>
 
         {/* Redes Sociales */}
-        <section className="bg-white rounded-xl border border-neutral-200 p-6">
-          <h2 className="text-xl font-semibold text-neutral-800 mb-6">
-            Redes Sociales
-          </h2>
+        <section className="rounded-3xl border border-(--border-subtle) bg-(--color-neutral2)/90 p-6 shadow-(--shadow-sm)">
+          <div className="mb-6 space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-(--text-secondary1)">
+              Comunidad
+            </p>
+            <h2 className="text-xl font-semibold text-(--text-strong)">
+              Redes sociales
+            </h2>
+            <p className="text-sm text-(--text-secondary1)">
+              Vincula los perfiles oficiales de la marca para mostrarlos en el sitio.
+            </p>
+          </div>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label htmlFor="instagram_url" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="instagram_url" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
                 Instagram
               </label>
               <Input
@@ -230,7 +293,7 @@ export const StoreSettingsPage = () => {
             </div>
 
             <div>
-              <label htmlFor="facebook_url" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="facebook_url" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
                 Facebook
               </label>
               <Input
@@ -244,7 +307,7 @@ export const StoreSettingsPage = () => {
             </div>
 
             <div>
-              <label htmlFor="twitter_url" className="block text-sm font-medium text-neutral-700 mb-2">
+              <label htmlFor="twitter_url" className="mb-2 block text-sm font-semibold text-(--color-primary2)">
                 Twitter / X
               </label>
               <Input
@@ -260,14 +323,15 @@ export const StoreSettingsPage = () => {
         </section>
 
         {/* Botones de Acción */}
-        <div className="flex items-center justify-end gap-4 pt-4">
+        <div className="flex flex-wrap items-center justify-end gap-3 rounded-2xl border border-(--border-subtle) bg-(--color-neutral2)/80 px-4 py-4">
           <Button
             type="button"
-            appearance="outline"
+            appearance="ghost"
+            intent="neutral"
+            leftIcon={<RefreshCw className="h-4 w-4" />}
             onClick={loadConfig}
             disabled={saving}
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
             Recargar
           </Button>
           
@@ -275,19 +339,10 @@ export const StoreSettingsPage = () => {
             type="submit"
             appearance="solid"
             intent="primary"
-            disabled={saving}
+            leftIcon={saving ? null : <Save className="h-4 w-4" />}
+            loading={saving}
           >
-            {saving ? (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Guardar Cambios
-              </>
-            )}
+            {saving ? 'Guardando...' : 'Guardar cambios'}
           </Button>
         </div>
       </form>

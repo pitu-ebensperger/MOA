@@ -70,7 +70,7 @@ const MetricCard = ({
 
   return (
     <div 
-      className={`rounded-3xl border border-[color:var(--color-border)] bg-[color:var(--color-neutral1)] shadow-[var(--shadow-sm)] transition-all hover:shadow-[var(--shadow-md)] ${sizeClasses[size]} ${className}`}
+      className={`rounded-3xl border border-(--color-border) bg-(--color-neutral1) shadow-(--shadow-sm) transition-all hover:shadow-(--shadow-md) ${sizeClasses[size]} ${className}`}
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
@@ -95,20 +95,20 @@ const MetricCard = ({
       </div>
       
       <div className="space-y-2">
-        <p className={`font-bold text-(--text-strong) ${valueClasses[size]}`}>
+        <div className={`font-bold text-(--text-strong) ${valueClasses[size]}`}>
           {value}
-        </p>
+        </div>
         
         {trend && (
           <div className="flex items-center gap-1">
             {trend === "up" ? (
-              <ArrowUpRight className="h-4 w-4 text-[color:var(--color-success)]" />
+              <ArrowUpRight className="h-4 w-4 text-(--color-success)" />
             ) : (
-              <ArrowDownRight className="h-4 w-4 text-[color:var(--color-error)]" />
+              <ArrowDownRight className="h-4 w-4 text-(--color-error)" />
             )}
             <span 
               className={`text-sm font-medium ${
-                trend === "up" ? "text-[color:var(--color-success)]" : "text-[color:var(--color-error)]"
+                trend === "up" ? "text-(--color-success)" : "text-(--color-error)"
               }`}
             >
               {trendValue}

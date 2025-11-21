@@ -62,7 +62,11 @@ html:focus-within { scroll-behavior: smooth; }
 
 /* INPUT */
 input::placeholder { color: color-mix(in oklab, var(--color-secondary1) 90%, transparent); }
-input:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-primary1,#6B5444) 40%, transparent); outline-offset: 2px; }
+input:focus-visible {
+    outline: 1.5px solid color-mix(in srgb, var(--color-primary1,#6B5444) 20%, transparent);
+    outline-offset: 0.5px;
+    border-color: color-mix(in srgb, var(--color-primary1,#6B5444) 50%, transparent);
+}
 
 
 /* SLIDER */

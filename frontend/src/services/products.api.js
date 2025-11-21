@@ -1,6 +1,4 @@
-import { env } from "@/config/env.js"
 import { API_PATHS } from "@/config/api-paths.js"
-import { mockCatalogApi } from "@/mocks/api/products.js"
 import { apiClient } from "@/services/api-client.js"
 import { normalizeCategoryList, normalizeProduct } from "@/utils/normalizers.js"
 import { buildQueryString } from "@/utils/https.js"
@@ -74,39 +72,4 @@ const remoteProductsApi = {
   },
 };
 
-const mockProductsApi = {
-  async list(params = {}) {
-    const data = await mockCatalogApi.list(params);
-    return normalizeListResponse(data);
-  },
-  async getById(id) {
-    if (id == null) throw new Error("product id is required");
-    const data = await mockCatalogApi.getById(id);
-    return normalizeProduct(data);
-  },
-  async getBySlug(slug) {
-    if (!slug) throw new Error("product slug is required");
-    const data = await mockCatalogApi.getById(slug);
-    return normalizeProduct(data);
-  },
-  async listCategories(params = {}) {
-    const data = await mockCatalogApi.listCategories(params);
-    return normalizeCategoryList(data);
-  },
-  async create(payload = {}) {
-    const data = await mockCatalogApi.create(payload);
-    return normalizeProduct(data);
-  },
-  async update(id, patch = {}) {
-    if (id == null) throw new Error("product id is required");
-    const data = await mockCatalogApi.update(id, patch);
-    return normalizeProduct(data);
-  },
-  async remove(id) {
-    if (id == null) throw new Error("product id is required");
-    const data = await mockCatalogApi.remove(id);
-    return { ok: true, removedId: data?.removedId ?? id };
-  },
-};
-
-export const productsApi = env.USE_MOCKS ? mockProductsApi : remoteProductsApi;
+export const productsApi = remoteProductsApi;

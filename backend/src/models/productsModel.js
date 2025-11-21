@@ -7,6 +7,7 @@ export const productsModel = {
     const {
       page = 1,
       limit = 20,
+      offset = null,
       search = '',
       categoryId = null,
       status = null,
@@ -17,7 +18,17 @@ export const productsModel = {
       sortOrder = 'DESC'
     } = options;
 
-    const offset = (page - 1) * limit;
+    const safeLimit = Math.max(1, Number(limit) || 1);
+    const safePage = Math.max(1, Number(page) || 1);
+    const hasExplicitOffset =
+      offset !== undefined &&
+      offset !== null &&
+      String(offset).trim() !== '' &&
+      Number.isFinite(Number(offset));
+    const offsetValue = hasExplicitOffset
+      ? Math.max(0, Number(offset))
+      : (safePage - 1) * safeLimit;
+    const currentPage = Math.floor(offsetValue / safeLimit) + 1;
     const values = [];
     let paramIndex = 1;
 
@@ -97,7 +108,7 @@ export const productsModel = {
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
     `;
 
-    values.push(limit, offset);
+    values.push(safeLimit, offsetValue);
 
     // Consulta para el total
     const countQuery = `
@@ -113,17 +124,18 @@ export const productsModel = {
 
     const products = productsResult.rows;
     const total = countResult.rows[0].total;
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
 
     return {
       items: products,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: currentPage,
+        offset: offsetValue,
+        limit: safeLimit,
         total,
         totalPages,
-        hasNextPage: page < totalPages,
-        hasPrevPage: page > 1
+        hasNextPage: currentPage < totalPages,
+        hasPrevPage: currentPage > 1
       }
     };
   },

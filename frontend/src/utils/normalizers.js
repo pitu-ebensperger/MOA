@@ -51,7 +51,6 @@ export const normalizeProduct = (p = {}) => {
     color: p.color ?? null,
     dimensions: p.dimensions ?? null,
     weight: p.weight ?? null,
-    specs: p.specs ?? null,
     createdAt: p.createdAt ?? null,
     updatedAt: p.updatedAt ?? null,
     fk_category_id: p.fk_category_id ?? p.categoryId ?? null,

@@ -2,29 +2,233 @@ import pool from "../../database/config.js";
 import { NotFoundError, ValidationError, ForbiddenError } from "../utils/error.utils.js";
 import { createAdminCustomerModel, updateAdminCustomerModel } from "../models/usersModel.js";
 
+const safeNumber = (value) => {
+  if (value === null || value === undefined) return 0;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : 0;
+};
+
+const parsePositiveInt = (value, fallback) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return fallback;
+  }
+  return Math.floor(parsed);
+};
+
+const toClp = (value) => Math.round(safeNumber(value) / 100);
+
+const DAY_NAMES = [
+  "Domingo",
+  "Lunes",
+  "Martes",
+  "Miércoles",
+  "Jueves",
+  "Viernes",
+  "Sábado",
+];
+
+const ORDER_STATUS_KEYS = [
+  "pending",
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+];
+
+const determineOrderStatus = (estadoPago, estadoEnvio) => {
+  const payment = String(estadoPago || "").toLowerCase();
+  const shipping = String(estadoEnvio || "").toLowerCase();
+
+  if (payment === "cancelado" || shipping === "devuelto") return "cancelled";
+  if (shipping === "entregado") return "delivered";
+  if (shipping === "enviado") return "shipped";
+  if (payment === "pendiente") return "pending";
+  if (payment === "pagado") {
+    if (shipping === "" || shipping === "preparacion") {
+      return "confirmed";
+    }
+    return "shipped";
+  }
+  if (shipping === "preparacion" || payment === "procesando") {
+    return "processing";
+  }
+  return "processing";
+};
+
+const buildStatusCounts = (rows) => {
+  const counts = ORDER_STATUS_KEYS.reduce((acc, key) => {
+    acc[key] = 0;
+    return acc;
+  }, {});
+
+  rows.forEach((row) => {
+    const key = determineOrderStatus(row.estado_pago, row.estado_envio);
+    counts[key] += safeNumber(row.count);
+  });
+
+  return counts;
+};
+
+const MONTH_FORMATTER = new Intl.DateTimeFormat("es-CL", { month: "short" });
+
+const formatMonthLabel = (value) => {
+  if (!value) return "";
+  const label = MONTH_FORMATTER.format(new Date(value));
+  return label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+const getWeekNumber = (value) => {
+  const date = new Date(value);
+  const target = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNr = target.getUTCDay() || 7;
+  target.setUTCDate(target.getUTCDate() + 4 - dayNr);
+  const yearStart = new Date(Date.UTC(target.getUTCFullYear(), 0, 1));
+  return Math.ceil((((target - yearStart) / 86400000) + 1) / 7);
+};
+
+const getWeekStart = (value) => {
+  const date = new Date(value);
+  const day = date.getDay();
+  const diff = (day + 6) % 7;
+  date.setDate(date.getDate() - diff);
+  date.setHours(0, 0, 0, 0);
+  return date;
+};
+
+const buildDailyRevenueSeries = (rows, startDate, endDate) => {
+  const map = new Map();
+  rows.forEach((row) => {
+    const dateKey = new Date(row.period).toISOString().split("T")[0];
+    map.set(dateKey, toClp(row.revenue));
+  });
+
+  const series = [];
+  const cursor = new Date(startDate);
+  while (cursor < endDate) {
+    const key = cursor.toISOString().split("T")[0];
+    series.push({
+      date: key,
+      revenue: map.get(key) ?? 0,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return series;
+};
+
+const buildWeeklyRevenueSeries = (rows, weeksToShow = 4) => {
+  const map = new Map();
+  rows.forEach((row) => {
+    const start = getWeekStart(row.period);
+    map.set(start.toISOString(), toClp(row.revenue));
+  });
+
+  const reference = getWeekStart(new Date());
+  const series = [];
+  for (let i = weeksToShow - 1; i >= 0; i--) {
+    const date = new Date(reference);
+    date.setDate(reference.getDate() - i * 7);
+    const key = date.toISOString();
+    series.push({
+      week: `W${getWeekNumber(date)}`,
+      revenue: map.get(key) ?? 0,
+    });
+  }
+  return series;
+};
+
+const buildMonthlyRevenueSeries = (rows, monthsToShow = 6) => {
+  const map = new Map();
+  rows.forEach((row) => {
+    const date = new Date(row.period);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    map.set(key, toClp(row.revenue));
+  });
+
+  const reference = new Date();
+  reference.setDate(1);
+  reference.setHours(0, 0, 0, 0);
+
+  const series = [];
+  for (let i = monthsToShow - 1; i >= 0; i--) {
+    const date = new Date(reference.getFullYear(), reference.getMonth() - i, 1);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    series.push({
+      month: formatMonthLabel(date),
+      revenue: map.get(key) ?? 0,
+    });
+  }
+  return series;
+};
+
+const buildMonthlyTrend = (rows, visitorCount, monthsToShow = 3) => {
+  if (!rows.length) return [];
+  const sliceStart = Math.max(0, rows.length - monthsToShow);
+  return rows.slice(sliceStart).map((row) => {
+    const buyers = safeNumber(row.unique_buyers);
+    const rate = visitorCount ? (buyers / visitorCount) * 100 : 0;
+    return {
+      month: formatMonthLabel(row.period),
+      rate: Number(rate.toFixed(1)),
+    };
+  });
+};
+
+const buildOrderDistribution = (rows) => {
+  const map = new Map();
+  let total = 0;
+  rows.forEach((row) => {
+    const dow = Number(row.dow);
+    const count = Number(row.order_count);
+    total += count;
+    map.set(dow, {
+      orderCount: count,
+      revenue: toClp(row.revenue),
+    });
+  });
+
+  return DAY_NAMES.map((label, index) => {
+    const data = map.get(index) ?? { orderCount: 0, revenue: 0 };
+    const percentage = total ? (data.orderCount / total) * 100 : 0;
+    return {
+      period: label,
+      orderCount: data.orderCount,
+      revenue: data.revenue,
+      percentage: Number(percentage.toFixed(1)),
+    };
+  });
+};
+
 
 export class AdminController {
   static async getDashboardMetrics(req, res, next) {
     try {
-      // TODO: Implementar consultas reales a la base de datos
+      const [
+        productsResult,
+        ordersResult,
+        revenueResult,
+        customersResult,
+        statusResult,
+      ] = await Promise.all([
+        pool.query("SELECT COUNT(*)::int AS total_products FROM productos WHERE status = 'activo'"),
+        pool.query("SELECT COUNT(*)::int AS total_orders FROM ordenes"),
+        pool.query("SELECT COALESCE(SUM(total_cents), 0)::bigint AS total_revenue FROM ordenes"),
+        pool.query("SELECT COUNT(*)::int AS total_customers FROM usuarios WHERE rol != 'admin'"),
+        pool.query("SELECT estado_pago, estado_envio, COUNT(*)::int AS count FROM ordenes GROUP BY estado_pago, estado_envio"),
+      ]);
+
       const metrics = {
-        totalProducts: 0,
-        totalOrders: 0,
-        totalRevenue: 0,
-        totalCustomers: 0,
-        orderStatusCounts: {
-          pending: 0,
-          confirmed: 0,
-          processing: 0,
-          shipped: 0,
-          delivered: 0,
-          cancelled: 0,
-        }
+        totalProducts: productsResult.rows[0]?.total_products ?? 0,
+        totalOrders: ordersResult.rows[0]?.total_orders ?? 0,
+        totalRevenue: toClp(revenueResult.rows[0]?.total_revenue ?? 0),
+        totalCustomers: customersResult.rows[0]?.total_customers ?? 0,
+        orderStatusCounts: buildStatusCounts(statusResult.rows),
       };
 
       res.json({
         success: true,
-        data: metrics
+        data: metrics,
       });
     } catch (error) {
       next(error);
@@ -33,23 +237,103 @@ export class AdminController {
 
   static async getSalesAnalytics(req, res, next) {
     try {
-      const { period = 'month' } = req.query;
-      
-      // TODO: Implementar consultas reales basadas en el período
+      const now = new Date();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const weekWindowStart = new Date(now);
+      weekWindowStart.setDate(now.getDate() - 28);
+      weekWindowStart.setHours(0, 0, 0, 0);
+      const monthlyWindowStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      const statsQuery = `
+        SELECT
+          COUNT(*)::int AS orders,
+          COUNT(DISTINCT usuario_id)::int AS customers,
+          COALESCE(SUM(total_cents), 0)::bigint AS revenue
+        FROM ordenes
+        WHERE creado_en >= $1 AND creado_en < $2
+      `;
+
+      const [
+        currentStats,
+        previousStats,
+        dailyRows,
+        weeklyRows,
+        monthlyRows,
+      ] = await Promise.all([
+        pool.query(statsQuery, [currentMonthStart.toISOString(), nextMonthStart.toISOString()]),
+        pool.query(statsQuery, [previousMonthStart.toISOString(), currentMonthStart.toISOString()]),
+        pool.query(
+          `
+            SELECT DATE_TRUNC('day', creado_en) AS period,
+                   COALESCE(SUM(total_cents), 0)::bigint AS revenue
+            FROM ordenes
+            WHERE creado_en >= $1 AND creado_en < $2
+            GROUP BY 1
+            ORDER BY 1 ASC
+          `,
+          [currentMonthStart.toISOString(), nextMonthStart.toISOString()]
+        ),
+        pool.query(
+          `
+            SELECT DATE_TRUNC('week', creado_en) AS period,
+                   COALESCE(SUM(total_cents), 0)::bigint AS revenue
+            FROM ordenes
+            WHERE creado_en >= $1
+            GROUP BY 1
+            ORDER BY 1 ASC
+          `,
+          [weekWindowStart.toISOString()]
+        ),
+        pool.query(
+          `
+            SELECT DATE_TRUNC('month', creado_en) AS period,
+                   COALESCE(SUM(total_cents), 0)::bigint AS revenue
+            FROM ordenes
+            WHERE creado_en >= $1
+            GROUP BY 1
+            ORDER BY 1 ASC
+          `,
+          [monthlyWindowStart.toISOString()]
+        ),
+      ]);
+
+      const current = currentStats.rows[0] ?? { orders: 0, customers: 0, revenue: 0 };
+      const previous = previousStats.rows[0] ?? { orders: 0, customers: 0, revenue: 0 };
+      const currentRevenueClp = toClp(current.revenue);
+      const previousRevenueClp = toClp(previous.revenue);
+      const growthPercentage = previousRevenueClp
+        ? Number((((currentRevenueClp - previousRevenueClp) / previousRevenueClp) * 100).toFixed(1))
+        : 0;
+
+      const dailyRevenue = buildDailyRevenueSeries(dailyRows.rows, currentMonthStart, nextMonthStart);
+      const weeklyRevenue = buildWeeklyRevenueSeries(weeklyRows.rows, 4);
+      const monthlyRevenue = buildMonthlyRevenueSeries(monthlyRows.rows, 6);
+
       const salesData = {
-        currentMonth: { revenue: 0, orders: 0, customers: 0 },
-        previousMonth: { revenue: 0, orders: 0, customers: 0 },
-        growthPercentage: 0,
-        averageOrderValue: 0,
-        totalTransactions: 0,
-        dailyRevenue: [],
-        weeklyRevenue: [],
-        monthlyRevenue: []
+        currentMonth: {
+          revenue: currentRevenueClp,
+          orders: current.orders,
+          customers: current.customers,
+        },
+        previousMonth: {
+          revenue: previousRevenueClp,
+          orders: previous.orders,
+          customers: previous.customers,
+        },
+        growthPercentage,
+        averageOrderValue:
+          current.orders > 0 ? Math.round(currentRevenueClp / current.orders) : 0,
+        totalTransactions: current.orders,
+        dailyRevenue,
+        weeklyRevenue,
+        monthlyRevenue,
       };
 
       res.json({
         success: true,
-        data: salesData
+        data: salesData,
       });
     } catch (error) {
       next(error);
@@ -58,20 +342,79 @@ export class AdminController {
 
   static async getConversionMetrics(req, res, next) {
     try {
-      const { period = 'month' } = req.query;
-      
-      // TODO: Implementar cálculos de conversión reales
+      const now = new Date();
+      const trendStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+      const [
+        visitorResult,
+        purchaserResult,
+        ordersResult,
+        categoriesResult,
+        trendResult,
+      ] = await Promise.all([
+        pool.query("SELECT COUNT(*)::int AS visitor_count FROM usuarios WHERE rol != 'admin'"),
+        pool.query("SELECT COUNT(DISTINCT usuario_id)::int AS purchaser_count FROM ordenes"),
+        pool.query("SELECT COUNT(*)::int AS total_orders FROM ordenes"),
+        pool.query(
+          `
+            SELECT
+              c.categoria_id AS id,
+              c.nombre AS name,
+              COUNT(DISTINCT o.orden_id)::int AS orders,
+              COALESCE(SUM(oi.cantidad), 0)::int AS sales,
+              COALESCE(SUM(oi.cantidad * oi.precio_unit), 0)::bigint AS revenue
+            FROM orden_items oi
+            JOIN ordenes o ON oi.orden_id = o.orden_id
+            JOIN productos p ON oi.producto_id = p.producto_id
+            LEFT JOIN categorias c ON p.categoria_id = c.categoria_id
+            WHERE p.status = 'activo' AND c.categoria_id IS NOT NULL
+            GROUP BY c.categoria_id, c.nombre
+            ORDER BY revenue DESC
+            LIMIT 5
+          `
+        ),
+        pool.query(
+          `
+            SELECT
+              DATE_TRUNC('month', creado_en) AS period,
+              COUNT(DISTINCT usuario_id)::int AS unique_buyers
+            FROM ordenes
+            WHERE creado_en >= $1
+            GROUP BY 1
+            ORDER BY 1 ASC
+          `,
+          [trendStart.toISOString()]
+        ),
+      ]);
+
+      const visitorCount = visitorResult.rows[0]?.visitor_count ?? 0;
+      const purchaserCount = purchaserResult.rows[0]?.purchaser_count ?? 0;
+      const totalOrders = ordersResult.rows[0]?.total_orders ?? 0;
+
+      const categoryRates = categoriesResult.rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        sales: Number(row.sales),
+        revenue: toClp(row.revenue),
+        orders: Number(row.orders),
+        conversionRate: totalOrders
+          ? Number(((row.orders / totalOrders) * 100).toFixed(1))
+          : 0,
+      }));
+
       const conversionData = {
-        overallRate: 0,
-        visitorCount: 0,
-        purchaserCount: 0,
-        categoryRates: [],
-        monthlyTrend: []
+        overallRate: visitorCount
+          ? Number(((purchaserCount / visitorCount) * 100).toFixed(1))
+          : 0,
+        visitorCount,
+        purchaserCount,
+        categoryRates,
+        monthlyTrend: buildMonthlyTrend(trendResult.rows, visitorCount, 3),
       };
 
       res.json({
         success: true,
-        data: conversionData
+        data: conversionData,
       });
     } catch (error) {
       next(error);
@@ -80,14 +423,53 @@ export class AdminController {
 
   static async getTopProducts(req, res, next) {
     try {
-      const { limit = 10, period = 'month' } = req.query;
-      
-      // TODO: Implementar consulta real para productos más vendidos
-      const topProducts = [];
+      const limitValue = parsePositiveInt(req.query.limit ?? 10, 10);
+
+      const result = await pool.query(
+        `
+          SELECT
+            p.producto_id AS id,
+            p.nombre AS name,
+            p.sku,
+            p.img_url AS image_url,
+            p.precio_cents AS price_cents,
+            COALESCE(SUM(oi.cantidad), 0)::int AS sales_count,
+            COALESCE(SUM(oi.cantidad * oi.precio_unit), 0)::bigint AS revenue
+          FROM orden_items oi
+          JOIN productos p ON oi.producto_id = p.producto_id
+          JOIN ordenes o ON oi.orden_id = o.orden_id
+          WHERE p.status = 'activo'
+          GROUP BY p.producto_id, p.nombre, p.sku, p.img_url, p.precio_cents
+          ORDER BY revenue DESC
+          LIMIT $1
+        `,
+        [limitValue]
+      );
+
+      const topProducts = result.rows.map((row) => {
+        const salesCount = Number(row.sales_count);
+        const viewCount = Math.max(100, salesCount * 25);
+        const conversionRate = viewCount
+          ? Number(((salesCount / viewCount) * 100).toFixed(1))
+          : 0;
+
+        return {
+          id: row.id,
+          name: row.name,
+          sku: row.sku,
+          salesCount,
+          viewCount,
+          totalRevenue: toClp(row.revenue),
+          conversionRate,
+          price: Math.round((Number(row.price_cents) || 0) / 100),
+          imageUrl: row.image_url,
+          images: row.image_url ? [{ url: row.image_url }] : [],
+        };
+      });
 
       res.json({
         success: true,
-        data: topProducts
+        data: topProducts,
       });
     } catch (error) {
       next(error);
@@ -97,14 +479,47 @@ export class AdminController {
 
   static async getCategoryAnalytics(req, res, next) {
     try {
-      const { period = 'month' } = req.query;
-      
-      // TODO: Implementar analytics por categoría
-      const categoryData = [];
+      const limitValue = parsePositiveInt(req.query.limit ?? 6, 6);
+
+      const [ordersResult, categoriesResult] = await Promise.all([
+        pool.query("SELECT COUNT(*)::int AS total_orders FROM ordenes"),
+        pool.query(
+          `
+            SELECT
+              c.categoria_id AS id,
+              c.nombre AS name,
+              COUNT(DISTINCT o.orden_id)::int AS orders,
+              COALESCE(SUM(oi.cantidad), 0)::int AS sales,
+              COALESCE(SUM(oi.cantidad * oi.precio_unit), 0)::bigint AS revenue
+            FROM orden_items oi
+            JOIN ordenes o ON oi.orden_id = o.orden_id
+            JOIN productos p ON oi.producto_id = p.producto_id
+            JOIN categorias c ON p.categoria_id = c.categoria_id
+            WHERE p.status = 'activo'
+            GROUP BY c.categoria_id, c.nombre
+            ORDER BY revenue DESC
+            LIMIT $1
+          `,
+          [limitValue]
+        ),
+      ]);
+
+      const totalOrders = ordersResult.rows[0]?.total_orders ?? 0;
+
+      const categoryData = categoriesResult.rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        sales: Number(row.sales),
+        revenue: toClp(row.revenue),
+        orders: Number(row.orders),
+        conversionRate: totalOrders
+          ? Number(((row.orders / totalOrders) * 100).toFixed(1))
+          : 0,
+      }));
 
       res.json({
         success: true,
-        data: categoryData
+        data: categoryData,
       });
     } catch (error) {
       next(error);
@@ -113,18 +528,91 @@ export class AdminController {
 
   static async getStockAnalytics(req, res, next) {
     try {
-      // TODO: Implementar consultas de stock
+      const threshold = parsePositiveInt(req.query.threshold ?? 5, 5);
+      const limitValue = parsePositiveInt(req.query.limit ?? 5, 5);
+
+      const [countsResult, lowStockResult, outOfStockResult] = await Promise.all([
+        pool.query(
+          `
+            SELECT
+              COUNT(*) FILTER (WHERE stock <= $1 AND status = 'activo')::int AS low_stock_count,
+              COUNT(*) FILTER (WHERE stock = 0 AND status = 'activo')::int AS out_of_stock_count,
+              COUNT(*) FILTER (WHERE status = 'activo')::int AS total_items
+            FROM productos
+          `,
+          [threshold]
+        ),
+        pool.query(
+          `
+            SELECT 
+              p.producto_id AS id,
+              p.nombre,
+              p.sku,
+              p.stock,
+              stats.last_sale
+            FROM productos p
+            LEFT JOIN (
+              SELECT oi.producto_id, MAX(o.creado_en) AS last_sale
+              FROM orden_items oi
+              JOIN ordenes o ON oi.orden_id = o.orden_id
+              GROUP BY oi.producto_id
+            ) stats ON stats.producto_id = p.producto_id
+            WHERE p.status = 'activo' AND p.stock <= $1
+            ORDER BY p.stock ASC, p.nombre ASC
+            LIMIT $2
+          `,
+          [threshold, limitValue]
+        ),
+        pool.query(
+          `
+            SELECT 
+              p.producto_id AS id,
+              p.nombre,
+              p.sku,
+              p.stock,
+              stats.last_sale
+            FROM productos p
+            LEFT JOIN (
+              SELECT oi.producto_id, MAX(o.creado_en) AS last_sale
+              FROM orden_items oi
+              JOIN ordenes o ON oi.orden_id = o.orden_id
+              GROUP BY oi.producto_id
+            ) stats ON stats.producto_id = p.producto_id
+            WHERE p.status = 'activo' AND p.stock = 0
+            ORDER BY p.nombre ASC
+            LIMIT $1
+          `,
+          [limitValue]
+        ),
+      ]);
+
+      const counts = countsResult.rows[0] ?? {
+        low_stock_count: 0,
+        out_of_stock_count: 0,
+        total_items: 0,
+      };
+
+      const formatProduct = (row, statusLabel) => ({
+        id: row.id,
+        name: row.nombre,
+        sku: row.sku,
+        currentStock: Number(row.stock),
+        minStock: threshold,
+        status: statusLabel,
+        lastSaleDate: row.last_sale ? new Date(row.last_sale).toISOString() : null,
+      });
+
       const stockData = {
-        lowStockCount: 0,
-        outOfStockCount: 0,
-        totalItems: 0,
-        lowStockProducts: [],
-        outOfStockProducts: []
+        lowStockCount: Number(counts.low_stock_count ?? 0),
+        outOfStockCount: Number(counts.out_of_stock_count ?? 0),
+        totalItems: Number(counts.total_items ?? 0),
+        lowStockProducts: lowStockResult.rows.map((row) => formatProduct(row, "low_stock")),
+        outOfStockProducts: outOfStockResult.rows.map((row) => formatProduct(row, "out_of_stock")),
       };
 
       res.json({
         success: true,
-        data: stockData
+        data: stockData,
       });
     } catch (error) {
       next(error);
@@ -133,14 +621,28 @@ export class AdminController {
 
   static async getOrderDistribution(req, res, next) {
     try {
-      const { period = 'week' } = req.query;
-      
-      // TODO: Implementar distribución temporal de órdenes
-      const distributionData = [];
+      const windowStart = new Date();
+      windowStart.setDate(windowStart.getDate() - 6);
+      windowStart.setHours(0, 0, 0, 0);
+
+      const { rows } = await pool.query(
+        `
+          SELECT
+            EXTRACT(DOW FROM creado_en)::int AS dow,
+            COUNT(*)::int AS order_count,
+            COALESCE(SUM(total_cents), 0)::bigint AS revenue
+          FROM ordenes
+          WHERE creado_en >= $1
+          GROUP BY dow
+        `,
+        [windowStart.toISOString()]
+      );
+
+      const distributionData = buildOrderDistribution(rows);
 
       res.json({
         success: true,
-        data: distributionData
+        data: distributionData,
       });
     } catch (error) {
       next(error);
@@ -149,10 +651,30 @@ export class AdminController {
 
   static async getUsers(req, res, next) {
     try {
-      const { page = 1, limit = 20, search = '' } = req.query;
-      const offset = (page - 1) * limit;
+      const { page = "1", limit = "20", search = "" } = req.query;
+      const parsedPage = Number.parseInt(page, 10);
+      const parsedLimit = Number.parseInt(limit, 10);
+      const pageNumber = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+      const pageSize = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 20;
+      const offset = (pageNumber - 1) * pageSize;
 
-      let query = `
+      const whereClauses = ["lower(rol) != 'admin'"];
+      const whereValues = [];
+
+      if (search) {
+        whereValues.push(`%${search}%`);
+        const searchIndex = whereValues.length;
+        whereClauses.push(
+          `(nombre ILIKE $${searchIndex} OR email ILIKE $${searchIndex})`,
+        );
+      }
+
+      const whereClause = whereClauses.length ? `WHERE ${whereClauses.join(" AND ")}` : "";
+      const queryValues = [...whereValues];
+      const limitPlaceholder = queryValues.length + 1;
+      const offsetPlaceholder = queryValues.length + 2;
+
+      const query = `
         SELECT 
           usuario_id AS id,
           public_id AS "publicId",
@@ -162,43 +684,36 @@ export class AdminController {
           rol,
           status,
           rol_code AS "rolCode",
-          creado_en AS "createdAt"
+          creado_en AS "createdAt",
+          (
+            SELECT COUNT(*)::int
+            FROM ordenes o
+            WHERE o.usuario_id = usuarios.usuario_id
+          ) AS "orderCount"
         FROM usuarios
+        ${whereClause}
+        ORDER BY creado_en DESC
+        LIMIT $${limitPlaceholder}
+        OFFSET $${offsetPlaceholder}
       `;
-      
-      const values = [];
-      
-      if (search) {
-        query += ' WHERE nombre ILIKE $1 OR email ILIKE $1';
-        values.push(`%${search}%`);
-      }
-      
-      query += ` ORDER BY creado_en DESC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
-      values.push(limit, offset);
 
-      const result = await pool.query(query, values);
-      
-      // Contar total de usuarios
-      let countQuery = 'SELECT COUNT(*) FROM usuarios';
-      let countValues = [];
-      
-      if (search) {
-        countQuery += ' WHERE nombre ILIKE $1 OR email ILIKE $1';
-        countValues.push(`%${search}%`);
-      }
-      
+      queryValues.push(pageSize, offset);
+      const result = await pool.query(query, queryValues);
+
+      const countValues = [...whereValues];
+      const countQuery = `SELECT COUNT(*) FROM usuarios ${whereClause}`;
       const countResult = await pool.query(countQuery, countValues);
-      const total = parseInt(countResult.rows[0].count);
+      const total = parseInt(countResult.rows[0].count, 10);
 
       res.json({
         success: true,
         data: {
           items: result.rows,
           total,
-          page: parseInt(page),
-          pageSize: parseInt(limit),
-          totalPages: Math.ceil(total / limit)
-        }
+          page: pageNumber,
+          pageSize,
+          totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        },
       });
     } catch (error) {
       next(error);

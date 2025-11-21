@@ -208,11 +208,13 @@ export default function AdminCategoriesPage() {
   const rowActions = useMemo(
     () => [
       {
+        key: "edit",
         label: "Editar",
         icon: Edit3,
         onAction: openEditDrawer,
       },
       {
+        key: "delete",
         label: "Eliminar",
         icon: Trash2,
         onAction: handleDelete,

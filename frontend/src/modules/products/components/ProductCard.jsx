@@ -6,6 +6,7 @@ import { Price } from "@/components/data-display/Price.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { useAuth } from "@/context/auth-context.js"
+import { alertAuthRequired } from '@/utils/alerts.js'
 import { ProductShape } from "@/utils/propTypes.js"
 
 import { Button } from "@/components/ui/Button.jsx"
@@ -35,6 +36,7 @@ export default function ProductCard({
   const [isHovered, setIsHovered] = useState(false);
   const [cartButtonPressed, setCartButtonPressed] = useState(false);
   const [detailsButtonPressed, setDetailsButtonPressed] = useState(false);
+  const [isConfirmRemoveOpen, setIsConfirmRemoveOpen] = useState(false);
 
   useEffect(() => {
     setIsLiked(Boolean(isInWishlist));
@@ -42,12 +44,37 @@ export default function ProductCard({
 
   const handleWishlistToggle = (event) => {
     event.preventDefault();
+    event.stopPropagation();
     if (!isAuthenticated) {
-      navigate(API_PATHS.auth.login);
+      alertAuthRequired().then(() => navigate(API_PATHS.auth.login));
       return;
     }
-    setIsLiked((prev) => !prev);
+    // Si actualmente está en wishlist, pedimos confirmación personalizada
+    if (isLiked) {
+      setIsConfirmRemoveOpen(true);
+      return;
+    }
+    // Agregar directamente
+    setIsLiked(true);
     onToggleWishlist(product);
+  };
+
+  const confirmRemove = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    setIsConfirmRemoveOpen(false);
+    setIsLiked(false);
+    onToggleWishlist(product); // Ejecuta eliminación en hook
+  };
+
+  const cancelRemove = (event) => {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    setIsConfirmRemoveOpen(false);
   };
 
   useEffect(() => {
@@ -58,6 +85,7 @@ export default function ProductCard({
 
   const handleViewDetails = (event) => {
     event.preventDefault();
+    event.stopPropagation();
     if (!href) return;
     setDetailsButtonPressed(true);
     setTimeout(() => {
@@ -164,20 +192,23 @@ export default function ProductCard({
           elevation="md"
           size="md"
           motion="lift"
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             if (!isAuthenticated) {
-              navigate(API_PATHS.auth.login);
+              alertAuthRequired().then(() => navigate(API_PATHS.auth.login));
               return;
             }
+            setCartButtonPressed(true);
             onAddToCart(product);
           }}
           leadingIcon={
             <ShoppingCart
               size={18}
-              className={cartButtonPressed ? "text-white" : "text-[var(--color-primary3)]"}
+              className={cartButtonPressed ? "text-white" : "text-(--color-primary3)"}
             />
           }
-          className={`w-[160px] gap-3 transition-all ${cartButtonPressed ? "scale-95" : ""}`}
+          className={`w-40 gap-3 transition-all ${cartButtonPressed ? "scale-95" : ""}`}
         >
           Agregar
         </Button>
@@ -191,7 +222,7 @@ export default function ProductCard({
           onClick={handleViewDetails}
           disabled={!href}
           leadingIcon={<Eye size={18} className="text-current" />}
-          className={`w-[160px] gap-3 transition-all ${
+          className={`w-40 gap-3 transition-all ${
             detailsButtonPressed ? "scale-95" : "hover:bg-white/10"
           } ${!href ? "pointer-events-none opacity-40" : ""}`}
         >
@@ -204,12 +235,51 @@ export default function ProductCard({
         className={`absolute bottom-5 left-5 right-5 z-30 transition-opacity duration-300 ${
           isHovered ? "opacity-50" : "opacity-100"
         }`}
-      >        <Price value={displayPrice} className="text-white text-base  text-xl font-regular" />
+      >        <Price value={displayPrice} className="text-white text-xl font-regular" />
  <h3 className="mb-1 text-sm font-regular tracking-[-0.01em] text-white">
           {displayTitle}
         </h3>
        
       </div>
+
+      {isConfirmRemoveOpen && (
+        <div
+          className="fixed inset-0 z-120 flex items-center justify-center bg-black/55 backdrop-blur-sm p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Confirmar eliminación de favorito"
+          onClick={cancelRemove}
+        >
+          <div
+            className="relative w-full max-w-xs rounded-xl bg-white p-6 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-4 text-sm text-neutral-700">
+              ¿Eliminar este producto de tu lista de deseos?
+            </p>
+            <div className="flex justify-center gap-3">
+              <Button
+                type="button"
+                appearance="outline"
+                intent="neutral"
+                size="sm"
+                onClick={cancelRemove}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                appearance="solid"
+                intent="danger"
+                size="sm"
+                onClick={confirmRemove}
+              >
+                Eliminar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }

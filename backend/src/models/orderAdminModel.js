@@ -1,15 +1,104 @@
 import pool from "../../database/config.js";
 
+const ORDERABLE_COLUMNS = ['creado_en', 'total_cents', 'order_code'];
+
+const resolveOrderByColumn = (orderBy) => {
+  return ORDERABLE_COLUMNS.includes(orderBy) ? `o.${orderBy}` : 'o.creado_en';
+};
+
+const resolveOrderDirection = (orderDir) => {
+  return orderDir?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+};
+
+const buildOrderFilters = (options = {}) => {
+  const {
+    fecha_desde,
+    fecha_hasta,
+    search,
+    estado_pago,
+    estado_envio,
+    metodo_despacho,
+  } = options;
+
+  const conditions = [];
+  const params = [];
+  let paramIndex = 1;
+
+  if (fecha_desde) {
+    conditions.push(`AND o.creado_en >= $${paramIndex}`);
+    params.push(fecha_desde);
+    paramIndex++;
+  }
+
+  if (fecha_hasta) {
+    conditions.push(`AND o.creado_en <= $${paramIndex}`);
+    params.push(fecha_hasta);
+    paramIndex++;
+  }
+
+  if (search) {
+    conditions.push(`
+      AND (
+        o.order_code ILIKE $${paramIndex} OR
+        u.email ILIKE $${paramIndex} OR
+        u.nombre ILIKE $${paramIndex}
+      )
+    `);
+    params.push(`%${search}%`);
+    paramIndex++;
+  }
+
+  if (estado_pago) {
+    conditions.push(`AND o.estado_pago = $${paramIndex}`);
+    params.push(estado_pago);
+    paramIndex++;
+  }
+
+  if (estado_envio) {
+    conditions.push(`AND o.estado_envio = $${paramIndex}`);
+    params.push(estado_envio);
+    paramIndex++;
+  }
+
+  if (metodo_despacho) {
+    conditions.push(`AND o.metodo_despacho = $${paramIndex}`);
+    params.push(metodo_despacho);
+    paramIndex++;
+  }
+
+  const clause = conditions.length ? ` ${conditions.join(' ')}` : '';
+  return {
+    clause,
+    params,
+    nextParamIndex: paramIndex,
+  };
+};
+
 const getAllOrders = async (options = {}) => {
   const {
     limit = 20,
     offset = 0,
     fecha_desde,
     fecha_hasta,
-    search, // Busca por order_code, email, nombre
+    search,
+    estado_pago,
+    estado_envio,
+    metodo_despacho,
     order_by = 'creado_en',
     order_dir = 'DESC',
   } = options;
+
+  const orderByColumn = resolveOrderByColumn(order_by);
+  const orderDirection = resolveOrderDirection(order_dir);
+
+  const mainFilters = buildOrderFilters({
+    fecha_desde,
+    fecha_hasta,
+    search,
+    estado_pago,
+    estado_envio,
+    metodo_despacho,
+  });
 
   let query = `
     SELECT 
@@ -21,86 +110,36 @@ const getAllOrders = async (options = {}) => {
     FROM ordenes o
     LEFT JOIN usuarios u ON o.usuario_id = u.usuario_id
     LEFT JOIN orden_items oi ON o.orden_id = oi.orden_id
-    WHERE 1=1
+    WHERE 1=1${mainFilters.clause}
   `;
 
-  const params = [];
-  let paramIndex = 1;
-
-  // Filtros básicos (solo lo que existe en DDL actual)
-  if (fecha_desde) {
-    query += ` AND o.creado_en >= $${paramIndex}`;
-    params.push(fecha_desde);
-    paramIndex++;
-  }
-
-  if (fecha_hasta) {
-    query += ` AND o.creado_en <= $${paramIndex}`;
-    params.push(fecha_hasta);
-    paramIndex++;
-  }
-
-  if (search) {
-    query += ` AND (
-      o.order_code ILIKE $${paramIndex} OR
-      u.email ILIKE $${paramIndex} OR
-      u.nombre ILIKE $${paramIndex}
-    )`;
-    params.push(`%${search}%`);
-    paramIndex++;
-  }
-
-  // Agrupar
   query += `
     GROUP BY o.orden_id, u.usuario_id
   `;
 
-  // Ordenamiento
-  const validOrderBy = ['creado_en', 'total_cents', 'order_code'];
-  const orderByColumn = validOrderBy.includes(order_by) ? `o.${order_by}` : 'o.creado_en';
-  const orderDirection = order_dir.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-  
   query += ` ORDER BY ${orderByColumn} ${orderDirection}`;
+  query += ` LIMIT $${mainFilters.nextParamIndex} OFFSET $${mainFilters.nextParamIndex + 1}`;
 
-  // Paginación
-  query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
-  params.push(limit, offset);
-
+  const params = [...mainFilters.params, limit, offset];
   const { rows } = await pool.query(query, params);
 
-  // Obtener total de registros para paginación
+  const countFilters = buildOrderFilters({
+    fecha_desde,
+    fecha_hasta,
+    search,
+    estado_pago,
+    estado_envio,
+    metodo_despacho,
+  });
+
   let countQuery = `
     SELECT COUNT(DISTINCT o.orden_id) as total
     FROM ordenes o
     LEFT JOIN usuarios u ON o.usuario_id = u.usuario_id
-    WHERE 1=1
+    WHERE 1=1${countFilters.clause}
   `;
-  
-  const countParams = [];
-  let countParamIndex = 1;
 
-  if (fecha_desde) {
-    countQuery += ` AND o.creado_en >= $${countParamIndex}`;
-    countParams.push(fecha_desde);
-    countParamIndex++;
-  }
-
-  if (fecha_hasta) {
-    countQuery += ` AND o.creado_en <= $${countParamIndex}`;
-    countParams.push(fecha_hasta);
-    countParamIndex++;
-  }
-
-  if (search) {
-    countQuery += ` AND (
-      o.order_code ILIKE $${countParamIndex} OR
-      u.email ILIKE $${countParamIndex} OR
-      u.nombre ILIKE $${countParamIndex}
-    )`;
-    countParams.push(`%${search}%`);
-  }
-
-  const { rows: [{ total }] } = await pool.query(countQuery, countParams);
+  const { rows: [{ total }] } = await pool.query(countQuery, countFilters.params);
 
   return {
     orders: rows,
@@ -111,6 +150,49 @@ const getAllOrders = async (options = {}) => {
       hasMore: offset + limit < Number.parseInt(total),
     },
   };
+};
+
+const getOrdersForExport = async (options = {}) => {
+  const {
+    fecha_desde,
+    fecha_hasta,
+    search,
+    estado_pago,
+    estado_envio,
+    metodo_despacho,
+    order_by = 'creado_en',
+    order_dir = 'DESC',
+  } = options;
+
+  const orderByColumn = resolveOrderByColumn(order_by);
+  const orderDirection = resolveOrderDirection(order_dir);
+
+  const filters = buildOrderFilters({
+    fecha_desde,
+    fecha_hasta,
+    search,
+    estado_pago,
+    estado_envio,
+    metodo_despacho,
+  });
+
+  let query = `
+    SELECT 
+      o.*,
+      u.nombre as usuario_nombre,
+      u.email as usuario_email,
+      u.telefono as usuario_telefono,
+      COUNT(oi.orden_item_id) as total_items
+    FROM ordenes o
+    LEFT JOIN usuarios u ON o.usuario_id = u.usuario_id
+    LEFT JOIN orden_items oi ON o.orden_id = oi.orden_id
+    WHERE 1=1${filters.clause}
+    GROUP BY o.orden_id, u.usuario_id
+    ORDER BY ${orderByColumn} ${orderDirection}
+  `;
+
+  const { rows } = await pool.query(query, filters.params);
+  return rows;
 };
 
 const getOrderByIdAdmin = async (ordenId) => {
@@ -249,6 +331,7 @@ const orderAdminModel = {
   addTrackingInfo,
   getOrderStats,
   getOrdersByDateRange,
+  getOrdersForExport,
 };
 
 export default orderAdminModel;

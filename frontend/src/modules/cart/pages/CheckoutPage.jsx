@@ -1,8 +1,9 @@
 import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart } from "lucide-react";
+import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart, Banknote, Wallet, Smartphone, CircleDollarSign } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
+import { useAuth } from "@/context/auth-context.js"
 import { useAddresses } from "@/context/useAddresses.js"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { Price } from "@/components/data-display/Price.jsx"
@@ -11,6 +12,9 @@ import { resolveProductPrice } from "@/modules/products/utils/products.js"
 import { METODOS_DESPACHO } from "@/utils/orderTracking.js"
 import ShippingMethodSelector from "@/modules/cart/components/ShippingMethodSelector.jsx"
 import { createOrder } from "@/services/checkout.api.js"
+import { CHILE_REGIONES } from "@/config/chile-regiones.js"
+import '@/styles/alerts.css'
+import { alertInfo, alertWarning, alertOrderError, alertOrderSuccess, alertGlobalError } from '@/utils/alerts.js'
 import {
   Badge,
   Button,
@@ -38,17 +42,19 @@ const buildItemImage = (item) =>
 export const CheckoutPage = () => {
   const navigate = useNavigate();
   const { cartItems, total, removeFromCart, clearCart } = useCartContext();
+  const { user } = useAuth();
   const { addresses, defaultAddress } = useAddresses();
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [selectedAddressId, setSelectedAddressId] = useState(defaultAddress?.direccion_id || null);
+  const [paymentMethod, setPaymentMethod] = useState('transferencia');
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Datos de contacto
+  // Datos de contacto (prellenados con info del usuario)
   const [contactData, setContactData] = useState({
-    nombre: '',
-    email: '',
-    telefono: '',
+    nombre: user?.nombre || user?.name || '',
+    email: user?.email || '',
+    telefono: user?.telefono || user?.phone || '',
   });
 
   // Dirección nueva (si no usa guardada)
@@ -83,20 +89,20 @@ export const CheckoutPage = () => {
 
   const handlePay = async () => {
     if (!hasItems) {
-      alert("Tu carrito está vacío 🛒");
+      alertInfo('Agrega productos antes de confirmar tu orden.', 'Carrito vacío');
       return;
     }
 
     // Validaciones
     if (!contactData.nombre || !contactData.email || !contactData.telefono) {
-      alert("Por favor completa todos los datos de contacto");
+      alertWarning('Revisa nombre, correo y teléfono para continuar.', 'Datos incompletos');
       return;
     }
 
     // Si no es retiro, validar dirección
     if (shippingMethod !== 'retiro') {
       if (!selectedAddressId && (!newAddress.calle || !newAddress.comuna || !newAddress.ciudad || !newAddress.region)) {
-        alert("Por favor completa la dirección de envío");
+        alertWarning('Faltan: calle, comuna, ciudad y región.', 'Dirección incompleta');
         return;
       }
     }
@@ -106,6 +112,7 @@ export const CheckoutPage = () => {
     try {
       const checkoutData = {
         metodo_despacho: shippingMethod,
+        metodo_pago: paymentMethod,
         notas_cliente: notes,
         contacto: contactData,
       };
@@ -125,15 +132,28 @@ export const CheckoutPage = () => {
 
       if (response.success) {
         clearCart();
-        alert(`¡Orden creada exitosamente! Código: ${response.data.order_code}`);
-        navigate('/perfil'); // Redirigir a perfil donde verá sus órdenes
+        alertOrderSuccess(response.data.order_code).then(() => navigate('/perfil'));
       } else {
-        alert(response.message || 'Error al crear la orden');
+        const msg = response.message || 'Error desconocido';
+        if (/carrito está vacío/i.test(msg)) {
+          alertOrderError('El carrito del servidor está vacío. Agrega productos antes de confirmar tu orden.');
+        } else if (/Error al crear orden/i.test(msg)) {
+          alertGlobalError();
+        } else {
+          alertOrderError(msg);
+        }
       }
 
     } catch (error) {
       console.error('Error en checkout:', error);
-      alert(error.response?.data?.message || 'Error al procesar la orden. Por favor intenta nuevamente.');
+      const serverMsg = error.response?.data?.message;
+      if (serverMsg && /carrito está vacío/i.test(serverMsg)) {
+        alertOrderError('El carrito del servidor está vacío. Agrega productos y vuelve a intentar.');
+      } else if (serverMsg && /Error al crear orden/i.test(serverMsg)) {
+        alertGlobalError();
+      } else {
+        alertOrderError(serverMsg || error.message);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -142,16 +162,11 @@ export const CheckoutPage = () => {
   return (
     <main className="page container-px mx-auto max-w-6xl py-12">
       <header className="mb-10 space-y-3">
-        <Badge variant="accent" className="bg-(--color-primary3) text-[var(--color-text-on-dark)]">
-          Paso final
-        </Badge>
-        <div>
-          <h1 className="title-serif text-4xl text-[var(--color-primary1)]">Checkout MOA</h1>
-          <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-secondary)]">
-            Completa los datos del envío boutique o programa un retiro. Nos encargaremos de
-            coordinar cada detalle para que tus piezas lleguen impecables.
-          </p>
-        </div>
+        <h1 className="title-serif text-4xl text-[var(--color-primary1)]">Checkout</h1>
+        <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-secondary)]">
+          Completa los datos del envío boutique o programa un retiro. Nos encargaremos de
+          coordinar cada detalle para que tus piezas lleguen impecables.
+        </p>
       </header>
 
       {hasItems ? (
@@ -159,8 +174,8 @@ export const CheckoutPage = () => {
           <section className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Datos del contacto</CardTitle>
-                <CardDescription>Usaremos esta información para coordinar la entrega boutique.</CardDescription>
+                <CardTitle>Datos del contacto y pago</CardTitle>
+                <CardDescription>Usaremos esta información para coordinar la entrega y procesar tu pedido.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -193,6 +208,52 @@ export const CheckoutPage = () => {
                       onChange={(e) => handleContactChange('telefono', e.target.value)}
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label required>Método de pago</Label>
+                    <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccionar método de pago" />
+                      </SelectTrigger>
+                      <SelectContent className="w-[--radix-select-trigger-width]">
+                        <SelectItem value="transferencia">
+                          <div className="flex items-center gap-2">
+                            <Banknote className="h-4 w-4" />
+                            <span>Transferencia bancaria</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="webpay">
+                          <div className="flex items-center gap-2">
+                            <Smartphone className="h-4 w-4" />
+                            <span>Webpay Plus (Transbank)</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="tarjeta_credito">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            <span>Tarjeta de crédito</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="tarjeta_debito">
+                          <div className="flex items-center gap-2">
+                            <Wallet className="h-4 w-4" />
+                            <span>Tarjeta de débito</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="link_pago">
+                          <div className="flex items-center gap-2">
+                            <MessageSquareHeart className="h-4 w-4" />
+                            <span>Link de pago por email</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="efectivo">
+                          <div className="flex items-center gap-2">
+                            <CircleDollarSign className="h-4 w-4" />
+                            <span>Efectivo contra entrega</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -216,11 +277,22 @@ export const CheckoutPage = () => {
                     {addresses.length > 0 && (
                       <div className="space-y-2">
                         <Label>Dirección guardada</Label>
-                        <Select value={selectedAddressId?.toString()} onValueChange={(val) => setSelectedAddressId(parseInt(val))}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar dirección guardada" />
+                        <Select
+                          value={selectedAddressId ? selectedAddressId.toString() : 'new'}
+                          onValueChange={(val) => {
+                            if (val === 'new') {
+                              setSelectedAddressId(null);
+                            } else {
+                              const parsed = parseInt(val, 10);
+                              setSelectedAddressId(Number.isNaN(parsed) ? null : parsed);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Seleccionar dirección" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="new">Nueva dirección personalizada</SelectItem>
                             {addresses.map(addr => (
                               <SelectItem key={addr.direccion_id} value={addr.direccion_id.toString()}>
                                 {addr.etiqueta || `${addr.calle}, ${addr.comuna}`}
@@ -264,24 +336,23 @@ export const CheckoutPage = () => {
                           </div>
                           <div className="space-y-2">
                             <Label required>Región</Label>
-                            <Input 
-                              placeholder="Metropolitana" 
-                              value={newAddress.region}
-                              onChange={(e) => handleAddressChange('region', e.target.value)}
-                            />
+                            <Select value={newAddress.region || ''} onValueChange={(val) => handleAddressChange('region', val)}>
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Seleccionar región" />
+                              </SelectTrigger>
+                              <SelectContent className="w-[--radix-select-trigger-width] max-h-72 overflow-auto">
+                                {CHILE_REGIONES.map(r => (
+                                  <SelectItem key={r} value={r}>{r}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
                       </>
                     )}
                   </>
                 )}
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label>Pago</Label>
-                    <p className="text-sm text-[var(--color-text-secondary)]">
-                      Coordinamos contigo la forma de pago más cómoda (factura, transferencia o link directo) después de confirmar el pedido.
-                    </p>
-                  </div>
+                <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Notas al equipo</Label>
                     <Textarea
@@ -301,16 +372,11 @@ export const CheckoutPage = () => {
 
           <aside className="space-y-6">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between gap-3">
-                <div>
-                  <CardTitle>Resumen de piezas</CardTitle>
-                  <CardDescription>
-                    {cartItems.length} producto{cartItems.length === 1 ? "" : "s"} listos para envío
-                  </CardDescription>
-                </div>
-                <Badge variant="neutral" className="text-[var(--color-primary2)]">
-                  Curado
-                </Badge>
+              <CardHeader>
+                <CardTitle>Resumen de piezas</CardTitle>
+                <CardDescription>
+                  {cartItems.length} producto{cartItems.length === 1 ? "" : "s"} listos para envío
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
@@ -341,12 +407,12 @@ export const CheckoutPage = () => {
                             onClick={() => removeFromCart(item.id)}
                             className={buttonClasses({
                               variant: "ghost",
-                              size: "sm",
-                              className: "gap-1 text-[0.6rem] uppercase tracking-[0.3em]",
+                              size: "icon",
+                              className: "h-8 w-8",
                             })}
+                            aria-label={`Quitar ${item.name}`}
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            Quitar
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
@@ -366,9 +432,9 @@ export const CheckoutPage = () => {
                     {shippingCost ? (
                       <Price value={shippingCost} />
                     ) : (
-                      <Badge variant="accent" className="text-[0.6rem] tracking-[0.3em]">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-(--color-primary4) px-2 py-1 text-xs font-semibold text-(--color-primary1)">
                         Gratis
-                      </Badge>
+                      </span>
                     )}
                   </div>
                   <Separator />
@@ -381,8 +447,8 @@ export const CheckoutPage = () => {
               <CardFooter className="flex flex-col gap-3">
                 <Button
                   type="button"
-                  size="lg"
-                  className="w-full justify-center text-base"
+                  size="md"
+                  className="w-full justify-center text-white"
                   onClick={handlePay}
                   disabled={isProcessing}
                 >
@@ -413,7 +479,7 @@ export const CheckoutPage = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <CreditCard className="h-5 w-5 text-[var(--color-primary1)]" />
-                  <span>Podemos enviar link de pago directo a tu cliente final.</span>
+                  <span>Recibirás el link de pago directo a tu correo al finalizar el proceso.</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <MessageSquareHeart className="h-5 w-5 text-[var(--color-primary1)]" />
@@ -424,9 +490,9 @@ export const CheckoutPage = () => {
                 <Link
                   to={API_PATHS.support.contact}
                   className={buttonClasses({
-                    variant: "ghost",
+                    variant: "outline",
                     size: "md",
-                    className: "text-[var(--color-primary1)]",
+                    className: "w-full justify-center",
                   })}
                 >
                   Contactar al equipo

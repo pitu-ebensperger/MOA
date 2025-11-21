@@ -1,6 +1,4 @@
-import { env } from "@/config/env.js"
 import { API_PATHS } from "@/config/api-paths.js"
-import { mockHomeApi } from "@/mocks/api/home.js"
 import { apiClient } from "@/services/api-client.js"
 
 const normalizeLanding = (payload = {}) => ({
@@ -19,11 +17,4 @@ const remoteHomeApi = {
   },
 };
 
-const mockHomeApiWrapper = {
-  async getLanding() {
-    const data = await mockHomeApi.getLanding();
-    return normalizeLanding(data);
-  },
-};
-
-export const homeApi = env.USE_MOCKS ? mockHomeApiWrapper : remoteHomeApi;
+export const homeApi = remoteHomeApi;

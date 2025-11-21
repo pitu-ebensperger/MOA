@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getPaginationRowModel, flexRender } from "@tanstack/react-table";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ArrowUpDown, ChevronUp, ChevronDown, Filter, MoreHorizontal, Pencil, Check, X } from "lucide-react";
+import { ArrowUpDown, ChevronUp, ChevronDown, ListFilter, Pencil, Check, X } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination.jsx"
 import { IconButton } from "@/components/ui/Button.jsx"
 import { InputSm } from "@/components/ui/Input.jsx"
+import { ResponsiveRowActions } from "@/components/ui/ResponsiveRowActions.jsx"
 
 /* DataTableV2
    Features (current implementation):
@@ -59,31 +59,34 @@ export function DataTableV2({
         meta: { align: "center" },
       });
     }
-    if (rowActions?.length) {
+    if (rowActions) {
       cols.push({
         id: "_actions",
         size: 44,
         header: () => <span className="sr-only">Acciones</span>,
-        cell: ({ row }) => (
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <IconButton aria-label="Acciones" intent="neutral" size="sm" icon={<MoreHorizontal size={16} />} />
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content className="min-w-40 rounded-xl border border-(--color-border) bg-white p-1 shadow-lg" sideOffset={6}>
-              {rowActions.map((action) => (
-                <DropdownMenu.Item
-                  key={action.label}
-                  onSelect={() => action.onAction(row.original)}
-                  className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-(--color-secondary2) outline-none data-highlighted:bg-(--color-neutral2) data-highlighted:text-(--color-primary1)"
-                >
-                  {action.icon && <action.icon size={14} />}
-                  {action.label}
-                </DropdownMenu.Item>
-              ))}
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
-        ),
-        meta: { align: "center" },
+        meta: { align: "right" },
+        cell: ({ row }) => {
+          const actions = typeof rowActions === 'function' 
+            ? rowActions(row.original)
+            : rowActions;
+          
+          if (!actions || actions.length === 0) return null;
+          
+          const preparedActions = actions.map((action, idx) => ({
+            ...action,
+            key: action.key ?? `row-action-${idx}`,
+            onAction: () => action.onAction?.(row.original),
+          }));
+          return (
+            <div className="px-1 py-2 flex justify-end">
+              <ResponsiveRowActions
+                actions={preparedActions}
+                menuLabel="Acciones del registro"
+                menuContentClassName="w-44"
+              />
+            </div>
+          );
+        },
       });
     }
     return cols;
@@ -162,6 +165,8 @@ export function DataTableV2({
                     const canSort = header.column.getCanSort();
                     const sorted = header.column.getIsSorted();
                     const headerMeta = header.column.columnDef.meta?.header || {};
+                    const filterActive = header.column.getIsFiltered?.() ?? false;
+                    const filterIconClass = `text-(--color-secondary1) transition ${filterActive ? "opacity-100" : "opacity-40"}`;
                     return (
                       <th key={header.id} colSpan={header.colSpan} style={{ width: header.getSize() }} className={`px-3 py-2 font-semibold ${align}`}>
                         {header.isPlaceholder ? null : (
@@ -181,7 +186,17 @@ export function DataTableV2({
                                   : headerMeta.sortIcons?.unsorted ?? <ArrowUpDown size={18} className="opacity-40" />
                             )}
                             {header.column.columnDef.meta?.filterable && (
-                              <IconButton aria-label="Filtrar" size="xs" intent="neutral" icon={<Filter size={14} />} onClick={(e) => { e.stopPropagation(); header.column.columnDef.meta.onFilterClick?.(header.getContext()); }} />
+                              <IconButton
+                                aria-label="Filtrar"
+                                size="xs"
+                                intent="neutral"
+                                className="ml-1"
+                                icon={<ListFilter size={14} className={filterIconClass} />}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  header.column.columnDef.meta.onFilterClick?.(header.getContext());
+                                }}
+                              />
                             )}
                           </div>
                         )}
@@ -271,11 +286,15 @@ DataTableV2.propTypes = {
   onSortChange: PropTypes.func,
   selectable: PropTypes.bool,
   editable: PropTypes.bool,
-  rowActions: PropTypes.arrayOf(PropTypes.shape({
-    label: PropTypes.string.isRequired,
-    onAction: PropTypes.func.isRequired,
-    icon: PropTypes.elementType,
-  })),
+  rowActions: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.shape({
+      key: PropTypes.string,
+      label: PropTypes.string.isRequired,
+      onAction: PropTypes.func,
+      icon: PropTypes.elementType,
+    })),
+    PropTypes.func,
+  ]),
   variant: PropTypes.oneOf(["card", "plain"]),
   condensed: PropTypes.bool,
   toolbar: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),

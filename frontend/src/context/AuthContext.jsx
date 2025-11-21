@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import { setOnUnauthorized, setTokenGetter } from "@/services/api-client.js"
 import { authApi } from "@/services/auth.api.js"
 import { AuthContext, isAdminRole } from "@/context/auth-context.js"
 import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useNavigate } from "react-router-dom";
+import { debugAuth } from "@/utils/clearAuth.js";
 
 // ---- Constantes y utilidades ----------------------------------
 const TOKEN_KEY = "moa.accessToken";
@@ -35,6 +37,7 @@ export const AuthProvider = ({ children }) => {
 
   // --- Sync helpers (token/user <-> storage + api-client) -------
   const syncToken = useCallback((nextToken) => {
+    console.log('[AuthContext] syncToken llamado, token:', nextToken);
     setTokenGetter(() => nextToken);           // api-client leerá el token actual
     setToken(nextToken ?? null);
   }, [setToken]);
@@ -42,6 +45,27 @@ export const AuthProvider = ({ children }) => {
   const syncUser = useCallback((nextUser) => {
     setUser(nextUser ?? null);
   }, [setUser]);
+
+  // --- Timeout de seguridad para evitar loader infinito ---
+  useEffect(() => {
+    if (status === STATUS.LOADING) {
+      const timeout = setTimeout(() => {
+        console.warn('[AuthContext] Timeout de carga alcanzado, forzando salida del loader');
+        const authState = debugAuth(); // Debug para ver qué hay en localStorage
+        console.log('[AuthContext] Estado actual:', authState);
+        if (!token) {
+          setStatus(STATUS.IDLE);
+        } else if (!user) {
+          // Si hay token pero no user después de 5 segundos, limpiar todo
+          console.error('[AuthContext] Token presente pero sin usuario después del timeout, limpiando sesión');
+          syncToken(null);
+          syncUser(null);
+          setStatus(STATUS.IDLE);
+        }
+      }, 5000); // 5 segundos de timeout
+      return () => clearTimeout(timeout);
+    }
+  }, [status, token, user, syncToken, syncUser]);
 
   const logout = useCallback(() => {
     syncToken(null);
@@ -59,17 +83,29 @@ export const AuthProvider = ({ children }) => {
 
   // Si hay token pero no user, intenta cargar perfil
   useEffect(() => {
-    if (!token || user) return undefined;
+    if (!token || user) {
+      // Si no hay token o ya hay user, asegurarse de salir del loading
+      if (status === STATUS.LOADING && !token) {
+        setStatus(STATUS.IDLE);
+      } else if (status === STATUS.LOADING && token && user) {
+        setStatus(STATUS.AUTH);
+      }
+      return undefined;
+    }
+    
     let cancelled = false;
 
     (async () => {
       try {
+        console.log('[AuthContext] Cargando perfil con token existente...');
         // No pasar user?.id porque user es null, usar endpoint /usuario que obtiene por token
         const profile = await authApi.profile();
+        console.log('[AuthContext] Perfil cargado:', profile);
         if (cancelled) return;
         syncUser(profile);
         setStatus(STATUS.AUTH);
       } catch (err) {
+        console.error('[AuthContext] Error cargando perfil:', err);
         if (cancelled) return;
         setError(err);
         logout();
@@ -77,7 +113,7 @@ export const AuthProvider = ({ children }) => {
     })();
 
     return () => { cancelled = true; };
-  }, [token, user, syncUser, logout]);
+  }, [token, user, status, syncUser, logout]);
 
   // --- Acciones públicas ---------------------------------------
   const login = useCallback(
@@ -85,12 +121,15 @@ export const AuthProvider = ({ children }) => {
       setStatus(STATUS.LOADING);
       setError(null);
       try {
+        console.log('[AuthContext] Intentando login con credenciales:', credentials);
         const { token: nextToken, user: profile } = await authApi.login(credentials);
+        console.log('[AuthContext] Login exitoso, token:', nextToken, 'profile:', profile);
         syncToken(nextToken);
         syncUser(profile);
         setStatus(STATUS.AUTH);
         return profile;
       } catch (err) {
+        console.error('[AuthContext] Error en login:', err);
         setError(err);
         setStatus(STATUS.IDLE);
         throw err;
@@ -153,9 +192,26 @@ export const AuthProvider = ({ children }) => {
     [user, token, status, error, login, register, logout, refreshProfile],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  // Loader global mientras se inicializa el token y el usuario
+  if (status === STATUS.LOADING && token && typeof token === 'string' && token.length > 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-page">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-xl font-medium text-primary">Cargando sesión...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// Re-export hooks/utilities to avoid breaking existing imports
-// Nota: para usar hooks/utilidades importa desde "./auth-context.js"
-// export { useAuth, isAdminRole } from "./auth-context.js";
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+

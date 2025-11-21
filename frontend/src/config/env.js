@@ -20,10 +20,6 @@ export const env = {
   API_TIMEOUT:
     Number(rawEnv.VITE_API_TIMEOUT ?? processEnv?.VITE_API_TIMEOUT) ||
     undefined,
-  USE_MOCKS:
-    String(rawEnv.VITE_USE_MOCKS ?? processEnv?.VITE_USE_MOCKS ?? "false")
-      .trim()
-      .toLowerCase() === "true",
   NODE_ENV: mode,
   IS_DEV: mode === "development",
   IS_PROD: mode === "production",

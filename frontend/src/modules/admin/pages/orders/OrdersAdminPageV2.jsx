@@ -1,31 +1,30 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
-  Package,
   Search,
   Filter,
   RefreshCw,
   Download,
   Eye,
   Edit,
-  CheckCircle,
-  Clock,
   AlertCircle,
-  Truck,
   X,
-  Calendar,
+  Save,
 } from 'lucide-react';
 
 import { useAdminOrders } from '@/modules/admin/hooks/useAdminOrders.js';
-import { useAdminOrderStats } from '@/modules/admin/hooks/useAdminOrderStats.js';
 import { ordersAdminApi } from '@/services/ordersAdmin.api.js';
 
 import { Button } from '@/components/ui/Button.jsx';
 import { Input } from '@/components/ui/Input.jsx';
 import { Select } from '@/components/ui/Select.jsx';
 import { StatusPill } from '@/components/ui/StatusPill.jsx';
-import { Skeleton } from '@/components/ui/Skeleton.jsx';
-import { Badge } from '@/components/ui/Badge.jsx';
-import { Pagination } from '@/components/ui/Pagination.jsx';
+import { DataTableV2 } from '@/components/data-display/DataTableV2.jsx';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/radix/DropdownMenu.jsx';
 
 import { formatCurrencyCLP } from '@/utils/currency.js';
 import { formatDateTime } from '@/utils/date.js';
@@ -59,6 +58,44 @@ const METODOS_DESPACHO = [
   { value: 'retiro', label: 'Retiro en Tienda' },
 ];
 
+const DEFAULT_FILTERS = {
+  page: 1,
+  limit: 20,
+  search: '',
+  estado_pago: '',
+  estado_envio: '',
+  metodo_despacho: '',
+  fecha_desde: '',
+  fecha_hasta: '',
+};
+
+const EXPORT_FORMATS = [
+  { label: 'CSV', value: 'csv', extension: 'csv' },
+  { label: 'Excel (XLSX)', value: 'xlsx', extension: 'xlsx' },
+  { label: 'JSON', value: 'json', extension: 'json' },
+];
+
+const PAGE_ALERT_STYLES = {
+  success: "border-[color:var(--color-success)] bg-[color:var(--color-success)]/10 text-[color:var(--color-success)]",
+  error: "border-[color:var(--color-error)] bg-[color:var(--color-error)]/10 text-[color:var(--color-error)]",
+  warning: "border-[color:var(--color-warning)] bg-[color:var(--color-warning)]/10 text-[color:var(--color-warning)]",
+};
+
+const compactFilters = (params = {}) => {
+  const sanitized = {};
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === '' || value === null || value === undefined) {
+      return;
+    }
+    sanitized[key] = value;
+  });
+  return sanitized;
+};
+
+const buildExportFileName = (extension) => {
+  return `pedidos-moa-${new Date().toISOString().split('T')[0]}.${extension}`;
+};
+
 // Mapeo de colores para estados
 const getStatusColor = (estado, tipo) => {
   if (tipo === 'pago') {
@@ -85,31 +122,22 @@ const getStatusColor = (estado, tipo) => {
   return 'neutral';
 };
 
-// Componente de tarjeta de estadísticas
-function StatsCard({ title, value, subtitle, icon, color = 'primary' }) {
-  const Icon = icon;
-  return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-neutral-500">{title}</p>
-        {Icon && <Icon className={`h-5 w-5 text-${color}`} />}
-      </div>
-      <p className="mt-2 text-2xl font-semibold text-neutral-900">{value}</p>
-      {subtitle && (
-        <p className="text-[10px] uppercase tracking-wide text-neutral-400 mt-1">
-          {subtitle}
-        </p>
-      )}
-    </div>
-  );
-}
+const formatEstado = (estado) => {
+  if (!estado) return 'N/A';
+  return estado
+    .toString()
+    .toLowerCase()
+    .replace(/_/g, ' ')
+    .replace(/^\w|(?:\s)\w/g, (char) => char.toUpperCase());
+};
 
 // Componente principal de filtros
 function OrderFilters({ 
   filters, 
   onFiltersChange, 
   onRefresh, 
-  isLoading 
+  isLoading,
+  onResetFilters = () => {},
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -233,113 +261,21 @@ function OrderFilters({
               />
             </div>
 
-            <div className="flex items-end">
-              <Button
-                appearance="outline"
-                intent="neutral"
-                size="sm"
-                onClick={() => onFiltersChange({ page: 1 })}
-                className="w-full"
-              >
-                Limpiar Filtros
-              </Button>
-            </div>
+      <div className="flex items-end">
+        <Button
+          appearance="outline"
+          intent="neutral"
+          size="sm"
+          onClick={onResetFilters}
+          className="w-full"
+        >
+          Limpiar Filtros
+        </Button>
+      </div>
           </div>
         </div>
       )}
     </div>
-  );
-}
-
-// Componente de fila de orden
-function OrderRow({ order, onViewDetails, onEditStatus }) {
-  const formatEstado = (estado) => {
-    return estado ? estado.charAt(0).toUpperCase() + estado.slice(1) : 'N/A';
-  };
-
-  return (
-    <tr className="hover:bg-neutral-50 border-b border-neutral-100">
-      <td className="px-6 py-4">
-        <div className="font-mono text-sm font-medium text-neutral-900">
-          {order.order_code}
-        </div>
-        <div className="text-xs text-neutral-500">
-          {formatDateTime(order.creado_en)}
-        </div>
-      </td>
-      
-      <td className="px-6 py-4">
-        <div className="text-sm font-medium text-neutral-900">
-          {order.usuario_nombre || 'N/A'}
-        </div>
-        <div className="text-xs text-neutral-500">
-          {order.usuario_email || 'N/A'}
-        </div>
-      </td>
-      
-      <td className="px-6 py-4">
-        <div className="text-sm font-bold text-neutral-900">
-          {formatCurrencyCLP(order.total_cents)}
-        </div>
-        <div className="text-xs text-neutral-500">
-          {order.total_items} item{order.total_items !== 1 ? 's' : ''}
-        </div>
-      </td>
-      
-      <td className="px-6 py-4">
-        <StatusPill
-          status={order.estado_pago}
-          intent={getStatusColor(order.estado_pago, 'pago')}
-          size="sm"
-        >
-          {formatEstado(order.estado_pago)}
-        </StatusPill>
-      </td>
-      
-      <td className="px-6 py-4">
-        <StatusPill
-          status={order.estado_envio}
-          intent={getStatusColor(order.estado_envio, 'envio')}
-          size="sm"
-        >
-          {formatEstado(order.estado_envio)}
-        </StatusPill>
-      </td>
-      
-      <td className="px-6 py-4">
-        <div className="text-sm text-neutral-600">
-          {order.metodo_despacho ? formatEstado(order.metodo_despacho) : 'Standard'}
-        </div>
-        {order.comuna && (
-          <div className="text-xs text-neutral-500">
-            {order.comuna}, {order.region}
-          </div>
-        )}
-      </td>
-      
-      <td className="px-6 py-4">
-        <div className="flex items-center gap-2">
-          <Button
-            appearance="ghost"
-            intent="primary"
-            size="sm"
-            onClick={() => onViewDetails(order)}
-            title="Ver detalles"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={() => onEditStatus(order)}
-            title="Editar estado"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        </div>
-      </td>
-    </tr>
   );
 }
 
@@ -525,34 +461,42 @@ function EditStatusModal({ order, onClose, onSave }) {
 // Componente principal
 export default function OrdersAdminPage() {
   // Estados para filtros y paginación
-  const [filters, setFilters] = useState({
-    page: 1,
-    limit: 20,
-    search: '',
-    estado_pago: '',
-    estado_envio: '',
-    metodo_despacho: '',
-    fecha_desde: '',
-    fecha_hasta: '',
-  });
+  const [filters, setFilters] = useState(() => ({ ...DEFAULT_FILTERS }));
 
   // Estados para modales
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [editingOrder, setEditingOrder] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const [pageAlert, setPageAlert] = useState(null);
+  
+  // Estados para edición inline
+  const [editingRowId, setEditingRowId] = useState(null);
+  const [editingValues, setEditingValues] = useState({});
+  const [savingRowId, setSavingRowId] = useState(null);
+
+  useEffect(() => {
+    if (!pageAlert) return;
+    const timeoutId = setTimeout(() => setPageAlert(null), 4000);
+    return () => clearTimeout(timeoutId);
+  }, [pageAlert]);
 
   // Hooks para datos
-  const { 
-    orders, 
-    total, 
-    page, 
-    pageSize, 
-    totalPages, 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    orders,
+    total,
+    page,
+    pageSize,
+    isLoading,
+    error,
+    refetch
   } = useAdminOrders(filters);
 
-  const { stats, isLoading: statsLoading } = useAdminOrderStats();
+  const ordersData = orders ?? [];
+
+  const hasActiveFilters = useMemo(() => {
+    const { page: _PAGE, limit: _LIMIT, ...rest } = filters;
+    return Object.values(rest).some((value) => value);
+  }, [filters]);
 
   // Handlers
   const handleFiltersChange = useCallback((newFilters) => {
@@ -563,12 +507,241 @@ export default function OrdersAdminPage() {
     setFilters(prev => ({ ...prev, page: newPage }));
   }, []);
 
-  const handleViewDetails = useCallback((order) => {
-    setSelectedOrder(order);
+  const resetFilters = useCallback(() => {
+    setFilters({ ...DEFAULT_FILTERS });
   }, []);
 
-  const handleEditStatus = useCallback((order) => {
-    setEditingOrder(order);
+  const showPageAlert = useCallback((message, type = 'success') => {
+    setPageAlert({ message, type });
+  }, []);
+
+  // Handlers para edición inline
+  const handleStartEdit = useCallback((order) => {
+    setEditingRowId(order.orden_id);
+    setEditingValues({
+      estado_pago: order.estado_pago,
+      estado_envio: order.estado_envio,
+    });
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingRowId(null);
+    setEditingValues({});
+  }, []);
+
+  const handleSaveInline = useCallback(async (order) => {
+    try {
+      setSavingRowId(order.orden_id);
+      await ordersAdminApi.updateStatus(order.orden_id, editingValues);
+      showPageAlert('Estado actualizado correctamente', 'success');
+      setEditingRowId(null);
+      setEditingValues({});
+      refetch();
+    } catch (error) {
+      console.error('Error updating order:', error);
+      showPageAlert('Error al actualizar el estado', 'error');
+    } finally {
+      setSavingRowId(null);
+    }
+  }, [editingValues, refetch, showPageAlert]);
+
+  const handleFieldChange = useCallback((field, value) => {
+    setEditingValues(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const orderColumns = useMemo(
+    () => [
+      {
+        accessorKey: "order_code",
+        header: "Orden",
+        cell: ({ row }) => (
+          <div className="space-y-1">
+            <p className="font-mono text-sm font-semibold text-(--text-strong)">
+              {row.original.order_code}
+            </p>
+            <p className="text-xs text-(--text-secondary1)">
+              {formatDateTime(row.original.creado_en)}
+            </p>
+          </div>
+        ),
+      },
+      {
+        id: "customer",
+        header: "Cliente",
+        cell: ({ row }) => (
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-(--text-strong)">
+              {row.original.usuario_nombre || "N/A"}
+            </p>
+            <p className="text-xs text-(--text-secondary1)">
+              {row.original.usuario_email || "N/A"}
+            </p>
+          </div>
+        ),
+      },
+      {
+        id: "total",
+        header: "Total",
+        meta: { align: "right" },
+        cell: ({ row }) => (
+          <div className="space-y-1 text-right">
+            <p className="text-sm font-semibold text-(--text-strong)">
+              {formatCurrencyCLP(row.original.total_cents)}
+            </p>
+            <p className="text-xs text-(--text-secondary1)">
+              {row.original.total_items ?? 0}{" "}
+              {row.original.total_items === 1 ? "item" : "items"}
+            </p>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "estado_pago",
+        header: "Pago",
+        cell: ({ row }) => {
+          const isEditing = editingRowId === row.original.orden_id;
+          
+          if (isEditing) {
+            return (
+              <Select
+                value={editingValues.estado_pago || row.original.estado_pago}
+                onChange={(e) => handleFieldChange('estado_pago', e.target.value)}
+                className="w-full min-w-[140px]"
+                size="sm"
+              >
+                {ESTADOS_PAGO.filter(e => e.value).map(estado => (
+                  <option key={estado.value} value={estado.value}>
+                    {estado.label}
+                  </option>
+                ))}
+              </Select>
+            );
+          }
+          
+          return (
+            <StatusPill
+              status={row.original.estado_pago}
+              intent={getStatusColor(row.original.estado_pago, 'pago')}
+              size="sm"
+            >
+              {formatEstado(row.original.estado_pago)}
+            </StatusPill>
+          );
+        },
+      },
+      {
+        accessorKey: "estado_envio",
+        header: "Envío",
+        cell: ({ row }) => {
+          const isEditing = editingRowId === row.original.orden_id;
+          
+          if (isEditing) {
+            return (
+              <Select
+                value={editingValues.estado_envio || row.original.estado_envio}
+                onChange={(e) => handleFieldChange('estado_envio', e.target.value)}
+                className="w-full min-w-[140px]"
+                size="sm"
+              >
+                {ESTADOS_ENVIO.filter(e => e.value).map(estado => (
+                  <option key={estado.value} value={estado.value}>
+                    {estado.label}
+                  </option>
+                ))}
+              </Select>
+            );
+          }
+          
+          return (
+            <StatusPill
+              status={row.original.estado_envio}
+              intent={getStatusColor(row.original.estado_envio, 'envio')}
+              size="sm"
+            >
+              {formatEstado(row.original.estado_envio)}
+            </StatusPill>
+          );
+        },
+      },
+      {
+        id: "metodo_despacho",
+        header: "Despacho",
+        cell: ({ row }) => {
+          const comuna = row.original.comuna;
+          const region = row.original.region;
+          const method = row.original.metodo_despacho
+            ? formatEstado(row.original.metodo_despacho)
+            : "Standard";
+          return (
+            <div className="space-y-1">
+              <p className="text-sm text-(--text-strong)">{method}</p>
+              {comuna && (
+                <p className="text-xs text-(--text-secondary1)">
+                  {comuna}
+                  {region ? `, ${region}` : ""}
+                </p>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [editingRowId, editingValues, handleFieldChange],
+  );
+
+  const orderRowActions = useCallback((row) => {
+    const isEditing = editingRowId === row.orden_id;
+    const isSaving = savingRowId === row.orden_id;
+    
+    if (isEditing) {
+      return [
+        {
+          label: isSaving ? "Guardando..." : "Guardar",
+          icon: Save,
+          onAction: () => handleSaveInline(row),
+          disabled: isSaving,
+        },
+        {
+          label: "Cancelar",
+          icon: X,
+          onAction: handleCancelEdit,
+          disabled: isSaving,
+        },
+      ];
+    }
+    
+    return [
+      {
+        label: "Ver detalles",
+        icon: Eye,
+        onAction: () => handleViewDetails(row),
+      },
+      {
+        label: "Editar estado",
+        icon: Edit,
+        onAction: () => handleStartEdit(row),
+      },
+    ];
+  }, [editingRowId, savingRowId, handleSaveInline, handleCancelEdit, handleViewDetails, handleStartEdit]);
+
+  const emptyStateMessage = hasActiveFilters ? (
+    <div className="flex flex-col items-center gap-3 text-(--text-secondary1)">
+      <p>No se encontraron órdenes con los filtros aplicados.</p>
+      <Button
+        appearance="outline"
+        intent="primary"
+        size="sm"
+        onClick={resetFilters}
+      >
+        Limpiar filtros
+      </Button>
+    </div>
+  ) : (
+    <div className="text-(--text-secondary1)">Aún no se han registrado órdenes en el sistema.</div>
+  );
+
+  const handleViewDetails = useCallback((order) => {
+    setSelectedOrder(order);
   }, []);
 
   const handleSaveStatus = useCallback(async (ordenId, data) => {
@@ -576,10 +749,43 @@ export default function OrdersAdminPage() {
     refetch();
   }, [refetch]);
 
-  const handleExportCSV = useCallback(() => {
-    // Implementar exportación CSV
-    console.log('Exportar a CSV:', orders);
-  }, [orders]);
+  const handleExport = useCallback(async (format) => {
+    if (ordersData.length === 0) {
+      showPageAlert('No hay órdenes para exportar', 'warning');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      const filtersWithoutPagination = { ...filters };
+      delete filtersWithoutPagination.page;
+      delete filtersWithoutPagination.limit;
+      const params = {
+        ...compactFilters(filtersWithoutPagination),
+        order_by: 'creado_en',
+        order_dir: 'DESC',
+      };
+
+      const blob = await ordersAdminApi.exportOrders(params, format);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const formatConfig = EXPORT_FORMATS.find((item) => item.value === format);
+      const extension = formatConfig?.extension || format;
+      link.href = url;
+      link.download = buildExportFileName(extension);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showPageAlert(`${formatConfig?.label ?? format.toUpperCase()} listo para descargar`, 'success');
+    } catch (error) {
+      console.error('Error exporting orders:', error);
+      showPageAlert('Error al exportar pedidos', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [filters, ordersData.length, showPageAlert]);
 
   // Mostrar error si hay alguno
   if (error) {
@@ -614,162 +820,65 @@ export default function OrdersAdminPage() {
 
   return (
     <div className="space-y-6">
+      {pageAlert && (
+        <div
+          className={`rounded-2xl border px-4 py-3 text-sm ${PAGE_ALERT_STYLES[pageAlert.type] || PAGE_ALERT_STYLES.success}`}
+        >
+          {pageAlert.message}
+        </div>
+      )}
       <AdminPageHeader
-        title="Gestión de Pedidos"
+        title="Pedidos"
         actions={
-          <Button
-            appearance="outline"
-            intent="neutral"
-            onClick={handleExportCSV}
-            leftIcon={<Download className="h-4 w-4" />}
-            disabled={orders.length === 0}
-          >
-            Exportar CSV
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button
+                appearance="solid"
+                intent="primary"
+                size="sm"
+                iconPlacement="only"
+                icon={<Download className="h-4 w-4" />}
+                loading={isExporting}
+                disabled={ordersData.length === 0 || isExporting}
+                aria-label="Exportar pedidos"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {EXPORT_FORMATS.map((format) => (
+                <DropdownMenuItem
+                  key={format.value}
+                  onSelect={() => handleExport(format.value)}
+                >
+                  {format.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         }
       />
 
-      {/* Estadísticas */}
-      {statsLoading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
-        </div>
-      ) : stats ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <StatsCard
-            title="Total Órdenes"
-            value={stats.total_ordenes || 0}
-            icon={Package}
-            color="primary"
+      <DataTableV2
+        columns={orderColumns}
+        data={ordersData}
+        loading={isLoading}
+        rowActions={orderRowActions}
+        toolbar={
+          <OrderFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            onRefresh={refetch}
+            isLoading={isLoading}
+            onResetFilters={resetFilters}
           />
-          <StatsCard
-            title="Pagadas"
-            value={stats.pagadas || 0}
-            subtitle="Confirmadas"
-            icon={CheckCircle}
-            color="success"
-          />
-          <StatsCard
-            title="En Proceso"
-            value={stats.procesando || 0}
-            subtitle="Siendo procesadas"
-            icon={Clock}
-            color="warning"
-          />
-          <StatsCard
-            title="Entregadas"
-            value={stats.entregadas || 0}
-            subtitle="Completadas"
-            icon={Truck}
-            color="success"
-          />
-        </div>
-      ) : null}
-
-      {/* Filtros */}
-      <OrderFilters
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        onRefresh={refetch}
-        isLoading={isLoading}
+        }
+        emptyMessage={emptyStateMessage}
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={handlePageChange}
+        variant="card"
+        maxHeight="calc(100vh - 320px)"
       />
-
-      {/* Tabla de órdenes */}
-      <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
-        {isLoading ? (
-          <div className="p-6 space-y-4">
-            {Array.from({ length: 5 }).map((_, idx) => (
-              <div key={idx} className="flex items-center gap-4">
-                <Skeleton className="h-12 w-32" />
-                <Skeleton className="h-12 flex-1" />
-                <Skeleton className="h-12 w-24" />
-                <Skeleton className="h-12 w-24" />
-              </div>
-            ))}
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="text-center py-12">
-            <Package className="h-16 w-16 text-neutral-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-neutral-900 mb-2">
-              No hay órdenes
-            </h3>
-            <p className="text-neutral-500 mb-4">
-              {Object.values(filters).some(v => v) 
-                ? 'No se encontraron órdenes que coincidan con los filtros aplicados.'
-                : 'Aún no se han registrado órdenes en el sistema.'
-              }
-            </p>
-            {Object.values(filters).some(v => v) && (
-              <Button
-                appearance="outline"
-                intent="primary"
-                onClick={() => setFilters({ page: 1, limit: 20 })}
-              >
-                Limpiar Filtros
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-neutral-50 border-b border-neutral-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Orden
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Cliente
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Total
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Pago
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Envío
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Despacho
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-neutral-200">
-                {orders.map((order) => (
-                  <OrderRow
-                    key={order.orden_id}
-                    order={order}
-                    onViewDetails={handleViewDetails}
-                    onEditStatus={handleEditStatus}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Paginación */}
-        {totalPages > 1 && (
-          <div className="border-t border-neutral-200 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-neutral-700">
-                Mostrando {((page - 1) * pageSize) + 1} a {Math.min(page * pageSize, total)} de {total} órdenes
-              </p>
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-                showFirstLast
-              />
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Modales */}
       {selectedOrder && (

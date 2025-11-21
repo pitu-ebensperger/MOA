@@ -22,7 +22,6 @@ const moaConfig = {
   denyButtonColor: '#B91C1C',
   width: '28rem',
   padding: '2rem',
-  borderRadius: '1rem',
   showCloseButton: true,
   showClass: {
     popup: 'animate__animated animate__fadeInUp animate__faster'

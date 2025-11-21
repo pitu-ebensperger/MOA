@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Minus, X, Trash2, ShoppingCart } from "lucide-react";
+import { X, Trash2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/Button.jsx"
 import { Price } from "@/components/data-display/Price.jsx"
 
 import { useCartContext } from "@/context/cart-context.js"
 
 import { resolveProductPrice } from "@/modules/products/utils/products.js"
+import { QuantityControl } from '@/components/cart/QuantityControl.jsx'
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { API_PATHS } from "@/config/api-paths.js"
 
@@ -34,10 +35,15 @@ export const CartDrawer = () => {
     return `${cartItems.length} producto${cartItems.length === 1 ? "" : "s"}`;
   }, [cartItems.length, hasItems]);
 
+  const totalUnits = useMemo(() => {
+    if (!hasItems) return 0;
+    return cartItems.reduce((acc, item) => acc + Number(item.quantity || 1), 0);
+  }, [cartItems, hasItems]);
+
   return (
     <div
       aria-hidden={!isDrawerOpen}
-      className={`fixed inset-0 z-[1200] flex transition duration-300 ${
+      className={`fixed inset-0 z-1200 flex transition duration-300 ${
         isDrawerOpen ? "pointer-events-auto" : "pointer-events-none"
       }`}
     >
@@ -48,16 +54,22 @@ export const CartDrawer = () => {
         }`}
       />
       <aside
-        className={`relative ml-auto flex w-full max-w-sm flex-col rounded-tl-3xl bg-[var(--color-lightest)] p-6 shadow-[0_20px_45px_rgba(17,24,39,0.35)] transition-transform duration-300 transform ${
+        className={`relative ml-auto flex w-full max-w-sm flex-col rounded-tl-3xl bg-(--color-lightest) p-6 shadow-[0_20px_45px_rgba(17,24,39,0.35)] transition-transform duration-300 transform ${
           isDrawerOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <header className="flex items-start justify-between gap-4">
           <div>
-            <h2 className=" text-2xl font-semibold text-[var(--color-primary1)]">
-              Carrito
-            </h2>
-            <p className="text-xs font-semibold text-neutral-500">{quantityLabel}</p>
+            <h2 className="text-2xl font-semibold text-(--color-primary1)">Carrito</h2>
+            {hasItems ? (
+              <p className="mt-1 flex flex-wrap items-center gap-2 text-xs font-semibold text-neutral-500" aria-label="Resumen del carrito">
+                <span>{cartItems.length} tipo{cartItems.length === 1 ? '' : 's'}</span>
+                <span className="opacity-50">•</span>
+                <span>{totalUnits} unidad{totalUnits === 1 ? '' : 'es'}</span>
+              </p>
+            ) : (
+              <p className="text-xs font-semibold text-neutral-500">{quantityLabel}</p>
+            )}
           </div>
           <button
             type="button"
@@ -89,7 +101,7 @@ export const CartDrawer = () => {
 
                   <div className="flex flex-1 flex-col justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-neutral-900">{item.name}</p>
+                      <p className="text-base font-semibold text-neutral-900">{item.name}</p>
                       <div className="text-xs text-neutral-500">
                         Precio unidad: <Price value={itemPrice} className="text-neutral-500" />
                       </div>
@@ -99,31 +111,12 @@ export const CartDrawer = () => {
                     </div>
 
                     <div className="flex items-center justify-between gap-2 text-sm">
-                      <div className="flex items-center rounded-full border border-neutral-200 bg-neutral-50 px-2 py-1">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateQuantity(item.id, (Number(item.quantity) || 1) - 1)
-                          }
-                          className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-600 transition hover:text-primary1"
-                          aria-label={`Disminuir cantidad de ${item.name}`}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </button>
-                        <span className="mx-2 min-w-[26px] text-center font-semibold">
-                          {item.quantity ?? 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateQuantity(item.id, (Number(item.quantity) || 1) + 1)
-                          }
-                          className="flex h-7 w-7 items-center justify-center rounded-full text-neutral-600 transition hover:text-primary1"
-                          aria-label={`Aumentar cantidad de ${item.name}`}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <QuantityControl
+                        value={Number(item.quantity) || 1}
+                        onChange={(next) => updateQuantity(item.id, next)}
+                        min={1}
+                        className="bg-neutral-50 border-neutral-200"
+                      />
 
                       <button
                         type="button"
@@ -158,7 +151,7 @@ export const CartDrawer = () => {
         <footer className="mt-6 flex flex-col gap-4">
           <div className="flex items-center justify-between border-t border-neutral-200 pt-4 text-sm">
             <span className="text-neutral-500">Subtotal</span>
-            <Price value={total} className="text-lg font-semibold text-[var(--color-primary1)]" />
+            <Price value={total} className="text-lg font-semibold text-(--color-primary1)" />
           </div>
 
           <div className="flex flex-col gap-3">

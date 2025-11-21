@@ -14,7 +14,8 @@
     "test:accessibility": "node src/config/__tests__/accessibility.test.js",
     "test:config": "npm run test:status-maps && npm run test:ui-tokens && npm run test:accessibility",
     "test:auth": "node scripts/test-auth-mock.js",
-    "export:tokens": "node scripts/export-tokens.js"
+    "export:tokens": "node scripts/export-tokens.js",
+    "test": "npm run test:config && npm run test:auth"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

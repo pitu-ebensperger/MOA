@@ -42,6 +42,7 @@ export const ProductDetailPage = () => {
   const [state, setState] = useState(initialState);
   const [quantity, setQuantity] = useState(1);
   const { addToCart, updateQuantity } = useCartContext() ?? {};
+  const { isAuthenticated } = useAuth();
   const productsBasePath = API_PATHS.products.products;
 
   const baseBreadcrumbItems = [
@@ -106,13 +107,6 @@ export const ProductDetailPage = () => {
     return [];
   }, [product]);
 
-  const specEntries = useMemo(() => {
-    if (!product) return [];
-    const specs = product.specs;
-    if (!specs || typeof specs !== "object" || Array.isArray(specs)) return [];
-    return Object.entries(specs);
-  }, [product]);
-
   const galleryImages = useMemo(() => {
     if (!product) return [];
     const rawGallery = Array.isArray(product.gallery) ? product.gallery : [];
@@ -125,6 +119,9 @@ export const ProductDetailPage = () => {
 
   const mainImage = galleryImages[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
   const thumbnailImages = galleryImages.slice(1, 4);
+  const hasDimensions = Boolean(product?.dimensions);
+  const hasWeight = Boolean(product?.weight);
+  const hasMeasurementDetails = hasDimensions || hasWeight;
 
   const highlights = [
     {
@@ -163,25 +160,19 @@ export const ProductDetailPage = () => {
       title: "Medidas y especificaciones",
       content: (
         <ul className="space-y-2">
-          {product?.dimensions && (
+          {hasDimensions && (
             <li>
               <span className="font-medium text-neutral-800">Dimensiones:&nbsp;</span>
               <span>{formatDimensions(product.dimensions)}</span>
             </li>
           )}
-          {product?.weight && (
+          {hasWeight && (
             <li>
               <span className="font-medium text-neutral-800">Peso:&nbsp;</span>
               <span>{formatWeight(product.weight)}</span>
             </li>
           )}
-          {specEntries.map(([key, value]) => (
-            <li key={key}>
-              <span className="font-medium text-neutral-800">{key}:&nbsp;</span>
-              <span>{value}</span>
-            </li>
-          ))}
-          {specEntries.length === 0 && (
+          {!hasMeasurementDetails && (
             <li>Consultar ficha técnica para más detalles.</li>
           )}
         </ul>
@@ -206,7 +197,7 @@ export const ProductDetailPage = () => {
     return (
       <main className="page container-px mx-auto max-w-6xl py-12">
         <Breadcrumbs items={baseBreadcrumbItems} className="mb-6" />
-        <div className="h-[30rem] animate-pulse rounded-[32px] bg-neutral-100" />
+        <div className="h-120 animate-pulse rounded-4xl bg-neutral-100" />
       </main>
     );
   }
@@ -234,7 +225,7 @@ export const ProductDetailPage = () => {
 
         <article className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
           <div className="space-y-4 h-full">
-            <div className="relative flex h-full flex-col overflow-hidden rounded-[32px] bg-neutral-100 shadow-sm max-h-[580px]">
+            <div className="relative flex h-full flex-col overflow-hidden rounded-4xl bg-neutral-100 shadow-sm max-h-[580px]">
               <img
                 src={mainImage}
                 alt={product.name ?? "Imagen del producto"}
@@ -248,7 +239,7 @@ export const ProductDetailPage = () => {
                 {thumbnailImages.map((imageUrl, index) => (
                   <div
                     key={`${imageUrl}-${index}`}
-                    className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white"
+                    className="overflow-hidden rounded-3xl border border-neutral-200 bg-white"
                   >
                     <img
                       src={imageUrl}
@@ -304,6 +295,12 @@ export const ProductDetailPage = () => {
                 type="button"
                 disabled={product.stock <= 0}
                 onClick={() => {
+                  if (!isAuthenticated) {
+                    alertAuthRequired().then(() => {
+                      window.location.assign('/login');
+                    });
+                    return;
+                  }
                   if (!addToCart) return;
                   addToCart(product);
                   if (quantity > 1 && updateQuantity) {

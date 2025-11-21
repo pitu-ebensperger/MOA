@@ -6,8 +6,10 @@ import { createCategoryMatcher } from "@/modules/products/utils/products.js"
 import { ALL_CATEGORY_ID } from "@/config/constants.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { buildCategoryTabs, normalizeFeaturedProduct } from "@/utils/normalizers.js"
+import { useWishlist } from "@/modules/profile/hooks/useWishlist.js"
 
-export default function ProductsSection({ products, categories }) {
+export default function ProductsSection({ products, categories, onAddToCart = () => {} }) {
+  const { wishlist, toggleWishlist } = useWishlist();
   const tabs = useMemo(() => buildCategoryTabs(categories), [categories]);
   const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
   const matchCategory = useMemo(
@@ -70,9 +72,21 @@ export default function ProductsSection({ products, categories }) {
 
       {items.length ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {items.map((product) => {
+            const isSaved = wishlist.some(
+              (item) => item.producto_id === product.id || item.id === product.id
+            );
+            
+            return (
+              <ProductCard
+                key={product.id}
+                product={product}
+                isInWishlist={isSaved}
+                onToggleWishlist={toggleWishlist}
+                onAddToCart={() => onAddToCart(product)}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-neutral-200 bg-white/80 px-6 py-10 text-center text-sm text-neutral-500">

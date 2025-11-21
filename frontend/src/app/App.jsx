@@ -34,7 +34,7 @@ import { ServerErrorPage } from '@/modules/support/pages/ServerErrorPage.jsx'
 import { AdminRoute, ProtectedRoute } from '@/modules/auth/hooks/useAuth.jsx'
 import EntornoAdmin from '@/modules/admin/components/EntornoAdmin.jsx'
 import AdminDashboardPage from '@/modules/admin/pages/AdminDashboardPage.jsx'
-import OrdersAdminPage from '@/modules/admin/pages/orders/OrdersAdminPageV2.jsx'
+import OrdersAdminPage from '@/modules/admin/pages/orders/OrdersAdminPage.jsx'
 import AdminProductsPage from '@/modules/admin/pages/AdminProductsPage.jsx'
 import AdminCategoriesPage from '@/modules/admin/pages/AdminCategoriesPage.jsx'
 import CustomersPage from '@/modules/admin/pages/CustomersPage.jsx'
@@ -72,7 +72,7 @@ export const App = () => {
           <Route path={auth.register} element={<RegisterPage />} />
           <Route path={auth.forgot} element={<ForgotPasswordPage />} />
           <Route path={auth.reset} element={<ResetPasswordPage />} />
-          <Route path='/order-confirmation/:orderCode' element={<OrderConfirmationPage />} />
+          <Route path='/order-confirmation/:orderId' element={<OrderConfirmationPage />} />
           <Route element={<ProtectedRoute />}>
             <Route path={auth.profile} element={<ProfilePage />} />
             <Route path='/wishlist' element={<WishlistPage />} />         

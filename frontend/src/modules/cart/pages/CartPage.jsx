@@ -1,13 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Minus,
-  Plus,
   Trash2,
   ShoppingCart,
-  Truck,
-  PackageCheck,
 } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
 import { Price } from "@/components/data-display/Price.jsx"
@@ -23,13 +19,10 @@ import {
   CardHeader,
   CardTitle,
   Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Separator,
 } from "../../../components/shadcn/ui/index.js";
+// Despacho y dirección ahora gestionados sólo en Checkout
+import { QuantityControl } from '@/components/cart/QuantityControl.jsx'
 
 const buildItemImage = (item) =>
   item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
@@ -37,248 +30,173 @@ const buildItemImage = (item) =>
 const getItemKey = (item, index) =>
   item?.id ?? item?.slug ?? item?.name ?? `cart-item-${index}`;
 
-const shippingOptions = [
-  { value: "standard", label: "Despacho estándar", detail: "48-72 h hábiles", cost: 0 },
-  { value: "express", label: "Despacho express", detail: "24 h hábiles", cost: 6900 },
-  { value: "pickup", label: "Retiro en showroom", detail: "Disponible hoy", cost: 0 },
-];
+// Se removieron opciones de despacho del carrito; se calculan en Checkout
 
 export const CartPage = () => {
   const { cartItems, total, updateQuantity, removeFromCart, clearCart } = useCartContext();
-  const [shippingMethod, setShippingMethod] = useState(shippingOptions[0].value);
+  // Sin selección de despacho en carrito
 
   const hasItems = cartItems.length > 0;
+  const totalUnits = useMemo(() => (
+    cartItems.reduce((acc, item) => acc + Number(item.quantity || 1), 0)
+  ), [cartItems]);
 
-  const activeShipping = useMemo(
-    () => shippingOptions.find((option) => option.value === shippingMethod) ?? shippingOptions[0],
-    [shippingMethod]
-  );
+  const grandTotal = total; // Total sin envío; envío se agrega en Checkout
 
-  const shippingCost = hasItems ? activeShipping.cost : 0;
-  const grandTotal = total + shippingCost;
-
-  const handleQuantity = (itemId, amount) => {
-    const current = Number(
-      cartItems.find((item) => item.id === itemId)?.quantity ?? 1
-    );
-    const nextValue = Math.max(1, current + amount);
-    updateQuantity(itemId, nextValue);
-  };
+  // Quantity handled directly via QuantityControl
 
   return (
     <main className="page container-px mx-auto max-w-6xl py-12">
-      <header className="mb-10 space-y-4">
-        <div>
-          <h1 className="title-serif text-4xl text-[var(--color-primary1)]">
-            {hasItems ? "Carro de compra" : "Tu carrito aún no tiene tesoros"}
-          </h1>
-        </div>
+      <header className="mb-10 space-y-3">
+        <h1 className="title-serif text-4xl text-[var(--color-primary1)]">
+          {hasItems ? "Carro de compra" : "Tu carrito aún no tiene tesoros"}
+        </h1>
+        {/* Métricas removidas según solicitud: tipos, unidades y total inline */}
       </header>
 
       {hasItems ? (
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="space-y-6">
-            <Card>
-              <CardContent className="p-0">
-                <div className="divide-y divide-[var(--border)]">
-                  {cartItems.map((item, index) => {
-                    const itemPrice = resolveProductPrice(item) ?? 0;
-                    const quantity = Number(item.quantity) || 1;
-                    const itemTotal = itemPrice * quantity;
+        <>
+            <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_340px]">
+              <div className="space-y-6">
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-(--border)">
+                      {cartItems.map((item, index) => {
+                        const itemPrice = resolveProductPrice(item) ?? 0;
+                        const quantity = Number(item.quantity) || 1;
+                        const itemTotal = itemPrice * quantity;
 
-                    return (
-                      <div
-                        key={getItemKey(item, index)}
-                        className="flex flex-col gap-4 px-4 py-5 first:pt-5 last:pb-5 sm:flex-row sm:items-start"
-                      >
-                        <div className="flex flex-1 gap-4">
-                          <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-[#44311417]">
-                            <img
-                              src={buildItemImage(item)}
-                              alt={item.name ?? "Producto"}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <p className="font-display text-lg text-[var(--color-primary2)]">{item.name}</p>
-                            <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
-                              SKU {item.sku ?? "—"}
-                            </p>
-                          </div>
-                        </div>
+                        return (
+                          <div
+                            key={getItemKey(item, index)}
+                            className="flex flex-col gap-4 px-4 py-5 first:pt-5 last:pb-5 sm:grid sm:grid-cols-[minmax(0,1fr)_92px_160px] sm:items-center sm:gap-6"
+                          >
+                            {/* Col 1: Imagen + info */}
+                            <div className="flex items-center gap-4">
+                              <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-[#44311417]">
+                                <img
+                                  src={buildItemImage(item)}
+                                  alt={item.name ?? "Producto"}
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                              <div className="flex flex-col justify-center min-w-0">
+                                <p className="font-display text-xl leading-snug text-(--color-primary2) truncate">{item.name}</p>
+                                <p className="text-xs uppercase text-(--color-text-muted) leading-tight">
+                                  SKU {item.sku ?? "—"}
+                                </p>
+                                <div className="mt-1 text-xs flex items-center gap-1 text-(--color-text-muted)">
+                                  <span className="uppercase">Precio unidad:</span>
+                                  <Price value={itemPrice} className="font-semibold text-(--color-primary2)" />
+                                </div>
+                              </div>
+                            </div>
 
-                        <div className="flex flex-1 flex-col gap-3">
-                          <div className="flex items-center justify-between text-sm text-[var(--color-text-muted)]">
-                            <span>Precio unidad</span>
-                            <Price value={itemPrice} className="font-semibold text-[var(--color-primary2)]" />
-                          </div>
-
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/60 px-2 py-1">
+                            {/* Col 2: Controles */}
+                            <div className="flex items-center justify-center gap-1 w-[92px]">
+                              <QuantityControl
+                                value={quantity}
+                                onChange={(next) => updateQuantity(item.id, next)}
+                                min={1}
+                              />
                               <button
                                 type="button"
-                                onClick={() => handleQuantity(item.id, -1)}
+                                onClick={() => removeFromCart(item.id)}
                                 className={buttonClasses({
                                   variant: "ghost",
                                   size: "icon",
-                                  className: "h-9 w-9 text-[var(--color-primary2)]",
+                                  className: "h-8 w-8 text-(--color-text-muted) hover:text-(--color-primary1)",
                                 })}
-                                aria-label={`Disminuir cantidad de ${item.name}`}
+                                aria-label={`Eliminar ${item.name}`}
+                                title="Eliminar"
                               >
-                                <Minus className="h-4 w-4" />
-                              </button>
-                              <span className="min-w-[32px] text-center font-semibold">{quantity}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleQuantity(item.id, 1)}
-                                className={buttonClasses({
-                                  variant: "ghost",
-                                  size: "icon",
-                                  className: "h-9 w-9 text-[var(--color-primary2)]",
-                                })}
-                                aria-label={`Aumentar cantidad de ${item.name}`}
-                              >
-                                <Plus className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
 
-                            <button
-                              type="button"
-                              onClick={() => removeFromCart(item.id)}
-                              className={buttonClasses({
-                                variant: "ghost",
-                                size: "icon",
-                                className: "h-9 w-9",
-                              })}
-                              aria-label={`Eliminar ${item.name}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
+                            {/* Col 3: Subtotal */}
+                            <div className="flex items-center justify-end w-40">
+                              <Price value={itemTotal} className="text-xl tracking-tight text-(--color-primary1)" />
+                            </div>
                           </div>
-
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-[var(--color-text-muted)]">Subtotal pieza</span>
-                            <Price value={itemTotal} className="text-base font-semibold text-[var(--color-primary1)]" />
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-3">
-                <div className="flex w-full items-center justify-between text-sm text-[var(--color-text-muted)]">
-                  <span>Total carro</span>
-                  <Price value={total} className="text-lg font-semibold text-[var(--color-primary1)]" />
-                </div>
-                <button
-                  type="button"
-                  onClick={clearCart}
-                  className="text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-text-muted)] transition hover:text-[var(--color-primary1)]"
-                >
-                  Vaciar carrito
-                </button>
-              </CardFooter>
-            </Card>
-          </div>
-
-          <aside className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Resumen de compra</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
-                    <span>Subtotal</span>
-                    <Price value={total} />
-                  </div>
-                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
-                    <span>Envío</span>
-                    {shippingCost ? (
-                      <Price value={shippingCost} className="text-[var(--color-primary2)]" />
-                    ) : (
-                      <Badge variant="accent" className="text-[0.6rem] tracking-[0.3em]">
-                        Gratis
-                      </Badge>
-                    )}
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between text-base font-semibold text-[var(--color-primary1)]">
-                    <span>Total</span>
-                    <Price value={grandTotal} />
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
-                  <Label required>Método de entrega</Label>
-                  <Select value={shippingMethod} onValueChange={setShippingMethod}>
-                    <SelectTrigger>
-                      <div className="flex items-center gap-2">
-                        <Truck className="h-4 w-4" />
-                        <SelectValue placeholder="Selecciona el método" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {shippingOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value} textValue={option.label}>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-[var(--color-primary2)]">{option.label}</span>
-                            <span className="text-xs text-[var(--color-text-muted)]">{option.detail}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="rounded-[var(--radius-xl)] bg-[var(--color-lightest)] p-4 text-sm text-[var(--color-text-secondary)]">
-                  <div className="flex items-center gap-3">
-                    <PackageCheck className="h-5 w-5 text-[var(--color-primary1)]" />
-                    <div>
-                      <p className="font-semibold text-[var(--color-primary2)]">
-                        {activeShipping.label}
-                      </p>
-                      <p>{activeShipping.detail}</p>
+                        );
+                      })}
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-3">
-                <Link
-                  to="/checkout"
-                  className={buttonClasses({
-                    size: "lg",
-                    className: "w-full justify-center gap-2 text-base",
-                  })}
-                >
-                  Continuar al checkout
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  to={API_PATHS.products.products}
-                  className={buttonClasses({
-                    variant: "outline",
-                    size: "md",
-                    className: "w-full justify-center",
-                  })}
-                >
-                  Seguir explorando
-                </Link>
-              </CardFooter>
-            </Card>
-          </aside>
-        </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-row items-center justify-between gap-4 px-4">
+                    <button
+                      type="button"
+                      onClick={clearCart}
+                      className="text-xs font-semibold text-(--color-text-muted) transition hover:text-(--color-primary1) rounded-full border border-(--border) px-4 py-2 bg-white/40 backdrop-blur-sm hover:border-(--color-primary1)"
+                    >
+                      Vaciar carrito
+                    </button>
+                    <div className="flex items-center gap-3 text-xs text-(--color-text-muted)">
+                      <span className="uppercase tracking-tight">Total carro</span>
+                      <Price value={total} className="text-xl font-bold text-(--color-primary1) tracking-tight" />
+                    </div>
+                  </CardFooter>
+                </Card>
+                {/* Sección de despacho eliminada del carrito */}
+              </div>
+
+              <aside className="space-y-6 lg:sticky lg:top-28 lg:self-start">
+                <Card className="bg-(--color-lightest) ring-1 ring-(--border)/60 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold text-(--color-primary2)">Resumen de compra</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between text-xs uppercase text-(--color-text-muted)">
+                      <span>{cartItems.length} tipo{cartItems.length === 1 ? '' : 's'}</span>
+                      <span>{totalUnits} unidad{totalUnits === 1 ? '' : 'es'}</span>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-xs text-(--color-text-muted)">
+                        <span className="tracking-tight">Subtotal productos</span>
+                        <Price value={total} className="text-sm" />
+                      </div>
+                      <Separator />
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-(--color-text-muted)">Total (sin envío)</span>
+                        <Price value={grandTotal} className="text-2xl font-bold text-(--color-primary1) tracking-tight" />
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-col gap-3">
+                    <Link
+                      to="/checkout"
+                      className={buttonClasses({
+                        variant: "primary",
+                        size: "md",
+                        className: "w-full justify-center gap-2 text-white",
+                      })}
+                    >
+                        Continuar al checkout
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      to={API_PATHS.products.products}
+                      className={buttonClasses({
+                        variant: "outline",
+                        size: "md",
+                        className: "w-full justify-center",
+                      })}
+                    >
+                      Seguir explorando
+                    </Link>
+                  </CardFooter>
+                </Card>
+              </aside>
+            </div>
+        </>
       ) : (
         <Card className="flex flex-col items-center gap-6 border-dashed py-16 text-center">
-          <div className="rounded-full bg-[var(--color-primary4)]/70 p-6 text-[var(--color-primary1)]">
+          <div className="rounded-full bg-(--color-primary4)/70 p-6 text-(--color-primary1)">
             <ShoppingCart className="h-10 w-10" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold text-[var(--color-primary2)]">Tu carrito está vacío</h2>
-            <p className="text-sm text-[var(--color-text-secondary)] max-w-md">
+            <h2 className="text-2xl font-semibold text-(--color-primary2)">Tu carrito está vacío</h2>
+            <p className="text-sm text-(--color-text-secondary) max-w-md">
               Explora el catálogo MOA, guarda tus favoritos y podrás retomar el checkout cuando quieras.
             </p>
           </div>
@@ -287,7 +205,7 @@ export const CartPage = () => {
             className={buttonClasses({
               variant: "ghost",
               size: "md",
-              className: "text-[var(--color-primary1)]",
+              className: "text-(--color-primary1)",
             })}
           >
             Comenzar a explorar

@@ -21,8 +21,10 @@ export const productsController = {
         sortOrder
       } = req.query;
 
+      const offsetParam = req.query.offset ?? null;
       const pageNum = parseInt(page);
       const limitNum = parseInt(limit);
+      const offsetNum = offsetParam !== null ? parseInt(offsetParam, 10) : null;
 
       if (pageNum < 1) {
         throw new AppError('El número de página debe ser mayor a 0', 400);
@@ -35,6 +37,7 @@ export const productsController = {
       const options = {
         page: pageNum,
         limit: limitNum,
+        offset: Number.isFinite(offsetNum) ? Math.max(0, offsetNum) : null,
         search,
         categoryId: categoryId ? parseInt(categoryId) : null,
         status,

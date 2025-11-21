@@ -1,5 +1,6 @@
 //path/src/components/data/TanstackDataTable.jsx
 import React from "react";
+import { ListFilter } from "lucide-react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -92,6 +93,10 @@ export function TanstackDataTable({
                   const sortIcons = headerMeta.sortIcons || {};
                   const onFilterClick = headerMeta.onFilterClick;
                   const headerExtra = headerMeta.extra;
+                  const filterActive = header.column.getIsFiltered?.() ?? false;
+                  const filterIconClass = `text-(--color-secondary1) transition ${
+                    filterActive ? "opacity-100" : "opacity-40"
+                  }`;
                   return (
                     <th
                       key={header.id}
@@ -99,7 +104,7 @@ export function TanstackDataTable({
                       style={{ width: header.getSize() }}
                       className={`px-3 py-2 font-medium ${align}`}
                     >
-                      {header.isPlaceholder ? null : (
+                          {header.isPlaceholder ? null : (
                         <div
                           onClick={header.column.getToggleSortingHandler()}
                           className={
@@ -123,15 +128,14 @@ export function TanstackDataTable({
                           {onFilterClick && (
                             <button
                               type="button"
-                              className="ml-1 rounded p-0.5 text-neutral-400 hover:text-neutral-700"
+                              className="ml-1 rounded p-0.5 transition hover:opacity-100"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onFilterClick(header.getContext());
                               }}
                               aria-label="Filtrar columna"
                             >
-                              {/* Simple funnel icon */}
-                              <span className="text-[12px]">⏷</span>
+                                <ListFilter size={14} className={filterIconClass} />
                             </button>
                           )}
                           {headerExtra && <span className="ml-1">{headerExtra}</span>}

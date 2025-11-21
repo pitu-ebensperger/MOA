@@ -4,10 +4,17 @@ import { Plus, RefreshCw, Download, FileSpreadsheet, FileText, ChevronDown } fro
 
 import { TanstackDataTable } from "@/components/data-display/DataTable.jsx"
 import { Pagination } from "@/components/ui/Pagination.jsx"
+import ProductsToolbar from "@/modules/admin/pages/ProductsToolbar.jsx"
 
 import { useAdminProducts } from "@/modules/admin/hooks/useAdminProducts.js"
 import { useCategories } from "@/modules/products/hooks/useCategories.js"
 import { buildProductColumns } from "@/modules/admin/utils/ProductsColumns.jsx"
+
+const STATUS_LABELS = {
+  activo: "Activo",
+  borrador: "Borrador",
+  archivado: "Archivado",
+};
 
 export default function ProductsAdminPage() {
   const [page, setPage] = React.useState(1);
@@ -48,6 +55,29 @@ export default function ProductsAdminPage() {
       }),
     [categoryMap],
   );
+
+  const activeTags = React.useMemo(() => {
+    if (!status) return [];
+    return [
+      {
+        key: "status",
+        value: status,
+        label: `Estado: ${STATUS_LABELS[status] ?? status}`,
+      },
+    ];
+  }, [status]);
+
+  const handleRemoveTag = React.useCallback((tag) => {
+    if (tag.key === "status") {
+      setStatus("");
+      setPage(1);
+    }
+  }, []);
+
+  const handleToggleLowStock = React.useCallback(() => {
+    setOnlyLowStock((prev) => !prev);
+    setPage(1);
+  }, []);
 
   // Funciones de exportación
   const exportToCSV = () => {
@@ -229,6 +259,14 @@ export default function ProductsAdminPage() {
           <span>Solo stock crítico</span>
         </label>
       </div>
+
+      {/* Toolbar */}
+      <ProductsToolbar
+        onlyLowStock={onlyLowStock}
+        onToggleLowStock={handleToggleLowStock}
+        activeTags={activeTags}
+        onRemoveTag={handleRemoveTag}
+      />
 
       {/* Tabla TanStack */}
       <TanstackDataTable

@@ -101,7 +101,6 @@ export const PRODUCTS = [
     updatedAt: "2024-02-01T10:00:00Z",
     fk_category_id: 4000,
     compareAtPrice: null,
-    specs: { voltage: "220-240V", socket: "E27" },
   },
   {
     id: 42002,
@@ -128,7 +127,6 @@ export const PRODUCTS = [
     updatedAt: "2024-02-05T10:00:00Z",
     fk_category_id: 4000,
     compareAtPrice: null,
-    specs: { voltage: "220-240V", socket: "E14" },
   },
   {
     id: 51001,

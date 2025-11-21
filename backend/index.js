@@ -2,14 +2,51 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { errorHandler, NotFoundError } from "./src/utils/error.utils.js";
+import rateLimit from "express-rate-limit";
+import { validateEnv } from "./src/utils/env.js";
 
 dotenv.config();
+validateEnv();
 
 const app = express();
 
 // Middleware global
 app.use(express.json({ limit: '10mb' })); // Límite de payload
-app.use(cors());
+
+// CORS configuration
+const isProd = (process.env.NODE_ENV || 'development') === 'production';
+const defaultDevOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+];
+const envOrigins = (process.env.CORS_ORIGIN || process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
+const allowedOrigins = isProd ? envOrigins : (envOrigins.length ? envOrigins : defaultDevOrigins);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS: Origin not allowed: ${origin}`));
+  },
+  credentials: true,
+}));
+
+// Rate limiting
+const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000); // 15 minutes
+const maxRequests = Number(process.env.RATE_LIMIT_MAX || 200);
+const authMaxRequests = Number(process.env.AUTH_RATE_LIMIT_MAX || 10);
+
+const generalLimiter = rateLimit({ windowMs, max: maxRequests, standardHeaders: true, legacyHeaders: false });
+const authLimiter = rateLimit({ windowMs, max: authMaxRequests, standardHeaders: true, legacyHeaders: false });
+
+// Apply general limiter to all routes
+app.use(generalLimiter);
 
 /* ----------------------------- Rutas ----------------------------- */
 
@@ -36,6 +73,7 @@ app.get("/", (req, res) => {
 
 // Registro de rutas en orden de prioridad
 app.use(home);              // Rutas home (/)
+app.use(['/login', '/register'], authLimiter); // Rate limit auth endpoints
 app.use(authRoutes);        // Rutas de autenticación (/login, /register, etc.)
 app.use(userRoutes);        // Rutas de usuario (/usuario, /auth/perfil)
 app.use(categoriesRouter);  // Rutas de categorías (/categorias)

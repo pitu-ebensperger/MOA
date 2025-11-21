@@ -91,7 +91,7 @@ export default function RegisterPage({ onRegister }) {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Juan Pérez"
+                  placeholder="Tu nombre completo"
                   required
                   autoComplete="name" // sugerencia del navegador
             className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"

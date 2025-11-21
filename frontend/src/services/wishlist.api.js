@@ -81,7 +81,14 @@ export const wishlistApi = {
   }
 }
 
-// Exports individuales opcionales
+// Alias de compatibilidad para código legacy (evita TypeError wishlistApi.getWishlist ...)
+wishlistApi.getWishlist = wishlistApi.get
+wishlistApi.addToWishlist = wishlistApi.add
+wishlistApi.removeFromWishlist = wishlistApi.remove
+wishlistApi.isInWishlist = wishlistApi.contains
+wishlistApi.toggleWishlist = wishlistApi.toggle
+
+// Exports individuales opcionales (manteniendo ambos nombres)
 export const getWishlist = wishlistApi.get
 export const addToWishlist = wishlistApi.add
 export const removeFromWishlist = wishlistApi.remove

@@ -1,5 +1,48 @@
 import orderAdminModel from "../models/orderAdminModel.js";
 
+const CSV_COLUMNS = [
+  { label: "Orden ID", key: "orden_id" },
+  { label: "Código", key: "order_code" },
+  { label: "Cliente", key: "usuario_nombre" },
+  { label: "Email", key: "usuario_email" },
+  { label: "Estado de pago", key: "estado_pago" },
+  { label: "Estado de envío", key: "estado_envio" },
+  { label: "Método de pago", key: "metodo_pago" },
+  { label: "Método de despacho", key: "metodo_despacho" },
+  {
+    label: "Total (CLP)",
+    key: "total_cents",
+    transform: (order) => ((order.total_cents ?? 0) / 100).toFixed(2),
+  },
+  { label: "Cantidad de ítems", key: "total_items" },
+  { label: "Fecha de creación", key: "creado_en", transform: (order) => formatCsvDate(order.creado_en) },
+  { label: "Fecha de pago", key: "fecha_pago", transform: (order) => formatCsvDate(order.fecha_pago) },
+  { label: "Fecha de envío", key: "fecha_envio", transform: (order) => formatCsvDate(order.fecha_envio) },
+  {
+    label: "Fecha de entrega",
+    key: "fecha_entrega_real",
+    transform: (order) => formatCsvDate(order.fecha_entrega_real),
+  },
+  { label: "Número de seguimiento", key: "numero_seguimiento" },
+  { label: "Empresa de envío", key: "empresa_envio" },
+];
+
+function formatCsvDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString();
+}
+
+function serializeCsvValue(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  const text = typeof value === "number" ? String(value) : value;
+  const escaped = String(text).replace(/"/g, '""');
+  return `"${escaped}"`;
+}
+
 const getAllOrders = async (req, res) => {
   try {
     const {
@@ -39,6 +82,41 @@ const getAllOrders = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error al obtener órdenes',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+};
+
+const CSV_BOM = "\uFEFF";
+
+const exportOrdersCSV = async (req, res) => {
+  try {
+    const params = {
+      ...req.query,
+    };
+
+    const orders = await orderAdminModel.getOrdersForExport(params);
+    const headerRow = CSV_COLUMNS.map(col => serializeCsvValue(col.label)).join(',');
+    const rows = orders.map(order => {
+      const values = CSV_COLUMNS.map(col => {
+        const rawValue = col.transform ? col.transform(order) : order[col.key];
+        return serializeCsvValue(rawValue);
+      });
+      return values.join(',');
+    });
+
+    const csvContent = [headerRow, ...rows].join('\n');
+    const fileName = `ordenes-moa-${new Date().toISOString().split('T')[0]}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.status(200).send(`${CSV_BOM}${csvContent}`);
+
+  } catch (error) {
+    console.error('Error exportando órdenes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al exportar órdenes',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
@@ -238,6 +316,7 @@ const getOrderStats = async (req, res) => {
 
 const orderAdminController = {
   getAllOrders,
+  exportOrdersCSV,
   getOrderById,
   updateOrderStatus,
   addTrackingInfo,

@@ -7,6 +7,7 @@ import { asyncHandler } from "../src/utils/error.utils.js";
 const router = Router();
 
 // === RUTAS DE PEDIDOS ADMIN ===
+router.get("/admin/pedidos/export", verifyAdmin, asyncHandler(orderAdminController.exportOrdersCSV));
 router.get("/admin/pedidos/stats", verifyAdmin, asyncHandler(orderAdminController.getOrderStats));
 router.get("/admin/pedidos", verifyAdmin, asyncHandler(orderAdminController.getAllOrders));
 router.get("/admin/pedidos/:id", verifyAdmin, asyncHandler(orderAdminController.getOrderById));

@@ -10,7 +10,7 @@ import {
 } from '@/services/address.api';
 
 export const AddressProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [addresses, setAddresses] = useState([]);
   const [defaultAddress, setDefaultAddressState] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ export const AddressProvider = ({ children }) => {
    * Cargar direcciones desde el backend
    */
   const loadAddresses = useCallback(async () => {
-    if (!user) {
+    if (!user || !token) {
       setAddresses([]);
       setDefaultAddressState(null);
       return;
@@ -42,7 +42,7 @@ export const AddressProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, token]);
 
   /**
    * Agregar nueva dirección

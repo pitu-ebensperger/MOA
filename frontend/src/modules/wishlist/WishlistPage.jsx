@@ -1,0 +1,1 @@
+Implementa la vista de wishlist utilizando shadcn y los tokens de estilo definidos en `tokens.css`. Usa componentes reutilizables como `Card` y `Button` para mantener consistencia visual.

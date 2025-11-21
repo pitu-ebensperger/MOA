@@ -1,8 +1,9 @@
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { formatCurrencyCLP } from "@/utils/currency.js"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/radix/DropdownMenu.jsx"
-import { MoreHorizontal, Eye, XCircle } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/radix/DropdownMenu.jsx"
+import { Eye, XCircle } from "lucide-react";
+import { ResponsiveRowActions } from "@/components/ui/ResponsiveRowActions.jsx";
 
 export const buildOrderColumns = ({ onOpen, onUpdateStatus, onCancel }) => [
   {
@@ -106,36 +107,33 @@ export const buildOrderColumns = ({ onOpen, onUpdateStatus, onCancel }) => [
       const order = row.original;
       const canCancel = order.status !== "cancelled" && order.status !== "fulfilled";
 
+      const actions = [
+        {
+          key: "view",
+          label: "Ver detalle",
+          icon: Eye,
+          onAction: () => onOpen?.(order),
+        },
+      ];
+
+      if (canCancel) {
+        actions.push({
+          key: "cancel",
+          label: "Cancelar orden",
+          icon: XCircle,
+          onAction: () => onCancel?.(order),
+          danger: true,
+          separatorBefore: true,
+        });
+      }
+
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-(--color-border) hover:bg-(--surface-subtle) focus:outline-none focus:ring-2 focus:ring-(--color-primary1) focus:ring-offset-1"
-              aria-label="Acciones de orden"
-            >
-              <MoreHorizontal className="h-4 w-4 text-(--color-text-muted)" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => onOpen?.(order)}>
-              <Eye className="mr-2 h-4 w-4" />
-              Ver detalle
-            </DropdownMenuItem>
-            {canCancel && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={() => onCancel?.(order)}
-                  className="text-red-600 focus:text-red-600"
-                >
-                  <XCircle className="mr-2 h-4 w-4" />
-                  Cancelar orden
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="px-1 py-2 flex justify-end">
+          <ResponsiveRowActions
+            actions={actions}
+            menuLabel="Acciones de orden"
+          />
+        </div>
       );
     },
   },

@@ -64,7 +64,6 @@ const normalizeIncomingProduct = (payload = {}) => {
     color: payload.color ?? null,
     dimensions: payload.dimensions ?? null,
     weight: payload.weight ?? null,
-    specs: payload.specs ?? null,
     fk_category_id: payload.fk_category_id ?? null,
     createdAt: payload.createdAt ?? null,
     updatedAt: payload.updatedAt ?? null,

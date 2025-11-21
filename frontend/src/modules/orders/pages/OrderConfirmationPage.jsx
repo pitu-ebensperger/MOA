@@ -3,7 +3,8 @@ import { useNavigate, useParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/Button.jsx"
 import { Spinner } from "@/components/ui/Spinner.jsx"
-import { ordersApi } from "@/services/orders.api.js"
+import { getOrderById } from "@/services/checkout.api.js"
+import { API_PATHS } from "@/config/api-paths.js"
 import { formatCurrencyCLP } from "@/utils/currency.js"
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 
@@ -28,9 +29,11 @@ const parseNumber = (value) => {
   if (value === undefined || value === null || value === "") return null
   if (typeof value === "number" && Number.isFinite(value)) return value
 
-  const cleaned = typeof value === "string"
-    ? value.replace(/[^0-9.-]+/g, "")
-    : String(value)
+  const src = typeof value === "string" ? value : String(value)
+  let cleaned = ""
+  for (const ch of src) {
+    if (ch === "." || ch === "-" || (ch >= "0" && ch <= "9")) cleaned += ch
+  }
 
   const parsed = Number(cleaned)
   return Number.isFinite(parsed) ? parsed : null
@@ -108,23 +111,22 @@ const getItemsSubtotal = (items = []) => {
 }
 
 export const OrderConfirmationPage = () => {
-  const { orderCode } = useParams()
+  const { orderId } = useParams()
   const navigate = useNavigate()
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (!orderCode) return
+    if (!orderId) return
     setLoading(true)
     setError("")
 
-    ordersApi
-      .getById(orderCode)
-      .then((data) => setOrder(data))
+    getOrderById(orderId)
+      .then((payload) => setOrder(payload?.data ?? payload))
       .catch((err) => setError(err?.message ?? "No fue posible recuperar la orden"))
       .finally(() => setLoading(false))
-  }, [orderCode])
+  }, [orderId])
 
   const summary = useMemo(() => {
     if (!order) return null
@@ -180,18 +182,18 @@ export const OrderConfirmationPage = () => {
         </div>
 
         {error && (
-          <div className="rounded-2xl border border-[color:var(--color-denial)] bg-[color:var(--overlay-soft)] p-4 text-sm text-[color:var(--color-denial)]">
+          <div className="rounded-2xl border border-(--color-denial) bg-(--overlay-soft) p-4 text-sm text-(--color-denial)">
             {error}
           </div>
         )}
 
-        <section className="rounded-[32px] bg-white shadow-2xl ring-1 ring-neutral-100">
+        <section className="rounded-4xl bg-white shadow-2xl ring-1 ring-neutral-100">
           <div className="overflow-hidden">
-            <div className="flex flex-col gap-3 bg-[color:var(--color-primary1)] px-8 py-8 text-white sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 bg-(--color-primary1) px-8 py-8 text-white sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Orden confirmada</p>
                 <p className="text-2xl font-semibold">{order?.number ?? order?.id ?? "-"}</p>
-                <p className="text-sm">{order?.status ? order.status.replace(/_/g, " ") : "Estado pendiente"}</p>
+                <p className="text-sm">{order?.status ? order.status.replaceAll("_", " ") : "Estado pendiente"}</p>
               </div>
               <div className="space-y-1 text-right">
                 <p className="text-sm text-white/80">Fecha</p>
@@ -258,8 +260,8 @@ export const OrderConfirmationPage = () => {
                     <h2 className="text-lg font-semibold text-(--text-strong)">Seguimiento</h2>
                     <p className="text-sm text-neutral-600 truncate">{trackingNumber ?? "Próximo paso"}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-[color:var(--color-primary1)]/10 px-3 py-1 text-xs font-semibold text-[color:var(--color-primary1)]">
-                        {order?.shipment?.status ? order.shipment.status.replace(/_/g, " ") : "Pendiente"}
+                      <span className="rounded-full bg-(--color-primary1)/10 px-3 py-1 text-xs font-semibold text-(--color-primary1)">
+                        {order?.shipment?.status ? order.shipment.status.replaceAll("_", " ") : "Pendiente"}
                       </span>
                       {order?.shipment?.carrier && (
                         <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
@@ -347,9 +349,17 @@ export const OrderConfirmationPage = () => {
                     appearance="outline"
                     intent="neutral"
                     className="w-full"
-                    onClick={() => window.print()}
+                    onClick={() => globalThis.print()}
                   >
                     Descargar comprobante
+                  </Button>
+                  <Button
+                    appearance="ghost"
+                    intent="neutral"
+                    className="w-full"
+                    onClick={() => navigate(API_PATHS.auth.profile)}
+                  >
+                    Volver a mis compras
                   </Button>
                   <Button
                     appearance="ghost"

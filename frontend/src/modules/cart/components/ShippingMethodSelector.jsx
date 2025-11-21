@@ -28,8 +28,8 @@ export default function ShippingMethodSelector({
 
   return (
     <div className={className}>
-      <Label required className="mb-3 block">
-        Método de despacho
+      <Label required className="mb-3 block normal-case tracking-normal text-sm font-medium text-(--color-primary2)">
+        Método de despacho*
       </Label>
       
       <div className="space-y-3">
@@ -43,7 +43,7 @@ export default function ShippingMethodSelector({
               key={metodo.value}
               className={`cursor-pointer transition-all hover:shadow-md ${
                 isSelected 
-                  ? 'border-2 border-primary shadow-md ring-2 ring-primary/20' 
+                  ? 'border-2 border-(--color-primary1) shadow-md ring-2 ring-(--color-primary1)/20' 
                   : 'border border-(--border)'
               }`}
               onClick={() => handleChange(metodo.value)}
@@ -63,8 +63,8 @@ export default function ShippingMethodSelector({
                   {/* Ícono */}
                   <div className={`rounded-full p-3 ${
                     isSelected 
-                      ? 'bg-primary/10 text-primary' 
-                      : 'bg-gray-100 text-gray-500'
+                      ? 'bg-(--color-primary1)/10 text-(--color-primary1)' 
+                      : 'bg-(--color-lightest) text-(--color-text-muted)'
                   }`}>
                     <IconComponent className="h-6 w-6" />
                   </div>
@@ -75,11 +75,11 @@ export default function ShippingMethodSelector({
                       <div>
                         <label 
                           htmlFor={metodo.value}
-                          className="cursor-pointer font-semibold text-(--text-strong)"
+                          className="cursor-pointer font-semibold text-(--color-primary2)"
                         >
                           {metodo.label}
                         </label>
-                        <p className="mt-1 text-sm text-(--text-weak)">
+                        <p className="mt-1 text-sm text-(--color-text-secondary)">
                           {metodo.descripcion}
                         </p>
                       </div>
@@ -87,7 +87,7 @@ export default function ShippingMethodSelector({
                       {/* Precio */}
                       <div className="text-right">
                         {isFree ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-700">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-(--color-primary4) px-2 py-1 text-xs font-semibold text-(--color-primary1)">
                             <Check className="h-3 w-3" />
                             Gratis
                           </span>
@@ -102,11 +102,11 @@ export default function ShippingMethodSelector({
 
                     {/* Información adicional para retiro */}
                     {metodo.value === 'retiro' && isSelected && (
-                      <div className="mt-3 rounded-lg bg-purple-50 p-3 text-sm">
-                        <p className="font-medium text-purple-900">
+                      <div className="mt-3 rounded-lg bg-(--color-lightest) p-3 text-sm border border-(--border)">
+                        <p className="font-medium text-(--color-primary2)">
                           📍 {metodo.direccion}
                         </p>
-                        <p className="mt-1 text-purple-700">
+                        <p className="mt-1 text-(--color-text-secondary)">
                           🕐 {metodo.horario}
                         </p>
                       </div>
@@ -119,9 +119,9 @@ export default function ShippingMethodSelector({
       </div>
       
       {/* Información adicional */}
-      <div className="mt-4 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+      <div className="mt-4 rounded-lg bg-(--color-text-secondary) p-4 text-sm text-white">
         <p>
-          ℹ️ <strong>Nota:</strong> Los tiempos de entrega son estimados en días hábiles 
+          <strong>Nota:</strong> Los tiempos de entrega son estimados en días hábiles 
           (no incluyen fines de semana). Te notificaremos por email y WhatsApp 
           cuando tu pedido esté listo.
         </p>

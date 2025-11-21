@@ -1,7 +1,4 @@
 import { env } from "@/config/env.js"
-import { mockAuthApi } from "@/mocks/api/auth.js"
-import { mockCartApi } from "@/mocks/api/cart.js"
-import { analyticsData } from "@/mocks/analytics.data.js"
 
 const DEFAULT_TIMEOUT = env.API_TIMEOUT ?? 15000;
 
@@ -24,108 +21,42 @@ const isRawBody =
     (typeof Blob !== "undefined" && data instanceof Blob) ||
     (typeof ArrayBuffer !== "undefined" && data instanceof ArrayBuffer);
 
-// Mock interceptor
-function tryMockRoute(path, method, data) {
-  if (!env.USE_MOCKS) return null;
+// Interceptor de mocks eliminado: todo va contra backend real.
 
-  // Auth routes - corregidas para coincidir con API_PATHS
-  if ((path.includes('/auth/login') || path.includes('/login')) && method === 'POST') {
-    return mockAuthApi.login(data);
+const tryParseJson = (text) => {
+  if (text === undefined || text === null || text === "") {
+    return { ok: true, value: null };
   }
-  if ((path.includes('/auth/register') || path.includes('/registro')) && method === 'POST') {
-    return mockAuthApi.register(data);
+  try {
+    return { ok: true, value: JSON.parse(text) };
+  } catch {
+    return { ok: false, value: text };
   }
-  if (path.includes('/auth/profile') || path.includes('/perfil')) {
-    // Extraer userId de la URL si está disponible
-    const userIdMatch = path.match(/\/perfil\/([^/]+)|\/profile\/([^/]+)/);
-    const userId = userIdMatch?.[1] || userIdMatch?.[2];
-    return mockAuthApi.profile(userId);
-  }
-  if (path.includes('/auth/forgot-password') || path.includes('/olvidaste-contrasena')) {
-    return mockAuthApi.requestPasswordReset(data.email);
-  }
-  if (path.includes('/auth/reset-password') || path.includes('/restablecer-contrasena')) {
-    return mockAuthApi.resetPassword();
-  }
-
-  // Cart routes
-  const cartMatch = path.match(/\/carrito\/([^/]+)/);
-  if (cartMatch) {
-    const userId = cartMatch[1];
-    
-    if (method === 'GET') {
-      return mockCartApi.getCart(userId);
-    }
-    if (path.includes('/items') && method === 'POST') {
-      return mockCartApi.addItem(userId, data);
-    }
-    
-    const itemMatch = path.match(/\/items\/([^/]+)/);
-    if (itemMatch) {
-      const itemId = itemMatch[1];
-      if (method === 'PUT') {
-        return mockCartApi.updateItem(userId, itemId, data.quantity);
-      }
-      if (method === 'DELETE') {
-        return mockCartApi.removeItem(userId, itemId);
-      }
-    }
-    
-    if (method === 'DELETE') {
-      return mockCartApi.clearCart(userId);
-    }
-  }
-
-  // Analytics routes
-  if (path.includes('/admin/analytics/dashboard') && method === 'GET') {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(analyticsData.dashboardMetrics), 300);
-    });
-  }
-  if (path.includes('/admin/analytics/sales') && method === 'GET') {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(analyticsData.salesAnalytics), 350);
-    });
-  }
-  if (path.includes('/admin/analytics/conversion') && method === 'GET') {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(analyticsData.conversionMetrics), 280);
-    });
-  }
-  if (path.includes('/admin/analytics/products/top') && method === 'GET') {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(analyticsData.topProducts), 320);
-    });
-  }
-  if (path.includes('/admin/analytics/categories') && method === 'GET') {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(analyticsData.categoryAnalytics), 290);
-    });
-  }
-  if (path.includes('/admin/analytics/stock') && method === 'GET') {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(analyticsData.stockAnalytics), 250);
-    });
-  }
-  if (path.includes('/admin/analytics/orders/distribution') && method === 'GET') {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(analyticsData.orderDistribution), 310);
-    });
-  }
-
-  return null;
-}
+};
 
 // Petición base (fetch)
-async function request(path, { method = "GET", data, headers = {}, auth = null, timeout = DEFAULT_TIMEOUT } = {}) {
-  // Intentar usar mock primero
-  const mockResult = tryMockRoute(path, method, data);
-  if (mockResult !== null) {
-    return await mockResult;
-  }
+async function request(path, { method = "GET", data, headers = {}, auth = null, timeout = DEFAULT_TIMEOUT, responseType = "json", params } = {}) {
+  // Sin soporte de mocks: siempre solicitar al backend.
 
   const baseURL = env.API_BASE_URL;
   const url = new URL(path, baseURL);
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === undefined || value === null || value === "") {
+        return;
+      }
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          if (item === undefined || item === null) {
+            return;
+          }
+          url.searchParams.append(key, String(item));
+        });
+        return;
+      }
+      url.searchParams.append(key, String(value));
+    });
+  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(new Error("Request timeout")), timeout);
@@ -162,6 +93,7 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
       /\/orders/,
       /\/usuario/,
       /\/user/,
+      /\/checkout/, // agregar checkout para ordenes
     ];
     
     auth = authRequiredPatterns.some(pattern => pattern.test(path));
@@ -170,7 +102,13 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
   // Authorization si es cliente privado
   if (auth) {
     const token = tokenGetter?.();
-    if (token) opts.headers.Authorization = `Bearer ${token}`;
+    console.log('[api-client] Token usado para Authorization:', token);
+    if (token && typeof token === 'string' && token.length > 0) {
+      opts.headers.Authorization = `Bearer ${token}`;
+      console.log('[api-client] Header Authorization:', opts.headers.Authorization);
+    } else {
+      console.warn('[api-client] No se envió el token en Authorization. Token:', token);
+    }
   }
 
   let res;
@@ -183,13 +121,23 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
   // 204 No Content
   if (res.status === 204) return null;
 
-  // Parse seguro
-  const text = await res.text();
   let payload;
-  try {
-    payload = text ? JSON.parse(text) : null;
-  } catch {
-    payload = text;
+  let rawText = "";
+  let parsedJson = null;
+
+  if (responseType === "blob") {
+    const clone = res.clone();
+    payload = await res.blob();
+    rawText = await clone.text();
+    parsedJson = tryParseJson(rawText);
+  } else {
+    rawText = await res.text();
+    parsedJson = tryParseJson(rawText);
+    if (responseType === "text") {
+      payload = rawText;
+    } else {
+      payload = parsedJson.ok ? parsedJson.value : rawText;
+    }
   }
 
   // 401 → dispara handler global (logout) si existe
@@ -202,9 +150,13 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
   }
 
   if (!res.ok) {
-    const err = new Error(payload?.message || `HTTP ${res.status}`);
+    const errorData = parsedJson?.ok ? parsedJson.value : rawText;
+    const message = parsedJson?.ok && parsedJson.value?.message
+      ? parsedJson.value.message
+      : rawText || `HTTP ${res.status}`;
+    const err = new Error(message);
     err.status = res.status;
-    err.data = payload;
+    err.data = errorData;
     throw err;
   }
 

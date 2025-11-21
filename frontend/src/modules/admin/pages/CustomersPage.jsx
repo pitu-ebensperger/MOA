@@ -8,8 +8,7 @@ import { TableToolbar, TableSearch, FilterTags } from "../../../components/data-
 import { Button, IconButton } from "@/components/ui/Button.jsx"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../components/ui/radix/DropdownMenu.jsx";
 import { USER_STATUS_MAP } from "@/config/status-maps.js";
-import { usersDb } from "@/mocks/database/users.js"
-import { ordersDb } from "@/mocks/database/orders.js"
+import { ordersAdminApi } from "@/services/ordersAdmin.api.js"
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";
@@ -18,6 +17,7 @@ import { Input } from "@/components/ui/Input.jsx";
 import { Pagination } from "@/components/ui/Pagination.jsx";
 import { customersAdminApi } from "@/services/customersAdmin.api.js";
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
+import { ResponsiveRowActions } from "@/components/ui/ResponsiveRowActions.jsx";
 
 const USER_STATUS_OPTIONS = [
   { value: "", label: "Todos los estados" },
@@ -88,24 +88,20 @@ export default function CustomersPage() {
   const pageSize = customersData?.pageSize ?? limit;
   const pageCount = Math.max(1, Math.ceil(totalCustomers / pageSize));
 
-  // Helper para cargar una orden completa con sus relaciones
-  const loadFullOrder = (order) => {
-    const items = ordersDb.orderItems.filter((item) => item.orderId === order.id);
-    const payment = ordersDb.payments.find((p) => p.id === order.paymentId);
-    const shipment = ordersDb.shipping.find((s) => s.id === order.shipmentId);
-    const address = usersDb.addresses.find((a) => a.id === order.addressId);
-    const user = usersDb.users.find((u) => u.id === order.userId);
-
-    return {
-      ...order,
-      items,
-      payment,
-      shipment,
-      address,
-      userName: user ? `${user.firstName} ${user.lastName}` : "—",
-      userEmail: user?.email ?? "—",
-      userPhone: user?.phone ?? "—",
-    };
+  // Cargar orden completa desde backend cuando se solicita
+  const loadFullOrder = async (order) => {
+    try {
+      const data = await ordersAdminApi.getById(order.id);
+      return {
+        ...data,
+        userName: data.userName || data.nombre_cliente || data.cliente_nombre || "—",
+        userEmail: data.userEmail || data.email_cliente || data.cliente_email || "—",
+        userPhone: data.userPhone || data.telefono_cliente || data.cliente_telefono || "—",
+      };
+    } catch (err) {
+      console.error("Error cargando orden", err);
+      return { ...order };
+    }
   };
 
   const resetNewCustomerForm = useCallback(() => {
@@ -165,10 +161,10 @@ export default function CustomersPage() {
     refetchCustomers();
   }, [refetchCustomers]);
 
-  const handleViewOrder = (order) => {
-    const fullOrder = loadFullOrder(order);
+  const handleViewOrder = async (order) => {
     const customer = selectedCustomer;
     setBreadcrumb(customer ? customer.nombre : null);
+    const fullOrder = await loadFullOrder(order);
     setSelectedOrder(fullOrder);
   };
 
@@ -186,17 +182,6 @@ export default function CustomersPage() {
     if (!statusFilter) return enhancedCustomers;
     return enhancedCustomers.filter((customer) => customer.status === statusFilter);
   }, [enhancedCustomers, statusFilter]);
-
-  const customerOrders = useMemo(() => {
-    const ordersMap = {};
-    for (const order of ordersDb.orders) {
-      if (!ordersMap[order.userId]) {
-        ordersMap[order.userId] = 0;
-      }
-      ordersMap[order.userId]++;
-    }
-    return ordersMap;
-  }, []);
 
   const handleStatusChange = useCallback(
     async (customerId, newStatus) => {
@@ -288,7 +273,9 @@ export default function CustomersPage() {
         enableSorting: true,
         cell: ({ row }) => {
           const customer = row.original;
-          const orderCount = customerOrders[customer.id] || 0;
+          const orderCount = Number.isFinite(customer.orderCount)
+            ? customer.orderCount
+            : 0;
           return (
             <div className="flex items-center gap-1 px-1 py-2 text-sm">
               <ShoppingBag className="h-3.5 w-3.5 text-(--text-weak)" />
@@ -391,56 +378,45 @@ export default function CustomersPage() {
         cell: ({ row }) => {
           const customer = row.original;
           return (
-            <div className="flex items-center justify-end px-1 py-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    appearance="ghost"
-                    intent="neutral"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    aria-label={`Acciones para ${customer.nombre}`}
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      setSelectedCustomer(customer);
-                    }}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    Ver perfil
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      handleOpenEditDialog(customer);
-                    }}
-                  >
-                    <Edit3 className="mr-2 h-4 w-4" />
-                    Editar
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onSelect={() => {
+            <div className="px-1 py-2 flex justify-end">
+              <ResponsiveRowActions
+                actions={(() => {
+                  const customerActions = [
+                    {
+                      key: "view",
+                      label: "Ver perfil",
+                      icon: Eye,
+                      onAction: () => setSelectedCustomer(customer),
+                    },
+                    {
+                      key: "edit",
+                      label: "Editar",
+                      icon: Edit3,
+                      onAction: () => handleOpenEditDialog(customer),
+                    },
+                  ];
+                  customerActions.push({
+                    key: "disable",
+                    label: "Desactivar",
+                    icon: Ban,
+                    danger: true,
+                    separatorBefore: true,
+                    onAction: () => {
                       if (confirm(`¿Desactivar a ${customer.nombre}?`)) {
                         handleStatusChange(customer.id, "suspendido");
                       }
-                    }}
-                    className="text-(--color-error)"
-                  >
-                    <Ban className="mr-2 h-4 w-4" />
-                    Desactivar
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    },
+                  });
+                  return customerActions;
+                })()}
+                menuLabel={`Acciones para ${customer.nombre}`}
+              />
             </div>
           );
         },
       },
     ],
-    [customerOrders, handleStatusFilter, statusFilter, handleOpenEditDialog, handleStatusChange]
+    [handleStatusFilter, statusFilter, handleOpenEditDialog, handleStatusChange]
   );
 
   const activeStatusTags = useMemo(() => {
@@ -544,7 +520,10 @@ export default function CustomersPage() {
           {/* Grid View */}
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredCustomers.map((customer) => {
-              const orderCount = customerOrders[customer.id] || 0;
+              const orderCount =
+                Number.isFinite(customer.orderCount)
+                  ? customer.orderCount
+                  : Number(customer.orderCount ?? customer.orders?.length ?? 0) || 0;
               return (
                 <div
                   key={customer.id}

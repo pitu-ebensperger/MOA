@@ -1,36 +1,8 @@
 import { apiClient } from '@/services/api-client.js'
 
-/**
-import { apiClient } from "./api-client.js";
-
-export const cartApi = {
-  async getCart() {
-    return apiClient.private.get("/cart");
-  },
-
-  async addToCart(productId, cantidad = 1) {
-    return apiClient.private.post("/cart/add", {
-      producto_id: productId,
-      cantidad,
-    });
-  },
-
-  async removeFromCart(productId) {
-    return apiClient.private.delete(`/cart/remove/${productId}`);
-  },
-
-  async updateQuantity(productId, cantidad) {
-    return apiClient.private.patch("/cart/update", {
-      producto_id: productId,
-      cantidad,
-    });
-  },
-
-  async clearCart() {
-    return apiClient.private.delete("/cart/clear");
-  },
-};
- */
+// Nota: Se migró de métodos getCart/addToCart/etc. a get/add/remove/updateQuantity/clear.
+// Para mantener compatibilidad con código legacy (evitar TypeError en builds antiguos)
+// se añaden alias luego de definir el objeto principal.
 export const cartApi = {
   /*GET /cart*/
   get: async () => {
@@ -105,7 +77,15 @@ export const cartApi = {
   }
 }
 
-// Exports individuales opcionales
+// Compatibilidad retroactiva (para código que aún llama cartApi.getCart / addToCart / etc.)
+// Evita TypeError: cartApi.getCart is not a function
+cartApi.getCart = cartApi.get
+cartApi.addToCart = cartApi.add
+cartApi.removeFromCart = cartApi.remove
+cartApi.clearCart = cartApi.clear
+cartApi.updateCartItemQuantity = cartApi.updateQuantity
+
+// Exports individuales (manteniendo ambos nombres)
 export const getCart = cartApi.get
 export const addToCart = cartApi.add
 export const removeFromCart = cartApi.remove

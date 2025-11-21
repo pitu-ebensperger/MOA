@@ -1,13 +1,8 @@
-import { env } from "@/config/env.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { apiClient } from "@/services/api-client.js"
-import { delay } from "@/utils/delay.js"
 import { buildQueryString } from "@/utils/https.js"
 import { toNum } from "@/utils/number.js"
 import { paginate } from "@/utils/pagination.js"
-
-import { usersDb } from "@/mocks/database/users.js"
-import { ordersDb } from "@/mocks/database/orders.js"
 
 
 
@@ -44,170 +39,6 @@ const normalizeOrder = (raw = {}, extra = {}) => {
   };
 };
 
-/* Implentacion Mock ----------------------------------------------------------------------------------------------- */
-
-function buildMockOrderView(order) {
-  const items = ordersDb.orderItems.filter((it) => it.orderId === order.id);
-  const payment = ordersDb.payments.find((p) => p.id === order.paymentId) ?? null;
-  const shipment = ordersDb.shipping.find((s) => s.id === order.shipmentId) ?? null;
-  const user =
-    (usersDb?.users ?? []).find(
-      (u) => String(u.id) === String(order.userId ?? ""),
-    ) ?? null;
-  const addressDirect = (usersDb?.addresses ?? []).find(
-    (a) => String(a.id) === String(order.addressId ?? ""),
-  ) ?? null;
-  const userDefaultAddress = (usersDb?.addresses ?? []).find(
-    (a) => String(a.userId) === String(order.userId ?? "") && a.isDefault,
-  ) ?? null;
-
-  const userName = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || null
-    : null;
-  const userEmail = user?.email ?? null;
-
-  // Si quieres luego conectar con usersDb
-  const extra = {
-    items,
-    payment,
-    shipment,
-    address: addressDirect ?? userDefaultAddress ?? null,
-    userName,
-    userEmail,
-  };
-
-  return normalizeOrder(order, extra);
-}
-
-const mockOrdersApi = {
-  async list({ page = 1, limit = 20, status, q }) {
-    await delay();
-
-    let list = [...ordersDb.orders];
-
-    /* Filtrar por status */
-    if (status) {
-      const s = String(status).toLowerCase();
-      list = list.filter((o) => String(o.status).toLowerCase() === s);
-    }
-
-    /* Búsqueda */
-    if (q) {
-      const text = String(q).toLowerCase();
-      list = list.filter((o) => {
-        const haystack = [
-          o.number,
-          o.id,
-          o.userId,
-          o.userName,
-          o.userEmail,
-        ]
-          .filter(Boolean)
-          .map((x) => String(x).toLowerCase())
-          .join(" ");
-
-        return haystack.includes(text);
-      });
-    }
-
-    /* Orden por fecha (más reciente primero) */
-    list.sort(
-      (a, b) =>
-        new Date(b.createdAt ?? 0).getTime() -
-        new Date(a.createdAt ?? 0).getTime()
-    );
-
-    const {
-      items: pageItems,
-      total,
-      totalPages,
-      page: pageInfo,
-    } = paginate(list, { page, limit });
-
-    const items = pageItems.map(buildMockOrderView);
-
-    return {
-      items,
-      total,
-      totalPages,
-      page: pageInfo,
-    };
-  },
-
-  async getById(id) {
-    if (!id) throw new Error("order id is required");
-
-    await delay();
-
-    const strId = String(id);
-    const found =
-      ordersDb.orders.find(
-        (o) => String(o.id) === strId || String(o.number) === strId
-      ) ?? null;
-
-    if (!found) {
-      const err = new Error("Order not found");
-      err.status = 404;
-      throw err;
-    }
-
-    return buildMockOrderView(found);
-  },
-
-  async cancel(id) {
-    if (!id) throw new Error("order id is required");
-
-    await delay();
-
-    const idx = ordersDb.orders.findIndex(
-      (o) => String(o.id) === String(id) || String(o.number) === String(id),
-    );
-
-    if (idx === -1) {
-      const err = new Error("Order not found");
-      err.status = 404;
-      throw err;
-    }
-
-    const updated = {
-      ...ordersDb.orders[idx],
-      status: "cancelled",
-      updatedAt: new Date().toISOString(),
-    };
-
-    ordersDb.orders[idx] = updated;
-
-    return buildMockOrderView(updated);
-  },
-
-  async updateStatus(id, status) {
-    if (!id) throw new Error("order id is required");
-    if (!status) throw new Error("status is required");
-
-    await delay();
-
-    const idx = ordersDb.orders.findIndex(
-      (o) => String(o.id) === String(id) || String(o.number) === String(id),
-    );
-
-    if (idx === -1) {
-      const err = new Error("Order not found");
-      err.status = 404;
-      throw err;
-    }
-
-    const updated = {
-      ...ordersDb.orders[idx],
-      status,
-      updatedAt: new Date().toISOString(),
-    };
-
-    ordersDb.orders[idx] = updated;
-
-    return buildMockOrderView(updated);
-  },
-
-};
 
 /* Remote implementation --------------------------------------------------------------------------------------------- */
 
@@ -267,4 +98,4 @@ const remoteOrdersApi = {
 
 /* Export ------------------------------------------------------------------------------------------------------------ */
 
-export const ordersApi = env.USE_MOCKS ? mockOrdersApi : remoteOrdersApi;
+export const ordersApi = remoteOrdersApi;

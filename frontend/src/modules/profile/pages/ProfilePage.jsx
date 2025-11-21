@@ -13,7 +13,7 @@ export const ProfilePage = () => {
   useEffect(() => {
     if (!token) return;
 
-    wishlistApi.getWishlist()
+    wishlistApi.get()
       .then(data => {
         console.log("Wishlist cargada:", data);
         setWishlistItems(data.items || []);
@@ -28,20 +28,22 @@ export const ProfilePage = () => {
   } = useUserOrders({ limit: 4 });
 
   return (
-    <div>
-      <UserInfoSection />
+    <div className="page min-h-screen bg-page">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+        <UserInfoSection />
 
-      <WishlistSection 
-        products={wishlistItems} 
-        isLoading={isLoading} 
-        error={error} 
-      />
+        <WishlistSection 
+          products={wishlistItems} 
+          isLoading={isLoading} 
+          error={error} 
+        />
 
-      <OrderSection 
-        orders={orders} 
-        isLoading={isLoading} 
-        error={error} 
-      />
+        <OrderSection 
+          orders={orders} 
+          isLoading={isLoading} 
+          error={error} 
+        />
+      </div>
     </div>
   );
 };

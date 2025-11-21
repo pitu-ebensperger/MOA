@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useAuth } from "@/context/auth-context.js"
 import { cartApi } from "@/services/cart.api.js"
+import { API_PATHS } from "@/config/api-paths.js"
+import { alertAuthRequired } from '@/utils/alerts.js'
+import { productsApi } from "@/services/products.api.js"
 
 const CART_STORAGE_KEY = "cart";
 
@@ -17,7 +20,9 @@ export const useCart = () => {
 
   const ensureAuthenticated = () => {
     if (isSessionReady) return true;
-    alert("Debes iniciar sesión y esperar a que tu sesión se confirme para usar el carrito");
+    alertAuthRequired().then(() => {
+      window.location.assign(API_PATHS.auth.login);
+    });
     return false;
   };
 
@@ -30,20 +35,40 @@ export const useCart = () => {
 
   useEffect(() => {
     if (!isSessionReady) {
+        console.log('[useCart] Session not ready, clearing cart');
       setCartItems([]);
       return;
     }
 
     let cancelled = false;
+  console.log('[useCart] Loading cart from API...');
 
     (async () => {
       try {
-        const data = await cartApi.getCart();
+        const data = await cartApi.get();
+          console.log('[useCart] Cart data received:', data);
         if (cancelled) return;
 
         if (Array.isArray(data?.items)) {
           const normalized = data.items.map(normalizeCartItem);
-          setCartItems(normalized);
+          // Enriquecer con detalles de producto si faltan name/img
+          const enriched = [];
+          for (const item of normalized) {
+            if (cancelled) break;
+            const hasBasicData = item.name && item.imgUrl;
+            if (hasBasicData) {
+              enriched.push(item);
+              continue;
+            }
+            try {
+              const productDetail = await productsApi.getById(item.id);
+              enriched.push({ ...item, ...productDetail });
+            } catch (e) {
+              console.warn('[useCart] Failed to enrich item id', item.id, e);
+              enriched.push(item); // fallback
+            }
+          }
+          setCartItems(enriched);
         }
       } catch (err) {
         console.error("Error cargando carrito:", err);
@@ -58,23 +83,28 @@ export const useCart = () => {
   const addToCart = async (product) => {
     if (!ensureAuthenticated()) return;
     const productId = product?.id ?? product?.producto_id;
+      console.log('[useCart] addToCart called with product:', product, 'productId:', productId);
     if (!productId) return;
 
     try {
-      const response = await cartApi.addToCart(productId, 1);
+      const response = await cartApi.add(productId, 1);
+        console.log('[useCart] API response:', response);
       const normalized = response?.item ? normalizeCartItem(response.item) : null;
+  console.log('[useCart] Normalized item:', normalized);
 
       setCartItems((prevCart) => {
         const existing = prevCart.find((item) => item.id === productId);
         if (normalized && existing) {
           return prevCart.map((item) =>
             item.id === productId
-              ? { ...item, quantity: normalized.quantity }
+              ? { ...item, quantity: normalized.quantity, name: item.name || product.name, imgUrl: item.imgUrl || product.imgUrl }
               : item
           );
         }
 
-        const baseItem = normalized ?? { ...product, id: productId, quantity: 1 };
+        const baseItem = normalized
+          ? { ...normalized, name: normalized.name || product.name, imgUrl: normalized.imgUrl || product.imgUrl, slug: normalized.slug || product.slug }
+          : { ...product, id: productId, quantity: 1 };
         if (existing) {
           return prevCart.map((item) =>
             item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
@@ -89,7 +119,7 @@ export const useCart = () => {
 
   const executeRemoveFromCart = async (productId) => {
     try {
-      await cartApi.removeFromCart(productId);
+      await cartApi.remove(productId);
       setCartItems((prevCart) =>
         prevCart.filter((item) => item.id !== productId)
       );
@@ -132,7 +162,7 @@ export const useCart = () => {
   const clearCart = async () => {
     if (!ensureAuthenticated()) return;
     try {
-      await cartApi.clearCart();
+      await cartApi.clear();
       setCartItems([]);
     } catch (err) {
       console.error("Error clearCart:", err);

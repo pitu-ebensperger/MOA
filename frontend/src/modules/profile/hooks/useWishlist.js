@@ -22,6 +22,7 @@ export const useWishlist = () => {
 
   useEffect(() => {
     if (!isSessionReady) {
+        console.log('[useWishlist] Session not ready, clearing wishlist');
       setWishlist([]);
       setIsLoading(false);
       return;
@@ -29,10 +30,12 @@ export const useWishlist = () => {
 
     let cancelled = false;
     setIsLoading(true);
+  console.log('[useWishlist] Loading wishlist from API...');
 
     (async () => {
       try {
-        const data = await wishlistApi.getWishlist();
+        const data = await wishlistApi.get();
+          console.log('[useWishlist] Wishlist data received:', data);
         if (cancelled) return;
         const items = Array.isArray(data?.items) ? data.items : [];
         setWishlist(items);
@@ -51,10 +54,12 @@ export const useWishlist = () => {
   const addToWishlist = async (product) => {
     if (!ensureAuthenticated()) return;
     const productId = product?.id ?? product?.producto_id;
+      console.log('[useWishlist] addToWishlist called with product:', product, 'productId:', productId);
     if (!productId) return;
 
     try {
-      await wishlistApi.addToWishlist(productId);
+      const response = await wishlistApi.add(productId);
+      console.log('[useWishlist] API response:', response);
       setWishlist((prev) => [...prev, { producto_id: productId, ...product }]);
     } catch (error) {
       console.error("Error wishlist add:", error);
@@ -65,12 +70,14 @@ export const useWishlist = () => {
     if (!ensureAuthenticated()) return;
 
     try {
-      await wishlistApi.removeFromWishlist(productId);
-      setWishlist((prev) =>
-        prev.filter(
-          (item) => item.producto_id !== productId && item.id !== productId
-        )
-      );
+      await wishlistApi.remove(productId);
+      setWishlist((prev) => {
+        const pid = String(productId);
+        return prev.filter((item) => {
+          const itemId = String(item.producto_id ?? item.id);
+          return itemId !== pid;
+        });
+      });
     } catch (error) {
       console.error("Error wishlist remove:", error);
     }

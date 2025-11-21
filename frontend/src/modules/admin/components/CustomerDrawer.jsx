@@ -5,8 +5,7 @@ import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { Price } from "@/components/data-display/Price.jsx"
 import { Mail, Phone, Calendar, MapPin, ShoppingBag, Package } from "lucide-react";
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
-import { ordersDb } from "@/mocks/database/orders.js"
-import { usersDb } from "@/mocks/database/users.js"
+import { ordersAdminApi } from "@/services/ordersAdmin.api.js"
 import { UserShape } from "@/utils/propTypes.js";
 
 const safeText = (v) => (v == null || v === "" ? "–" : v);
@@ -56,11 +55,32 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
   const fullName = (firstName + " " + lastName).trim() || "Cliente";
 
   // Hooks (si no hay id retornan arrays vacíos, mantener orden estable)
-  const customerOrders = useMemo(() => {
-    if (!id) return [];
-    return ordersDb.orders
-      .filter((order) => order.userId === id)
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const [customerOrders, setCustomerOrders] = React.useState([]);
+
+  React.useEffect(() => {
+    let active = true;
+    async function fetchOrders() {
+      if (!id) {
+        setCustomerOrders([]);
+        return;
+      }
+      try {
+        // Pedimos un page grande para filtrar en memoria (hasta que exista endpoint por usuario)
+        const data = await ordersAdminApi.getAll({ page: 1, limit: 200 });
+        const rawItems = data?.items || data?.data?.items || [];
+        const filtered = rawItems.filter((o) => {
+          const uid = o.userId || o.usuario_id || o.user_id;
+          return String(uid) === String(id);
+        });
+        filtered.sort((a, b) => new Date(b.createdAt || b.creado_en || 0) - new Date(a.createdAt || a.creado_en || 0));
+        if (active) setCustomerOrders(filtered);
+      } catch (err) {
+        console.error("Error cargando órdenes del cliente", err);
+        if (active) setCustomerOrders([]);
+      }
+    }
+    fetchOrders();
+    return () => { active = false; };
   }, [id]);
 
   const totalSpent = useMemo(() => {
@@ -74,9 +94,18 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
   }, [id, customerOrders]);
 
   const customerAddresses = useMemo(() => {
-    if (!id) return [];
-    return usersDb.addresses.filter((addr) => addr.userId === id);
-  }, [id]);
+    // Derivar direcciones únicas desde las órdenes cargadas
+    const list = [];
+    const seen = new Set();
+    for (const o of customerOrders) {
+      const addr = o.address || o.direccion || null;
+      if (addr && addr.id && !seen.has(addr.id)) {
+        seen.add(addr.id);
+        list.push(addr);
+      }
+    }
+    return list;
+  }, [customerOrders]);
 
   // Early return AFTER hooks (evita warning de hooks condicionales)
   if (!open || !customer) return null;
@@ -179,7 +208,7 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
                         </div>
                       )}
                       {customerOrders.map((order) => {
-                        const itemsCount = ordersDb.orderItems.filter((item) => item.orderId === order.id).length;
+                        const itemsCount = Array.isArray(order.items) ? order.items.length : (order.items_count || order.total_items || 0);
                         return (
                           <button
                             key={order.id}

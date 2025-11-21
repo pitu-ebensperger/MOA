@@ -37,26 +37,44 @@ const createOrder = async (orderData) => {
     const {
       usuario_id,
       items, // Array de { producto_id, cantidad, precio_unit }
+      direccion_id,
+      metodo_despacho = 'standard',
+      metodo_pago = 'transferencia',
+      subtotal_cents = 0,
+      envio_cents = 0,
       total_cents,
+      notas_cliente,
     } = orderData;
 
     // Generar código de orden
     const order_code = await generateOrderCode();
 
-    // Crear orden (solo columnas que existen en DDL actual)
+    // Crear orden con campos disponibles en DDL
     const insertOrderQuery = `
       INSERT INTO ordenes (
         order_code,
         usuario_id,
-        total_cents
-      ) VALUES ($1, $2, $3)
+        direccion_id,
+        metodo_despacho,
+        metodo_pago,
+        subtotal_cents,
+        envio_cents,
+        total_cents,
+        notas_cliente
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
 
     const { rows: [orden] } = await client.query(insertOrderQuery, [
       order_code,
       usuario_id,
+      direccion_id,
+      metodo_despacho,
+      metodo_pago,
+      subtotal_cents,
+      envio_cents,
       total_cents,
+      notas_cliente,
     ]);
 
     // Insertar items de la orden

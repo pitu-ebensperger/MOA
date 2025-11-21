@@ -14,7 +14,7 @@ const navItems = [
 export default function AdminSidebar() {
   const location = useLocation();
   return (
-    <aside className="bg-moa-neutral-100 w-64 h-full p-6 flex flex-col border-r border-moa-neutral-200">
+    <aside className="fixed inset-y-0 left-0 w-64 bg-moa-neutral-100 p-6 flex flex-col border-r border-moa-neutral-200 overflow-y-auto">
       <h2 className="text-xl font-bold mb-8 text-moa-primary">Admin Panel</h2>
       <nav className="flex flex-col gap-4">
         {navItems.map((item) => (

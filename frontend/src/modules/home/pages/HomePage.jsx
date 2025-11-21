@@ -2,9 +2,11 @@ import ContactSection from "@/modules/home/components/ContactSection.jsx"
 import HeroSection from "@/modules/home/components/HeroSection.jsx"
 import ProductsSection from "@/modules/home/components/ProductsSection.jsx"
 import { useHomeLanding } from "@/modules/home/hooks/useHomeLanding.js"
+import { useCart } from "@/modules/cart/hooks/useCart.js"
 
 export const HomePage = () => {
   const { home, isLoading, error } = useHomeLanding();
+  const { addToCart } = useCart();
   console.log('--------');
   console.log(home)
   console.log('--------');
@@ -24,7 +26,11 @@ export const HomePage = () => {
                 No pudimos cargar los productos. Intenta nuevamente en unos minutos.
               </div>
             )}
-            <ProductsSection categories={categories} products={featuredProducts} />
+            <ProductsSection
+              categories={categories}
+              products={featuredProducts}
+              onAddToCart={addToCart}
+            />
             {isLoading && (
               <div className="mt-6 text-center text-sm text-neutral-500">
                 Cargando piezas curadas para ti…
