@@ -86,14 +86,14 @@ function applyBleedToStyle(inlineStyle = {}, bleed) {
         .map((entry) => entry.trim())
         .filter(Boolean);
 
-  entries.forEach((entry) => {
+  for (const entry of entries) {
     const key = entry.toLowerCase();
     const directions = BLEED_MAP[key];
-    if (!directions) return;
-    directions.forEach((prop) => {
+    if (!directions) continue;
+    for (const prop of directions) {
       style[prop] = `calc(${BLEED_VALUE} * -1)`;
-    });
-  });
+    }
+  }
 
   return style;
 }

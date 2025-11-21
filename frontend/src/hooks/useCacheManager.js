@@ -8,7 +8,7 @@ export const useCacheManager = () => {
   const queryClient = useQueryClient();
 
   return {
-    // Invalidar todo
+    // Invalidar todas las queries del cache
     invalidateAll: () => {
       queryClient.invalidateQueries();
     },
@@ -53,7 +53,7 @@ export const useCacheManager = () => {
       queryClient.setQueryData(QUERY_KEYS.wishlist, []);
     },
 
-    // Limpiar todo el cache (útil al logout)
+    // Limpiar todo el cache de React Query (ejecutar al logout del usuario)
     clearAll: () => {
       queryClient.clear();
     },
@@ -151,7 +151,7 @@ export const useQueryDebug = () => {
     logCache: () => {
       console.group('🔍 React Query Cache');
       const cache = queryClient.getQueryCache().getAll();
-      cache.forEach(query => {
+      for (const query of cache) {
         console.log({
           queryKey: query.queryKey,
           state: query.state,
@@ -159,7 +159,7 @@ export const useQueryDebug = () => {
           isStale: query.isStale(),
           isFetching: query.state.fetchStatus === 'fetching',
         });
-      });
+      }
       console.groupEnd();
     },
     

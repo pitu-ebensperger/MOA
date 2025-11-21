@@ -169,7 +169,9 @@ export function useAdminDashboard() {
 
   // Refetch all data
   const refetchAll = () => {
-    queries.forEach(query => query.refetch());
+    for (const query of queries) {
+      query.refetch();
+    }
   };
 
   return {

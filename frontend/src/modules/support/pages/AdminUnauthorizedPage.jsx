@@ -23,11 +23,11 @@ export default function AdminUnauthorizedPage({ type = "auth", state }) {
   const message = MESSAGES[type] ?? MESSAGES.auth;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[color:var(--color-neutral1)] px-4 py-16">
-      <section className="w-full max-w-2xl rounded-3xl border border-[color:var(--color-border)] bg-white p-10 text-center shadow-[var(--shadow-high)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[color:var(--text-muted)]">Acceso restringido</p>
+    <div className="min-h-screen flex items-center justify-center bg-(--color-neutral1) px-4 py-16">
+      <section className="w-full max-w-2xl rounded-3xl border border-(--color-border) bg-white p-10 text-center shadow-[var(--shadow-high)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.4em] text-(--text-muted)">Acceso restringido</p>
         <h1 className="mt-3 text-3xl font-semibold text-(--text-strong)">{message.title}</h1>
-        <p className="mt-4 text-base text-[color:var(--text-secondary1)] leading-relaxed">
+        <p className="mt-4 text-base text-(--text-secondary1) leading-relaxed">
           {message.description}
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">

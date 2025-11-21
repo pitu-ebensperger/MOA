@@ -1,4 +1,3 @@
-//path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
 import React from "react";
 import { Plus, RefreshCw, Download, FileSpreadsheet, FileText, ChevronDown } from "@icons/lucide";
 

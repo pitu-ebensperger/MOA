@@ -89,7 +89,7 @@ export function AddressSelector({ onSelect, className = '' }) {
       <Card className="bg-(--color-lightest)/60">
         <CardContent className="p-4">
           {loading && <p className="text-xs text-(--color-text-muted)">Cargando direcciones…</p>}
-          {error && <p className="text-xs text-[color:var(--color-error)]">{error}</p>}
+          {error && <p className="text-xs text-(--color-error)">{error}</p>}
 
           {!loading && mode === 'lista' && (
             <div className="space-y-2">

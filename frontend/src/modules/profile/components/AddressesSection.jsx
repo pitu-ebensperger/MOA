@@ -55,6 +55,7 @@ const addressShape = PropTypes.shape({
   region: PropTypes.string,
   codigo_postal: PropTypes.string,
   referencia: PropTypes.string,
+  etiqueta: PropTypes.string,
   predeterminada: PropTypes.bool,
 });
 

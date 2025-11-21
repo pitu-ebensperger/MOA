@@ -85,7 +85,7 @@ export function SearchBar({
           ref={inputRef}
           type="search"
           placeholder={placeholder}
-          className="w-full border-none bg-transparent text-base text-neutral-700 placeholder:text-neutral-400 focus:outline-none"
+          className="w-full border-none bg-transparent text-base text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-0 active:outline-none active:ring-0"
           value={value}
           onChange={onChange}
         />

@@ -129,12 +129,12 @@ ${errorInfo?.componentStack || 'No disponible'}
             </div>
 
             {/* Título */}
-            <h1 className="text-2xl font-bold text-[#443114] mb-4">
+            <h1 className="text-2xl font-bold text-primary mb-4">
               ¡Ups! Algo salió mal
             </h1>
 
             {/* Descripción */}
-            <p className="text-[#6B5B47] mb-6 leading-relaxed">
+            <p className="text-primary mb-6 leading-relaxed">
               Ha ocurrido un error inesperado en la aplicación. 
               Nuestro equipo ha sido notificado automáticamente.
             </p>

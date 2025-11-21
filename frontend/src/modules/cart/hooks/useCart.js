@@ -7,6 +7,9 @@ import { alertAuthRequired, alertError } from '@/utils/alerts.js'
 import { productsApi } from "@/services/products.api.js"
 
 const CART_STORAGE_KEY = "cart";
+const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true' || import.meta.env?.MODE === 'development';
+const debugWarn = (...args) => { if (DEBUG_LOGS) console.warn(...args); };
+const debugError = (...args) => { if (DEBUG_LOGS) console.error(...args); };
 
 export const useCart = () => {
   const { token, status } = useAuth();
@@ -38,7 +41,6 @@ export const useCart = () => {
   useEffect(() => {
     return () => {
       setIsDrawerOpen(false);
-      console.log('[useCart] Componente desmontado, drawer cerrado');
     };
   }, []);
 
@@ -49,9 +51,8 @@ export const useCart = () => {
       // Limpiar localStorage explícitamente si no hay sesión
       try {
         localStorage.removeItem(CART_STORAGE_KEY);
-        console.log('[useCart] Carrito limpiado (sin sesión), items:', 0);
       } catch (e) {
-        console.warn('[useCart] No se pudo limpiar carrito del storage', e);
+        debugWarn('[useCart] No se pudo limpiar carrito del storage', e);
       }
       return;
     }
@@ -78,14 +79,14 @@ export const useCart = () => {
               const productDetail = await productsApi.getById(item.id);
               enriched.push({ ...item, ...productDetail });
             } catch (e) {
-              console.warn('[useCart] Failed to enrich item id', item.id, e);
+              debugWarn('[useCart] Failed to enrich item id', item.id, e);
               enriched.push(item); // fallback
             }
           }
           setCartItems(enriched);
         }
       } catch (err) {
-        console.error("Error cargando carrito:", err);
+        debugError("Error cargando carrito:", err);
       }
     })();
 
@@ -98,17 +99,15 @@ export const useCart = () => {
     if (!ensureAuthenticated()) return;
     const productId = product?.id ?? product?.producto_id;
     if (!productId) {
-      console.warn('[useCart] addToCart: productId inválido', product);
+      debugWarn('[useCart] addToCart: productId inválido', product);
       return;
     }
 
-    console.log('[useCart] addToCart iniciado, productId:', productId);
     try {
       const response = await cartApi.add(productId, 1);
       const normalized = response?.item ? normalizeCartItem(response.item) : null;
 
       setCartItems((prevCart) => {
-        console.log('[useCart] Actualizando carrito, prevCart.length:', prevCart.length);
         const existing = prevCart.find((item) => item.id === productId);
         
         if (normalized && existing) {
@@ -117,7 +116,6 @@ export const useCart = () => {
               ? { ...item, quantity: normalized.quantity, name: item.name || product.name, imgUrl: item.imgUrl || product.imgUrl }
               : item
           );
-          console.log('[useCart] Producto existente actualizado, newCart.length:', updated.length);
           return updated;
         }
 
@@ -129,16 +127,14 @@ export const useCart = () => {
           const updated = prevCart.map((item) =>
             item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
           );
-          console.log('[useCart] Cantidad incrementada, newCart.length:', updated.length);
           return updated;
         }
         
         const newCart = [...prevCart, baseItem];
-        console.log('[useCart] Producto agregado, newCart.length:', newCart.length);
         return newCart;
       });
     } catch (err) {
-      console.error("Error addToCart:", err);
+      debugError("Error addToCart:", err);
       const errorMsg = err?.response?.data?.message || err?.message || 'No se pudo agregar el producto al carrito';
       alertError(errorMsg);
       throw err;
@@ -152,7 +148,7 @@ export const useCart = () => {
         prevCart.filter((item) => item.id !== productId)
       );
     } catch (err) {
-      console.error("Error removeFromCart:", err);
+      debugError("Error removeFromCart:", err);
     }
   };
 
@@ -183,7 +179,7 @@ export const useCart = () => {
         );
       }
     } catch (err) {
-      console.error("Error updateQuantity:", err);
+      debugError("Error updateQuantity:", err);
     }
   };
 
@@ -194,9 +190,8 @@ export const useCart = () => {
       setCartItems([]);
       // Forzar limpieza del localStorage
       localStorage.removeItem(CART_STORAGE_KEY);
-      console.log('[useCart] Carrito limpiado, items:', 0);
     } catch (err) {
-      console.error("Error clearCart:", err);
+      debugError("Error clearCart:", err);
     }
   };
 

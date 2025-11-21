@@ -137,46 +137,47 @@ export default function AdminDashboardPage() {
     <section className="space-y-8">
       <AdminPageHeader
         title="Dashboard"
+        className="gap-4"
+        actions={
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+              <TabsList className="inline-flex w-full flex-wrap gap-2 sm:w-auto">
+                <TabsTrigger value="overview">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="analytics">
+                  <Activity className="mr-2 h-4 w-4" />
+                  Analytics
+                </TabsTrigger>
+                <TabsTrigger value="products">
+                  <Package className="mr-2 h-4 w-4" />
+                  Productos
+                </TabsTrigger>
+                <TabsTrigger value="customers">
+                  <Users className="mr-2 h-4 w-4" />
+                  Clientes
+                </TabsTrigger>
+                <TabsTrigger value="operations">
+                  <Truck className="mr-2 h-4 w-4" />
+                  Operaciones
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <Button
+              appearance="outline"
+              intent="primary"
+              size="sm"
+              onClick={refetch}
+              disabled={isLoading}
+              leadingIcon={<RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />}
+            >
+              Actualizar
+            </Button>
+          </div>
+        }
       />
-
-      {/* Tabs Navigation */}
-      <div className="flex items-center justify-between gap-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-          <TabsList className="inline-flex w-auto gap-2">
-            <TabsTrigger value="overview">
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="analytics">
-              <Activity className="mr-2 h-4 w-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="products">
-              <Package className="mr-2 h-4 w-4" />
-              Productos
-            </TabsTrigger>
-            <TabsTrigger value="customers">
-              <Users className="mr-2 h-4 w-4" />
-              Clientes
-            </TabsTrigger>
-            <TabsTrigger value="operations">
-              <Truck className="mr-2 h-4 w-4" />
-              Operaciones
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <Button
-          appearance="outline"
-          intent="primary"
-          size="sm"
-          onClick={refetch}
-          disabled={isLoading}
-          leadingIcon={<RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />}
-        >
-          Actualizar
-        </Button>
-      </div>
 
       {/* Error State */}
       {isError && (

@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Info, ShoppingCart, Star } from "@icons/lucide";
+import { Info, ShoppingCart, Star, Mail, Lock, User, Search as SearchIcon } from "@icons/lucide";
 import { Button, IconButton, AnimatedCTAButton } from "@/components/ui/Button.jsx"
+import { Input, Textarea } from "@/components/ui/Input.jsx"
+import { Select } from "@/components/ui/Select.jsx"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs.jsx"
 import Badge from "@/components/ui/Badge.jsx"
 import { Accordion } from "@/components/ui/Accordion.jsx"
 import { Pagination } from "@/components/ui/Pagination.jsx"
@@ -20,8 +23,10 @@ import {
   PILL_STYLES,
   BUTTON_APPEARANCES,
   BUTTON_INTENTS,
+  BUTTON_SIZES,
   BUTTON_SHAPES,
   BUTTON_MOTION_EFFECTS,
+  BUTTON_WIDTHS,
 } from "../../../config/ui-tokens.js";
 import {
   PRODUCT_STATUS_MAP,
@@ -128,6 +133,8 @@ const badgeVariants = Object.keys(BADGE_VARIANTS);
 const pillVariants = Object.keys(PILL_STYLES);
 const TAB_ITEMS = [
   { id: "tokens", label: "Tokens" },
+  { id: "buttons", label: "Buttons" },
+  { id: "forms", label: "Forms & Inputs" },
   { id: "componentes", label: "Componentes" },
   { id: "data-display", label: "Data Display" },
   { id: "modulos", label: "Módulos" },
@@ -741,7 +748,7 @@ const LAB_TESTS = [
   },
 ];
 
-export function StyleGuidePage() {
+export default function StyleGuidePage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [computedValues, setComputedValues] = useState({ colors: {}, spacings: {} });
@@ -1056,14 +1063,581 @@ export function StyleGuidePage() {
       );
     }
 
+    if (activeTab === "buttons") {
+      return (
+        <div className="space-y-6">
+          <section className={sectionClass("gap-6")}>
+            <div>
+              <h2 className="text-2xl font-semibold text-[var(--color-primary1)]">Button Component</h2>
+              <p className="text-sm text-[var(--color-secondary2)]">
+                Sistema completo de botones con múltiples variantes, intents, tamaños y efectos de movimiento.
+              </p>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Propiedades disponibles</h3>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Appearance</p>
+                  <div className="flex flex-wrap gap-2">
+                    {BUTTON_APPEARANCES.map((app) => (
+                      <code key={app} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{app}</code>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Intent</p>
+                  <div className="flex flex-wrap gap-2">
+                    {BUTTON_INTENTS.map((intent) => (
+                      <code key={intent} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{intent}</code>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Size</p>
+                  <div className="flex flex-wrap gap-2">
+                    {BUTTON_SIZES.map((size) => (
+                      <code key={size} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{size}</code>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Shape</p>
+                  <div className="flex flex-wrap gap-2">
+                    {BUTTON_SHAPES.map((shape) => (
+                      <code key={shape} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{shape}</code>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Motion</p>
+                  <div className="flex flex-wrap gap-2">
+                    {BUTTON_MOTION_EFFECTS.map((motion) => (
+                      <code key={motion} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{motion}</code>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Width</p>
+                  <div className="flex flex-wrap gap-2">
+                    {BUTTON_WIDTHS.map((width) => (
+                      <code key={width} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{width}</code>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Matriz completa: Appearance × Intent</h3>
+              <p className="text-sm text-[var(--color-secondary2)]">
+                Todas las combinaciones disponibles de apariencia e intención
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-[var(--color-border)]">
+                      <th className="p-3 text-left text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">
+                        Appearance
+                      </th>
+                      {BUTTON_INTENTS.map((intent) => (
+                        <th key={intent} className="p-3 text-center text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">
+                          {intent}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {BUTTON_APPEARANCES.map((appearance) => (
+                      <tr key={appearance} className="border-b border-[var(--color-border)]">
+                        <td className="p-3 text-xs font-medium text-[var(--color-text-secondary)]">{appearance}</td>
+                        {BUTTON_INTENTS.map((intent) => (
+                          <td key={`${appearance}-${intent}`} className="p-3 text-center">
+                            <Button
+                              appearance={appearance}
+                              intent={intent}
+                              size="sm"
+                            >
+                              Demo
+                            </Button>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Tamaños</h3>
+              <div className="flex flex-wrap items-center gap-4">
+                {BUTTON_SIZES.map((size) => (
+                  <div key={size} className="flex flex-col items-center gap-2">
+                    <Button size={size} intent="primary">
+                      {size}
+                    </Button>
+                    <span className="text-xs text-[var(--color-text-secondary)]">{size}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Formas (Shapes)</h3>
+              <div className="flex flex-wrap items-center gap-4">
+                {BUTTON_SHAPES.map((shape) => (
+                  <div key={shape} className="flex flex-col items-center gap-2">
+                    <Button shape={shape} intent="primary">
+                      {shape}
+                    </Button>
+                    <span className="text-xs text-[var(--color-text-secondary)]">{shape}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Efectos de Movimiento (Motion)</h3>
+              <div className="flex flex-wrap gap-4">
+                {BUTTON_MOTION_EFFECTS.map((effect) => (
+                  <div key={effect} className="flex flex-col items-center gap-2">
+                    <Button motion={effect} intent="primary">
+                      {effect}
+                    </Button>
+                    <span className="text-xs text-[var(--color-text-secondary)]">{effect}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Estados especiales</h3>
+              <div className="flex flex-wrap items-center gap-4">
+                <Button intent="primary">Normal</Button>
+                <Button intent="primary" loading>Loading</Button>
+                <Button intent="primary" disabled>Disabled</Button>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Con iconos</h3>
+              <div className="space-y-3">
+                <div className="text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Icon-only</div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <IconButton aria-label="Agregar" intent="primary" icon={<Star />} />
+                  <IconButton aria-label="Carrito" intent="secondary" icon={<ShoppingCart />} />
+                  <IconButton aria-label="Info" intent="accent" icon={<Info />} />
+                </div>
+                <div className="text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Con texto</div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button intent="primary" leadingIcon={<ShoppingCart />}>Comprar</Button>
+                  <Button appearance="outline" intent="secondary" trailingIcon={<Star />}>Destacar</Button>
+                  <Button appearance="ghost" intent="accent" leadingIcon={<Info />}>Más info</Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Anchos (Width)</h3>
+              <div className="space-y-3">
+                {BUTTON_WIDTHS.map((width) => (
+                  <div key={width}>
+                    <span className="mb-1 block text-xs text-[var(--color-text-secondary)]">{width}</span>
+                    <Button width={width} intent="primary">
+                      Width: {width}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    if (activeTab === "forms") {
+      const [inputValue, setInputValue] = useState("");
+      const [emailValue, setEmailValue] = useState("");
+      const [passwordValue, setPasswordValue] = useState("");
+      const [textareaValue, setTextareaValue] = useState("");
+      const [selectValue, setSelectValue] = useState("");
+      const [selectValue2, setSelectValue2] = useState("");
+
+      return (
+        <div className="space-y-6">
+          <section className={sectionClass("gap-6")}>
+            <div>
+              <h2 className="text-2xl font-semibold text-[var(--color-primary1)]">Forms & Inputs</h2>
+              <p className="text-sm text-[var(--color-secondary2)]">
+                Sistema completo de formularios: inputs, selects, textarea, tabs, dropdowns, dialogs y popovers.
+              </p>
+            </div>
+
+            {/* Inputs */}
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Input Component</h3>
+              <p className="text-sm text-[var(--color-secondary2)]">Variantes: neutral, primary, ghost | Tamaños: sm, md, lg</p>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-4">
+                  <Input
+                    label="Input neutral (default)"
+                    placeholder="Escribe algo..."
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    helperText="Texto de ayuda opcional"
+                  />
+                  
+                  <Input
+                    label="Input con ícono izquierdo"
+                    placeholder="Tu email"
+                    leftIcon={<Mail className="h-4 w-4" />}
+                    value={emailValue}
+                    onChange={(e) => setEmailValue(e.target.value)}
+                  />
+                  
+                  <Input
+                    label="Input con ícono derecho"
+                    placeholder="Buscar..."
+                    rightIcon={<SearchIcon className="h-4 w-4" />}
+                  />
+
+                  <Input
+                    label="Input con error"
+                    placeholder="Campo requerido"
+                    error="Este campo es obligatorio"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <Input
+                    label="Variant: primary"
+                    placeholder="Input primario"
+                    variant="primary"
+                  />
+
+                  <Input
+                    label="Variant: ghost"
+                    placeholder="Input fantasma"
+                    variant="ghost"
+                  />
+
+                  <Input
+                    label="Input password"
+                    type="password"
+                    placeholder="Tu contraseña"
+                    leftIcon={<Lock className="h-4 w-4" />}
+                    value={passwordValue}
+                    onChange={(e) => setPasswordValue(e.target.value)}
+                  />
+
+                  <Input
+                    label="Input deshabilitado"
+                    placeholder="No editable"
+                    disabled
+                    value="Valor fijo"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-[var(--color-border)]">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Tamaños</p>
+                <div className="space-y-3">
+                  <Input size="sm" placeholder="Small size" />
+                  <Input size="md" placeholder="Medium size (default)" />
+                  <Input size="lg" placeholder="Large size" />
+                </div>
+              </div>
+            </div>
+
+            {/* Textarea */}
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Textarea Component</h3>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                <Textarea
+                  label="Textarea neutral"
+                  placeholder="Escribe un mensaje largo..."
+                  value={textareaValue}
+                  onChange={(e) => setTextareaValue(e.target.value)}
+                  helperText="Máximo 500 caracteres"
+                  rows={4}
+                />
+
+                <Textarea
+                  label="Textarea primary"
+                  placeholder="Descripción del producto"
+                  variant="primary"
+                  rows={4}
+                />
+
+                <Textarea
+                  label="Textarea con error"
+                  placeholder="Campo obligatorio"
+                  error="Debes completar este campo"
+                  rows={3}
+                />
+
+                <Textarea
+                  label="Textarea deshabilitado"
+                  placeholder="No editable"
+                  disabled
+                  value="Texto fijo que no se puede editar"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Select */}
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Select Component</h3>
+              <p className="text-sm text-[var(--color-secondary2)]">Selects nativos con estilos consistentes</p>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                <Select
+                  label="Select neutral"
+                  placeholder="Selecciona una opción"
+                  value={selectValue}
+                  onChange={(e) => setSelectValue(e.target.value)}
+                  options={[
+                    { value: "1", label: "Opción 1" },
+                    { value: "2", label: "Opción 2" },
+                    { value: "3", label: "Opción 3" },
+                  ]}
+                  helperText="Selecciona una opción de la lista"
+                />
+
+                <Select
+                  label="Select primary"
+                  placeholder="Categoría"
+                  variant="primary"
+                  options={[
+                    { value: "muebles", label: "Muebles" },
+                    { value: "decoracion", label: "Decoración" },
+                    { value: "iluminacion", label: "Iluminación" },
+                  ]}
+                />
+
+                <Select
+                  label="Select ghost"
+                  placeholder="Filtrar por estado"
+                  variant="ghost"
+                  value={selectValue2}
+                  onChange={(e) => setSelectValue2(e.target.value)}
+                  options={[
+                    { value: "activo", label: "Activo" },
+                    { value: "inactivo", label: "Inactivo" },
+                    { value: "pendiente", label: "Pendiente" },
+                  ]}
+                />
+
+                <Select
+                  label="Select con error"
+                  placeholder="Selecciona una opción"
+                  error="Este campo es obligatorio"
+                  options={[
+                    { value: "opt1", label: "Opción A" },
+                    { value: "opt2", label: "Opción B" },
+                  ]}
+                />
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-[var(--color-border)]">
+                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Tamaños</p>
+                <div className="space-y-3">
+                  <Select size="sm" placeholder="Small select" options={[{ value: "1", label: "Opción 1" }]} />
+                  <Select size="md" placeholder="Medium select (default)" options={[{ value: "1", label: "Opción 1" }]} />
+                  <Select size="lg" placeholder="Large select" options={[{ value: "1", label: "Opción 1" }]} />
+                </div>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Tabs Component</h3>
+              <p className="text-sm text-[var(--color-secondary2)]">Navegación por pestañas con estado controlado</p>
+              
+              <Tabs defaultValue="tab1">
+                <TabsList>
+                  <TabsTrigger value="tab1">Información</TabsTrigger>
+                  <TabsTrigger value="tab2">Especificaciones</TabsTrigger>
+                  <TabsTrigger value="tab3">Comentarios</TabsTrigger>
+                </TabsList>
+                <TabsContent value="tab1">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-neutral1)] p-4">
+                    <p className="text-sm text-[var(--color-text)]">
+                      Contenido de la pestaña de Información. Aquí puedes mostrar detalles generales del producto o contenido.
+                    </p>
+                  </div>
+                </TabsContent>
+                <TabsContent value="tab2">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-neutral1)] p-4">
+                    <p className="text-sm text-[var(--color-text)]">
+                      Contenido de Especificaciones técnicas. Dimensiones, materiales, peso, etc.
+                    </p>
+                  </div>
+                </TabsContent>
+                <TabsContent value="tab3">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-neutral1)] p-4">
+                    <p className="text-sm text-[var(--color-text)]">
+                      Sección de comentarios y reseñas de usuarios.
+                    </p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Dropdown Menu */}
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">DropdownMenu (Radix)</h3>
+              <p className="text-sm text-[var(--color-secondary2)]">Menús desplegables para acciones contextuales</p>
+              
+              <div className="flex flex-wrap gap-4">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button appearance="outline" intent="neutral">Abrir menú</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onSelect={() => console.log("Editar")}>
+                      <User className="h-4 w-4" />
+                      Editar perfil
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => console.log("Configuración")}>
+                      Configuración
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => console.log("Salir")} className="text-red-600">
+                      Cerrar sesión
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button appearance="ghost" intent="neutral" trailingIcon={<span>⋮</span>}>Acciones</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem>Ver detalles</DropdownMenuItem>
+                    <DropdownMenuItem>Duplicar</DropdownMenuItem>
+                    <DropdownMenuItem>Compartir</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="text-red-600">Eliminar</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Dialog */}
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Dialog & Drawer (Radix)</h3>
+              <p className="text-sm text-[var(--color-secondary2)]">Modales centrados y drawers laterales</p>
+              
+              <div className="flex flex-wrap gap-4">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button appearance="solid" intent="primary">Abrir Dialog</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader title="Título del Modal" description="Descripción opcional del contenido" />
+                    <div className="space-y-3">
+                      <Input label="Nombre" placeholder="Tu nombre completo" />
+                      <Input label="Email" type="email" placeholder="correo@ejemplo.com" />
+                    </div>
+                    <DialogFooter>
+                      <DialogClose>
+                        <Button appearance="ghost" intent="neutral">Cancelar</Button>
+                      </DialogClose>
+                      <Button intent="primary">Guardar</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button appearance="outline" intent="secondary">Abrir Drawer</Button>
+                  </DialogTrigger>
+                  <DialogContent variant="drawer" placement="right" className="max-w-md">
+                    <div className="p-6 space-y-4">
+                      <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Drawer lateral</h3>
+                      <p className="text-sm text-[var(--color-secondary2)]">
+                        Los drawers son útiles para formularios, filtros o paneles de detalles que no requieren bloquear toda la pantalla.
+                      </p>
+                      <Input label="Campo de ejemplo" placeholder="Escribe algo..." />
+                      <Textarea label="Mensaje" placeholder="Tu mensaje aquí..." rows={4} />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+
+            {/* Formulario completo de ejemplo */}
+            <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
+              <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Formulario Completo (Ejemplo)</h3>
+              <p className="text-sm text-[var(--color-secondary2)]">
+                Combinación de todos los elementos en un formulario real
+              </p>
+              
+              <form className="max-w-2xl space-y-4 rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-neutral2)] p-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <Input
+                    label="Nombre completo"
+                    placeholder="Juan Pérez"
+                    leftIcon={<User className="h-4 w-4" />}
+                    required
+                  />
+                  <Input
+                    label="Email"
+                    type="email"
+                    placeholder="juan@ejemplo.com"
+                    leftIcon={<Mail className="h-4 w-4" />}
+                    required
+                  />
+                </div>
+
+                <Select
+                  label="Categoría de interés"
+                  placeholder="Selecciona una categoría"
+                  variant="primary"
+                  options={[
+                    { value: "muebles", label: "Muebles" },
+                    { value: "decoracion", label: "Decoración" },
+                    { value: "iluminacion", label: "Iluminación" },
+                    { value: "textiles", label: "Textiles" },
+                  ]}
+                  required
+                />
+
+                <Textarea
+                  label="Mensaje"
+                  placeholder="¿En qué podemos ayudarte?"
+                  rows={5}
+                  helperText="Máximo 500 caracteres"
+                />
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button appearance="ghost" intent="neutral" type="button">
+                    Cancelar
+                  </Button>
+                  <Button intent="primary" type="submit">
+                    Enviar formulario
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </section>
+        </div>
+      );
+    }
+
     if (activeTab === "componentes") {
       return (
         <div className="space-y-6">
           <section className={sectionClass("gap-4")}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-[var(--color-primary1)]">Botones</h2>
-                <p className="text-sm text-[var(--color-secondary2)]">Todas las variantes del componente Button.</p>
+                <h2 className="text-xl font-semibold text-[var(--color-primary1)]">Badges y Pills</h2>
+                <p className="text-sm text-[var(--color-secondary2)]">Etiquetas para estados y filtros rápidos.</p>
               </div>
               <Tooltip label="Usos de botones">
                 <button

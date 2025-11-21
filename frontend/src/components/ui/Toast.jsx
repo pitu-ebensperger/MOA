@@ -19,7 +19,9 @@ class ToastManager {
   }
 
   notify() {
-    this.listeners.forEach((listener) => listener(this.toasts));
+    for (const listener of this.listeners) {
+      listener(this.toasts);
+    }
   }
 
   show(toast) {
@@ -101,7 +103,7 @@ function ToastItem({ toast, onDismiss }) {
     <div
       className={cx(
         "flex items-start gap-3 min-w-[320px] max-w-md",
-        "p-4 rounded-[var(--radius-lg)]",
+        "p-4 rounded-lg",
         "border shadow-lg",
         config.bgClass,
         config.borderClass,
@@ -164,7 +166,7 @@ export function ToastContainer() {
 
   return createPortal(
     <div
-      className="fixed top-4 right-4 z-[var(--z-tooltip)] flex flex-col gap-3 pointer-events-none"
+      className="fixed top-4 right-4 z-(--z-tooltip) flex flex-col gap-3 pointer-events-none"
       aria-live="polite"
       aria-atomic="true"
     >

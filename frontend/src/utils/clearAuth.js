@@ -7,11 +7,9 @@
  */
 
 export function clearAuth() {
-  if (typeof window !== 'undefined' && window.localStorage) {
-    console.log('[clearAuth] Limpiando tokens y usuario del localStorage');
+  if (typeof globalThis.window !== 'undefined' && globalThis.localStorage) {
     localStorage.removeItem('moa.accessToken');
     localStorage.removeItem('moa.user');
-    console.log('[clearAuth] Autenticación limpiada. Recarga la página.');
     return true;
   }
   console.error('[clearAuth] localStorage no disponible');
@@ -19,7 +17,7 @@ export function clearAuth() {
 }
 
 export function debugAuth() {
-  if (typeof window !== 'undefined' && window.localStorage) {
+  if (typeof globalThis.window !== 'undefined' && globalThis.localStorage) {
     const token = localStorage.getItem('moa.accessToken');
     const user = localStorage.getItem('moa.user');
     
@@ -40,7 +38,7 @@ export function debugAuth() {
 }
 
 // Hacer disponibles en window para debugging
-if (typeof window !== 'undefined') {
-  window.clearAuth = clearAuth;
-  window.debugAuth = debugAuth;
+if (typeof globalThis.window !== 'undefined') {
+  globalThis.clearAuth = clearAuth;
+  globalThis.debugAuth = debugAuth;
 }

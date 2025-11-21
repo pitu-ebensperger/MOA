@@ -40,6 +40,42 @@ import {
 
 const buildItemImage = (item) =>
   item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
+const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true' || import.meta.env?.MODE === 'development';
+const debugLog = (...args) => { if (DEBUG_LOGS) console.log(...args); };
+const debugError = (...args) => { if (DEBUG_LOGS) console.error(...args); };
+
+const cartItemShape = PropTypes.shape({
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  name: PropTypes.string,
+  quantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  imgUrl: PropTypes.string,
+  image: PropTypes.string,
+  gallery: PropTypes.arrayOf(PropTypes.string),
+  price: PropTypes.number,
+  precio: PropTypes.number,
+});
+
+const addressShape = PropTypes.shape({
+  direccion_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  etiqueta: PropTypes.string,
+  calle: PropTypes.string,
+  comuna: PropTypes.string,
+  ciudad: PropTypes.string,
+  region: PropTypes.string,
+});
+
+const userShape = PropTypes.shape({
+  nombre: PropTypes.string,
+  name: PropTypes.string,
+  email: PropTypes.string,
+  telefono: PropTypes.string,
+  phone: PropTypes.string,
+});
+
+const configShape = PropTypes.shape({
+  email: PropTypes.string,
+  telefono: PropTypes.string,
+});
 
 export const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -134,7 +170,7 @@ export const CheckoutPage = () => {
 
   const handleConfirmOrder = async () => {
     setIsProcessing(true);
-    console.log('[handleConfirmOrder] Iniciando creación de orden');
+    debugLog('[handleConfirmOrder] Iniciando creación de orden');
 
     try {
       const checkoutData = {
@@ -153,16 +189,11 @@ export const CheckoutPage = () => {
       else if (orderPreview.metodo_despacho !== 'retiro') {
         checkoutData.usar_direccion_guardada = false;
         checkoutData.direccion_nueva = newAddress;
-      }
+      };
 
-      console.log('[handleConfirmOrder] checkoutData preparada:', checkoutData);
       const response = await createOrder(checkoutData);
-      console.log('[handleConfirmOrder] response:', response);
-      console.log('[handleConfirmOrder] response.success:', response.success);
-      console.log('[handleConfirmOrder] response.data:', response.data);
-      console.log('[handleConfirmOrder] response.data?.order_code:', response.data?.order_code);
 
-      if (response.success) {
+      if (response.success && response.data) {
         setShowConfirmDialog(false);
         clearCart();
         alertOrderSuccess(response.data.order_code).then(() => navigate('/profile'));
@@ -178,11 +209,11 @@ export const CheckoutPage = () => {
       }
 
     } catch (error) {
-      console.error('[handleConfirmOrder] Error en checkout:', error);
-      console.error('[handleConfirmOrder] error.response:', error.response);
-      console.error('[handleConfirmOrder] error.response?.data:', error.response?.data);
+      debugError('[handleConfirmOrder] Error en checkout:', error);
+      debugError('[handleConfirmOrder] error.response:', error.response);
+      debugError('[handleConfirmOrder] error.response?.data:', error.response?.data);
       const serverMsg = error.response?.data?.message;
-      console.error('[handleConfirmOrder] serverMsg:', serverMsg);
+      debugError('[handleConfirmOrder] serverMsg:', serverMsg);
       if (serverMsg && /carrito está vacío/i.test(serverMsg)) {
         alertOrderError('El carrito del servidor está vacío. Agrega productos y vuelve a intentar.', config.email);
       } else if (serverMsg && /Error al crear orden/i.test(serverMsg)) {
@@ -723,4 +754,11 @@ export const CheckoutPage = () => {
   );
 };
 
-CheckoutPage.propTypes = {};
+CheckoutPage.propTypes = {
+  cartItems: PropTypes.arrayOf(cartItemShape),
+  total: PropTypes.number,
+  user: userShape,
+  addresses: PropTypes.arrayOf(addressShape),
+  defaultAddress: addressShape,
+  config: configShape,
+};

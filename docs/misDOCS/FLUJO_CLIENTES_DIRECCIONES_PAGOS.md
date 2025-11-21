@@ -15,7 +15,7 @@
 - ❌ Endpoints CRUD para métodos de pago
 - ❌ UI para gestionar direcciones en perfil de usuario
 - ❌ UI para gestionar métodos de pago
-- ❌ Integración con pasarela de pago real
+- 🚫 Integración con pasarela de pago real (fuera de alcance, se mantiene simulada)
 
 ---
 

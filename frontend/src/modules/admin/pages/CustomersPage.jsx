@@ -321,16 +321,18 @@ export default function CustomersPage() {
           {toolbar(null)}
           
           {/* Loading State */}
-          {isLoadingCustomers ? (
+          {isLoadingCustomers && (
             <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-8 text-center">
               <RefreshCw className="h-8 w-8 animate-spin mx-auto text-neutral-400" />
               <p className="mt-2 text-sm text-neutral-500">Cargando clientes...</p>
             </div>
-          ) : filteredCustomers.length === 0 ? (
+          )}
+          {!isLoadingCustomers && filteredCustomers.length === 0 && (
             <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-8 text-center">
               <p className="text-sm text-neutral-500">No se encontraron clientes</p>
             </div>
-          ) : (
+          )}
+          {!isLoadingCustomers && filteredCustomers.length > 0 && (
             <VirtualizedTable
               data={filteredCustomers}
               columns={[
@@ -607,8 +609,9 @@ export default function CustomersPage() {
               onChange={handleNewCustomerChange("phone")}
             />
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-(--color-text-muted)">Estado</label>
+              <label htmlFor="new-customer-status" className="text-xs font-semibold text-(--color-text-muted)">Estado</label>
               <select
+                id="new-customer-status"
                 value={newCustomerForm.status}
                 onChange={handleNewCustomerChange("status")}
                 className="w-full rounded-lg border border-(--color-border) bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-(--color-primary1) focus:bg-white"
@@ -667,11 +670,12 @@ export default function CustomersPage() {
               onChange={handleEditFormChange("telefono")}
             />
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-(--color-text-muted)">Estado</label>
+              <label htmlFor="edit-customer-status" className="text-xs font-semibold text-(--color-text-muted)">Estado</label>
               <select
+                id="edit-customer-status"
                 value={editForm.status}
                 onChange={handleEditFormChange("status")}
-                className="w-full rounded-lg border border-(--color-border) bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-(--color-primary1) focus:bg-white"
+                className="w-full rounded-lg border border-(--color-border) bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-(--color-primary1) focus:bg-white">
               >
                 {STATUS_FILTER_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>

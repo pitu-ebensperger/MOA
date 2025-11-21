@@ -23,7 +23,6 @@ export const ProfilePage = () => {
 
     wishlistApi.get()
       .then(data => {
-        console.log("Wishlist cargada:", data);
         setWishlistItems(data.items || []);
       })
       .catch(err => console.error("Error cargando wishlist:", err));

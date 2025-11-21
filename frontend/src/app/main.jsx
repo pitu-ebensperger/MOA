@@ -27,6 +27,14 @@ if (typeof document !== 'undefined' && document.body) {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Error handling global
+      onError: (error) => {
+        console.error('[React Query - Query Error]', error);
+        // En producción, enviar a servicio de logging
+        if (import.meta.env.PROD) {
+          // TODO: Sentry.captureException(error);
+        }
+      },
       // Configuración de retry
       retry: (failureCount, error) => {
         // No reintentar si es error de autenticación
@@ -47,13 +55,58 @@ const queryClient = new QueryClient({
     },
     mutations: {
       retry: false, // No reintentar mutations
+      onError: (error) => {
+        console.error('[React Query - Mutation Error]', error);
+        // En producción, enviar a servicio de logging
+        if (import.meta.env.PROD) {
+          // TODO: Sentry.captureException(error);
+        }
+      },
     },
   },
 })
 
+// 🌐 NETWORK OFFLINE DETECTION
+if (typeof globalThis.window !== 'undefined') {
+  window.addEventListener('online', () => {
+    console.log('[Network] Conexión restaurada');
+    // Refetch queries automáticamente
+    queryClient.refetchQueries();
+  });
+
+  window.addEventListener('offline', () => {
+    console.warn('[Network] Sin conexión a internet');
+    // Opcional: mostrar toast/banner
+  });
+}
+
+// 🔇 SUPPRESS CONSOLE ERRORS EN PRODUCCIÓN (solo errores, mantener warns)
+if (import.meta.env.PROD && typeof console !== 'undefined') {
+  const originalError = console.error;
+  console.error = (...args) => {
+    // Silenciar ciertos errores conocidos/esperados en producción
+    const message = args[0]?.toString() || '';
+    
+    // Lista de errores a silenciar
+    const suppressPatterns = [
+      'ResizeObserver loop', // Error benigno de ResizeObserver
+      'Failed to fetch dynamically imported module', // Ya manejado por ErrorBoundary
+    ];
+    
+    const shouldSuppress = suppressPatterns.some(pattern => message.includes(pattern));
+    
+    if (!shouldSuppress) {
+      // Enviar a servicio de logging en lugar de mostrar en consola
+      // TODO: Sentry.captureException(new Error(message));
+      // Mientras tanto, log simple sin stack trace
+      originalError('[Error]', message);
+    }
+  };
+}
+
 // 🚨 LIMPIEZA DE EMERGENCIA: Ctrl+Shift+X para limpiar overlays trabados
-if (typeof window !== 'undefined') {
-  window.addEventListener('keydown', (e) => {
+if (typeof globalThis.window !== 'undefined') {
+  globalThis.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.shiftKey && e.key === 'X') {
       console.warn('🚨 LIMPIEZA DE EMERGENCIA ACTIVADA - Removiendo todos los overlays');
       
@@ -66,23 +119,25 @@ if (typeof window !== 'undefined') {
       
       // Remover TODOS los elementos con fixed inset-0
       const allFixed = document.querySelectorAll('[class*="fixed"][class*="inset-0"]');
-      allFixed.forEach(el => {
+      for (const el of allFixed) {
         console.log('Removiendo:', el.className);
         el.remove();
-      });
+      }
       
       // Remover portales de Radix
-      document.querySelectorAll('[data-radix-portal]').forEach(p => p.remove());
+      for (const p of document.querySelectorAll('[data-radix-portal]')) {
+        p.remove();
+      }
       
       // Remover overlays con z-index alto
       const highZ = Array.from(document.querySelectorAll('div')).filter(el => {
-        const zIndex = window.getComputedStyle(el).zIndex;
-        return !isNaN(zIndex) && parseInt(zIndex) > 40;
+        const zIndex = globalThis.getComputedStyle(el).zIndex;
+        return !Number.isNaN(Number(zIndex)) && Number.parseInt(zIndex, 10) > 40;
       });
-      highZ.forEach(el => {
-        console.log('Removiendo z-index alto:', el.className, 'z-index:', window.getComputedStyle(el).zIndex);
+      for (const el of highZ) {
+        console.log('Removiendo z-index alto:', el.className, 'z-index:', globalThis.getComputedStyle(el).zIndex);
         el.remove();
-      });
+      }
       
       alert('✅ Limpieza completada. Presiona F5 para recargar.');
     }

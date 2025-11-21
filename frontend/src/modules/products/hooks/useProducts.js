@@ -16,11 +16,8 @@ export const useProducts = (filters) => {
   const query = useQuery({
     queryKey: [...PRODUCTS_QUERY_KEY, normalizedFilters],
     queryFn: async () => {
-      const ts = Date.now();
-      console.log('[useProducts] Fetch start', { filters: normalizedFilters });
       try {
         const data = await productsApi.list(normalizedFilters);
-        console.log('[useProducts] Fetch success', { ms: Date.now() - ts, count: data?.items?.length });
         return data;
       } catch (err) {
         console.error('[useProducts] Fetch error', {

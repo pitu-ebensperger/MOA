@@ -74,26 +74,25 @@ const DEFAULT_FILTERS = {
   fecha_hasta: '',
 };
 
+// API solo devuelve CSV, así que restringimos la UI al formato soportado
 const EXPORT_FORMATS = [
   { label: 'CSV', value: 'csv', extension: 'csv' },
-  { label: 'Excel (XLSX)', value: 'xlsx', extension: 'xlsx' },
-  { label: 'JSON', value: 'json', extension: 'json' },
 ];
 
 const PAGE_ALERT_STYLES = {
-  success: "border-[color:var(--color-success)] bg-[color:var(--color-success)]/10 text-[color:var(--color-success)]",
-  error: "border-[color:var(--color-error)] bg-[color:var(--color-error)]/10 text-[color:var(--color-error)]",
-  warning: "border-[color:var(--color-warning)] bg-[color:var(--color-warning)]/10 text-[color:var(--color-warning)]",
+  success: "border-(--color-success) bg-(--color-success)/10 text-(--color-success)",
+  error: "border-(--color-error) bg-(--color-error)/10 text-(--color-error)",
+  warning: "border-(--color-warning) bg-(--color-warning)/10 text-(--color-warning)",
 };
 
 const compactFilters = (params = {}) => {
   const sanitized = {};
-  Object.entries(params).forEach(([key, value]) => {
+  for (const [key, value] of Object.entries(params)) {
     if (value === '' || value === null || value === undefined) {
-      return;
+      continue;
     }
     sanitized[key] = value;
-  });
+  }
   return sanitized;
 };
 
@@ -425,6 +424,44 @@ export default function OrdersAdminPage() {
     ];
   }, [editingRowId, savingRowId, handleSaveInline, handleCancelEdit, handleViewDetails, handleStartEdit]);
 
+  const handleExport = useCallback(async (format) => {
+    if (ordersData.length === 0) {
+      showPageAlert('No hay órdenes para exportar', 'warning');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      const filtersWithoutPagination = { ...filters };
+      delete filtersWithoutPagination.page;
+      delete filtersWithoutPagination.limit;
+      const params = {
+        ...compactFilters(filtersWithoutPagination),
+        order_by: 'creado_en',
+        order_dir: 'DESC',
+      };
+
+      const blob = await ordersAdminApi.exportOrders(params, format);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const formatConfig = EXPORT_FORMATS.find((item) => item.value === format);
+      const extension = formatConfig?.extension || format;
+      link.href = url;
+      link.download = buildExportFileName(extension);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      showPageAlert(`${formatConfig?.label ?? format.toUpperCase()} listo para descargar`, 'success');
+    } catch (error) {
+      console.error('Error exporting orders:', error);
+      showPageAlert('Error al exportar pedidos', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [filters, ordersData.length, showPageAlert]);
+
   const toolbar = useMemo(
     () => () => (
       <TableToolbar>
@@ -502,44 +539,6 @@ export default function OrdersAdminPage() {
   ) : (
     <div className="text-(--text-secondary1)">Aún no se han registrado órdenes en el sistema.</div>
   );
-
-  const handleExport = useCallback(async (format) => {
-    if (ordersData.length === 0) {
-      showPageAlert('No hay órdenes para exportar', 'warning');
-      return;
-    }
-
-    try {
-      setIsExporting(true);
-      const filtersWithoutPagination = { ...filters };
-      delete filtersWithoutPagination.page;
-      delete filtersWithoutPagination.limit;
-      const params = {
-        ...compactFilters(filtersWithoutPagination),
-        order_by: 'creado_en',
-        order_dir: 'DESC',
-      };
-
-      const blob = await ordersAdminApi.exportOrders(params, format);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const formatConfig = EXPORT_FORMATS.find((item) => item.value === format);
-      const extension = formatConfig?.extension || format;
-      link.href = url;
-      link.download = buildExportFileName(extension);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      showPageAlert(`${formatConfig?.label ?? format.toUpperCase()} listo para descargar`, 'success');
-    } catch (error) {
-      console.error('Error exporting orders:', error);
-      showPageAlert('Error al exportar pedidos', 'error');
-    } finally {
-      setIsExporting(false);
-    }
-  }, [filters, ordersData.length, showPageAlert]);
 
   // Mostrar error si hay alguno
   if (error) {

@@ -21,7 +21,9 @@ class ConfirmDialogManager {
   }
 
   notify() {
-    this.listeners.forEach((listener) => listener(this.dialog));
+    for (const listener of this.listeners) {
+      listener(this.dialog);
+    }
   }
 
   show(config) {

@@ -32,8 +32,6 @@ const UserInfoSection = () => {
     // Usar authApi.profile() que obtiene perfil por token, sin necesidad de user.id
     authApi.profile()
       .then((data) => {
-        console.log("✅ Datos cargados exitosamente desde backend:", data);
-
         setForm({
           nombre: data.nombre || "",
           email: data.email || "",
@@ -69,8 +67,6 @@ const UserInfoSection = () => {
         nombre: form.nombre,
         telefono: form.telefono,
       });
-
-      console.log("Usuario actualizado:", updatedUser);
 
       if (updatedUser.user) {
         setForm({

@@ -10,8 +10,26 @@ import {
   formatearFecha,
   mensajeTiempoEntrega
 } from "@/utils/orderTracking.js";
-import { CheckCircle, Circle, Package, Truck, Mail, Phone } from "@icons/lucide";
+import { Mail, Phone, Store } from "@icons/lucide";
 import { useStoreConfig } from "@/hooks/useStoreConfig.js";
+
+const timelineEntryShape = PropTypes.shape({
+  estado: PropTypes.string,
+  fecha: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+});
+
+const orderShape = PropTypes.shape({
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  order_code: PropTypes.string,
+  estado_envio: PropTypes.string,
+  estado: PropTypes.string,
+  metodo_despacho: PropTypes.oneOf(['standard', 'express', 'retiro']),
+  fecha_entrega_estimada: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  fecha_entrega_real: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  creado_en: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  timeline: PropTypes.arrayOf(timelineEntryShape),
+});
 
 /**
  * Componente de Timeline de Estado de Orden
@@ -213,12 +231,5 @@ export default function OrderStatusTimeline({ order }) {
 }
 
 OrderStatusTimeline.propTypes = {
-  order: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    order_code: PropTypes.string,
-    metodo_despacho: PropTypes.string,
-    fecha_entrega_estimada: PropTypes.string,
-    creado_en: PropTypes.string,
-    createdAt: PropTypes.string,
-  }),
+  order: orderShape,
 };

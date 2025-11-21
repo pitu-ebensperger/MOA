@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 
 import { Navbar } from '@/components/layout/Navbar.jsx'
@@ -50,6 +50,7 @@ const AdminProductsPage = lazy(() => import('@/modules/admin/pages/AdminProducts
 const AdminCategoriesPage = lazy(() => import('@/modules/admin/pages/AdminCategoriesPage.jsx'))
 const CustomersPage = lazy(() => import('@/modules/admin/pages/CustomersPage.jsx'))
 const StoreSettingsPage = lazy(() => import('@/modules/admin/pages/StoreSettingsPage.jsx'))
+const AdminTestPage = lazy(() => import('@/modules/admin/pages/AdminTestPage.jsx'))
 
 // Lazy load - Style guide (solo desarrollo)
 const StyleGuidePage = lazy(() => import('@/modules/styleguide/pages/StyleGuidePage.jsx'))
@@ -69,10 +70,116 @@ const PageLoader = () => (
   </div>
 )
 
+// Componente de error para lazy loading fallido
+const LazyLoadError = () => (
+  <div className="flex min-h-[60vh] items-center justify-center p-4">
+    <div className="text-center space-y-4 max-w-md">
+      <div className="text-red-600 text-4xl">⚠️</div>
+      <h2 className="text-xl font-semibold text-(--text-strong)">Error al cargar</h2>
+      <p className="text-sm text-(--text-weak)">
+        No se pudo cargar esta página. Esto puede deberse a un problema de conexión o un error temporal.
+      </p>
+      <button
+        onClick={() => window.location.reload()}
+        className="px-4 py-2 bg-(--color-primary1) text-white rounded-lg hover:bg-(--color-hover) transition-colors"
+      >
+        Recargar página
+      </button>
+    </div>
+  </div>
+)
+
+// ErrorBoundary específico para Suspense (captura errores de lazy loading)
+class SuspenseErrorBoundary extends ErrorBoundary {
+  render() {
+    if (this.state.hasError) {
+      return <LazyLoadError />;
+    }
+    return this.props.children;
+  }
+}
+
+// Componente de error para lazy loading fallido
+const LazyLoadError = ({ error, retry }) => (
+  <div className="flex min-h-[60vh] items-center justify-center p-4">
+    <div className="text-center space-y-4 max-w-md">
+      <div className="text-red-600 text-4xl">⚠️</div>
+      <h2 className="text-xl font-semibold text-(--text-strong)">Error al cargar</h2>
+      <p className="text-sm text-(--text-weak)">
+        No se pudo cargar esta página. Esto puede deberse a un problema de conexión.
+      </p>
+      <button
+        onClick={() => window.location.reload()}
+        className="px-4 py-2 bg-(--color-primary1) text-white rounded-lg hover:bg-(--color-hover) transition-colors"
+      >
+        Recargar página
+      </button>
+    </div>
+  </div>
+)
+
+// ErrorBoundary específico para Suspense (captura errores de lazy loading)
+class SuspenseErrorBoundary extends ErrorBoundary {
+  render() {
+    if (this.state.hasError) {
+      return <LazyLoadError error={this.state.error} retry={this.handleReload} />;
+    }
+    return this.props.children;
+  }
+}
+
 export const App = () => {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
   const { home, auth, products, support, admin } = API_PATHS
+
+  // Global error handlers
+  useEffect(() => {
+    // Captura errores síncronos no manejados (window.onerror)
+    const handleError = (event) => {
+      console.error('[Global Error Handler]', {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        error: event.error,
+      });
+
+      // Enviar a servicio de logging en producción
+      if (import.meta.env.PROD) {
+        // TODO: Integrar con Sentry/LogRocket
+        // Sentry.captureException(event.error);
+      }
+
+      // No prevenir el comportamiento por defecto para que ErrorBoundary lo capture
+      // return true; // Esto evitaría que se propague
+    };
+
+    // Captura promesas rechazadas sin .catch() (unhandledrejection)
+    const handleUnhandledRejection = (event) => {
+      console.error('[Unhandled Promise Rejection]', {
+        reason: event.reason,
+        promise: event.promise,
+      });
+
+      // Enviar a servicio de logging en producción
+      if (import.meta.env.PROD) {
+        // TODO: Integrar con Sentry/LogRocket
+        // Sentry.captureException(event.reason);
+      }
+
+      // Prevenir que el error se muestre en consola por defecto
+      event.preventDefault();
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
 
   return (
     <ErrorBoundary showDetails={import.meta.env.DEV}>
@@ -82,7 +189,8 @@ export const App = () => {
             {!isAdminRoute && <CartDrawer />}
             <ScrollToTop />
             <main className='main w-full'>
-          <Suspense fallback={<PageLoader />}>
+          <SuspenseErrorBoundary>
+            <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path='/' element={<HomePage />} />
               <Route path={home.landing} element={<HomePage />} />
@@ -117,6 +225,9 @@ export const App = () => {
                 <Route path={admin.categories} element={<EntornoAdmin><AdminCategoriesPage /></EntornoAdmin>} />
                 <Route path={admin.customers} element={<EntornoAdmin><CustomersPage /></EntornoAdmin>} />
                 <Route path={admin.settings} element={<EntornoAdmin><StoreSettingsPage /></EntornoAdmin>} />
+                {import.meta.env.DEV && (
+                  <Route path={admin.test} element={<EntornoAdmin><AdminTestPage /></EntornoAdmin>} />
+                )}
               </Route>
 
               <Route path='/style-guide/*' element={<StyleGuidePage />} />
@@ -128,6 +239,7 @@ export const App = () => {
               <Route path="/error/504" element={<ServerErrorPage statusCode={504} />} />
             </Routes>
           </Suspense>
+          </SuspenseErrorBoundary>
         </main>
             {!isAdminRoute && <Footer />}
           </div>

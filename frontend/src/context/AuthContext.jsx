@@ -18,6 +18,9 @@ const safeParseJson = (value) => {
 };
 
 const identity = (value) => value;
+const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true' || import.meta.env?.MODE === 'development';
+const debugWarn = (...args) => { if (DEBUG_LOGS) console.warn(...args); };
+const debugError = (...args) => { if (DEBUG_LOGS) console.error(...args); };
 
 // ---- Contexto --------------------------------------------------
 export const AuthProvider = ({ children }) => {
@@ -39,12 +42,11 @@ export const AuthProvider = ({ children }) => {
   const [status, setStatus] = useState(() => {
     // Si hay sesión completa guardada (token + user con ID), confiar en ella
     if (token && user && (user.id || user.usuario_id)) {
-      console.log('[AuthContext] 📦 Sesión completa encontrada en localStorage');
       return STATUS.AUTH;
     }
     // Si solo hay token sin user, será token inválido - limpiar en el useEffect
     if (token && !user) {
-      console.warn('[AuthContext] ⚠️ Token sin usuario detectado al iniciar');
+      debugWarn('[AuthContext] ⚠️ Token sin usuario detectado al iniciar');
       return STATUS.IDLE; // No mostrar loader, limpiar en background
     }
     // Sin sesión
@@ -75,14 +77,14 @@ export const AuthProvider = ({ children }) => {
     
     // Solo limpiar si realmente hay inconsistencia al inicio
     if (storedToken && !storedUser) {
-      console.warn('[AuthContext] ⚠️ Token huérfano detectado (sin user), limpiando localStorage...');
+      debugWarn('[AuthContext] ⚠️ Token huérfano detectado (sin user), limpiando localStorage...');
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem('cart');
       localStorage.removeItem('wishlist');
       syncToken(null);
       setStatus(STATUS.IDLE);
     } else if (!storedToken && storedUser) {
-      console.warn('[AuthContext] ⚠️ User huérfano detectado (sin token), limpiando localStorage...');
+      debugWarn('[AuthContext] ⚠️ User huérfano detectado (sin token), limpiando localStorage...');
       localStorage.removeItem(USER_KEY);
       syncUser(null);
       setStatus(STATUS.IDLE);
@@ -90,7 +92,6 @@ export const AuthProvider = ({ children }) => {
   }, []); // Solo al montar, eliminar dependencias para evitar re-ejecución
 
   const logout = useCallback(() => {
-    console.log('[AuthContext] Ejecutando logout y limpiando sesión...');
     // Limpiar token y perfil
     syncToken(null);
     syncUser(null);
@@ -110,13 +111,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
     } catch (e) {
-      console.warn('[AuthContext] No se pudieron limpiar datos del storage', e);
+      debugWarn('[AuthContext] No se pudieron limpiar datos del storage', e);
     }
     // Limpiar cache de React Query para datos protegidos
     try {
       queryClient.clear();
     } catch (e) {
-      console.warn('[AuthContext] Error limpiando cache de QueryClient', e);
+      debugWarn('[AuthContext] Error limpiando cache de QueryClient', e);
     }
     
     // Redirigir según contexto: admin → login, otros → home
@@ -124,7 +125,6 @@ export const AuthProvider = ({ children }) => {
     const isAdminPath = currentPath.startsWith('/admin');
     
     if (isAdminPath) {
-      console.log('[AuthContext] Sesión expirada en admin, redirigiendo a login...');
       navigate("/login", { replace: true, state: { from: currentPath, expired: true } });
     } else {
       navigate("/", { replace: true });
@@ -151,7 +151,6 @@ export const AuthProvider = ({ children }) => {
       const radixPortals = document.querySelectorAll('[data-radix-portal]');
       for (const portal of radixPortals) {
         if (portal?.parentNode) {
-          console.log('[AuthContext] Removiendo portal de Radix huérfano');
           portal.remove();
         }
       }
@@ -160,7 +159,6 @@ export const AuthProvider = ({ children }) => {
       const overlays = document.querySelectorAll('[data-radix-dialog-overlay], [data-radix-sheet-overlay]');
       for (const overlay of overlays) {
         if (overlay?.parentNode) {
-          console.log('[AuthContext] Removiendo overlay de Radix huérfano');
           overlay.remove();
         }
       }
@@ -173,7 +171,7 @@ export const AuthProvider = ({ children }) => {
         const hasOverlay = classList.some(cls => /bg-black|overlay|backdrop/.test(cls));
         
         if (hasHighZIndex && hasOverlay) {
-          console.warn('[AuthContext] Removiendo overlay sospechoso:', overlay.className);
+          debugWarn('[AuthContext] Removiendo overlay sospechoso:', overlay.className);
           overlay.remove();
         }
       }
@@ -192,17 +190,15 @@ export const AuthProvider = ({ children }) => {
 
     (async () => {
       try {
-        console.log('[AuthContext] 🔍 Validando token guardado...');
         const profile = await authApi.profile();
         if (cancelled) return;
         
         // Validar que el perfil tenga ID (identificador único requerido)
         if (!profile || !(profile.id || profile.usuario_id)) {
-          console.error('[AuthContext] ❌ Perfil inválido: sin ID de usuario');
+          debugError('[AuthContext] ❌ Perfil inválido: sin ID de usuario');
           throw new Error('Perfil inválido: sin ID de usuario');
         }
         
-        console.log('[AuthContext] ✅ Token válido, perfil cargado ID:', profile?.id || profile?.usuario_id);
         syncUser(profile);
         setStatus(STATUS.AUTH);
       } catch (err) {
@@ -212,9 +208,9 @@ export const AuthProvider = ({ children }) => {
         const isTokenInvalid = err?.message?.toLowerCase().includes('token') || err?.message?.toLowerCase().includes('sesión');
         
         if (is401 || isTokenInvalid) {
-          console.error('[AuthContext] ❌ Token inválido o expirado, limpiando:', err.message);
+          debugError('[AuthContext] ❌ Token inválido o expirado, limpiando:', err.message);
         } else {
-          console.error('[AuthContext] ❌ Error validando token:', err.message);
+          debugError('[AuthContext] ❌ Error validando token:', err.message);
         }
         
         // Limpiar cualquier token inválido inmediatamente
@@ -240,7 +236,7 @@ export const AuthProvider = ({ children }) => {
         setStatus(STATUS.AUTH);
         return profile;
       } catch (err) {
-        console.error('[AuthContext] Error en login:', err);
+        debugError('[AuthContext] Error en login:', err);
         setError(err);
         setStatus(STATUS.IDLE);
         throw err;

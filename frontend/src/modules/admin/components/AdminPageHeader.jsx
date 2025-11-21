@@ -19,7 +19,7 @@ export function AdminPageHeader({
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-3">
           {icon && (
-            <span className="grid h-10 w-10 place-content-center rounded-2xl bg-[color:var(--surface-subtle)] text-primary1">
+            <span className="grid h-10 w-10 place-content-center rounded-2xl bg-(--surface-subtle) text-primary1">
               {icon}
             </span>
           )}

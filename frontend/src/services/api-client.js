@@ -53,21 +53,21 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
   const baseURL = env.API_BASE_URL;
   const url = new URL(path, baseURL);
   if (params) {
-    Object.entries(params).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(params)) {
       if (value === undefined || value === null || value === "") {
-        return;
+        continue;
       }
       if (Array.isArray(value)) {
-        value.forEach((item) => {
+        for (const item of value) {
           if (item === undefined || item === null) {
-            return;
+            continue;
           }
           url.searchParams.append(key, String(item));
-        });
-        return;
+        }
+        continue;
       }
       url.searchParams.append(key, String(value));
-    });
+    }
   }
 
   const controller = new AbortController();

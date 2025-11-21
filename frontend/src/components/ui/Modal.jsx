@@ -103,7 +103,7 @@ export function Modal({
       {/* Overlay */}
       <div
         className={cx(
-          "absolute inset-0 bg-[color:var(--overlay-dark)] transition-opacity duration-200",
+          "absolute inset-0 bg-(--overlay-dark) transition-opacity duration-200",
           isExiting ? "opacity-0" : "opacity-100"
         )}
         onClick={handleOverlayClick}
@@ -116,13 +116,13 @@ export function Modal({
           <div
             className={cx(
               "flex items-center justify-between gap-4",
-              "px-6 py-4 border-b border-[color:var(--color-border)]",
+              "px-6 py-4 border-b border-(--color-border)",
               headerClassName
             )}
           >
             <div className="min-w-0 flex-1">
               {typeof title === "string" ? (
-                <h2 className="text-lg font-semibold text-[color:var(--color-text)] truncate">
+                <h2 className="text-lg font-semibold text-(--color-text) truncate">
                   {title}
                 </h2>
               ) : (
@@ -135,10 +135,10 @@ export function Modal({
                 onClick={handleClose}
                 className={cx(
                   "shrink-0 p-2 rounded-full",
-                  "text-[color:var(--color-text-secondary)]",
-                  "hover:bg-[color:var(--color-neutral3)]/30",
+                  "text-(--color-text-secondary)",
+                  "hover:bg-(--color-neutral3)/30",
                   "transition-colors duration-150",
-                  "focus:outline-none focus:ring-2 focus:ring-[color:var(--color-primary1)]/40"
+                  "focus:outline-none focus:ring-2 focus:ring-(--color-primary1)/40"
                 )}
                 aria-label="Cerrar modal"
               >
@@ -166,7 +166,7 @@ export function Modal({
         {footer && (
           <div
             className={cx(
-              "px-6 py-4 border-t border-[color:var(--color-border)]",
+              "px-6 py-4 border-t border-(--color-border)",
               "flex items-center justify-end gap-3",
               footerClassName
             )}

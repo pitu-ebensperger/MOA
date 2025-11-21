@@ -22,6 +22,19 @@ const normalizeOrder = (order, index) => {
   };
 };
 
+const orderPropShape = PropTypes.shape({
+  orden_id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  order_code: PropTypes.string,
+  orderCode: PropTypes.string,
+  total_cents: PropTypes.number,
+  totalCents: PropTypes.number,
+  total_items: PropTypes.number,
+  items: PropTypes.arrayOf(PropTypes.object),
+  creado_en: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+});
+
 const OrderSection = ({ orders = [], isLoading = false, error = null }) => {
   const navigate = useNavigate();
   const recentOrders = (Array.isArray(orders) ? orders : [])
@@ -107,9 +120,9 @@ const OrderSection = ({ orders = [], isLoading = false, error = null }) => {
 };
 
 OrderSection.propTypes = {
-  orders: PropTypes.array,
+  orders: PropTypes.arrayOf(orderPropShape),
   isLoading: PropTypes.bool,
-  error: PropTypes.any,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
 };
 
 export default OrderSection;

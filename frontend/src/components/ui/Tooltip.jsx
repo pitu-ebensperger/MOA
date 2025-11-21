@@ -29,23 +29,26 @@ export function Tooltip({
     let top = 0;
     let left = 0;
 
+    const arrowSize = 6; // Tamaño de la flecha
+    const offset = 12; // Distancia entre el trigger y el tooltip
+
     switch (position) {
       case "top":
-        top = rect.top - 8;
+        top = rect.top - offset;
         left = rect.left + rect.width / 2;
         break;
       case "bottom":
-        top = rect.bottom + 8;
+        top = rect.bottom + offset;
         left = rect.left + rect.width / 2;
         break;
       case "left":
         top = rect.top + rect.height / 2;
-        left = rect.left - 8;
+        left = rect.left - offset;
         break;
       case "right":
       default:
         top = rect.top + rect.height / 2;
-        left = rect.right + 8;
+        left = rect.right + offset;
         break;
     }
 
@@ -93,6 +96,47 @@ export function Tooltip({
       })
     : children;
 
+  const getArrowClasses = () => {
+    const baseClasses = "absolute w-0 h-0 border-[6px] border-solid";
+    const variantBorder = variant === "primary" 
+      ? "border-[color:var(--color-primary1)]"
+      : variant === "soft"
+      ? "border-[color:var(--color-neutral4)]"
+      : "border-[color:var(--color-dark)]";
+
+    switch (position) {
+      case "top":
+        return cx(
+          baseClasses,
+          variantBorder,
+          "border-t-[color:inherit] border-r-transparent border-b-transparent border-l-transparent",
+          "top-full left-1/2 -translate-x-1/2"
+        );
+      case "bottom":
+        return cx(
+          baseClasses,
+          variantBorder,
+          "border-b-[color:inherit] border-t-transparent border-r-transparent border-l-transparent",
+          "bottom-full left-1/2 -translate-x-1/2"
+        );
+      case "left":
+        return cx(
+          baseClasses,
+          variantBorder,
+          "border-l-[color:inherit] border-t-transparent border-r-transparent border-b-transparent",
+          "left-full top-1/2 -translate-y-1/2"
+        );
+      case "right":
+      default:
+        return cx(
+          baseClasses,
+          variantBorder,
+          "border-r-[color:inherit] border-t-transparent border-l-transparent border-b-transparent",
+          "right-full top-1/2 -translate-y-1/2"
+        );
+    }
+  };
+
   const tooltipContent = isVisible && typeof document !== "undefined" ? ReactDOM.createPortal(
     <span
       id={tooltipId}
@@ -101,10 +145,14 @@ export function Tooltip({
         position: "fixed",
         top: `${coords.top}px`,
         left: `${coords.left}px`,
-        transform: position === "top" || position === "bottom" ? "translateX(-50%)" : position === "left" ? "translate(-100%, -50%)" : "translateY(-50%)",
+        transform: position === "top" || position === "bottom" 
+          ? "translate(-50%, -100%)" 
+          : position === "left" 
+          ? "translate(-100%, -50%)" 
+          : "translateY(-50%)",
       }}
       className={cx(
-        "pointer-events-none z-[var(--z-tooltip)] whitespace-nowrap",
+        "pointer-events-none z-(--z-tooltip) whitespace-nowrap relative",
         "rounded-md px-3 py-2 text-[0.75rem] leading-snug shadow-lg",
         "opacity-0 invisible",
         "transition-all duration-150 ease-out",
@@ -113,6 +161,7 @@ export function Tooltip({
       )}
     >
       {label}
+      <span className={getArrowClasses()} />
     </span>,
     document.body
   ) : null;
