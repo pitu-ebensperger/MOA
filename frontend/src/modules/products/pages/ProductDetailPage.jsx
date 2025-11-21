@@ -9,8 +9,10 @@ import { productsApi } from "@/services/products.api.js"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { useCategories } from "@/modules/products/hooks/useCategories.js"
 import { API_PATHS } from "@/config/api-paths.js"
-import { Minus, Plus, Recycle, ShieldCheck, Truck } from "lucide-react";
+import { Minus, Plus, Recycle, ShieldCheck, Truck } from "@icons/lucide";
 import { useCartContext } from "@/context/cart-context.js"
+import { useAuth } from "@/context/auth-context.js"
+import { alertAuthRequired } from "@/utils/alerts.js"
 
 const initialState = {
   product: null,
@@ -266,17 +268,29 @@ export const ProductDetailPage = () => {
                   <Price value={product.compareAtPrice} className="text-base text-neutral-400 line-through" />
                 )}
               </div>
-              <p className="mt-1 text-sm text-(--color-secondary1)">
-                {product.stock > 0 ? "En stock" : "Sin stock"}
-              </p>
+              <div className="mt-2 inline-flex items-center gap-2">
+                {product.stock > 0 ? (
+                  <>
+                    <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+                      ✓ En stock
+                    </span>
+                    <span className="text-xs text-neutral-500">({product.stock} disponibles)</span>
+                  </>
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
+                    ✕ Sin stock
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex items-center justify-between rounded-full px-4 py-2 text-lg font-medium text-neutral-900 sm:w-40 border border-(--border-subtle)">
+              <div className={`flex items-center justify-between rounded-full px-4 py-2 text-lg font-medium text-neutral-900 sm:w-40 border border-(--border-subtle) ${product.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 <button
                   type="button"
                   onClick={handleDecrease}
-                  className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
+                  disabled={product.stock <= 0}
+                  className="text-(--color-secondary1) transition hover:text-(--color-primary1) disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Disminuir cantidad"
                 >
                   <Minus className="size-4" aria-hidden />
@@ -285,7 +299,8 @@ export const ProductDetailPage = () => {
                 <button
                   type="button"
                   onClick={handleIncrease}
-                  className="text-(--color-secondary1) transition hover:text-(--color-primary1)"
+                  disabled={product.stock <= 0}
+                  className="text-(--color-secondary1) transition hover:text-(--color-primary1) disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label="Aumentar cantidad"
                 >
                   <Plus className="size-4" aria-hidden />

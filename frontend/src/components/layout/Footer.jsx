@@ -1,8 +1,7 @@
-import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from "@icons/lucide";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { API_PATHS } from "@/config/api-paths.js";
-import { getStoreConfig } from "@/services/config.api.js";
+import { useStoreConfig } from "@/hooks/useStoreConfig.js";
 
 const HELP_LINKS = [
   { label: "Contacto", href: API_PATHS.support.contact },
@@ -17,32 +16,7 @@ const LEGAL_LINKS = [
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const [storeConfig, setStoreConfig] = useState({
-    nombre_tienda: 'MOA',
-    descripcion: 'Muebles y decoración de diseño contemporáneo para crear espacios únicos. Calidad, estilo y funcionalidad en cada pieza.',
-    direccion: 'Providencia 1234, Santiago, Chile',
-    telefono: '+56 2 2345 6789',
-    email: 'hola@moastudio.cl',
-    instagram_url: 'https://instagram.com/moastudio',
-    facebook_url: 'https://facebook.com/moastudio',
-    twitter_url: 'https://twitter.com/moastudio'
-  });
-
-  useEffect(() => {
-    const loadConfig = async () => {
-      try {
-        const response = await getStoreConfig();
-        if (response.data) {
-          setStoreConfig(response.data);
-        }
-      } catch (error) {
-        console.error('Error al cargar configuración:', error);
-        // Mantener valores por defecto
-      }
-    };
-    
-    loadConfig();
-  }, []);
+  const { config: storeConfig } = useStoreConfig();
 
   const SOCIAL_LINKS = [
     { label: "Instagram", href: storeConfig.instagram_url, icon: Instagram },

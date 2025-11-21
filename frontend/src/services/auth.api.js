@@ -29,17 +29,27 @@ export const authApi = {
   },
 
   async requestPasswordReset(payload = {}) {
+    const body =
+      typeof payload === 'string'
+        ? { email: payload }
+        : payload ?? {};
+
     const res = await apiClient.post(
       API_PATHS.auth.requestPasswordReset,
-      payload
+      body
     )
     return res
   },
 
   async resetPassword(payload = {}) {
+    const body =
+      payload && typeof payload === 'object'
+        ? payload
+        : { token: payload?.token, password: payload?.password };
+
     const res = await apiClient.post(
       API_PATHS.auth.resetPassword,
-      payload
+      body
     )
     return res
   },

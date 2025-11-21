@@ -1,8 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
+import { 
+  CheckCircle, 
+  Package, 
+  Truck, 
+  Receipt, 
+  MapPin, 
+  Calendar,
+  CreditCard,
+  Download,
+  Home,
+  ShoppingBag,
+  Mail,
+  Phone
+} from "@icons/lucide"
 
 import { Button } from "@/components/ui/Button.jsx"
 import { Spinner } from "@/components/ui/Spinner.jsx"
+import { Badge } from "@/components/ui/Badge.jsx"
 import { getOrderById } from "@/services/checkout.api.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { formatCurrencyCLP } from "@/utils/currency.js"
@@ -168,212 +183,198 @@ export const OrderConfirmationPage = () => {
   const trackingUrl = getTrackingUrl(trackingNumber)
 
   const paymentLabel =
-    order?.payment?.provider ?? "Pago por confirmar con nuestro equipo"
+    order?.payment?.provider ?? order?.metodo_pago ?? "Pago por confirmar con nuestro equipo"
 
   const shippingMethod = order?.shipment?.carrier ?? order?.metodo_despacho ?? "Despacho estándar"
+  
+  const orderCode = order?.order_code ?? order?.number ?? order?.id ?? "-"
+  const orderStatus = order?.estado_pago ?? order?.status ?? "pending"
+  
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      completado: { label: 'Pagado', variant: 'success' },
+      pending: { label: 'Pendiente', variant: 'warning' },
+      processing: { label: 'Procesando', variant: 'info' },
+      cancelled: { label: 'Cancelado', variant: 'danger' },
+      approved: { label: 'Aprobado', variant: 'success' }
+    }
+    return statusConfig[status?.toLowerCase()] ?? { label: status, variant: 'default' }
+  }
+
   return (
-    <main className="page min-h-screen bg-(--color-light) py-12">
-      <div className="mx-auto w-full max-w-6xl space-y-6 px-4">
-        <div className="space-y-4">
-          <h1 className="text-3xl font-semibold text-(--text-strong)">Tu compra está confirmada</h1>
-          <p className="text-sm text-(--text-muted)">
-            Se ha emitido un comprobante por tu compra. Revísalo con calma y guarda la clave de seguimiento.
-          </p>
+    <main className="page min-h-screen bg-neutral-50 py-8 md:py-16">
+      <div className="mx-auto w-full max-w-3xl px-4 md:px-6">
+        <div className="bg-white rounded-3xl shadow-xl border border-neutral-200 p-6 md:p-10 space-y-8">
+        {/* Success Header */}
+        <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-linear-to-br from-(--color-success) to-green-600 shadow-lg shadow-green-500/50">
+            <CheckCircle className="h-12 w-12 text-white" strokeWidth={2.5} />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-(--color-primary1)">
+              ¡Compra confirmada!
+            </h1>
+            <p className="text-base md:text-lg text-(--color-text-secondary) max-w-2xl mx-auto">
+              Tu pedido <span className="font-semibold text-(--color-primary1)">#{orderCode}</span> ha sido recibido exitosamente
+            </p>
+          </div>
+          {order && (
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <Badge variant={getStatusBadge(orderStatus).variant} className="text-sm px-4 py-1.5">
+                {getStatusBadge(orderStatus).label}
+              </Badge>
+              {trackingNumber && (
+                <Badge variant="outline" className="text-sm px-4 py-1.5">
+                  <Package className="h-3.5 w-3.5 mr-1.5" />
+                  Tracking: {trackingNumber.slice(0, 12)}...
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
 
         {error && (
-          <div className="rounded-2xl border border-(--color-denial) bg-(--overlay-soft) p-4 text-sm text-(--color-denial)">
-            {error}
+          <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-6 text-center shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
+            <p className="text-red-700 font-medium">{error}</p>
           </div>
         )}
 
-        <section className="rounded-4xl bg-white shadow-2xl ring-1 ring-neutral-100">
-          <div className="overflow-hidden">
-            <div className="flex flex-col gap-3 bg-(--color-primary1) px-8 py-8 text-white sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Orden confirmada</p>
-                <p className="text-2xl font-semibold">{order?.number ?? order?.id ?? "-"}</p>
-                <p className="text-sm">{order?.status ? order.status.replaceAll("_", " ") : "Estado pendiente"}</p>
+        {/* Loading State */}
+        {loading && !order && (
+          <div className="flex flex-col items-center justify-center py-20 space-y-4 animate-pulse">
+            <Spinner size="lg" />
+            <p className="text-(--color-text-secondary)">Cargando detalles de tu pedido...</p>
+          </div>
+        )}
+
+        {/* Order Details */}
+        {!loading && order && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Quick Info Row */}
+            <div className="flex flex-col md:flex-row gap-4 justify-between">
+              <div className="flex-1 flex items-center gap-4 bg-neutral-50 rounded-xl p-4">
+                <Calendar className="h-6 w-6 text-(--color-primary1)" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-1">Fecha de pedido</p>
+                  <p className="text-lg font-bold text-(--color-primary1)">{formatDate_ddMMyyyy(order?.createdAt ?? order?.created_at) || "-"}</p>
+                </div>
               </div>
-              <div className="space-y-1 text-right">
-                <p className="text-sm text-white/80">Fecha</p>
-                <p className="text-lg font-semibold">{formatDate_ddMMyyyy(order?.createdAt ?? order?.created_at) || "-"}</p>
-                {summary && (
-                  <p className="text-sm">Total pagado: <span className="font-semibold">{formatCurrencyCLP(summary.total)}</span></p>
-                )}
+              <div className="flex-1 flex items-center gap-4 bg-green-50 rounded-xl p-4">
+                <Truck className="h-6 w-6 text-green-600" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-1">Entrega estimada</p>
+                  <p className="text-lg font-bold text-green-600">{formattedEstimatedDelivery || "Próximamente"}</p>
+                </div>
+              </div>
+              <div className="flex-1 flex items-center gap-4 bg-linear-to-br from-(--color-primary1) to-(--color-primary2) rounded-xl p-4">
+                <CreditCard className="h-6 w-6 text-white" />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/80 mb-1">Total pagado</p>
+                  <p className="text-2xl font-bold text-white">{summary ? formatCurrencyCLP(summary.total) : '$0'}</p>
+                </div>
               </div>
             </div>
 
-            {loading && !order && (
-              <div className="flex items-center justify-center py-10">
-                <Spinner size="lg" />
+            {/* Main Content - Single Column */}
+            <div className="space-y-8">
+              {/* Shipping & Payment */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Shipping Address */}
+                <div>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-(--color-primary1)/10">
+                      <MapPin className="h-5 w-5 text-(--color-primary1)" />
+                    </div>
+                    <h2 className="text-lg font-bold text-(--color-primary1)">Dirección de envío</h2>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-(--text-strong)">{order?.userName ?? order?.usuario_nombre ?? "Cliente"}</p>
+                      <div className="mt-2 space-y-1 text-sm text-neutral-700">
+                        {order?.address?.street && (<p className="flex items-start gap-2"><span className="text-neutral-400 mt-0.5">•</span>{order.address.street}</p>)}
+                        {(order?.address?.commune || order?.address?.city) && (<p className="flex items-start gap-2"><span className="text-neutral-400 mt-0.5">•</span>{[order.address.commune, order.address.city].filter(Boolean).join(", ")}</p>)}
+                        {order?.address?.region && (<p className="flex items-start gap-2"><span className="text-neutral-400 mt-0.5">•</span>{order.address.region}</p>)}
+                      </div>
+                    </div>
+                    {order?.userEmail && (<div className="pt-3 border-t border-neutral-200"><div className="flex items-center gap-2 text-sm text-neutral-600"><Mail className="h-4 w-4" /><span className="truncate">{order.userEmail}</span></div></div>)}
+                    {order?.address?.telefono_contacto && (<div className="flex items-center gap-2 text-sm text-neutral-600"><Phone className="h-4 w-4" /><span>{order.address.telefono_contacto}</span></div>)}
+                    {(order?.notas_cliente || order?.notes) && (<div className="pt-3 border-t border-neutral-200"><p className="text-xs font-semibold text-neutral-500 mb-1">Notas:</p><p className="text-sm italic text-neutral-600">"{order.notas_cliente ?? order.notes}"</p></div>)}
+                  </div>
+                </div>
+                {/* Payment & Shipping Method */}
+                <div>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center gap-3 mb-3"><div className="p-2 rounded-lg bg-blue-100"><CreditCard className="h-5 w-5 text-blue-600" /></div><h3 className="text-sm font-semibold text-neutral-700">Método de pago</h3></div>
+                      <p className="text-base font-medium text-(--text-strong) ml-11">{paymentLabel}</p>
+                      {order?.payment?.status && (<Badge variant="outline" className="ml-11 mt-2">{order.payment.status}</Badge>)}
+                    </div>
+                    <div className="border-t border-neutral-200 pt-4"><div className="flex items-center gap-3 mb-3"><div className="p-2 rounded-lg bg-green-100"><Truck className="h-5 w-5 text-green-600" /></div><h3 className="text-sm font-semibold text-neutral-700">Método de envío</h3></div><p className="text-base font-medium text-(--text-strong) ml-11">{shippingMethod}</p></div>
+                  </div>
+                  {/* Tracking Info */}
+                  {trackingNumber && (<div className="bg-linear-to-br from-(--color-primary2) to-(--color-primary1) rounded-xl p-4 text-white mt-6"><div className="flex items-center gap-3 mb-3"><Package className="h-5 w-5" /><h3 className="text-sm font-semibold">Número de seguimiento</h3></div><p className="text-lg font-mono font-bold break-all">{trackingNumber}</p>{order?.shipment?.carrier && (<p className="text-sm text-white/80 mt-2">Courier: {order.shipment.carrier}</p>)}{trackingUrl && (<Button as="a" href={trackingUrl} target="_blank" rel="noreferrer" appearance="solid" intent="neutral" className="w-full mt-4 bg-white text-(--color-primary1) hover:bg-neutral-100">Ver tracking en tiempo real</Button>)}</div>)}
+                </div>
               </div>
-            )}
-
-            {!loading && order && (
-              <div className="space-y-6 px-6 py-8 md:px-10">
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Entrega estimada</p>
-                    <p className="text-lg font-semibold text-(--text-strong)">
-                      {formattedEstimatedDelivery || "Próximamente"}
-                    </p>
-                    <p className="text-sm text-neutral-600">{shippingMethod}</p>
-                  </div>
-                  <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500">Método de pago</p>
-                    <p className="text-lg font-semibold text-(--text-strong)">{paymentLabel}</p>
-                    {order?.payment?.status && (
-                      <p className="text-sm text-neutral-600">{order.payment.status}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid gap-6 md:grid-cols-2">
-                  <div className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-                    <h2 className="text-lg font-semibold text-(--text-strong)">Información de envío</h2>
-                    <p className="text-sm text-neutral-600">{order?.userName ?? "Cliente"}</p>
-                    <div className="mt-3 space-y-1 text-sm text-neutral-700">
-                      {order?.address?.street && <p>{order.address.street}</p>}
-                      {(order?.address?.commune || order?.address?.city) && (
-                        <p>
-                          {[order.address.commune, order.address.city]
-                            .filter(Boolean)
-                            .join(", ")}
-                        </p>
-                      )}
-                      {order?.address?.region && <p>{order.address.region}</p>}
-                      {order?.address?.country && <p>{order.address.country}</p>}
-                      {order?.userEmail && <p>Email: {order.userEmail}</p>}
-                      {order?.address?.telefono_contacto && (
-                        <p>Teléfono: {order.address.telefono_contacto}</p>
-                      )}
-                    </div>
-                    {(order?.notas_cliente || order?.notes) && (
-                      <p className="mt-2 text-sm italic text-neutral-500">
-                        "{order.notas_cliente ?? order.notes}"
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="rounded-3xl border border-neutral-100 bg-white p-6 shadow-sm">
-                    <h2 className="text-lg font-semibold text-(--text-strong)">Seguimiento</h2>
-                    <p className="text-sm text-neutral-600 truncate">{trackingNumber ?? "Próximo paso"}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-(--color-primary1)/10 px-3 py-1 text-xs font-semibold text-(--color-primary1)">
-                        {order?.shipment?.status ? order.shipment.status.replaceAll("_", " ") : "Pendiente"}
-                      </span>
-                      {order?.shipment?.carrier && (
-                        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
-                          {order.shipment.carrier}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-(--text-strong)">
-                      Resumen de productos ({items.length})
-                    </h2>
-                    <p className="text-sm font-semibold text-neutral-500">
-                      {formatCurrencyCLP(summary?.subtotal ?? 0)} antes de envío
-                    </p>
-                  </div>
-                  <div className="mt-6 space-y-4">
+              {/* Products & Summary */}
+              <div className="space-y-8">
+                {/* Products List */}
+                <div>
+                  <div className="flex items-center gap-3 mb-6"><div className="p-2 rounded-lg bg-(--color-primary1)/10"><ShoppingBag className="h-5 w-5 text-(--color-primary1)" /></div><h2 className="text-xl font-bold text-(--color-primary1)">Productos ({items.length})</h2></div>
+                  <div className="space-y-3">
                     {items.map((item, index) => {
-                      const { value, quantity } = resolveItemUnit(item)
-                      const name =
-                        item.producto_nombre ?? item.nombre ?? item.name ?? "Producto"
+                      const { value, quantity } = resolveItemUnit(item);
+                      const name = item.producto_nombre ?? item.nombre ?? item.name ?? "Producto";
+                      const imageUrl = item.imagen_url ?? item.image ?? null;
                       return (
-                        <article
-                          key={`${name}-${index}`}
-                          className="flex items-start gap-4 rounded-2xl border border-neutral-100 p-4"
-                        >
-                          <div className="flex-1">
-                            <p className="font-medium text-neutral-800">{name}</p>
-                            <p className="text-xs text-neutral-500">Cantidad: {quantity}</p>
+                        <article key={`${name}-${index}`} className="flex items-start gap-4 rounded-xl border border-neutral-200 p-4 hover:border-(--color-primary1) hover:shadow-md transition-all duration-200">
+                          {imageUrl && (
+                            <div className="w-16 h-16 rounded-lg bg-neutral-100 flex items-center justify-center overflow-hidden shrink-0">
+                              <img src={imageUrl} alt={name} className="w-full h-full object-cover" onError={(e) => {e.target.style.display = 'none'}} />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-(--text-strong) truncate">{name}</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="text-xs text-neutral-500">Cantidad: <span className="font-semibold text-neutral-700">{quantity}</span></span>
+                              <span className="text-xs text-neutral-400">•</span>
+                              <span className="text-xs text-neutral-500">{formatCurrencyCLP(value)} c/u</span>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-sm text-neutral-500">
-                              {formatCurrencyCLP(value)} c/u
-                            </p>
-                            <p className="text-base font-semibold text-(--text-strong)">
-                              {formatCurrencyCLP(value * quantity)}
-                            </p>
+                          <div className="text-right shrink-0">
+                            <p className="text-lg font-bold text-(--color-primary1)">{formatCurrencyCLP(value * quantity)}</p>
                           </div>
                         </article>
-                      )
+                      );
                     })}
                   </div>
                 </div>
-
-                <div className="rounded-3xl border border-neutral-200 bg-neutral-50 p-6 shadow-sm">
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">Subtotal</span>
-                      <span className="font-semibold text-(--text-strong)">{formatCurrencyCLP(summary?.subtotal ?? 0)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">Envío</span>
-                      <span className="font-semibold text-(--text-strong)">{formatCurrencyCLP(summary?.shipping ?? 0)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">Impuestos</span>
-                      <span className="font-semibold text-(--text-strong)">{formatCurrencyCLP(summary?.tax ?? 0)}</span>
-                    </div>
-                    <div className="border-t border-neutral-300 pt-3 text-base font-semibold text-(--text-strong)">
-                      <div className="flex justify-between">
-                        <span>Total pagado</span>
-                        <span>{formatCurrencyCLP(summary?.total ?? 0)}</span>
-                      </div>
-                    </div>
+                {/* Order Summary */}
+                <div>
+                  <h3 className="text-lg font-bold text-(--color-primary1) mb-4">Resumen del pedido</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between py-2"><span className="flex items-center gap-2 text-sm text-neutral-600"><Package className="h-4 w-4" />Subtotal</span><span className="font-semibold text-(--text-strong)">{formatCurrencyCLP(summary?.subtotal ?? 0)}</span></div>
+                    <div className="flex items-center justify-between py-2"><span className="flex items-center gap-2 text-sm text-neutral-600"><Truck className="h-4 w-4" />Envío</span><span className="font-semibold text-(--text-strong)">{summary?.shipping > 0 ? formatCurrencyCLP(summary.shipping) : (<span className="text-green-600">Gratis</span>)}</span></div>
+                    {summary?.tax > 0 && (<div className="flex items-center justify-between py-2"><span className="flex items-center gap-2 text-sm text-neutral-600"><Receipt className="h-4 w-4" />Impuestos</span><span className="font-semibold text-(--text-strong)">{formatCurrencyCLP(summary.tax)}</span></div>)}
+                    <div className="border-t-2 border-neutral-200 pt-4 mt-2"><div className="flex items-center justify-between"><span className="text-lg font-bold text-(--color-primary1)">Total</span><span className="text-2xl font-bold text-(--color-primary1)">{formatCurrencyCLP(summary?.total ?? 0)}</span></div></div>
                   </div>
                 </div>
-
-                <div className="flex flex-col gap-3 pt-1 sm:flex-row">
-                  <Button
-                    as={trackingUrl ? "a" : "button"}
-                    href={trackingUrl ?? undefined}
-                    target={trackingUrl ? "_blank" : undefined}
-                    rel={trackingUrl ? "noreferrer" : undefined}
-                    intent="primary"
-                    appearance="solid"
-                    className="w-full"
-                    disabled={!trackingUrl}
-                  >
-                    Ver tracking
-                  </Button>
-                  <Button
-                    appearance="outline"
-                    intent="neutral"
-                    className="w-full"
-                    onClick={() => globalThis.print()}
-                  >
-                    Descargar comprobante
-                  </Button>
-                  <Button
-                    appearance="ghost"
-                    intent="neutral"
-                    className="w-full"
-                    onClick={() => navigate(API_PATHS.auth.profile)}
-                  >
-                    Volver a mis compras
-                  </Button>
-                  <Button
-                    appearance="ghost"
-                    intent="neutral"
-                    className="w-full"
-                    onClick={() => navigate("/", { replace: true })}
-                  >
-                    Volver a inicio
-                  </Button>
+                {/* Action Buttons */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                  <Button appearance="solid" intent="primary" className="w-full" onClick={() => globalThis.print()}><Download className="h-4 w-4 mr-2" />Descargar comprobante</Button>
+                  <Button appearance="outline" intent="primary" className="w-full" onClick={() => navigate(API_PATHS.auth.profile)}><ShoppingBag className="h-4 w-4 mr-2" />Ver mis pedidos</Button>
+                  <Button appearance="outline" intent="neutral" className="w-full sm:col-span-2" onClick={() => navigate("/", { replace: true })}><Home className="h-4 w-4 mr-2" />Volver a inicio</Button>
                 </div>
               </div>
-            )}
+            </div>
+            {/* Email Notification Notice */}
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-6 text-center">
+              <div className="flex items-center justify-center gap-3 mb-2"><Mail className="h-5 w-5 text-blue-600" /><h3 className="text-lg font-semibold text-blue-900">Confirmación enviada</h3></div>
+              <p className="text-sm text-blue-700">Hemos enviado un correo de confirmación a <span className="font-semibold">{order?.userEmail ?? 'tu email'}</span> con todos los detalles de tu pedido.</p>
+              <p className="text-xs text-blue-600 mt-2">Si no lo encuentras, revisa tu carpeta de spam o correo no deseado.</p>
+            </div>
           </div>
-        </section>
+        )}
+        </div>
       </div>
     </main>
   )

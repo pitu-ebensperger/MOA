@@ -8,6 +8,8 @@ export const API_PATHS = {
     profile: "/auth/perfil",
     forgot: "/auth/olvidaste-contrasena",
     reset: "/auth/restablecer-contrasena",
+    requestPasswordReset: "/api/auth/request-password-reset",
+    resetPassword: "/api/auth/reset-password",
   },
   products: {
     products: "/productos",

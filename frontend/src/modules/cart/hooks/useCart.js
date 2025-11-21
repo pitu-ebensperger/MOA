@@ -3,20 +3,21 @@ import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useAuth } from "@/context/auth-context.js"
 import { cartApi } from "@/services/cart.api.js"
 import { API_PATHS } from "@/config/api-paths.js"
-import { alertAuthRequired } from '@/utils/alerts.js'
+import { alertAuthRequired, alertError } from '@/utils/alerts.js'
 import { productsApi } from "@/services/products.api.js"
 
 const CART_STORAGE_KEY = "cart";
 
 export const useCart = () => {
   const { token, status } = useAuth();
+  const isSessionReady = Boolean(token) && status === "authenticated";
 
+  // Solo cargar carrito de localStorage si hay sesión activa
   const [cartItems, setCartItems] = usePersistentState(CART_STORAGE_KEY, {
     initialValue: [],
+    enabled: isSessionReady, // Solo persistir si hay sesión
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
-  const isSessionReady = Boolean(token) && status === "authenticated";
 
   const ensureAuthenticated = () => {
     if (isSessionReady) return true;
@@ -33,20 +34,33 @@ export const useCart = () => {
     ...item,
   });
 
+  // Cerrar drawer al desmontar el componente (prevenir memory leaks)
+  useEffect(() => {
+    return () => {
+      setIsDrawerOpen(false);
+      console.log('[useCart] Componente desmontado, drawer cerrado');
+    };
+  }, []);
+
   useEffect(() => {
     if (!isSessionReady) {
-        console.log('[useCart] Session not ready, clearing cart');
       setCartItems([]);
+      setIsDrawerOpen(false); // Cerrar drawer si no hay sesión
+      // Limpiar localStorage explícitamente si no hay sesión
+      try {
+        localStorage.removeItem(CART_STORAGE_KEY);
+        console.log('[useCart] Carrito limpiado (sin sesión), items:', 0);
+      } catch (e) {
+        console.warn('[useCart] No se pudo limpiar carrito del storage', e);
+      }
       return;
     }
 
     let cancelled = false;
-  console.log('[useCart] Loading cart from API...');
 
     (async () => {
       try {
         const data = await cartApi.get();
-          console.log('[useCart] Cart data received:', data);
         if (cancelled) return;
 
         if (Array.isArray(data?.items)) {
@@ -83,37 +97,51 @@ export const useCart = () => {
   const addToCart = async (product) => {
     if (!ensureAuthenticated()) return;
     const productId = product?.id ?? product?.producto_id;
-      console.log('[useCart] addToCart called with product:', product, 'productId:', productId);
-    if (!productId) return;
+    if (!productId) {
+      console.warn('[useCart] addToCart: productId inválido', product);
+      return;
+    }
 
+    console.log('[useCart] addToCart iniciado, productId:', productId);
     try {
       const response = await cartApi.add(productId, 1);
-        console.log('[useCart] API response:', response);
       const normalized = response?.item ? normalizeCartItem(response.item) : null;
-  console.log('[useCart] Normalized item:', normalized);
 
       setCartItems((prevCart) => {
+        console.log('[useCart] Actualizando carrito, prevCart.length:', prevCart.length);
         const existing = prevCart.find((item) => item.id === productId);
+        
         if (normalized && existing) {
-          return prevCart.map((item) =>
+          const updated = prevCart.map((item) =>
             item.id === productId
               ? { ...item, quantity: normalized.quantity, name: item.name || product.name, imgUrl: item.imgUrl || product.imgUrl }
               : item
           );
+          console.log('[useCart] Producto existente actualizado, newCart.length:', updated.length);
+          return updated;
         }
 
         const baseItem = normalized
           ? { ...normalized, name: normalized.name || product.name, imgUrl: normalized.imgUrl || product.imgUrl, slug: normalized.slug || product.slug }
           : { ...product, id: productId, quantity: 1 };
+          
         if (existing) {
-          return prevCart.map((item) =>
+          const updated = prevCart.map((item) =>
             item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
           );
+          console.log('[useCart] Cantidad incrementada, newCart.length:', updated.length);
+          return updated;
         }
-        return [...prevCart, baseItem];
+        
+        const newCart = [...prevCart, baseItem];
+        console.log('[useCart] Producto agregado, newCart.length:', newCart.length);
+        return newCart;
       });
     } catch (err) {
       console.error("Error addToCart:", err);
+      const errorMsg = err?.response?.data?.message || err?.message || 'No se pudo agregar el producto al carrito';
+      alertError(errorMsg);
+      throw err;
     }
   };
 
@@ -164,6 +192,9 @@ export const useCart = () => {
     try {
       await cartApi.clear();
       setCartItems([]);
+      // Forzar limpieza del localStorage
+      localStorage.removeItem(CART_STORAGE_KEY);
+      console.log('[useCart] Carrito limpiado, items:', 0);
     } catch (err) {
       console.error("Error clearCart:", err);
     }

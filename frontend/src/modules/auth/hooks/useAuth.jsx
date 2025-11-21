@@ -20,7 +20,8 @@ export function AdminRoute() {
   const location = useLocation();
 
   if (!isAuthenticated) {
-    return <AdminUnauthorizedPage type="auth" state={{ from: location }} />;
+    // Redirigir a login con la ruta admin desde donde venía
+    return <Navigate to={API_PATHS.auth.login} replace state={{ from: location, expired: true }} />;
   }
 
   if (!isAdmin) {

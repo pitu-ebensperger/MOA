@@ -1,6 +1,6 @@
 //path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
 import React from "react";
-import { Plus, RefreshCw, Download, FileSpreadsheet, FileText, ChevronDown } from "lucide-react";
+import { Plus, RefreshCw, Download, FileSpreadsheet, FileText, ChevronDown } from "@icons/lucide";
 
 import { TanstackDataTable } from "@/components/data-display/DataTable.jsx"
 import { Pagination } from "@/components/ui/Pagination.jsx"

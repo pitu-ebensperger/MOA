@@ -1,13 +1,11 @@
 //path/frontend/src/modules/admin/pages/products/ProductsAdminPage.jsx
 import React, { useState, useMemo, useCallback } from "react";
-import { Plus } from "lucide-react";
-import ProductDetailDrawer from "@/modules/admin/components/ProductDetailDrawer.jsx"
+import { Plus, Package, X } from "@icons/lucide";
 import ProductDrawer from "@/modules/admin/components/ProductDrawer.jsx"
 
 import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
-// Toolbar pieces used in separate ProductsToolbar component
-import ProductsToolbar from "@/modules/admin/pages/ProductsToolbar.jsx"
 import { Button } from "@/components/ui/Button.jsx"
+import { Badge } from "@/components/ui/Badge.jsx"
 import { productsApi } from "@/services/products.api.js"
 
 import { useAdminProducts } from "@/modules/admin/hooks/useAdminProducts.js"
@@ -25,7 +23,6 @@ export default function ProductsAdminPage() {
   const [onlyLowStock, setOnlyLowStock] = useState(false);
   const [activeTags, setActiveTags] = useState([]);
   const condensed = false;
-  const [selectedProductView, setSelectedProductView] = useState(null);
   const [selectedProductEdit, setSelectedProductEdit] = useState(null); // holds product being edited
   const [creatingNewProduct, setCreatingNewProduct] = useState(false); // flag for create drawer
 
@@ -102,7 +99,6 @@ export default function ProductsAdminPage() {
 
   const columns = useMemo(() => buildProductColumns({
     categoryMap,
-    onView: setSelectedProductView,
     onEdit: setSelectedProductEdit,
     onDuplicate: handleDuplicateProduct,
     onDelete: handleDeleteProduct,
@@ -137,18 +133,44 @@ export default function ProductsAdminPage() {
     setActiveTags((tags) => tags.filter((t) => !(t.key === tag.key && t.value === tag.value)));
   }, [handleStatusFilterChange, handleCategoryFilterChange]);
 
-  // Render toolbar (external component) with stable reference for lint compliance
+  // Render toolbar inline
   const renderToolbar = useCallback(
     () => (
-      <ProductsToolbar
-        onlyLowStock={onlyLowStock}
-        onToggleLowStock={() => {
-          setOnlyLowStock((v) => !v);
-          setPage(1);
-        }}
-        activeTags={activeTags}
-        onRemoveTag={handleRemoveTag}
-      />
+      <div className="flex flex-wrap items-center gap-2">
+        {onlyLowStock && (
+          <Badge
+            variant="warning"
+            className="flex items-center gap-2"
+          >
+            <Package className="h-3 w-3" />
+            Stock bajo
+            <button
+              onClick={() => {
+                setOnlyLowStock(false);
+                setPage(1);
+              }}
+              className="ml-1 hover:text-error"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        )}
+        {activeTags.map((tag) => (
+          <Badge
+            key={tag.key}
+            variant="neutral"
+            className="flex items-center gap-2"
+          >
+            {tag.label}
+            <button
+              onClick={() => handleRemoveTag(tag.key)}
+              className="ml-1 hover:text-error"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </Badge>
+        ))}
+      </div>
     ),
     [onlyLowStock, activeTags, handleRemoveTag],
   );
@@ -194,13 +216,6 @@ export default function ProductsAdminPage() {
       />
 
       {/* Drawers */}
-      <ProductDetailDrawer
-        open={!!selectedProductView}
-        product={selectedProductView}
-        onClose={() => setSelectedProductView(null)}
-        categoryMap={categoryMap}
-      />
-
       {/* Drawer: Crear nuevo producto */}
       <ProductDrawer
         open={creatingNewProduct}

@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
-import { Search } from "lucide-react";
+import { memo } from "react";
+import { Search } from "@icons/lucide";
 import ProductCard from "@/modules/products/components/ProductCard.jsx"
-import { useWishlist } from "@/modules/profile/hooks/useWishlist.js"
+import { useWishlistQuery, useToggleWishlist, useIsInWishlist } from "@/modules/profile/hooks/useWishlistQuery.js"
 import { ProductShape } from "@/utils/propTypes.js"
 import {
   EmptyPlaceholder,
@@ -10,8 +11,9 @@ import {
   EmptyPlaceholderTitle,
 } from "@/components/shadcn/ui/empty-state.jsx";
 
-export default function ProductGallery({ products = [], onAddToCart }) {
-  const { wishlist, toggleWishlist } = useWishlist();
+const ProductGallery = memo(function ProductGallery({ products = [], onAddToCart }) {
+  const { items: wishlist } = useWishlistQuery();
+  const { toggle: toggleWishlist } = useToggleWishlist();
 
   if (!Array.isArray(products) || products.length === 0) {
     return (
@@ -48,9 +50,11 @@ export default function ProductGallery({ products = [], onAddToCart }) {
       })}
     </section>
   );
-}
+});
 
 ProductGallery.propTypes = {
   products: PropTypes.arrayOf(ProductShape),
   onAddToCart: PropTypes.func,
 };
+
+export default ProductGallery;

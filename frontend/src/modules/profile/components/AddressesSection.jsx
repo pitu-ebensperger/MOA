@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { MapPin, Plus, Trash2, Star, StarOff, Edit } from 'lucide-react';
+import { MapPin, Plus, Trash2, Star, StarOff, Edit } from "@icons/lucide";
 import { useAddresses } from '@/context/useAddresses.js'
 import { Button } from '@/components/shadcn/ui/button.jsx'
 import {

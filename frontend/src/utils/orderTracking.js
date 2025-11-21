@@ -2,7 +2,7 @@
  * Utilidades para tracking y cálculo de estados de órdenes
  */
 
-import { Truck, Package, CheckCircle, Store, CheckCircle2, Zap } from "lucide-react";
+import { Truck, Package, CheckCircle, Store, CheckCircle2, Zap } from "@icons/lucide";
 
 // ============================================================================
 // CONFIGURACIÓN DE MÉTODOS DE DESPACHO

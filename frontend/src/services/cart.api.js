@@ -21,13 +21,16 @@ export const cartApi = {
    */
   add: async (productId, quantity = 1) => {
     try {
+      console.log('[cartApi.add] Llamando POST /cart/add con:', { producto_id: productId, cantidad: quantity });
       const response = await apiClient.private.post('/cart/add', {
         producto_id: productId,
         cantidad: quantity
       })
+      console.log('[cartApi.add] Respuesta del servidor:', response);
       return response?.data || response
     } catch (error) {
-      console.error('Error agregando al carrito:', error)
+      console.error('[cartApi.add] Error agregando al carrito:', error)
+      console.error('[cartApi.add] error.response:', error.response);
       throw error
     }
   },

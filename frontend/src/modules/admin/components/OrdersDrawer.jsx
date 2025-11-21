@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/Input.jsx";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/shadcn/ui/select.jsx";
 import { Accordion } from "@/components/ui/Accordion.jsx";
 import { formatDate_ddMMyyyy } from "@/utils/date.js";
-import { CalendarDays, PackageCheck, Truck, ChevronRight, Edit, Save, X, AlertCircle } from "lucide-react";
+import { CalendarDays, PackageCheck, Truck, ChevronRight, Edit, Save, X, AlertCircle } from "@icons/lucide";
 import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx";
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
 import { OrderShape } from "@/utils/propTypes.js";
+import { SHIPPING_COMPANIES } from "@config/shipping-companies.js";
 
 // Helpers pequeños para no ensuciar el JSX
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
@@ -347,11 +348,11 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
                               <SelectValue placeholder="Seleccionar courier" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Chilexpress">Chilexpress</SelectItem>
-                              <SelectItem value="Blue Express">Blue Express</SelectItem>
-                              <SelectItem value="Starken">Starken</SelectItem>
-                              <SelectItem value="Correos de Chile">Correos de Chile</SelectItem>
-                              <SelectItem value="Retiro en tienda">Retiro en tienda</SelectItem>
+                              {SHIPPING_COMPANIES.map((company) => (
+                                <SelectItem key={company.id} value={company.label}>
+                                  {company.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         )}

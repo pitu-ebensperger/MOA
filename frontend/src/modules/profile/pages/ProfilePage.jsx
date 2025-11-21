@@ -10,6 +10,14 @@ export const ProfilePage = () => {
   const { token } = useAuth();
   const [wishlistItems, setWishlistItems] = useState([]);
 
+  // Limpieza de seguridad: remover overlays trabados al montar
+  useEffect(() => {
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.overflow = '';
+      document.body.style.removeProperty('overflow');
+    }
+  }, []);
+
   useEffect(() => {
     if (!token) return;
 
@@ -21,6 +29,13 @@ export const ProfilePage = () => {
       .catch(err => console.error("Error cargando wishlist:", err));
   }, [token]);
 
+  const handleRemoveFromWishlist = (productId) => {
+    setWishlistItems(prev => prev.filter(item => 
+      String(item.id) !== String(productId) && 
+      String(item.producto_id) !== String(productId)
+    ));
+  };
+
   const {
     orders = [],
     isLoading,
@@ -28,21 +43,24 @@ export const ProfilePage = () => {
   } = useUserOrders({ limit: 4 });
 
   return (
-    <div className="page min-h-screen bg-page">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+    <div className="min-h-screen bg-(--color-light) pt-28">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
         <UserInfoSection />
 
-        <WishlistSection 
-          products={wishlistItems} 
-          isLoading={isLoading} 
-          error={error} 
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <WishlistSection 
+            products={wishlistItems} 
+            isLoading={isLoading} 
+            error={error}
+            onRemove={handleRemoveFromWishlist}
+          />
 
-        <OrderSection 
-          orders={orders} 
-          isLoading={isLoading} 
-          error={error} 
-        />
+          <OrderSection 
+            orders={orders} 
+            isLoading={isLoading} 
+            error={error} 
+          />
+        </div>
       </div>
     </div>
   );

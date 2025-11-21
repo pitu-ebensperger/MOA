@@ -8,6 +8,7 @@ const normalizeLanding = (payload = {}) => ({
   editorialSections: Array.isArray(payload.editorialSections) ? payload.editorialSections : [],
   testimonials: Array.isArray(payload.testimonials) ? payload.testimonials : [],
   contact: payload.contact ?? null,
+  storeConfig: payload.storeConfig ?? null,
 });
 
 const remoteHomeApi = {

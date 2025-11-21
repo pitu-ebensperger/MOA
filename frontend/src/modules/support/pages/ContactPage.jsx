@@ -1,20 +1,17 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button'
-import Swal from 'sweetalert2';
+import { confirm } from '@/components/ui';
 
 export default function ContactPage() {
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const name = formData.get('name');
 
-    Swal.fire({
-      title: 'Mensaje enviado',
-      text: `Gracias, ${name || '😊'} — hemos recibido tu mensaje.`,
-      icon: 'success',
-      confirmButtonText: 'Cerrar',
-      confirmButtonColor: '#5c4526',
-    });
+    await confirm.info(
+      'Mensaje enviado',
+      `Gracias, ${name || '😊'} — hemos recibido tu mensaje.`
+    );
 
     e.target.reset();
   };

@@ -1,5 +1,5 @@
 // SEARCHBAR DE EMERGENCIA - SIN OVERLAY
-import { Search, X } from 'lucide-react';
+import { Search, X } from "@icons/lucide";
 import { Button } from '@/components/ui/Button.jsx'
 
 export function SearchBarEmergency({

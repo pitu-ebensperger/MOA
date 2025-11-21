@@ -25,9 +25,9 @@ const pool = new pg.Pool({
 // Test de conexión
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
-    console.log('Error al conectar la base de datos', err)
+    console.error('Error al conectar la base de datos', err)
   } else {
-    console.log('Base de datos conectada con éxito', res.rows[0])
+    // Conexión exitosa
   }
 })
 

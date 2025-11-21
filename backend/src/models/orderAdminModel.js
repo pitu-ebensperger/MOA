@@ -18,11 +18,18 @@ const buildOrderFilters = (options = {}) => {
     estado_pago,
     estado_envio,
     metodo_despacho,
+    usuario_id,
   } = options;
 
   const conditions = [];
   const params = [];
   let paramIndex = 1;
+
+  if (usuario_id) {
+    conditions.push(`AND o.usuario_id = $${paramIndex}`);
+    params.push(usuario_id);
+    paramIndex++;
+  }
 
   if (fecha_desde) {
     conditions.push(`AND o.creado_en >= $${paramIndex}`);
@@ -84,6 +91,7 @@ const getAllOrders = async (options = {}) => {
     estado_pago,
     estado_envio,
     metodo_despacho,
+    usuario_id,
     order_by = 'creado_en',
     order_dir = 'DESC',
   } = options;
@@ -98,6 +106,7 @@ const getAllOrders = async (options = {}) => {
     estado_pago,
     estado_envio,
     metodo_despacho,
+    usuario_id,
   });
 
   let query = `
@@ -114,7 +123,7 @@ const getAllOrders = async (options = {}) => {
   `;
 
   query += `
-    GROUP BY o.orden_id, u.usuario_id
+    GROUP BY o.orden_id, u.usuario_id, u.nombre, u.email, u.telefono
   `;
 
   query += ` ORDER BY ${orderByColumn} ${orderDirection}`;
@@ -130,6 +139,7 @@ const getAllOrders = async (options = {}) => {
     estado_pago,
     estado_envio,
     metodo_despacho,
+    usuario_id,
   });
 
   let countQuery = `
@@ -187,7 +197,7 @@ const getOrdersForExport = async (options = {}) => {
     LEFT JOIN usuarios u ON o.usuario_id = u.usuario_id
     LEFT JOIN orden_items oi ON o.orden_id = oi.orden_id
     WHERE 1=1${filters.clause}
-    GROUP BY o.orden_id, u.usuario_id
+    GROUP BY o.orden_id, u.usuario_id, u.nombre, u.email, u.telefono
     ORDER BY ${orderByColumn} ${orderDirection}
   `;
 
@@ -236,18 +246,140 @@ const getOrderByIdAdmin = async (ordenId) => {
 };
 
 const updateOrderStatus = async (ordenId, updates = {}) => {
-  // Por ahora solo retorna la orden sin modificar
-  // Cuando agregues columnas de estado, podrás implementar actualizaciones
-  const query = `SELECT * FROM ordenes WHERE orden_id = $1`;
-  const { rows } = await pool.query(query, [ordenId]);
+  const {
+    estado_pago,
+    estado_envio,
+    notas_internas,
+    fecha_pago,
+    fecha_envio,
+    fecha_entrega_real,
+    numero_seguimiento,
+    empresa_envio,
+  } = updates;
+
+  const fields = [];
+  const params = [];
+  let paramIndex = 1;
+
+  if (estado_pago !== undefined) {
+    fields.push(`estado_pago = $${paramIndex}`);
+    params.push(estado_pago);
+    paramIndex++;
+  }
+
+  if (estado_envio !== undefined) {
+    fields.push(`estado_envio = $${paramIndex}`);
+    params.push(estado_envio);
+    paramIndex++;
+  }
+
+  if (notas_internas !== undefined) {
+    fields.push(`notas_internas = $${paramIndex}`);
+    params.push(notas_internas);
+    paramIndex++;
+  }
+
+  if (fecha_pago !== undefined) {
+    fields.push(`fecha_pago = $${paramIndex}`);
+    params.push(fecha_pago);
+    paramIndex++;
+  }
+
+  if (fecha_envio !== undefined) {
+    fields.push(`fecha_envio = $${paramIndex}`);
+    params.push(fecha_envio);
+    paramIndex++;
+  }
+
+  if (fecha_entrega_real !== undefined) {
+    fields.push(`fecha_entrega_real = $${paramIndex}`);
+    params.push(fecha_entrega_real);
+    paramIndex++;
+  }
+
+  if (numero_seguimiento !== undefined) {
+    fields.push(`numero_seguimiento = $${paramIndex}`);
+    params.push(numero_seguimiento);
+    paramIndex++;
+  }
+
+  if (empresa_envio !== undefined) {
+    fields.push(`empresa_envio = $${paramIndex}`);
+    params.push(empresa_envio);
+    paramIndex++;
+  }
+
+  if (fields.length === 0) {
+    // Si no hay campos para actualizar, retornar la orden actual
+    const query = `SELECT * FROM ordenes WHERE orden_id = $1`;
+    const { rows } = await pool.query(query, [ordenId]);
+    return rows[0];
+  }
+
+  // Construir query de actualización
+  const query = `
+    UPDATE ordenes 
+    SET ${fields.join(', ')}
+    WHERE orden_id = $${paramIndex}
+    RETURNING *
+  `;
+
+  params.push(ordenId);
+
+  const { rows } = await pool.query(query, params);
   return rows[0];
 };
 
 const addTrackingInfo = async (ordenId, trackingData) => {
-  // Tracking no disponible sin columnas de estado_envio/numero_seguimiento
-  // Por ahora solo retorna la orden
-  const query = `SELECT * FROM ordenes WHERE orden_id = $1`;
-  const { rows } = await pool.query(query, [ordenId]);
+  const { numero_seguimiento, empresa_envio, fecha_envio } = trackingData;
+
+  const fields = [];
+  const params = [];
+  let paramIndex = 1;
+
+  if (numero_seguimiento !== undefined) {
+    fields.push(`numero_seguimiento = $${paramIndex}`);
+    params.push(numero_seguimiento);
+    paramIndex++;
+  }
+
+  if (empresa_envio !== undefined) {
+    fields.push(`empresa_envio = $${paramIndex}`);
+    params.push(empresa_envio);
+    paramIndex++;
+  }
+
+  if (fecha_envio !== undefined) {
+    fields.push(`fecha_envio = $${paramIndex}`);
+    params.push(fecha_envio);
+    paramIndex++;
+  }
+
+  // Si se agrega tracking, también actualizar estado_envio a 'enviado'
+  if (fields.length > 0) {
+    fields.push(`estado_envio = $${paramIndex}`);
+    params.push('enviado');
+    paramIndex++;
+  }
+
+  if (fields.length === 0) {
+    // Si no hay campos para actualizar, retornar la orden actual
+    const query = `SELECT * FROM ordenes WHERE orden_id = $1`;
+    const { rows } = await pool.query(query, [ordenId]);
+    return rows[0];
+  }
+
+  // Construir query de actualización
+  const query = `
+    UPDATE ordenes 
+    SET ${fields.join(', ')}
+    WHERE orden_id = $${paramIndex}
+    RETURNING *
+  `;
+
+  params.push(ordenId);
+
+  const { rows } = await pool.query(query, params);
   return rows[0];
 };
 
@@ -313,7 +445,7 @@ const getOrdersByDateRange = async (fechaDesde, fechaHasta, options = {}) => {
   }
 
   query += `
-    GROUP BY o.orden_id, u.usuario_id
+    GROUP BY o.orden_id, u.usuario_id, u.nombre, u.email, u.telefono
     ORDER BY o.creado_en DESC
     LIMIT $${paramIndex}
   `;

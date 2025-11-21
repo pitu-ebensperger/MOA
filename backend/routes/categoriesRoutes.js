@@ -8,7 +8,7 @@ import {
   getCategoryProductCount
 } from "../src/controllers/categoriesController.js";
 import { verifyToken } from "../src/middleware/tokenMiddleware.js";
-import { verifyAdmin } from "../src/middleware/adminMiddleware.js";
+import { verifyAdmin } from "../src/middleware/verifyAdmin.js";
 
 const router = Router();
 

@@ -6,9 +6,11 @@ import {
   updateCartItemQuantity,
 } from "../models/cartModel.js";
 
+const getRequestUserId = (req) => req.user?.usuario_id ?? req.user?.id;
+
 export const getCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getRequestUserId(req);
 
     const result = await getCartItems(userId);
 
@@ -24,7 +26,7 @@ export const getCart = async (req, res) => {
 
 export const addToCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getRequestUserId(req);
     const { producto_id, cantidad = 1 } = req.body;
 
     if (!producto_id) {
@@ -42,7 +44,7 @@ export const addToCart = async (req, res) => {
 
 export const removeFromCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getRequestUserId(req);
     const { productId } = req.params;
 
     if (!productId) {
@@ -63,7 +65,7 @@ export const removeFromCart = async (req, res) => {
 
 export const updateCartItem = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getRequestUserId(req);
     const { producto_id, cantidad } = req.body;
 
     if (!producto_id) {
@@ -95,7 +97,7 @@ export const updateCartItem = async (req, res) => {
 
 export const emptyCart = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = getRequestUserId(req);
 
     await clearCart(userId);
 

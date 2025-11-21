@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Info, ShoppingCart, Star } from "lucide-react";
+import { Info, ShoppingCart, Star } from "@icons/lucide";
 import { Button, IconButton, AnimatedCTAButton } from "@/components/ui/Button.jsx"
 import Badge from "@/components/ui/Badge.jsx"
 import { Accordion } from "@/components/ui/Accordion.jsx"
@@ -35,6 +35,7 @@ import { Tooltip } from "@/components/ui/Tooltip.jsx"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/radix/DropdownMenu.jsx"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogClose } from "@/components/ui/radix/Dialog.jsx"
 import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
+import { MessagingSystemDemo } from "./MessagingSystemDemo.jsx";
 
 const colorTokens = [
   {
@@ -130,6 +131,7 @@ const TAB_ITEMS = [
   { id: "componentes", label: "Componentes" },
   { id: "data-display", label: "Data Display" },
   { id: "modulos", label: "Módulos" },
+  { id: "mensajeria", label: "Mensajería" },
   { id: "utilidades", label: "Utilidades" },
   { id: "lab", label: "Lab" },
 ];
@@ -1605,6 +1607,22 @@ export function StyleGuidePage() {
             shipping: 5000,
             total: 85000 + 2*94000 + 5000,
           }} />
+        </div>
+      );
+    }
+
+    if (activeTab === "mensajeria") {
+      return (
+        <div className="space-y-6">
+          <section className={sectionClass("gap-6")}>
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold text-[var(--color-primary1)]">Sistema de Mensajería</h2>
+              <p className="text-sm text-[var(--color-secondary2)]">
+                Toasts, confirmaciones, modales y alertas con diseño homogéneo y consistente.
+              </p>
+            </div>
+            <MessagingSystemDemo />
+          </section>
         </div>
       );
     }

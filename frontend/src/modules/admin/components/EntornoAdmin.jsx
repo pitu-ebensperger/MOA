@@ -14,7 +14,7 @@ import {
   Store,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
+} from "@icons/lucide";
 import { API_PATHS } from "@config/api-paths.js";
 
 const navItems = [

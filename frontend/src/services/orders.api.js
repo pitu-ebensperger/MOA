@@ -1,101 +1,99 @@
-import { API_PATHS } from "@/config/api-paths.js"
-import { apiClient } from "@/services/api-client.js"
-import { buildQueryString } from "@/utils/https.js"
-import { toNum } from "@/utils/number.js"
-import { paginate } from "@/utils/pagination.js"
+import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
 
+const STATUS_PAYLOADS = {
+  pending: { estado_pago: "pendiente", estado_envio: "preparacion" },
+  processing: { estado_pago: "procesando", estado_envio: "preparacion" },
+  shipped: { estado_pago: "pagado", estado_envio: "enviado" },
+  fulfilled: { estado_pago: "pagado", estado_envio: "entregado" },
+  cancelled: { estado_pago: "cancelado", estado_envio: "devuelto" },
+};
 
-
-const normalizeOrder = (raw = {}, extra = {}) => {
-  const id = raw.id ?? null;
+const normalizeLegacyOrder = (order = {}) => {
+  if (!order || typeof order !== "object") return order;
+  const normalizedItems = Array.isArray(order.items) ? order.items : [];
 
   return {
-    id,
-    number: raw.number ?? id,
-    userId: raw.userId ?? null,
+    id: order.id ?? order.orden_id ?? null,
+    number: order.number ?? order.orderCode ?? order.id ?? null,
+    userId: order.usuario_id ?? order.userId ?? null,
 
-    status: raw.status ?? "pending",
-    currency: raw.currency ?? "CLP",
+    status: order.status ?? order.shippingStatus ?? order.paymentStatus ?? "pendiente",
+    currency: order.currency ?? "CLP",
 
-    subtotal: toNum(raw.subtotal),
-    shipping: toNum(raw.shipping),
-    tax: toNum(raw.tax),
-    total: toNum(raw.total),
+    subtotal: order.subtotal ?? null,
+    shipping: order.shipping ?? null,
+    tax: order.tax ?? null,
+    total: order.total ?? null,
 
-    createdAt: raw.createdAt ?? null,
-    updatedAt: raw.updatedAt ?? raw.createdAt ?? null,
+    createdAt: order.createdAt ?? null,
+    updatedAt: order.updatedAt ?? order.createdAt ?? null,
 
-    addressId: raw.addressId ?? null,
-    paymentId: raw.paymentId ?? null,
-    shipmentId: raw.shipmentId ?? null,
+    addressId: order.addressId ?? order.direccion_id ?? null,
+    paymentId: order.paymentId ?? null,
+    shipmentId: order.shipmentId ?? null,
 
-    items: extra.items ?? [],
-    payment: extra.payment ?? null,
-    shipment: extra.shipment ?? null,
-    address: extra.address ?? null,
+    items: normalizedItems,
+    payment: order.payment ?? null,
+    shipment: order.shipment ?? null,
+    address: order.address ?? null,
 
-    userName: extra.userName ?? raw.userName ?? null,
-    userEmail: extra.userEmail ?? raw.userEmail ?? null,
+    userName: order.userName ?? null,
+    userEmail: order.userEmail ?? null,
+    userPhone: order.userPhone ?? null,
+    totalItems: order.totalItems ?? normalizedItems.length,
   };
 };
 
+const translateStatusToPayload = (status) => {
+  if (!status) return null;
+  const normalized = String(status).trim().toLowerCase();
+  return STATUS_PAYLOADS[normalized] ?? null;
+};
 
-/* Remote implementation --------------------------------------------------------------------------------------------- */
-
-const remoteOrdersApi = {
+export const ordersApi = {
   async list(params = {}) {
-    const query = buildQueryString(params);
-    const data = await apiClient.get(
-      `${API_PATHS.admin.orders}${query}`
-    );
-
-    const rawItems = Array.isArray(data.items) ? data.items : [];
-    const items = rawItems.map((o) => normalizeOrder(o, o));
+    const response = await ordersAdminApi.getAll(params);
+    const items = (response?.data ?? []).map(normalizeLegacyOrder);
+    const pagination = response?.pagination ?? {};
+    const total = Number(pagination.total ?? items.length);
+    const limit = Number(pagination.limit ?? params.limit ?? (items.length || 1));
+    const offset = Number(pagination.offset ?? params.offset ?? 0);
+    const totalPages = limit > 0 ? Math.max(1, Math.ceil(total / limit)) : 1;
+    const page = limit > 0 ? Math.floor(offset / limit) + 1 : 1;
 
     return {
       items,
-      total: data.total ?? items.length,
-      totalPages: data.totalPages ?? 1,
-      page: data.page ?? null,
+      total,
+      totalPages,
+      page,
     };
   },
 
   async getById(id) {
     if (!id) throw new Error("order id is required");
-
-    const data = await apiClient.get(
-      `${API_PATHS.admin.orders}/${id}`
-    );
-
-    return normalizeOrder(data, data);
+    const data = await ordersAdminApi.getById(id);
+    return normalizeLegacyOrder(data);
   },
 
   async cancel(id) {
     if (!id) throw new Error("order id is required");
-
-    const data = await apiClient.post(
-      `${API_PATHS.admin.orders}/${id}/cancel`,
-    );
-
-    return data ? normalizeOrder(data, data) : null;
+    const payload = translateStatusToPayload("cancelled");
+    if (!payload) {
+      throw new Error("Cancel status payload unavailable");
+    }
+    const data = await ordersAdminApi.updateOrderStatus(id, payload);
+    return normalizeLegacyOrder(data);
   },
 
   async updateStatus(id, updates = {}) {
     if (!id) throw new Error("order id is required");
     const status = updates?.status;
-    if (!status) throw new Error("status is required");
-
-    const payload = await apiClient.patch(
-      `${API_PATHS.admin.orders}/${id}/estado`,
-      { estado_envio: status }
-    );
-
-    const orderData = payload?.data ?? payload;
-    return orderData ? normalizeOrder(orderData, orderData) : null;
+    const payload = translateStatusToPayload(status);
+    if (!payload) {
+      const allowed = Object.keys(STATUS_PAYLOADS).join(", ");
+      throw new Error(`status is required. Valores permitidos: ${allowed}`);
+    }
+    const data = await ordersAdminApi.updateOrderStatus(id, payload);
+    return normalizeLegacyOrder(data);
   },
-
 };
-
-/* Export ------------------------------------------------------------------------------------------------------------ */
-
-export const ordersApi = remoteOrdersApi;

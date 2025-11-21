@@ -1,4 +1,8 @@
+import { useStoreConfig } from "@/hooks/useStoreConfig.js"
+
 export const PrivacyPage = () => {
+  const { config } = useStoreConfig();
+
   return (
     <main className="bg-[#E6E0D8] min-h-screen px-8 py-50 text-[#453F34]">
       <section className="max-w-3xl mx-auto">
@@ -57,7 +61,7 @@ export const PrivacyPage = () => {
         </h2>
         <p className="mb-6 leading-relaxed">
           Puedes solicitar acceso, corrección o eliminación de tus datos personales en cualquier momento escribiéndonos a 
-          <span className="font-medium text-[#443114]"> contacto@moa.com</span>. 
+          <span className="font-medium text-[#443114]"> {config.email}</span>. 
           También puedes solicitar dejar de recibir nuestras comunicaciones promocionales.
         </p>
 
@@ -74,7 +78,7 @@ export const PrivacyPage = () => {
         </h2>
         <p className="leading-relaxed">
           Si tienes dudas o comentarios sobre esta Política de Privacidad, puedes comunicarte con nosotros al correo:  
-          <span className="font-medium text-[#443114]"> contacto@moa.com</span>.
+          <span className="font-medium text-[#443114]"> {config.email}</span>.
         </p>
       </section>
     </main>

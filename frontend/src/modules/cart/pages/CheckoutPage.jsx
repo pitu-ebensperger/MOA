@@ -1,10 +1,12 @@
 import PropTypes from "prop-types";
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart, Banknote, Wallet, Smartphone, CircleDollarSign } from "lucide-react";
+import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart, Banknote, Wallet, Smartphone, CircleDollarSign, CheckCircle2, Package, Truck, Receipt, Store, Home } from "@icons/lucide";
 import { useCartContext } from "@/context/cart-context.js"
 import { useAuth } from "@/context/auth-context.js"
 import { useAddresses } from "@/context/useAddresses.js"
+import { useStoreConfig } from "@/hooks/useStoreConfig.js"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/radix/Dialog.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { Price } from "@/components/data-display/Price.jsx"
 import { API_PATHS } from "@/config/api-paths.js"
@@ -44,11 +46,14 @@ export const CheckoutPage = () => {
   const { cartItems, total, removeFromCart, clearCart } = useCartContext();
   const { user } = useAuth();
   const { addresses, defaultAddress } = useAddresses();
+  const { config } = useStoreConfig();
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [selectedAddressId, setSelectedAddressId] = useState(defaultAddress?.direccion_id || null);
   const [paymentMethod, setPaymentMethod] = useState('transferencia');
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [orderPreview, setOrderPreview] = useState(null);
   
   // Datos de contacto (prellenados con info del usuario)
   const [contactData, setContactData] = useState({
@@ -87,7 +92,7 @@ export const CheckoutPage = () => {
     setNewAddress(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePay = async () => {
+  const handlePay = () => {
     if (!hasItems) {
       alertInfo('Agrega productos antes de confirmar tu orden.', 'Carrito vacío');
       return;
@@ -107,52 +112,83 @@ export const CheckoutPage = () => {
       }
     }
 
+    // Preparar preview de la orden (sin crear nada en BD todavía)
+    const preview = {
+      items: cartItems,
+      contacto: contactData,
+      direccion: selectedAddressId 
+        ? addresses.find(a => a.direccion_id === selectedAddressId) 
+        : newAddress,
+      metodo_despacho: shippingMethod,
+      metodo_pago: paymentMethod,
+      notas: notes,
+      subtotal: total,
+      envio: shippingCost,
+      total: grandTotal,
+      selectedAddressId,
+    };
+
+    setOrderPreview(preview);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmOrder = async () => {
     setIsProcessing(true);
+    console.log('[handleConfirmOrder] Iniciando creación de orden');
 
     try {
       const checkoutData = {
-        metodo_despacho: shippingMethod,
-        metodo_pago: paymentMethod,
-        notas_cliente: notes,
-        contacto: contactData,
+        metodo_despacho: orderPreview.metodo_despacho,
+        metodo_pago: orderPreview.metodo_pago,
+        notas_cliente: orderPreview.notas,
+        contacto: orderPreview.contacto,
       };
 
       // Si usa dirección guardada
-      if (selectedAddressId && shippingMethod !== 'retiro') {
+      if (orderPreview.selectedAddressId && orderPreview.metodo_despacho !== 'retiro') {
         checkoutData.usar_direccion_guardada = true;
-        checkoutData.direccion_id = selectedAddressId;
+        checkoutData.direccion_id = orderPreview.selectedAddressId;
       } 
       // Si es dirección nueva
-      else if (shippingMethod !== 'retiro') {
+      else if (orderPreview.metodo_despacho !== 'retiro') {
         checkoutData.usar_direccion_guardada = false;
         checkoutData.direccion_nueva = newAddress;
       }
 
+      console.log('[handleConfirmOrder] checkoutData preparada:', checkoutData);
       const response = await createOrder(checkoutData);
+      console.log('[handleConfirmOrder] response:', response);
+      console.log('[handleConfirmOrder] response.success:', response.success);
+      console.log('[handleConfirmOrder] response.data:', response.data);
+      console.log('[handleConfirmOrder] response.data?.order_code:', response.data?.order_code);
 
       if (response.success) {
+        setShowConfirmDialog(false);
         clearCart();
-        alertOrderSuccess(response.data.order_code).then(() => navigate('/perfil'));
+        alertOrderSuccess(response.data.order_code).then(() => navigate('/profile'));
       } else {
         const msg = response.message || 'Error desconocido';
         if (/carrito está vacío/i.test(msg)) {
-          alertOrderError('El carrito del servidor está vacío. Agrega productos antes de confirmar tu orden.');
+          alertOrderError('El carrito del servidor está vacío. Agrega productos antes de confirmar tu orden.', config.email);
         } else if (/Error al crear orden/i.test(msg)) {
           alertGlobalError();
         } else {
-          alertOrderError(msg);
+          alertOrderError(msg, config.email);
         }
       }
 
     } catch (error) {
-      console.error('Error en checkout:', error);
+      console.error('[handleConfirmOrder] Error en checkout:', error);
+      console.error('[handleConfirmOrder] error.response:', error.response);
+      console.error('[handleConfirmOrder] error.response?.data:', error.response?.data);
       const serverMsg = error.response?.data?.message;
+      console.error('[handleConfirmOrder] serverMsg:', serverMsg);
       if (serverMsg && /carrito está vacío/i.test(serverMsg)) {
-        alertOrderError('El carrito del servidor está vacío. Agrega productos y vuelve a intentar.');
+        alertOrderError('El carrito del servidor está vacío. Agrega productos y vuelve a intentar.', config.email);
       } else if (serverMsg && /Error al crear orden/i.test(serverMsg)) {
         alertGlobalError();
       } else {
-        alertOrderError(serverMsg || error.message);
+        alertOrderError(serverMsg || error.message || 'Error desconocido', config.email);
       }
     } finally {
       setIsProcessing(false);
@@ -162,8 +198,8 @@ export const CheckoutPage = () => {
   return (
     <main className="page container-px mx-auto max-w-6xl py-12">
       <header className="mb-10 space-y-3">
-        <h1 className="title-serif text-4xl text-[var(--color-primary1)]">Checkout</h1>
-        <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-secondary)]">
+        <h1 className="title-serif text-4xl text-(--color-primary1)">Checkout</h1>
+        <p className="mt-2 max-w-2xl text-sm text-(--color-text-secondary)">
           Completa los datos del envío boutique o programa un retiro. Nos encargaremos de
           coordinar cada detalle para que tus piezas lleguen impecables.
         </p>
@@ -361,7 +397,7 @@ export const CheckoutPage = () => {
                       placeholder="Accesos al edificio, horarios preferidos…"
                       maxLength={280}
                     />
-                    <p className="text-right text-xs text-[var(--color-text-muted)]">
+                    <p className="text-right text-xs text-(--color-text-muted)">
                       {notes.length}/280 caracteres
                     </p>
                   </div>
@@ -387,21 +423,21 @@ export const CheckoutPage = () => {
                     return (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between gap-3 rounded-[var(--radius-xl)] border border-[var(--border)] bg-white/70 p-3"
+                        className="flex items-center justify-between gap-3 rounded-xl border border-(--border) bg-white/70 p-3"
                       >
                         <div className="flex items-center gap-3">
                           <div className="h-16 w-16 overflow-hidden rounded-2xl bg-[#44311417]">
                             <img src={displayImage} alt={item.name ?? "Producto"} className="h-full w-full object-cover" />
                           </div>
                           <div>
-                            <p className="font-display text-sm text-[var(--color-primary2)]">{item.name}</p>
-                            <p className="text-xs text-[var(--color-text-muted)]">
+                            <p className="font-display text-sm text-(--color-primary2)">{item.name}</p>
+                            <p className="text-xs text-(--color-text-muted)">
                               Cantidad: {quantity}
                             </p>
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                          <Price value={itemPrice * quantity} className="text-sm font-semibold text-[var(--color-primary1)]" />
+                          <Price value={itemPrice * quantity} className="text-sm font-semibold text-(--color-primary1)" />
                           <button
                             type="button"
                             onClick={() => removeFromCart(item.id)}
@@ -423,11 +459,11 @@ export const CheckoutPage = () => {
                 <Separator />
 
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
+                  <div className="flex items-center justify-between text-(--color-text-muted)">
                     <span>Subtotal</span>
                     <Price value={total} />
                   </div>
-                  <div className="flex items-center justify-between text-[var(--color-text-muted)]">
+                  <div className="flex items-center justify-between text-(--color-text-muted)">
                     <span>Envío</span>
                     {shippingCost ? (
                       <Price value={shippingCost} />
@@ -438,7 +474,7 @@ export const CheckoutPage = () => {
                     )}
                   </div>
                   <Separator />
-                  <div className="flex items-center justify-between text-base font-semibold text-[var(--color-primary1)]">
+                  <div className="flex items-center justify-between text-base font-semibold text-(--color-primary1)">
                     <span>Total</span>
                     <Price value={grandTotal} />
                   </div>
@@ -467,22 +503,22 @@ export const CheckoutPage = () => {
               </CardFooter>
             </Card>
 
-            <Card className="bg-[var(--color-lightest)]">
+            <Card className="bg-(--color-lightest)">
               <CardHeader>
                 <CardTitle>¿Necesitas coordinación especial?</CardTitle>
                 <CardDescription>Estamos disponibles para alinear horarios o detalles con tu estudio.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 text-sm text-[var(--color-text-secondary)]">
+              <CardContent className="space-y-4 text-sm text-(--color-text-secondary)">
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-[var(--color-primary1)]" />
+                  <MapPin className="h-5 w-5 text-(--color-primary1)" />
                   <span>Desembalaje y staging en la Región Metropolitana.</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <CreditCard className="h-5 w-5 text-[var(--color-primary1)]" />
+                  <CreditCard className="h-5 w-5 text-(--color-primary1)" />
                   <span>Recibirás el link de pago directo a tu correo al finalizar el proceso.</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <MessageSquareHeart className="h-5 w-5 text-[var(--color-primary1)]" />
+                  <MessageSquareHeart className="h-5 w-5 text-(--color-primary1)" />
                   <span>¿Dudas? Escríbenos por WhatsApp o coordina una videollamada.</span>
                 </div>
               </CardContent>
@@ -503,12 +539,12 @@ export const CheckoutPage = () => {
         </div>
       ) : (
         <Card className="flex flex-col items-center gap-6 border-dashed py-16 text-center">
-          <div className="rounded-full bg-[var(--color-primary4)]/70 p-6 text-[var(--color-primary1)]">
+          <div className="rounded-full bg-(--color-primary4)/70 p-6 text-(--color-primary1)">
             <ShoppingCart className="h-10 w-10" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold text-[var(--color-primary2)]">Aún no seleccionas piezas</h2>
-            <p className="text-sm text-[var(--color-text-secondary)] max-w-md">
+            <h2 className="text-2xl font-semibold text-(--color-primary2)">Aún no seleccionas piezas</h2>
+            <p className="text-sm text-(--color-text-secondary) max-w-md">
               Vuelve al catálogo y agrega productos para continuar con el checkout.
             </p>
           </div>
@@ -517,13 +553,172 @@ export const CheckoutPage = () => {
             className={buttonClasses({
               variant: "ghost",
               size: "md",
-              className: "text-[var(--color-primary1)]",
+              className: "text-(--color-primary1)",
             })}
           >
             Explorar catálogo
           </Link>
         </Card>
       )}
+
+      {/* Modal de confirmación */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-2xl text-(--color-primary1)">
+              <CheckCircle2 className="h-6 w-6 text-(--color-primary1)" />
+              Confirmar pedido
+            </DialogTitle>
+            <DialogDescription className="text-(--color-primary1)">
+              Revisa los detalles de tu orden antes de confirmar. Una vez confirmada, se procesará tu pedido.
+            </DialogDescription>
+          </DialogHeader>
+
+          {orderPreview && (
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              {/* Productos */}
+              <div className="space-y-3">
+                <h3 className="text-xs font-semibold text-(--color-secondary2)">Productos ({orderPreview.items.length})</h3>
+                <div className="space-y-2">
+                  {orderPreview.items.map((item) => {
+                    const quantity = Number(item.quantity) || 1;
+                    const itemPrice = resolveProductPrice(item) ?? 0;
+                    return (
+                      <div key={item.id} className="flex items-center justify-between gap-3 rounded-xl border border-(--border) bg-(--color-lightest) p-3">
+                        <div className="flex items-center gap-3">
+                          <img 
+                            src={buildItemImage(item)} 
+                            alt={item.name} 
+                            className="h-12 w-12 rounded-lg object-cover"
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-(--color-primary2)">{item.name}</p>
+                            <p className="text-xs text-(--color-text-muted)">Cantidad: {quantity}</p>
+                          </div>
+                        </div>
+                        <Price value={itemPrice * quantity} className="text-sm font-semibold" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Contacto */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-(--color-secondary2)">Datos de contacto</h3>
+                <div className="rounded-xl border border-(--border) bg-(--color-lightest) p-3 text-sm">
+                  <p><span className="font-medium">Nombre:</span> {orderPreview.contacto.nombre}</p>
+                  <p><span className="font-medium">Email:</span> {orderPreview.contacto.email}</p>
+                  <p><span className="font-medium">Teléfono:</span> {orderPreview.contacto.telefono}</p>
+                </div>
+              </div>
+
+              {/* Dirección */}
+              {orderPreview.metodo_despacho !== 'retiro' && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-semibold text-(--color-secondary2)">Dirección de envío</h3>
+                  <div className="rounded-xl border border-(--border) bg-(--color-lightest) p-3 text-sm">
+                    {orderPreview.direccion?.calle && (
+                      <>
+                        <p>{orderPreview.direccion.calle}</p>
+                        <p>{orderPreview.direccion.comuna}, {orderPreview.direccion.ciudad}</p>
+                        <p>{orderPreview.direccion.region}</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Método de envío y pago */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h3 className="text-xs font-semibold text-(--color-secondary2)">Método de envío</h3>
+                  <div className="rounded-xl border border-(--border) bg-(--color-lightest) p-3 text-sm">
+                    <p className="flex items-center gap-2 capitalize">
+                      {orderPreview.metodo_despacho === 'retiro' ? (
+                        <Store className="h-4 w-4 text-(--color-primary1)" />
+                      ) : (
+                        <Truck className="h-4 w-4 text-(--color-primary1)" />
+                      )}
+                      {METODOS_DESPACHO[orderPreview.metodo_despacho]?.label || orderPreview.metodo_despacho}
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xs font-semibold text-(--color-secondary2)">Método de pago</h3>
+                  <div className="rounded-xl border border-(--border) bg-(--color-lightest) p-3 text-sm">
+                    <p className="flex items-center gap-2 capitalize">
+                      {orderPreview.metodo_pago === 'transferencia' ? (
+                        <Banknote className="h-4 w-4 text-(--color-primary1)" />
+                      ) : orderPreview.metodo_pago === 'efectivo' ? (
+                        <CircleDollarSign className="h-4 w-4 text-(--color-primary1)" />
+                      ) : orderPreview.metodo_pago === 'webpay' ? (
+                        <CreditCard className="h-4 w-4 text-(--color-primary1)" />
+                      ) : (
+                        <Wallet className="h-4 w-4 text-(--color-primary1)" />
+                      )}
+                      {orderPreview.metodo_pago.replace(/_/g, ' ')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notas */}
+              {orderPreview.notas && (
+                <div className="space-y-2">
+                  <h3 className="text-xs font-semibold text-(--color-secondary2)">Notas</h3>
+                  <div className="rounded-xl border border-(--border) bg-(--color-lightest) p-3 text-sm">
+                    <p>{orderPreview.notas}</p>
+                  </div>
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Total */}
+              <div className="space-y-3 px-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-(--color-secondary2)">Subtotal</span>
+                  <Price value={orderPreview.subtotal} className="font-semibold" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-(--color-secondary2)">Envío</span>
+                  {orderPreview.envio > 0 ? (
+                    <Price value={orderPreview.envio} className="font-semibold" />
+                  ) : (
+                    <span className="font-semibold text-(--text-strong)">Gratis</span>
+                  )}
+                </div>
+                <div className="border-t border-neutral-300 pt-3">
+                  <div className="flex items-center justify-between text-lg font-bold">
+                    <span className="text-(--color-primary1)">Total</span>
+                    <Price value={orderPreview.total} className="text-(--color-primary1)" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+              disabled={isProcessing}
+            >
+              Volver a editar
+            </Button>
+            <Button
+              onClick={handleConfirmOrder}
+              disabled={isProcessing}
+              className="text-white"
+            >
+              {isProcessing ? 'Procesando...' : 'Confirmar y crear orden'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 };

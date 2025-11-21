@@ -94,8 +94,8 @@ export function useAdminDashboard() {
 
       // Stock analytics
       stock: {
-        lowStockItems: stockData.lowStockCount || 0,
-        outOfStockItems: stockData.outOfStockCount || 0,
+        lowStockCount: stockData.lowStockCount || 0,
+        outOfStockCount: stockData.outOfStockCount || 0,
         totalItems: stockData.totalItems || 0,
         lowStockProducts: stockData.lowStockProducts || [],
         outOfStockProducts: stockData.outOfStockProducts || [],

@@ -4,21 +4,19 @@ import {
   ArrowRight,
   Trash2,
   ShoppingCart,
-} from "lucide-react";
+} from "@icons/lucide";
 import { useCartContext } from "@/context/cart-context.js"
 import { Price } from "@/components/data-display/Price.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { resolveProductPrice } from "@/modules/products/utils/products.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import {
-  Badge,
   buttonClasses,
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-  Label,
   Separator,
 } from "../../../components/shadcn/ui/index.js";
 // Despacho y dirección ahora gestionados sólo en Checkout
@@ -48,15 +46,14 @@ export const CartPage = () => {
   return (
     <main className="page container-px mx-auto max-w-6xl py-12">
       <header className="mb-10 space-y-3">
-        <h1 className="title-serif text-4xl text-[var(--color-primary1)]">
+        <h1 className="title-serif text-4xl text-(--color-primary1)">
           {hasItems ? "Carro de compra" : "Tu carrito aún no tiene tesoros"}
         </h1>
         {/* Métricas removidas según solicitud: tipos, unidades y total inline */}
       </header>
 
       {hasItems ? (
-        <>
-            <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_340px]">
               <div className="space-y-6">
                 <Card>
                   <CardContent className="p-0">
@@ -81,7 +78,7 @@ export const CartPage = () => {
                                 />
                               </div>
                               <div className="flex flex-col justify-center min-w-0">
-                                <p className="font-display text-xl leading-snug text-(--color-primary2) truncate">{item.name}</p>
+                                <p className="font-display text-lg leading-snug text-(--color-primary2) truncate">{item.name}</p>
                                 <p className="text-xs uppercase text-(--color-text-muted) leading-tight">
                                   SKU {item.sku ?? "—"}
                                 </p>
@@ -116,7 +113,7 @@ export const CartPage = () => {
 
                             {/* Col 3: Subtotal */}
                             <div className="flex items-center justify-end w-40">
-                              <Price value={itemTotal} className="text-xl tracking-tight text-(--color-primary1)" />
+                              <Price value={itemTotal} className="text-lg  text-(--color-primary1)" />
                             </div>
                           </div>
                         );
@@ -133,7 +130,7 @@ export const CartPage = () => {
                     </button>
                     <div className="flex items-center gap-3 text-xs text-(--color-text-muted)">
                       <span className="uppercase tracking-tight">Total carro</span>
-                      <Price value={total} className="text-xl font-bold text-(--color-primary1) tracking-tight" />
+                      <Price value={total} className="text-lg font-medium text-(--color-secondary)" />
                     </div>
                   </CardFooter>
                 </Card>
@@ -158,7 +155,7 @@ export const CartPage = () => {
                       <Separator />
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold text-(--color-text-muted)">Total (sin envío)</span>
-                        <Price value={grandTotal} className="text-2xl font-bold text-(--color-primary1) tracking-tight" />
+                        <Price value={grandTotal} className="text-xl font-bold text-(--color-primary1) tracking-tight" />
                       </div>
                     </div>
                   </CardContent>
@@ -187,8 +184,7 @@ export const CartPage = () => {
                   </CardFooter>
                 </Card>
               </aside>
-            </div>
-        </>
+        </div>
       ) : (
         <Card className="flex flex-col items-center gap-6 border-dashed py-16 text-center">
           <div className="rounded-full bg-(--color-primary4)/70 p-6 text-(--color-primary1)">

@@ -42,6 +42,23 @@ export const BADGE_VARIANTS = {
     "bg-[color:var(--color-error)]",
     "text-[color:var(--color-white)]"
   ),
+  info: cx(
+    "bg-[color:var(--color-info)]",
+    "text-[color:var(--color-white)]"
+  ),
+  danger: cx(
+    "bg-[color:var(--color-error)]",
+    "text-[color:var(--color-white)]"
+  ),
+  outline: cx(
+    "bg-transparent",
+    "text-[color:var(--color-primary1)]",
+    "border border-[color:var(--color-primary1)]"
+  ),
+  default: cx(
+    "bg-[color:var(--color-neutral2)]",
+    "text-[color:var(--text-secondary)]"
+  ),
   // Aliases para compatibilidad
   destacado: cx(
     "bg-[color:var(--color-primary3)]",

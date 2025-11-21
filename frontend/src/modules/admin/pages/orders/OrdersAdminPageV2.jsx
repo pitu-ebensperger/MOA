@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Filter,
@@ -9,16 +10,20 @@ import {
   AlertCircle,
   X,
   Save,
-} from 'lucide-react';
+} from "@icons/lucide";
 
 import { useAdminOrders } from '@/modules/admin/hooks/useAdminOrders.js';
 import { ordersAdminApi } from '@/services/ordersAdmin.api.js';
+import { useDebounce } from '@/hooks/useDebounce.js';
 
-import { Button } from '@/components/ui/Button.jsx';
+import { Button, IconButton } from '@/components/ui/Button.jsx';
 import { Input } from '@/components/ui/Input.jsx';
 import { Select } from '@/components/ui/Select.jsx';
 import { StatusPill } from '@/components/ui/StatusPill.jsx';
-import { DataTableV2 } from '@/components/data-display/DataTableV2.jsx';
+import { VirtualizedTable } from '@/components/data-display/VirtualizedTable.jsx';
+import { TableToolbar, TableSearch } from '@/components/data-display/TableToolbar.jsx';
+import { ResponsiveRowActions } from '@/components/ui/ResponsiveRowActions.jsx';
+import { TooltipNeutral } from '@/components/ui/Tooltip.jsx';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -131,341 +136,17 @@ const formatEstado = (estado) => {
     .replace(/^\w|(?:\s)\w/g, (char) => char.toUpperCase());
 };
 
-// Componente principal de filtros
-function OrderFilters({ 
-  filters, 
-  onFiltersChange, 
-  onRefresh, 
-  isLoading,
-  onResetFilters = () => {},
-}) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
-  const handleFilterChange = useCallback((key, value) => {
-    onFiltersChange({ ...filters, [key]: value, page: 1 });
-  }, [filters, onFiltersChange]);
-
-  return (
-    <div className="space-y-4">
-      {/* Filtros básicos */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1">
-          <Input
-            type="text"
-            placeholder="Buscar por código de orden, cliente, email..."
-            value={filters.search || ''}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-            className="w-full"
-            leftIcon={<Search className="h-4 w-4" />}
-          />
-        </div>
-        <div className="flex gap-3">
-          <Button
-            appearance="ghost"
-            intent="primary"
-            size="sm"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            leftIcon={<Filter className="h-4 w-4" />}
-          >
-            Filtros {showAdvanced ? 'menos' : 'más'}
-          </Button>
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={onRefresh}
-            disabled={isLoading}
-            leftIcon={<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />}
-          >
-            Actualizar
-          </Button>
-        </div>
-      </div>
-
-      {/* Filtros avanzados */}
-      {showAdvanced && (
-        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-neutral-700">
-                Estado de Pago
-              </label>
-              <Select
-                value={filters.estado_pago || ''}
-                onChange={(e) => handleFilterChange('estado_pago', e.target.value)}
-                className="w-full"
-              >
-                {ESTADOS_PAGO.map(estado => (
-                  <option key={estado.value} value={estado.value}>
-                    {estado.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-neutral-700">
-                Estado de Envío
-              </label>
-              <Select
-                value={filters.estado_envio || ''}
-                onChange={(e) => handleFilterChange('estado_envio', e.target.value)}
-                className="w-full"
-              >
-                {ESTADOS_ENVIO.map(estado => (
-                  <option key={estado.value} value={estado.value}>
-                    {estado.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-neutral-700">
-                Método de Despacho
-              </label>
-              <Select
-                value={filters.metodo_despacho || ''}
-                onChange={(e) => handleFilterChange('metodo_despacho', e.target.value)}
-                className="w-full"
-              >
-                {METODOS_DESPACHO.map(metodo => (
-                  <option key={metodo.value} value={metodo.value}>
-                    {metodo.label}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-neutral-700">
-                Fecha desde
-              </label>
-              <Input
-                type="date"
-                value={filters.fecha_desde || ''}
-                onChange={(e) => handleFilterChange('fecha_desde', e.target.value)}
-                className="w-full"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-neutral-700">
-                Fecha hasta
-              </label>
-              <Input
-                type="date"
-                value={filters.fecha_hasta || ''}
-                onChange={(e) => handleFilterChange('fecha_hasta', e.target.value)}
-                className="w-full"
-              />
-            </div>
-
-      <div className="flex items-end">
-        <Button
-          appearance="outline"
-          intent="neutral"
-          size="sm"
-          onClick={onResetFilters}
-          className="w-full"
-        >
-          Limpiar Filtros
-        </Button>
-      </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Modal simple para ver detalles de orden
-function OrderDetailsModal({ order, onClose }) {
-  if (!order) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-neutral-200 p-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-neutral-900">
-            Orden {order.order_code}
-          </h2>
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="p-6 space-y-6">
-          {/* Información del cliente */}
-          <section>
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Cliente</h3>
-            <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
-              <p><strong>Nombre:</strong> {order.usuario_nombre || 'N/A'}</p>
-              <p><strong>Email:</strong> {order.usuario_email || 'N/A'}</p>
-              <p><strong>Teléfono:</strong> {order.usuario_telefono || 'N/A'}</p>
-            </div>
-          </section>
-
-          {/* Información de la orden */}
-          <section>
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Detalles de la Orden</h3>
-            <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
-              <p><strong>Total:</strong> {formatCurrencyCLP(order.total_cents)}</p>
-              <p><strong>Items:</strong> {order.total_items}</p>
-              <p><strong>Estado de Pago:</strong> 
-                <StatusPill
-                  status={order.estado_pago}
-                  intent={getStatusColor(order.estado_pago, 'pago')}
-                  size="sm"
-                  className="ml-2"
-                >
-                  {order.estado_pago}
-                </StatusPill>
-              </p>
-              <p><strong>Estado de Envío:</strong> 
-                <StatusPill
-                  status={order.estado_envio}
-                  intent={getStatusColor(order.estado_envio, 'envio')}
-                  size="sm"
-                  className="ml-2"
-                >
-                  {order.estado_envio}
-                </StatusPill>
-              </p>
-              <p><strong>Método de Despacho:</strong> {order.metodo_despacho || 'Standard'}</p>
-              <p><strong>Fecha de Creación:</strong> {formatDateTime(order.creado_en)}</p>
-            </div>
-          </section>
-
-          {/* Dirección de envío */}
-          {(order.comuna || order.ciudad) && (
-            <section>
-              <h3 className="text-lg font-medium text-neutral-900 mb-3">Dirección de Envío</h3>
-              <div className="bg-neutral-50 rounded-lg p-4">
-                <p>{order.comuna}, {order.ciudad}, {order.region}</p>
-              </div>
-            </section>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Modal para editar estado
-function EditStatusModal({ order, onClose, onSave }) {
-  const [estado_pago, setEstadoPago] = useState(order?.estado_pago || '');
-  const [estado_envio, setEstadoEnvio] = useState(order?.estado_envio || '');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSave = async () => {
-    try {
-      setIsLoading(true);
-      await onSave(order.orden_id, {
-        estado_pago,
-        estado_envio,
-      });
-      onClose();
-    } catch (error) {
-      console.error('Error updating order:', error);
-      alert('Error al actualizar la orden');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!order) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-lg w-full">
-        <div className="border-b border-neutral-200 p-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-neutral-900">
-            Editar Estado - {order.order_code}
-          </h2>
-          <Button
-            appearance="ghost"
-            intent="neutral"
-            size="sm"
-            onClick={onClose}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="p-6 space-y-4">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-neutral-700">
-              Estado de Pago
-            </label>
-            <Select
-              value={estado_pago}
-              onChange={(e) => setEstadoPago(e.target.value)}
-              className="w-full"
-            >
-              {ESTADOS_PAGO.filter(e => e.value).map(estado => (
-                <option key={estado.value} value={estado.value}>
-                  {estado.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-neutral-700">
-              Estado de Envío
-            </label>
-            <Select
-              value={estado_envio}
-              onChange={(e) => setEstadoEnvio(e.target.value)}
-              className="w-full"
-            >
-              {ESTADOS_ENVIO.filter(e => e.value).map(estado => (
-                <option key={estado.value} value={estado.value}>
-                  {estado.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-        </div>
-
-        <div className="border-t border-neutral-200 p-6 flex gap-3 justify-end">
-          <Button
-            appearance="outline"
-            intent="neutral"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
-          <Button
-            appearance="solid"
-            intent="primary"
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Guardando...' : 'Guardar Cambios'}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// Sin componente OrderFilters - se usa TableToolbar inline
 
 // Componente principal
 export default function OrdersAdminPage() {
+  const navigate = useNavigate();
+  
   // Estados para filtros y paginación
   const [filters, setFilters] = useState(() => ({ ...DEFAULT_FILTERS }));
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  // Estados para modales
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [editingOrder, setEditingOrder] = useState(null);
+  // Estados para exportación y alertas
   const [isExporting, setIsExporting] = useState(false);
   const [pageAlert, setPageAlert] = useState(null);
   
@@ -474,13 +155,19 @@ export default function OrdersAdminPage() {
   const [editingValues, setEditingValues] = useState({});
   const [savingRowId, setSavingRowId] = useState(null);
 
+  // Aplicar debounce al campo search
+  const debouncedSearch = useDebounce(filters.search, 400);
+  const debouncedFilters = useMemo(() => {
+    return { ...filters, search: debouncedSearch };
+  }, [filters.page, filters.limit, debouncedSearch, filters.estado_pago, filters.estado_envio, filters.metodo_despacho, filters.fecha_desde, filters.fecha_hasta]);
+
   useEffect(() => {
     if (!pageAlert) return;
     const timeoutId = setTimeout(() => setPageAlert(null), 4000);
     return () => clearTimeout(timeoutId);
   }, [pageAlert]);
 
-  // Hooks para datos
+  // Hooks para datos con filtros debounced
   const {
     orders,
     total,
@@ -489,7 +176,7 @@ export default function OrdersAdminPage() {
     isLoading,
     error,
     refetch
-  } = useAdminOrders(filters);
+  } = useAdminOrders(debouncedFilters);
 
   const ordersData = orders ?? [];
 
@@ -501,6 +188,10 @@ export default function OrdersAdminPage() {
   // Handlers
   const handleFiltersChange = useCallback((newFilters) => {
     setFilters(newFilters);
+  }, []);
+
+  const handleFilterChange = useCallback((key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
   }, []);
 
   const handlePageChange = useCallback((newPage) => {
@@ -549,7 +240,13 @@ export default function OrdersAdminPage() {
     setEditingValues(prev => ({ ...prev, [field]: value }));
   }, []);
 
-  const orderColumns = useMemo(
+  const handleViewDetails = useCallback((order) => {
+    navigate(`/admin/orders/${order.orden_id}`);
+  }, [navigate]);
+
+  // orderColumns ya no es necesario con VirtualizedTable (renderRow inline)
+  // Se mantiene por si se necesita migrar de vuelta a DataTableV2
+  const _orderColumns = useMemo(
     () => [
       {
         accessorKey: "order_code",
@@ -571,10 +268,10 @@ export default function OrdersAdminPage() {
         cell: ({ row }) => (
           <div className="space-y-1">
             <p className="text-sm font-medium text-(--text-strong)">
-              {row.original.usuario_nombre || "N/A"}
+              {row.original.userName || row.original.usuario_nombre || "N/A"}
             </p>
             <p className="text-xs text-(--text-secondary1)">
-              {row.original.usuario_email || "N/A"}
+              {row.original.userEmail || row.original.usuario_email || "N/A"}
             </p>
           </div>
         ),
@@ -696,12 +393,14 @@ export default function OrdersAdminPage() {
     if (isEditing) {
       return [
         {
+          key: "save",
           label: isSaving ? "Guardando..." : "Guardar",
           icon: Save,
           onAction: () => handleSaveInline(row),
           disabled: isSaving,
         },
         {
+          key: "cancel",
           label: "Cancelar",
           icon: X,
           onAction: handleCancelEdit,
@@ -712,17 +411,81 @@ export default function OrdersAdminPage() {
     
     return [
       {
+        key: "view",
         label: "Ver detalles",
         icon: Eye,
         onAction: () => handleViewDetails(row),
       },
       {
+        key: "edit",
         label: "Editar estado",
         icon: Edit,
         onAction: () => handleStartEdit(row),
       },
     ];
   }, [editingRowId, savingRowId, handleSaveInline, handleCancelEdit, handleViewDetails, handleStartEdit]);
+
+  const toolbar = useMemo(
+    () => () => (
+      <TableToolbar>
+        <TableSearch
+          value={filters.search || ''}
+          onChange={(v) => handleFilterChange('search', v)}
+          placeholder="Buscar por código, cliente, email…"
+          className="flex-1 max-w-2xl"
+        />
+        <div className="ml-auto flex items-center gap-2">
+          <TooltipNeutral label="Filtros avanzados" position="bottom">
+            <IconButton
+              appearance="ghost"
+              intent={showAdvancedFilters ? "primary" : "neutral"}
+              size="sm"
+              icon={<Filter className="h-4 w-4" />}
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              aria-label="Filtros avanzados"
+              className={showAdvancedFilters ? "bg-(--color-primary1)/10" : ""}
+            />
+          </TooltipNeutral>
+          <TooltipNeutral label="Refrescar pedidos" position="bottom">
+            <IconButton
+              appearance="ghost"
+              intent="neutral"
+              size="sm"
+              icon={<RefreshCw className="h-4 w-4" />}
+              onClick={refetch}
+              aria-label="Refrescar pedidos"
+            />
+          </TooltipNeutral>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button
+                appearance="solid"
+                intent="primary"
+                size="sm"
+                leadingIcon={<Download className="h-4 w-4" />}
+                loading={isExporting}
+                disabled={ordersData.length === 0 || isExporting}
+                aria-label="Exportar pedidos"
+              >
+                Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {EXPORT_FORMATS.map((format) => (
+                <DropdownMenuItem
+                  key={format.value}
+                  onSelect={() => handleExport(format.value)}
+                >
+                  {format.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </TableToolbar>
+    ),
+    [filters.search, showAdvancedFilters, isExporting, ordersData.length, handleFilterChange, refetch, handleExport]
+  );
 
   const emptyStateMessage = hasActiveFilters ? (
     <div className="flex flex-col items-center gap-3 text-(--text-secondary1)">
@@ -739,15 +502,6 @@ export default function OrdersAdminPage() {
   ) : (
     <div className="text-(--text-secondary1)">Aún no se han registrado órdenes en el sistema.</div>
   );
-
-  const handleViewDetails = useCallback((order) => {
-    setSelectedOrder(order);
-  }, []);
-
-  const handleSaveStatus = useCallback(async (ordenId, data) => {
-    await ordersAdminApi.updateStatus(ordenId, data);
-    refetch();
-  }, [refetch]);
 
   const handleExport = useCallback(async (format) => {
     if (ordersData.length === 0) {
@@ -819,7 +573,7 @@ export default function OrdersAdminPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-4">
       {pageAlert && (
         <div
           className={`rounded-2xl border px-4 py-3 text-sm ${PAGE_ALERT_STYLES[pageAlert.type] || PAGE_ALERT_STYLES.success}`}
@@ -827,74 +581,277 @@ export default function OrdersAdminPage() {
           {pageAlert.message}
         </div>
       )}
-      <AdminPageHeader
-        title="Pedidos"
-        actions={
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button
-                appearance="solid"
-                intent="primary"
-                size="sm"
-                iconPlacement="only"
-                icon={<Download className="h-4 w-4" />}
-                loading={isExporting}
-                disabled={ordersData.length === 0 || isExporting}
-                aria-label="Exportar pedidos"
+      <AdminPageHeader title="Pedidos" />
+
+      {/* Toolbar */}
+      {toolbar(null)}
+
+      {/* Filtros Avanzados */}
+      {showAdvancedFilters && (
+        <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-neutral-700">
+                Estado de Pago
+              </label>
+              <Select
+                value={filters.estado_pago || ''}
+                onChange={(e) => handleFilterChange('estado_pago', e.target.value)}
+                className="w-full"
+              >
+                {ESTADOS_PAGO.map(estado => (
+                  <option key={estado.value} value={estado.value}>
+                    {estado.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-neutral-700">
+                Estado de Envío
+              </label>
+              <Select
+                value={filters.estado_envio || ''}
+                onChange={(e) => handleFilterChange('estado_envio', e.target.value)}
+                className="w-full"
+              >
+                {ESTADOS_ENVIO.map(estado => (
+                  <option key={estado.value} value={estado.value}>
+                    {estado.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-neutral-700">
+                Método de Despacho
+              </label>
+              <Select
+                value={filters.metodo_despacho || ''}
+                onChange={(e) => handleFilterChange('metodo_despacho', e.target.value)}
+                className="w-full"
+              >
+                {METODOS_DESPACHO.map(metodo => (
+                  <option key={metodo.value} value={metodo.value}>
+                    {metodo.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-neutral-700">
+                Fecha desde
+              </label>
+              <Input
+                type="date"
+                value={filters.fecha_desde || ''}
+                onChange={(e) => handleFilterChange('fecha_desde', e.target.value)}
+                className="w-full"
               />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {EXPORT_FORMATS.map((format) => (
-                <DropdownMenuItem
-                  key={format.value}
-                  onSelect={() => handleExport(format.value)}
-                >
-                  {format.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        }
-      />
+            </div>
 
-      <DataTableV2
-        columns={orderColumns}
-        data={ordersData}
-        loading={isLoading}
-        rowActions={orderRowActions}
-        toolbar={
-          <OrderFilters
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-            onRefresh={refetch}
-            isLoading={isLoading}
-            onResetFilters={resetFilters}
-          />
-        }
-        emptyMessage={emptyStateMessage}
-        page={page}
-        pageSize={pageSize}
-        total={total}
-        onPageChange={handlePageChange}
-        variant="card"
-        maxHeight="calc(100vh - 320px)"
-      />
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-neutral-700">
+                Fecha hasta
+              </label>
+              <Input
+                type="date"
+                value={filters.fecha_hasta || ''}
+                onChange={(e) => handleFilterChange('fecha_hasta', e.target.value)}
+                className="w-full"
+              />
+            </div>
 
-      {/* Modales */}
-      {selectedOrder && (
-        <OrderDetailsModal
-          order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
+            <div className="flex items-end">
+              <Button
+                appearance="outline"
+                intent="neutral"
+                size="sm"
+                onClick={resetFilters}
+                className="w-full"
+              >
+                Limpiar Filtros
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tabla Virtualizada */}
+      {isLoading ? (
+        <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-8 text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto text-neutral-400" />
+          <p className="mt-2 text-sm text-neutral-500">Cargando órdenes...</p>
+        </div>
+      ) : ordersData.length === 0 ? (
+        <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-8 text-center">
+          {emptyStateMessage}
+        </div>
+      ) : (
+        <VirtualizedTable
+          data={ordersData}
+          columns={[
+            { key: 'orden', header: 'Orden', width: '200px' },
+            { key: 'cliente', header: 'Cliente', width: '200px' },
+            { key: 'total', header: 'Total', width: '150px' },
+            { key: 'pago', header: 'Pago', width: '150px' },
+            { key: 'envio', header: 'Envío', width: '150px' },
+            { key: 'despacho', header: 'Despacho', width: '180px' },
+            { key: 'acciones', header: '', width: '100px' },
+          ]}
+          renderRow={(order) => {
+            const isEditing = editingRowId === order.orden_id;
+
+            return (
+              <div
+                className="grid items-center"
+                style={{
+                  gridTemplateColumns: '200px 200px 150px 150px 150px 180px 100px',
+                  height: '80px',
+                }}
+              >
+                {/* Orden */}
+                <div className="px-4 space-y-1">
+                  <p className="font-mono text-sm font-semibold text-neutral-900">
+                    {order.order_code}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    {formatDateTime(order.creado_en)}
+                  </p>
+                </div>
+
+                {/* Cliente */}
+                <div className="px-4 space-y-1">
+                  <p className="text-sm font-medium text-neutral-900">
+                    {order.userName || order.usuario_nombre || 'N/A'}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    {order.userEmail || order.usuario_email || 'N/A'}
+                  </p>
+                </div>
+
+                {/* Total */}
+                <div className="px-4 text-right space-y-1">
+                  <p className="text-sm font-semibold text-neutral-900">
+                    {formatCurrencyCLP(order.total_cents)}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    {order.total_items ?? 0} {order.total_items === 1 ? 'item' : 'items'}
+                  </p>
+                </div>
+
+                {/* Estado Pago */}
+                <div className="px-4">
+                  {isEditing ? (
+                    <Select
+                      value={editingValues.estado_pago || order.estado_pago}
+                      onChange={(e) => handleFieldChange('estado_pago', e.target.value)}
+                      className="w-full"
+                      size="sm"
+                    >
+                      {ESTADOS_PAGO.filter(e => e.value).map(estado => (
+                        <option key={estado.value} value={estado.value}>
+                          {estado.label}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <StatusPill
+                      status={order.estado_pago}
+                      intent={getStatusColor(order.estado_pago, 'pago')}
+                      size="sm"
+                    >
+                      {formatEstado(order.estado_pago)}
+                    </StatusPill>
+                  )}
+                </div>
+
+                {/* Estado Envío */}
+                <div className="px-4">
+                  {isEditing ? (
+                    <Select
+                      value={editingValues.estado_envio || order.estado_envio}
+                      onChange={(e) => handleFieldChange('estado_envio', e.target.value)}
+                      className="w-full"
+                      size="sm"
+                    >
+                      {ESTADOS_ENVIO.filter(e => e.value).map(estado => (
+                        <option key={estado.value} value={estado.value}>
+                          {estado.label}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <StatusPill
+                      status={order.estado_envio}
+                      intent={getStatusColor(order.estado_envio, 'envio')}
+                      size="sm"
+                    >
+                      {formatEstado(order.estado_envio)}
+                    </StatusPill>
+                  )}
+                </div>
+
+                {/* Método Despacho */}
+                <div className="px-4 space-y-1">
+                  <p className="text-sm text-neutral-900">
+                    {order.metodo_despacho ? formatEstado(order.metodo_despacho) : 'Standard'}
+                  </p>
+                  {order.comuna && (
+                    <p className="text-xs text-neutral-500">
+                      {order.comuna}{order.region ? `, ${order.region}` : ''}
+                    </p>
+                  )}
+                </div>
+
+                {/* Acciones */}
+                <div className="px-4 flex justify-end">
+                  <ResponsiveRowActions
+                    actions={orderRowActions(order)}
+                    menuLabel={`Acciones para orden ${order.order_code}`}
+                  />
+                </div>
+              </div>
+            );
+          }}
+          rowHeight={80}
+          overscan={5}
+          className="mt-4"
         />
       )}
 
-      {editingOrder && (
-        <EditStatusModal
-          order={editingOrder}
-          onClose={() => setEditingOrder(null)}
-          onSave={handleSaveStatus}
-        />
+      {/* Paginación */}
+      {ordersData.length > 0 && (
+        <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-neutral-600">
+              Mostrando {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} de {total} órdenes
+            </p>
+            <div className="flex gap-2">
+              <Button
+                appearance="outline"
+                size="sm"
+                disabled={page === 1}
+                onClick={() => handlePageChange(page - 1)}
+              >
+                Anterior
+              </Button>
+              <Button
+                appearance="outline"
+                size="sm"
+                disabled={page * pageSize >= total}
+                onClick={() => handlePageChange(page + 1)}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
+
     </div>
   );
 }

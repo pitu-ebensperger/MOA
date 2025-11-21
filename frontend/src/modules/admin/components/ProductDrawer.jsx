@@ -7,21 +7,16 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter } from "@/components/
 import { Button } from "@/components/ui/Button.jsx";
 import { Input, Textarea } from "@/components/ui/Input.jsx";
 import { Select } from "@/components/ui/Select.jsx";
-import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";
 import { ProductShape, CategoryShape } from "@/utils/propTypes.js";
-import { Save, Trash2, X } from "lucide-react";
+import { Save, Trash2, X } from "@icons/lucide";
 
 const STATUS_VALUES = ["activo", "sin_stock", "borrador"];
 
-const STATUS_OPTIONS = STATUS_VALUES.map((value) => ({
-  value,
-  label:
-    value === "activo"
-      ? "Activo"
-      : value === "sin_stock"
-        ? "Sin stock"
-        : "Borrador",
-}));
+const STATUS_OPTIONS = STATUS_VALUES.map((value) => {
+  if (value === "activo") return { value, label: "Activo" };
+  if (value === "sin_stock") return { value, label: "Sin stock" };
+  return { value, label: "Borrador" };
+});
 
 const DEFAULT_FORM_VALUES = {
   name: "",
@@ -48,7 +43,7 @@ const productSchema = z.object({
   stock: z.coerce.number().int().min(0, "Stock inválido"),
   status: z.enum(STATUS_VALUES),
   fk_category_id: z.union([z.string(), z.number()]).nullable().optional(),
-  imgUrl: z.string().url("URL inválida").or(z.literal("")).optional(),
+  imgUrl: z.union([z.string().url(), z.literal("")]).optional(),
   description: z.string().optional(),
   color: z.string().optional(),
   material: z.string().optional(),
@@ -166,14 +161,12 @@ export function ProductDrawer({
 
           <div className="flex-1 space-y-4 overflow-y-auto pr-1 hide-scrollbar">
             {/* Información básica */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3 space-y-3">
-              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
-                Información básica
-              </h3>
+            <div className="space-y-3">
               <Input
                 label="Nombre"
                 {...register("name")}
                 error={errors.name?.message}
+                placeholder="Ej. Mesa Escandinava"
                 fullWidth
               />
               <div className="grid grid-cols-2 gap-3">
@@ -181,6 +174,7 @@ export function ProductDrawer({
                   label="SKU"
                   {...register("sku")}
                   error={errors.sku?.message}
+                  placeholder="MOA-001"
                   fullWidth
                 />
                 <Select
@@ -192,12 +186,9 @@ export function ProductDrawer({
               </div>
             </div>
 
-            {/* Inventario */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
-                Inventario
-              </h3>
-              <div className="mt-2 grid grid-cols-2 gap-3">
+            {/* Inventario y precio */}
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Input
                   label="Precio"
                   type="number"
@@ -205,6 +196,7 @@ export function ProductDrawer({
                   step="0.01"
                   {...register("price")}
                   error={errors.price?.message}
+                  placeholder="150000"
                 />
                 <Input
                   label="Stock"
@@ -213,15 +205,13 @@ export function ProductDrawer({
                   step="1"
                   {...register("stock")}
                   error={errors.stock?.message}
+                  placeholder="10"
                 />
               </div>
             </div>
 
             {/* Clasificación */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
-                Clasificación
-              </h3>
+            <div className="space-y-3">
               <Select
                 label="Categoría"
                 {...register("fk_category_id")}
@@ -231,18 +221,15 @@ export function ProductDrawer({
             </div>
 
             {/* Imagen */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3 space-y-3">
-              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
-                Imagen
-              </h3>
+            <div className="space-y-3">
               <Input
-                label="Imagen (URL)"
+                label="URL de imagen"
                 {...register("imgUrl")}
                 placeholder="https://..."
                 fullWidth
               />
               {previewImage && (
-                <div className="rounded-2xl border border-neutral-200 bg-[color:var(--color-neutral1)] px-3 py-2">
+                <div className="rounded-2xl border border-neutral-200 bg-(--color-neutral1) px-3 py-2">
                   <p className="text-xs font-semibold text-(--text-muted)">Previsualización</p>
                   <div className="mt-2 h-32 w-full overflow-hidden rounded-2xl bg-(--surface-subtle)">
                     <img
@@ -256,15 +243,8 @@ export function ProductDrawer({
               )}
             </div>
 
-            {/* Características */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3 space-y-3">
-              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
-                Características
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <Input label="Color" {...register("color")} />
-                <Input label="Material" {...register("material")} />
-              </div>
+            {/* Descripción y características */}
+            <div className="space-y-3">
               <Textarea
                 label="Descripción"
                 rows={4}
@@ -272,20 +252,21 @@ export function ProductDrawer({
                 placeholder="Describe brevemente este producto"
                 fullWidth
               />
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Color" {...register("color")} placeholder="Beige" />
+                <Input label="Material" {...register("material")} placeholder="Madera de roble" />
+              </div>
             </div>
 
             {/* Dimensiones */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 px-4 py-3">
-              <h3 className="text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-500">
-                Dimensiones
-              </h3>
-              <div className="mt-2 grid grid-cols-4 gap-3">
+            <div className="space-y-3">
+              <div className="grid grid-cols-4 gap-3">
                 <Input
                   label="Alto"
                   size="sm"
                   type="number"
                   min="0"
-                  placeholder="cm"
+                  placeholder="75"
                   {...register("dimHeight")}
                 />
                 <Input
@@ -293,7 +274,7 @@ export function ProductDrawer({
                   size="sm"
                   type="number"
                   min="0"
-                  placeholder="cm"
+                  placeholder="120"
                   {...register("dimWidth")}
                 />
                 <Input
@@ -301,7 +282,7 @@ export function ProductDrawer({
                   size="sm"
                   type="number"
                   min="0"
-                  placeholder="cm"
+                  placeholder="80"
                   {...register("dimLength")}
                 />
                 <Select
@@ -309,63 +290,49 @@ export function ProductDrawer({
                   size="sm"
                   {...register("dimUnit")}
                   options={DIMENSION_UNIT_OPTIONS}
-                  placeholder="Selecciona unidad"
+                  placeholder="cm"
                   fullWidth
                 />
               </div>
             </div>
           </div>
 
-          <DialogFooter className="flex items-center justify-between gap-3 pt-4">
-            <div className="flex items-center gap-2">
+          <DialogFooter className="pt-4">
+            <div className="flex w-full justify-end gap-3">
               {initial && (
-                <TooltipNeutral label="Eliminar producto" position="top">
-                  <Button
-                    type="button"
-                    appearance="ghost"
-                    intent="error"
-                    size="sm"
-                    leadingIcon={<Trash2 className="h-4 w-4" />}
-                    onClick={() => onDelete?.(initial)}
-                  >
-                    Eliminar producto
-                  </Button>
-                </TooltipNeutral>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <TooltipNeutral label="Cerrar sin guardar" position="top">
                 <Button
                   type="button"
-                  appearance="soft"
-                  intent="neutral"
+                  appearance="ghost"
+                  intent="error"
                   size="sm"
-                  leadingIcon={<X className="h-4 w-4" />}
-                  onClick={onClose}
-                  className="text-(--text-strong)"
+                  leadingIcon={<Trash2 className="h-4 w-4" />}
+                  onClick={() => onDelete?.(initial)}
+                  className="mr-auto"
                 >
-                  Cancelar
+                  Eliminar
                 </Button>
-              </TooltipNeutral>
-              <TooltipNeutral
-                label={initial ? "Guardar cambios" : "Guardar producto"}
-                position="top"
+              )}
+              <Button
+                type="button"
+                appearance="ghost"
+                intent="neutral"
+                size="sm"
+                leadingIcon={<X className="h-4 w-4" />}
+                onClick={onClose}
+                className="text-(--text-strong)"
               >
-                <Button
-                  type="submit"
-                  appearance="solid"
-                  intent="primary"
-                  size="sm"
-                  leadingIcon={<Save className="h-4 w-4" />}
-                  disabled={isSubmitting}
-                  style={{
-                    "--btn-gap": "0.35rem",
-                    "--btn-icon-gap-left": "0.35rem",
-                  }}
-                >
-                  {isSubmitting ? "Guardando..." : initial ? "Guardar cambios" : "Guardar producto"}
-                </Button>
-              </TooltipNeutral>
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                appearance="solid"
+                intent="primary"
+                size="sm"
+                leadingIcon={<Save className="h-4 w-4" />}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Guardando..." : initial ? "Actualizar producto" : "Guardar producto"}
+              </Button>
             </div>
           </DialogFooter>
         </form>

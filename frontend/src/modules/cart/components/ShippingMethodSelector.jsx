@@ -5,7 +5,7 @@ import {
   Label,
   Card
 } from "@/components/shadcn/ui/index.js";
-import { Check } from "lucide-react";
+import { Check } from "@icons/lucide";
 
 /**
  * Selector de método de despacho para checkout

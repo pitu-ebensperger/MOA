@@ -1,4 +1,8 @@
+import { useStoreConfig } from "@/hooks/useStoreConfig.js"
+
 export const ReturnsAndExchangesPage = () => {
+  const { config } = useStoreConfig();
+
   return (
     <main className="bg-[#E6E0D8] min-h-screen px-8 py-50 text-[#453F34]">
       <section className="max-w-3xl mx-auto">
@@ -45,7 +49,7 @@ export const ReturnsAndExchangesPage = () => {
           Para iniciar una devolución, sigue estos pasos:
         </p>
         <ol className="list-decimal list-inside mb-6 space-y-2 ml-4">
-          <li>Contacta a nuestro equipo de atención al cliente a través de <span className="font-medium text-[#443114]">hola@moastudio.cl</span> o llamando al <span className="font-medium text-[#443114]">+56 2 2345 6789</span></li>
+          <li>Contacta a nuestro equipo de atención al cliente a través de <span className="font-medium text-[#443114]">{config.email}</span> o llamando al <span className="font-medium text-[#443114]">{config.telefono}</span></li>
           <li>Proporciona tu número de pedido y el motivo de la devolución</li>
           <li>Nuestro equipo te enviará las instrucciones de envío y una etiqueta de devolución si corresponde</li>
           <li>Empaca el producto de forma segura con todos sus accesorios y documentación</li>
@@ -136,8 +140,8 @@ export const ReturnsAndExchangesPage = () => {
           Si tienes dudas o necesitas ayuda con un cambio o devolución, no dudes en contactarnos:
         </p>
         <ul className="list-none mt-4 space-y-2 ml-4">
-          <li><span className="font-medium text-[#443114]">Email:</span> hola@moastudio.cl</li>
-          <li><span className="font-medium text-[#443114]">Teléfono:</span> +56 2 2345 6789</li>
+          <li><span className="font-medium text-[#443114]">Email:</span> {config.email}</li>
+          <li><span className="font-medium text-[#443114]">Teléfono:</span> {config.telefono}</li>
           <li><span className="font-medium text-[#443114]">Horario:</span> Lunes a viernes de 9:00 a 18:00 hrs</li>
         </ul>
       </section>

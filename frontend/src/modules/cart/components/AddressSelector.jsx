@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAddresses, createAddress } from '@/services/address.api.js';
 import { Input, Textarea } from '@/components/ui/Input.jsx';
-import { Card, CardHeader, CardTitle, CardContent, Separator, Label, buttonClasses } from '@/components/shadcn/ui/index.js';
+import { Card, CardContent, Label, buttonClasses } from '@/components/shadcn/ui/index.js';
 
 /**
  * Componente para seleccionar una dirección existente o crear una nueva.
@@ -29,7 +29,8 @@ export function AddressSelector({ onSelect, className = '' }) {
       try {
         const data = await getAddresses();
         if (mounted) setAddresses(Array.isArray(data) ? data : []);
-      } catch (e) {
+      } catch (err) {
+        console.error('[AddressSelector] Failed to load addresses', err);
         if (mounted) setError('No se pudieron cargar direcciones');
       } finally {
         if (mounted) setLoading(false);
@@ -61,7 +62,8 @@ export function AddressSelector({ onSelect, className = '' }) {
       setSelectedId(created.id);
       if (onSelect) onSelect(created);
       setFormData({ calle: '', comuna: '', ciudad: '', region: '', referencia: '' });
-    } catch (e) {
+    } catch (err) {
+      console.error('[AddressSelector] Error saving address', err);
       setError('Error guardando dirección');
     } finally {
       setSaving(false);

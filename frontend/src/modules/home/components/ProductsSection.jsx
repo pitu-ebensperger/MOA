@@ -6,10 +6,11 @@ import { createCategoryMatcher } from "@/modules/products/utils/products.js"
 import { ALL_CATEGORY_ID } from "@/config/constants.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { buildCategoryTabs, normalizeFeaturedProduct } from "@/utils/normalizers.js"
-import { useWishlist } from "@/modules/profile/hooks/useWishlist.js"
+import { useWishlistQuery, useToggleWishlist } from "@/modules/profile/hooks/useWishlistQuery.js"
 
 export default function ProductsSection({ products, categories, onAddToCart = () => {} }) {
-  const { wishlist, toggleWishlist } = useWishlist();
+  const { items: wishlist } = useWishlistQuery();
+  const { toggle: toggleWishlist } = useToggleWishlist();
   const tabs = useMemo(() => buildCategoryTabs(categories), [categories]);
   const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
   const matchCategory = useMemo(

@@ -1,5 +1,5 @@
 import React from "react";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "@icons/lucide";
 
 import { Button } from "@/components/ui/Button.jsx";
 import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";

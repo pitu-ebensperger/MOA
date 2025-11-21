@@ -1,6 +1,7 @@
 import { env } from "@/config/env.js"
 
 const DEFAULT_TIMEOUT = env.API_TIMEOUT ?? 15000;
+const TOKEN_STORAGE_KEY = "moa.accessToken";
 
 // token + handler global 401 (los setea AuthContext)
 let tokenGetter = () => null;
@@ -32,6 +33,17 @@ const tryParseJson = (text) => {
   } catch {
     return { ok: false, value: text };
   }
+};
+
+const getStoredToken = () => {
+  try {
+    if (typeof globalThis !== "undefined" && globalThis.localStorage) {
+      return globalThis.localStorage.getItem(TOKEN_STORAGE_KEY);
+    }
+  } catch {
+    // ignore storage read errors
+  }
+  return null;
 };
 
 // Petición base (fetch)
@@ -101,13 +113,12 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
 
   // Authorization si es cliente privado
   if (auth) {
-    const token = tokenGetter?.();
-    console.log('[api-client] Token usado para Authorization:', token);
-    if (token && typeof token === 'string' && token.length > 0) {
+    let token = tokenGetter?.();
+    if (!token || typeof token !== "string" || token.length === 0) {
+      token = getStoredToken();
+    }
+    if (token && typeof token === "string" && token.length > 0) {
       opts.headers.Authorization = `Bearer ${token}`;
-      console.log('[api-client] Header Authorization:', opts.headers.Authorization);
-    } else {
-      console.warn('[api-client] No se envió el token en Authorization. Token:', token);
     }
   }
 
@@ -141,11 +152,16 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
   }
 
   // 401 → dispara handler global (logout) si existe
+  // PERO no en rutas de autenticación (login/register) donde 401 es esperado
   if (res.status === 401 && onUnauthorized) {
-    try {
-      onUnauthorized();
-    } catch (handlerError) {
-      console.error('onUnauthorized handler failed', handlerError);
+    const isAuthEndpoint = path.includes('/login') || path.includes('/register');
+    if (!isAuthEndpoint) {
+      console.warn(`[api-client] 401 Unauthorized en ${path}, disparando logout...`);
+      try {
+        onUnauthorized();
+      } catch (handlerError) {
+        console.error('[api-client] onUnauthorized handler failed', handlerError);
+      }
     }
   }
 

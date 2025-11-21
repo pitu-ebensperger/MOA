@@ -17,11 +17,11 @@ export const alertWarning = (text, title = 'Atención') => base({ icon: 'warning
 export const alertSuccess = (html, title = 'Éxito') => base({ icon: 'success', title, html });
 export const alertError = (text, title = 'Error') => base({ icon: 'error', title, text });
 
-export const alertOrderError = (detail) => base({
+export const alertOrderError = (detail, supportEmail = 'contacto@moa.cl') => base({
   icon: 'error',
   title: 'No pudimos crear tu orden',
   html: `<p class='swal-p'>${detail || 'Intenta nuevamente. Si el error persiste comunícate con soporte.'}</p>`,
-  footer: '<small class="swal-footer">Soporte: contacto@moa.cl</small>'
+  footer: `<small class="swal-footer">Soporte: ${supportEmail}</small>`
 });
 
 export const alertOrderSuccess = (orderCode) => base({
@@ -44,8 +44,15 @@ export const alertGlobalError = () => base({
 
 // Auth required (login prompt)
 export const alertAuthRequired = () => base({
-  icon: 'info',
   title: 'Inicia sesión',
   html: `<p class='swal-p'>Debes iniciar sesión para usar el carrito y tu lista de deseos.</p>`,
-  confirmButtonText: 'Ir a login'
+  confirmButtonText: 'Ir a login',
+  showCloseButton: true,
+  customClass: {
+    popup: 'swal-popup',
+    title: 'swal-title',
+    htmlContainer: 'swal-html',
+    confirmButton: 'swal-btn swal-btn-confirm swal-btn-pill',
+    closeButton: 'swal-close-btn'
+  }
 });

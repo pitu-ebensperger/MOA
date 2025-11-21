@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus } from "@icons/lucide";
 import { buttonClasses } from '@/components/shadcn/ui/index.js';
 
 // Reusable quantity control for cart items

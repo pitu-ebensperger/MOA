@@ -1,12 +1,14 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, Ban, ShoppingBag, LayoutGrid, Rows, ListFilter } from "lucide-react";
+import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, ShoppingBag, LayoutGrid, Rows } from "@icons/lucide";
+import { toast } from '@/components/ui';
+import { useDebounce } from '@/hooks/useDebounce.js';
 import CustomerDrawer from "@/modules/admin/components/CustomerDrawer.jsx"
 import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
-import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
-import { TableToolbar, TableSearch, FilterTags } from "../../../components/data-display/TableToolbar.jsx";
+import { VirtualizedTable } from "@/components/data-display/VirtualizedTable.jsx";
+import { TableToolbar, TableSearch } from "../../../components/data-display/TableToolbar.jsx";
 import { Button, IconButton } from "@/components/ui/Button.jsx"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../../../components/ui/radix/DropdownMenu.jsx";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/radix/DropdownMenu.jsx";
 import { USER_STATUS_MAP } from "@/config/status-maps.js";
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js"
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
@@ -14,7 +16,6 @@ import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/radix/Dialog.jsx";
 import { Input } from "@/components/ui/Input.jsx";
-import { Pagination } from "@/components/ui/Pagination.jsx";
 import { customersAdminApi } from "@/services/customersAdmin.api.js";
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 import { ResponsiveRowActions } from "@/components/ui/ResponsiveRowActions.jsx";
@@ -28,9 +29,6 @@ const USER_STATUS_OPTIONS = [
 ];
 
 const STATUS_FILTER_OPTIONS = USER_STATUS_OPTIONS.filter((option) => option.value);
-const STATUS_LABEL_MAP = Object.fromEntries(
-  STATUS_FILTER_OPTIONS.map((option) => [option.value, option.label])
-);
 const NEW_CUSTOMER_INITIAL = {
   firstName: "",
   lastName: "",
@@ -38,8 +36,6 @@ const NEW_CUSTOMER_INITIAL = {
   phone: "",
   status: STATUS_FILTER_OPTIONS[0]?.value ?? "activo",
 };
-
-const getStatusLabel = (value) => STATUS_LABEL_MAP[value] ?? value;
 
 const normalizeCustomerRecord = (customer = {}) => {
   const nameParts = String(customer.nombre ?? "").split(" ").filter(Boolean);
@@ -57,11 +53,13 @@ const normalizeCustomerRecord = (customer = {}) => {
 export default function CustomersPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
   const [statusFilter, setStatusFilter] = useState("");
   const [viewMode, setViewMode] = useState("list"); // "list" o "grid"
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [breadcrumb, setBreadcrumb] = useState(null); // Para mostrar de dónde viene la orden
+  const [breadcrumb, setBreadcrumb] = useState(null);
+  const [onOrderUpdateCallback, setOnOrderUpdateCallback] = useState(null);
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   const [newCustomerForm, setNewCustomerForm] = useState(NEW_CUSTOMER_INITIAL);
   const [isCreatingSubmitting, setIsCreatingSubmitting] = useState(false);
@@ -76,7 +74,7 @@ export default function CustomersPage() {
     isLoading: isLoadingCustomers,
     refetch: refetchCustomers,
   } = useQuery({
-    queryKey: ["admin-customers", page, limit, search],
+    queryKey: ["admin-customers", page, limit, debouncedSearch],
     queryFn: () => customersAdminApi.list({ page, limit, search }),
     keepPreviousData: true,
     staleTime: 1000 * 60,
@@ -136,7 +134,7 @@ export default function CustomersPage() {
         setPage(1);
       } catch (error) {
         console.error("Error creando cliente:", error);
-        window.alert(error?.message ?? "No se pudo crear el cliente");
+        toast.error(error?.message ?? "No se pudo crear el cliente");
       } finally {
         setIsCreatingSubmitting(false);
       }
@@ -161,16 +159,18 @@ export default function CustomersPage() {
     refetchCustomers();
   }, [refetchCustomers]);
 
-  const handleViewOrder = async (order) => {
+  const handleViewOrder = async (order, onOrderUpdateCb) => {
     const customer = selectedCustomer;
     setBreadcrumb(customer ? customer.nombre : null);
     const fullOrder = await loadFullOrder(order);
     setSelectedOrder(fullOrder);
+    setOnOrderUpdateCallback(() => onOrderUpdateCb);
   };
 
   const handleCloseOrder = () => {
     setSelectedOrder(null);
     setBreadcrumb(null);
+    setOnOrderUpdateCallback(null);
   };
 
   const enhancedCustomers = useMemo(
@@ -188,9 +188,10 @@ export default function CustomersPage() {
       try {
         await customersAdminApi.update(customerId, { status: newStatus });
         refetchCustomers();
+        toast.success('Estado actualizado correctamente');
       } catch (error) {
         console.error("Error cambiando estado de cliente:", error);
-        window.alert(error?.message ?? "No se pudo actualizar el estado del cliente");
+        toast.error(error?.message ?? "No se pudo actualizar el estado del cliente");
       }
     },
     [refetchCustomers],
@@ -235,200 +236,16 @@ export default function CustomersPage() {
         setSelectedCustomer(normalizeCustomerRecord(updated));
         refetchCustomers();
         handleCloseEditDialog();
+        toast.success('Cliente actualizado correctamente');
       } catch (error) {
         console.error("Error editando cliente:", error);
-        window.alert(error?.message ?? "No se pudo actualizar el cliente");
+        toast.error(error?.message ?? "No se pudo actualizar el cliente");
       } finally {
         setIsEditingSubmitting(false);
       }
     },
     [editingCustomer, editForm, refetchCustomers, handleCloseEditDialog, setSelectedCustomer],
   );
-
-  // Definición de columnas
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: "fullName",
-        header: "Cliente",
-        enableSorting: false,
-        cell: ({ row }) => {
-          const customer = row.original;
-          return (
-            <div className="flex flex-col gap-0.5 px-1 py-2">
-                <span className="text-sm font-medium text-(--text-strong)">
-                  {customer.nombre}
-                </span>
-              <span className="flex items-center gap-1 text-xs text-(--color-text-muted)">
-                <Mail className="h-3 w-3" />
-                {customer.email}
-              </span>
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "orders",
-        header: "Pedidos",
-        enableSorting: true,
-        cell: ({ row }) => {
-          const customer = row.original;
-          const orderCount = Number.isFinite(customer.orderCount)
-            ? customer.orderCount
-            : 0;
-          return (
-            <div className="flex items-center gap-1 px-1 py-2 text-sm">
-              <ShoppingBag className="h-3.5 w-3.5 text-(--text-weak)" />
-              <span className="font-medium tabular-nums">{orderCount}</span>
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "status",
-        header: () => (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-(--text-strong)">Estado</span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <IconButton
-                  aria-label="Filtrar por estado"
-                  intent="neutral"
-                  size="xs"
-                  icon={<ListFilter size={14} />}
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start">
-                <DropdownMenuItem
-                  onSelect={() => handleStatusFilter("")}
-                  className="flex justify-between gap-2"
-                >
-                  <span>Todos los estados</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {STATUS_FILTER_OPTIONS.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onSelect={() => handleStatusFilter(option.value)}
-                    className="flex items-center justify-between gap-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <StatusPill status={option.value} domain="user" />
-                      <span className="text-xs text-(--color-text-muted)">{option.label}</span>
-                    </div>
-                    {statusFilter === option.value ? (
-                      <span className="text-(--color-primary1)">✓</span>
-                    ) : null}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {statusFilter ? (
-              <StatusPill status={statusFilter} domain="user" className="text-[10px]" />
-            ) : null}
-          </div>
-        ),
-        enableSorting: false,
-        cell: ({ row }) => {
-          const customer = row.original;
-          return (
-            <div className="px-1 py-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    className="cursor-pointer transition-opacity hover:opacity-80"
-                    aria-label="Cambiar estado"
-                  >
-                    <StatusPill status={customer.status} domain="user" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  {USER_STATUS_OPTIONS.filter((opt) => opt.value).map((option) => (
-                    <DropdownMenuItem
-                      key={option.value}
-                      onSelect={() => handleStatusChange(customer.id, option.value)}
-                    >
-                      {option.label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Registro",
-        enableSorting: true,
-        cell: ({ row }) => {
-          const customer = row.original;
-          return (
-            <div className="flex items-center gap-1 px-1 py-2 text-sm text-(--text-weak)">
-              <Calendar className="h-3.5 w-3.5" />
-              {formatDate_ddMMyyyy(customer.createdAt)}
-            </div>
-          );
-        },
-      },
-      {
-        id: "actions",
-        header: "",
-        enableSorting: false,
-        cell: ({ row }) => {
-          const customer = row.original;
-          return (
-            <div className="px-1 py-2 flex justify-end">
-              <ResponsiveRowActions
-                actions={(() => {
-                  const customerActions = [
-                    {
-                      key: "view",
-                      label: "Ver perfil",
-                      icon: Eye,
-                      onAction: () => setSelectedCustomer(customer),
-                    },
-                    {
-                      key: "edit",
-                      label: "Editar",
-                      icon: Edit3,
-                      onAction: () => handleOpenEditDialog(customer),
-                    },
-                  ];
-                  customerActions.push({
-                    key: "disable",
-                    label: "Desactivar",
-                    icon: Ban,
-                    danger: true,
-                    separatorBefore: true,
-                    onAction: () => {
-                      if (confirm(`¿Desactivar a ${customer.nombre}?`)) {
-                        handleStatusChange(customer.id, "suspendido");
-                      }
-                    },
-                  });
-                  return customerActions;
-                })()}
-                menuLabel={`Acciones para ${customer.nombre}`}
-              />
-            </div>
-          );
-        },
-      },
-    ],
-    [handleStatusFilter, statusFilter, handleOpenEditDialog, handleStatusChange]
-  );
-
-  const activeStatusTags = useMemo(() => {
-    if (!statusFilter) return [];
-    return [
-      {
-        key: "status",
-        value: statusFilter,
-        label: `Estado: ${getStatusLabel(statusFilter)}`,
-      },
-    ];
-  }, [statusFilter]);
 
   const toolbar = useMemo(
     () => () => (
@@ -441,7 +258,6 @@ export default function CustomersPage() {
           } }
           placeholder="Buscar por nombre, email…"
           className="flex-1 max-w-2xl" />
-        <FilterTags tags={activeStatusTags} onRemove={() => handleStatusFilter("")} />
         <div className="ml-auto flex items-center gap-2">
           <div className="flex items-center gap-0.5 rounded-md border border-(--color-border) p-0.5">
             <TooltipNeutral label="List" position="bottom">
@@ -489,7 +305,7 @@ export default function CustomersPage() {
         </div>
       </TableToolbar>
     ),
-    [search, activeStatusTags, viewMode, handleRefresh, handleStatusFilter]
+    [search, viewMode, handleRefresh, handleStatusFilter]
   );
 
   return (
@@ -500,18 +316,148 @@ export default function CustomersPage() {
 
       {/* Tabla con toolbar integrado */}
       {viewMode === "list" ? (
-          <DataTableV2
-            columns={columns}
-            data={filteredCustomers}
-            loading={isLoadingCustomers}
-            page={page}
-            pageSize={pageSize}
-            total={totalCustomers}
-            onPageChange={setPage}
-            toolbar={toolbar}
-            variant="card"
-            maxHeight="520px"
-          />
+        <div>
+          {/* Toolbar */}
+          {toolbar(null)}
+          
+          {/* Loading State */}
+          {isLoadingCustomers ? (
+            <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-8 text-center">
+              <RefreshCw className="h-8 w-8 animate-spin mx-auto text-neutral-400" />
+              <p className="mt-2 text-sm text-neutral-500">Cargando clientes...</p>
+            </div>
+          ) : filteredCustomers.length === 0 ? (
+            <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-8 text-center">
+              <p className="text-sm text-neutral-500">No se encontraron clientes</p>
+            </div>
+          ) : (
+            <VirtualizedTable
+              data={filteredCustomers}
+              columns={[
+                { key: 'cliente', header: 'Cliente', width: '300px' },
+                { key: 'pedidos', header: 'Pedidos', width: '120px' },
+                { key: 'estado', header: 'Estado', width: '180px' },
+                { key: 'registro', header: 'Registro', width: '150px' },
+                { key: 'acciones', header: '', width: '100px' },
+              ]}
+              renderRow={(customer) => (
+                <div
+                  className="grid items-center"
+                  style={{
+                    gridTemplateColumns: '300px 120px 180px 150px 100px',
+                    height: '70px',
+                  }}
+                >
+                  {/* Cliente */}
+                  <div className="flex flex-col gap-0.5 px-4">
+                    <span className="text-sm font-medium text-neutral-900">
+                      {customer.nombre}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-neutral-500">
+                      <Mail className="h-3 w-3" />
+                      {customer.email}
+                    </span>
+                  </div>
+
+                  {/* Pedidos */}
+                  <div className="flex items-center gap-1 px-4 text-sm">
+                    <ShoppingBag className="h-3.5 w-3.5 text-neutral-400" />
+                    <span className="font-medium tabular-nums">
+                      {Number.isFinite(customer.orderCount) ? customer.orderCount : 0}
+                    </span>
+                  </div>
+
+                  {/* Estado */}
+                  <div className="px-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className="cursor-pointer transition-opacity hover:opacity-80"
+                          aria-label="Cambiar estado"
+                        >
+                          <StatusPill status={customer.status} domain="user" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        {USER_STATUS_OPTIONS.filter((opt) => opt.value).map((option) => (
+                          <DropdownMenuItem
+                            key={option.value}
+                            onSelect={() => handleStatusChange(customer.id, option.value)}
+                            className="flex items-center justify-between gap-2"
+                          >
+                            <StatusPill status={option.value} domain="user" />
+                            {customer.status === option.value && (
+                              <span className="text-(--color-primary1)">✓</span>
+                            )}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Registro */}
+                  <div className="flex items-center gap-1 px-4 text-sm text-neutral-600">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate_ddMMyyyy(customer.createdAt)}
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="px-4 flex justify-end">
+                    <ResponsiveRowActions
+                      actions={[
+                        {
+                          key: "view",
+                          label: "Ver perfil",
+                          icon: Eye,
+                          onAction: () => setSelectedCustomer(customer),
+                        },
+                        {
+                          key: "edit",
+                          label: "Editar",
+                          icon: Edit3,
+                          onAction: () => handleOpenEditDialog(customer),
+                        },
+                      ]}
+                      menuLabel={`Acciones para ${customer.nombre}`}
+                    />
+                  </div>
+                </div>
+              )}
+              rowHeight={70}
+              overscan={5}
+              className="mt-4"
+            />
+          )}
+          
+          {/* Paginación */}
+          {totalCustomers > pageSize && !isLoadingCustomers && filteredCustomers.length > 0 && (
+            <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-neutral-600">
+                  Mostrando {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, totalCustomers)} de {totalCustomers} clientes
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    appearance="outline"
+                    size="sm"
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                  >
+                    Anterior
+                  </Button>
+                  <Button
+                    appearance="outline"
+                    size="sm"
+                    disabled={page >= pageCount}
+                    onClick={() => setPage(page + 1)}
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       ) : (
         <div>
           {/* Toolbar */}
@@ -618,6 +564,7 @@ export default function CustomersPage() {
         order={selectedOrder}
         onClose={handleCloseOrder}
         breadcrumb={breadcrumb}
+        onOrderUpdate={onOrderUpdateCallback}
       />
 
       <Dialog

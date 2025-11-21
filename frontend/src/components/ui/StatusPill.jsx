@@ -18,17 +18,27 @@ const DOMAIN_MAP = {
   user: USER_STATUS_MAP,
 };
 
-export function StatusPill({ status, domain = "order", className = "" }) {
-  if (!status) return <Pill variant="neutral">-</Pill>;
+const STATUS_PILL_SIZES = ["sm", "md", "lg"];
 
+export function StatusPill({
+  status,
+  domain = "order",
+  intent,
+  label,
+  size = "md",
+  className = "",
+  children,
+}) {
   const map = DOMAIN_MAP[domain] ?? {};
-  const key = String(status).toLowerCase();
+  const key = status == null ? "" : String(status).toLowerCase();
 
   const conf = map[key] ?? { variant: "neutral", label: key };
+  const variant = intent || conf.variant || "neutral";
+  const content = children ?? label ?? conf.label ?? (status ? key.replace(/_/g, " ") : "-");
 
   return (
-    <Pill variant={conf.variant} className={className}>
-      {conf.label}
+    <Pill variant={variant} size={size} className={className}>
+      {content}
     </Pill>
   );
 }
@@ -36,5 +46,9 @@ export function StatusPill({ status, domain = "order", className = "" }) {
 StatusPill.propTypes = {
   status: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   domain: PropTypes.oneOf(["product", "order", "payment", "shipment", "user"]),
+  intent: PropTypes.string,
+  label: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  size: PropTypes.oneOf(STATUS_PILL_SIZES),
   className: PropTypes.string,
+  children: PropTypes.node,
 };

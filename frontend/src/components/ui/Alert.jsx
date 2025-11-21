@@ -1,6 +1,6 @@
 import React from "react";
 import { cx } from "@/utils/ui-helpers.js"
-import { Info, CheckCircle, AlertTriangle, XCircle, X } from "lucide-react";
+import { Info, CheckCircle, AlertTriangle, XCircle, X } from "@icons/lucide";
 
 /* Alert Component -------------------------------------------------------------------------- */
 

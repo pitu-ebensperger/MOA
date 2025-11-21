@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useLayoutEffect } from "react";
+import { useQueryClient } from '@tanstack/react-query';
 import PropTypes from "prop-types";
 import { setOnUnauthorized, setTokenGetter } from "@/services/api-client.js"
 import { authApi } from "@/services/auth.api.js"
 import { AuthContext, isAdminRole } from "@/context/auth-context.js"
 import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useNavigate } from "react-router-dom";
-import { debugAuth } from "@/utils/clearAuth.js";
+
 
 // ---- Constantes y utilidades ----------------------------------
 const TOKEN_KEY = "moa.accessToken";
@@ -20,6 +21,7 @@ const identity = (value) => value;
 
 // ---- Contexto --------------------------------------------------
 export const AuthProvider = ({ children }) => {
+  const queryClient = useQueryClient();
   // Estado inicial: si hay token guardado, intentamos cargar perfil
   const [token, setToken] = usePersistentState(TOKEN_KEY, {
     initialValue: null,
@@ -30,14 +32,29 @@ export const AuthProvider = ({ children }) => {
     initialValue: null,
     parser: safeParseJson,
     serializer: (value) => JSON.stringify(value),
+    persistNull: true, // Mantener en storage incluso cuando sea null para evitar limpiezas accidentales
   });
-  const [status, setStatus] = useState(() => (token ? STATUS.LOADING : STATUS.IDLE));
+  
+  // Estado inicial: determinar según lo que hay en localStorage
+  const [status, setStatus] = useState(() => {
+    // Si hay sesión completa guardada (token + user con ID), confiar en ella
+    if (token && user && (user.id || user.usuario_id)) {
+      console.log('[AuthContext] 📦 Sesión completa encontrada en localStorage');
+      return STATUS.AUTH;
+    }
+    // Si solo hay token sin user, será token inválido - limpiar en el useEffect
+    if (token && !user) {
+      console.warn('[AuthContext] ⚠️ Token sin usuario detectado al iniciar');
+      return STATUS.IDLE; // No mostrar loader, limpiar en background
+    }
+    // Sin sesión
+    return STATUS.IDLE;
+  });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   // --- Sync helpers (token/user <-> storage + api-client) -------
   const syncToken = useCallback((nextToken) => {
-    console.log('[AuthContext] syncToken llamado, token:', nextToken);
     setTokenGetter(() => nextToken);           // api-client leerá el token actual
     setToken(nextToken ?? null);
   }, [setToken]);
@@ -46,34 +63,73 @@ export const AuthProvider = ({ children }) => {
     setUser(nextUser ?? null);
   }, [setUser]);
 
-  // --- Timeout de seguridad para evitar loader infinito ---
-  useEffect(() => {
-    if (status === STATUS.LOADING) {
-      const timeout = setTimeout(() => {
-        console.warn('[AuthContext] Timeout de carga alcanzado, forzando salida del loader');
-        const authState = debugAuth(); // Debug para ver qué hay en localStorage
-        console.log('[AuthContext] Estado actual:', authState);
-        if (!token) {
-          setStatus(STATUS.IDLE);
-        } else if (!user) {
-          // Si hay token pero no user después de 5 segundos, limpiar todo
-          console.error('[AuthContext] Token presente pero sin usuario después del timeout, limpiando sesión');
-          syncToken(null);
-          syncUser(null);
-          setStatus(STATUS.IDLE);
-        }
-      }, 5000); // 5 segundos de timeout
-      return () => clearTimeout(timeout);
+  // --- Limpieza preventiva al montar: si hay token huérfano (sin user), limpiarlo ---
+  useLayoutEffect(() => {
+    const storedToken = localStorage.getItem(TOKEN_KEY);
+    const storedUser = localStorage.getItem(USER_KEY);
+    
+    // Limpiar overflow:hidden del body por si quedó trabado
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.overflow = '';
     }
-  }, [status, token, user, syncToken, syncUser]);
+    
+    // Solo limpiar si realmente hay inconsistencia al inicio
+    if (storedToken && !storedUser) {
+      console.warn('[AuthContext] ⚠️ Token huérfano detectado (sin user), limpiando localStorage...');
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('cart');
+      localStorage.removeItem('wishlist');
+      syncToken(null);
+      setStatus(STATUS.IDLE);
+    } else if (!storedToken && storedUser) {
+      console.warn('[AuthContext] ⚠️ User huérfano detectado (sin token), limpiando localStorage...');
+      localStorage.removeItem(USER_KEY);
+      syncUser(null);
+      setStatus(STATUS.IDLE);
+    }
+  }, []); // Solo al montar, eliminar dependencias para evitar re-ejecución
 
   const logout = useCallback(() => {
+    console.log('[AuthContext] Ejecutando logout y limpiando sesión...');
+    // Limpiar token y perfil
     syncToken(null);
     syncUser(null);
     setStatus(STATUS.IDLE);
     setError(null);
-    navigate("/", { replace: true });
-  }, [syncToken, syncUser, navigate]);
+    
+    // Limpiar overflow:hidden del body por si quedó trabado
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.overflow = '';
+      document.body.style.removeProperty('overflow');
+    }
+    
+    // Limpiar almacenamiento local inmediato (evita mostrar datos stale)
+    try {
+      localStorage.removeItem('cart');
+      localStorage.removeItem('wishlist');
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+    } catch (e) {
+      console.warn('[AuthContext] No se pudieron limpiar datos del storage', e);
+    }
+    // Limpiar cache de React Query para datos protegidos
+    try {
+      queryClient.clear();
+    } catch (e) {
+      console.warn('[AuthContext] Error limpiando cache de QueryClient', e);
+    }
+    
+    // Redirigir según contexto: admin → login, otros → home
+    const currentPath = window.location.pathname;
+    const isAdminPath = currentPath.startsWith('/admin');
+    
+    if (isAdminPath) {
+      console.log('[AuthContext] Sesión expirada en admin, redirigiendo a login...');
+      navigate("/login", { replace: true, state: { from: currentPath, expired: true } });
+    } else {
+      navigate("/", { replace: true });
+    }
+  }, [syncToken, syncUser, navigate, queryClient]);
 
   // api-client: define cómo actuar ante 401 global y cómo obtener token
   useEffect(() => {
@@ -81,39 +137,96 @@ export const AuthProvider = ({ children }) => {
     setOnUnauthorized(() => logout);
   }, [token, logout]);
 
-  // Si hay token pero no user, intenta cargar perfil
+  // Limpieza de emergencia: si status es IDLE, asegurar que no haya overlays trabados
   useEffect(() => {
-    if (!token || user) {
-      // Si no hay token o ya hay user, asegurarse de salir del loading
-      if (status === STATUS.LOADING && !token) {
-        setStatus(STATUS.IDLE);
-      } else if (status === STATUS.LOADING && token && user) {
-        setStatus(STATUS.AUTH);
+    if (status === STATUS.IDLE && typeof document !== 'undefined') {
+      // Limpiar overflow del body
+      if (document.body) {
+        document.body.style.overflow = '';
+        document.body.style.removeProperty('overflow');
+        document.body.classList.remove('overflow-hidden');
       }
+      
+      // Cerrar cualquier portal de Radix que pueda estar abierto
+      const radixPortals = document.querySelectorAll('[data-radix-portal]');
+      for (const portal of radixPortals) {
+        if (portal?.parentNode) {
+          console.log('[AuthContext] Removiendo portal de Radix huérfano');
+          portal.remove();
+        }
+      }
+      
+      // Remover overlays específicos que puedan estar trabados
+      const overlays = document.querySelectorAll('[data-radix-dialog-overlay], [data-radix-sheet-overlay]');
+      for (const overlay of overlays) {
+        if (overlay?.parentNode) {
+          console.log('[AuthContext] Removiendo overlay de Radix huérfano');
+          overlay.remove();
+        }
+      }
+      
+      // Remover cualquier div con z-index alto y position fixed que cubra la pantalla
+      const suspiciousOverlays = document.querySelectorAll('div[class*="fixed"][class*="inset-0"][class*="z-"]');
+      for (const overlay of suspiciousOverlays) {
+        const classList = Array.from(overlay.classList);
+        const hasHighZIndex = classList.some(cls => /z-\d{2,}/.test(cls) || /z-50/.test(cls));
+        const hasOverlay = classList.some(cls => /bg-black|overlay|backdrop/.test(cls));
+        
+        if (hasHighZIndex && hasOverlay) {
+          console.warn('[AuthContext] Removiendo overlay sospechoso:', overlay.className);
+          overlay.remove();
+        }
+      }
+    }
+  }, [status]);
+
+  // Si hay token pero no user, intenta cargar perfil (validación de sesión silenciosa)
+  useEffect(() => {
+    // Si ya hay user o no hay token, no hacer nada
+    if (!token || user) {
       return undefined;
     }
     
+    // Si hay token pero no user, intentar validar en background (sin bloquear UI)
     let cancelled = false;
 
     (async () => {
       try {
-        console.log('[AuthContext] Cargando perfil con token existente...');
-        // No pasar user?.id porque user es null, usar endpoint /usuario que obtiene por token
+        console.log('[AuthContext] 🔍 Validando token guardado...');
         const profile = await authApi.profile();
-        console.log('[AuthContext] Perfil cargado:', profile);
         if (cancelled) return;
+        
+        // Validar que el perfil tenga ID (identificador único requerido)
+        if (!profile || !(profile.id || profile.usuario_id)) {
+          console.error('[AuthContext] ❌ Perfil inválido: sin ID de usuario');
+          throw new Error('Perfil inválido: sin ID de usuario');
+        }
+        
+        console.log('[AuthContext] ✅ Token válido, perfil cargado ID:', profile?.id || profile?.usuario_id);
         syncUser(profile);
         setStatus(STATUS.AUTH);
       } catch (err) {
-        console.error('[AuthContext] Error cargando perfil:', err);
         if (cancelled) return;
-        setError(err);
-        logout();
+        
+        const is401 = err?.status === 401 || err?.message?.includes('401') || err?.message?.toLowerCase().includes('unauthorized');
+        const isTokenInvalid = err?.message?.toLowerCase().includes('token') || err?.message?.toLowerCase().includes('sesión');
+        
+        if (is401 || isTokenInvalid) {
+          console.error('[AuthContext] ❌ Token inválido o expirado, limpiando:', err.message);
+        } else {
+          console.error('[AuthContext] ❌ Error validando token:', err.message);
+        }
+        
+        // Limpiar cualquier token inválido inmediatamente
+        syncToken(null);
+        syncUser(null);
+        setStatus(STATUS.IDLE);
+        setError(null); // No mostrar error, simplemente limpiar
       }
     })();
 
     return () => { cancelled = true; };
-  }, [token, user, status, syncUser, logout]);
+  }, [token, user, syncToken, syncUser]);
 
   // --- Acciones públicas ---------------------------------------
   const login = useCallback(
@@ -121,9 +234,7 @@ export const AuthProvider = ({ children }) => {
       setStatus(STATUS.LOADING);
       setError(null);
       try {
-        console.log('[AuthContext] Intentando login con credenciales:', credentials);
         const { token: nextToken, user: profile } = await authApi.login(credentials);
-        console.log('[AuthContext] Login exitoso, token:', nextToken, 'profile:', profile);
         syncToken(nextToken);
         syncUser(profile);
         setStatus(STATUS.AUTH);
@@ -192,8 +303,9 @@ export const AuthProvider = ({ children }) => {
     [user, token, status, error, login, register, logout, refreshProfile],
   );
 
-  // Loader global mientras se inicializa el token y el usuario
-  if (status === STATUS.LOADING && token && typeof token === 'string' && token.length > 0) {
+  // Loader global solo si hay sesión completa cargándose (token + user guardados)
+  // NO mostrar loader para tokens huérfanos (se validan en background)
+  if (status === STATUS.LOADING && token && user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-page">
         <div className="text-center space-y-4">
@@ -214,4 +326,3 @@ export const AuthProvider = ({ children }) => {
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
-

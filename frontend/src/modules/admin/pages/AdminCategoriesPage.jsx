@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit3, Trash2, Check, X } from "lucide-react";
+import { Plus, Edit3, Trash2, Check, X } from "@icons/lucide";
 
 import { categoriesApi } from "@/services/categories.api.js";
+import { confirm } from '@/components/ui';
 import { Button } from "@/components/ui/Button.jsx";
 import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx";
 import {
@@ -25,7 +26,7 @@ const sanitizeSlug = (value) =>
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/--+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/(^-+)|(-+$)/g, "");
 
 const initialFormState = {
   name: "",
@@ -192,14 +193,14 @@ export default function AdminCategoriesPage() {
   };
 
   const handleDelete = useCallback(
-    (category) => {
-      if (
-        !confirm(
-          `¿Estás seguro de eliminar la categoría "${category.name}"? Esta acción no se puede deshacer.`,
-        )
-      ) {
-        return;
-      }
+    async (category) => {
+      const confirmed = await confirm.delete(
+        `¿Eliminar "${category.name}"?`,
+        'Esta acción no se puede deshacer'
+      );
+      
+      if (!confirmed) return;
+      
       deleteCategoryMutation.mutate(category.id);
     },
     [deleteCategoryMutation],
@@ -244,8 +245,8 @@ export default function AdminCategoriesPage() {
         <div
           className={`rounded-2xl border px-4 py-3 text-sm ${
             pageAlert.type === "success"
-              ? "border-[color:var(--color-success)] bg-[color:var(--color-success)]/10 text-[color:var(--color-success)]"
-              : "border-[color:var(--color-error)] bg-[color:var(--color-error)]/10 text-[color:var(--color-error)]"
+              ? "border-(--color-success) bg-(--color-success)/10 text-(--color-success)"
+              : "border-(--color-error) bg-(--color-error)/10 text-(--color-error)"
           }`}
         >
           {pageAlert.message}
@@ -253,7 +254,7 @@ export default function AdminCategoriesPage() {
       )}
 
       {error && (
-        <div className="rounded-2xl border border-[color:var(--color-error)] bg-[color:var(--color-error)]/10 px-4 py-3 text-sm text-[color:var(--color-error)]">
+        <div className="rounded-2xl border border-(--color-error) bg-(--color-error)/10 px-4 py-3 text-sm text-(--color-error)">
           No pudimos cargar las categorías. {resolveErrorMessage(error)}
         </div>
       )}
@@ -283,7 +284,7 @@ export default function AdminCategoriesPage() {
 
             <div className="flex-1 space-y-4">
               {formError && (
-                <div className="rounded-2xl border border-[color:var(--color-error)] bg-[color:var(--color-error)]/10 px-4 py-2 text-xs font-medium text-[color:var(--color-error)]">
+                <div className="rounded-2xl border border-(--color-error) bg-(--color-error)/10 px-4 py-2 text-xs font-medium text-(--color-error)">
                   {formError}
                 </div>
               )}
@@ -323,7 +324,7 @@ export default function AdminCategoriesPage() {
               />
 
               {formValues.coverImage && (
-                <div className="rounded-2xl border border-neutral-200 bg-[color:var(--color-neutral1)] px-3 py-2">
+                <div className="rounded-2xl border border-neutral-200 bg-(--color-neutral1) px-3 py-2">
                   <p className="text-xs font-semibold text-(--text-muted)">Previsualización</p>
                   <div className="mt-2 h-32 w-full overflow-hidden rounded-2xl bg-(--surface-subtle)">
                     <img

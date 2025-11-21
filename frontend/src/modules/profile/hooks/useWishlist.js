@@ -2,40 +2,46 @@ import { useEffect, useState } from "react";
 import { usePersistentState } from "../../../hooks/usePersistentState.js";
 import { useAuth } from "../../../context/auth-context.js";
 import { wishlistApi } from "../../../services/wishlist.api.js";
+import { toast } from "@/components/ui";
 
 const WISHLIST_STORAGE_KEY = "wishlist";
 
 export const useWishlist = () => {
   const { token, status } = useAuth();
+  const isSessionReady = Boolean(token) && status === "authenticated";
+  
+  // Solo cargar wishlist de localStorage si hay sesión activa
   const [wishlist, setWishlist] = usePersistentState(WISHLIST_STORAGE_KEY, {
     initialValue: [],
+    enabled: isSessionReady, // Solo persistir si hay sesión
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const isSessionReady = Boolean(token) && status === "authenticated";
-
   const ensureAuthenticated = () => {
     if (isSessionReady) return true;
-    alert("Debes iniciar sesión para usar favoritos");
+    toast.info("Debes iniciar sesión para usar favoritos");
     return false;
   };
 
   useEffect(() => {
     if (!isSessionReady) {
-        console.log('[useWishlist] Session not ready, clearing wishlist');
       setWishlist([]);
       setIsLoading(false);
+      // Limpiar localStorage explícitamente si no hay sesión
+      try {
+        localStorage.removeItem(WISHLIST_STORAGE_KEY);
+      } catch (e) {
+        console.warn('[useWishlist] No se pudo limpiar wishlist del storage', e);
+      }
       return;
     }
 
     let cancelled = false;
     setIsLoading(true);
-  console.log('[useWishlist] Loading wishlist from API...');
 
     (async () => {
       try {
         const data = await wishlistApi.get();
-          console.log('[useWishlist] Wishlist data received:', data);
         if (cancelled) return;
         const items = Array.isArray(data?.items) ? data.items : [];
         setWishlist(items);
@@ -54,12 +60,10 @@ export const useWishlist = () => {
   const addToWishlist = async (product) => {
     if (!ensureAuthenticated()) return;
     const productId = product?.id ?? product?.producto_id;
-      console.log('[useWishlist] addToWishlist called with product:', product, 'productId:', productId);
     if (!productId) return;
 
     try {
-      const response = await wishlistApi.add(productId);
-      console.log('[useWishlist] API response:', response);
+      await wishlistApi.add(productId);
       setWishlist((prev) => [...prev, { producto_id: productId, ...product }]);
     } catch (error) {
       console.error("Error wishlist add:", error);

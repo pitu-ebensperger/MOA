@@ -1,18 +1,19 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, Heart, ShoppingCart } from "lucide-react";
+import { Eye, Heart, ShoppingCart } from "@icons/lucide";
 import { Price } from "@/components/data-display/Price.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { useAuth } from "@/context/auth-context.js"
 import { alertAuthRequired } from '@/utils/alerts.js'
 import { ProductShape } from "@/utils/propTypes.js"
+import { useCacheManager } from "@/hooks/useCacheManager.js"
 
 import { Button } from "@/components/ui/Button.jsx"
 import Badge from "@/components/ui/Badge.jsx"
 
-export default function ProductCard({
+const ProductCard = memo(function ProductCard({
   product = {},
   onAddToCart = () => {},
   onToggleWishlist = () => {},
@@ -21,10 +22,13 @@ export default function ProductCard({
   showBadge = false,
   badgeText = "NUEVO",
 }) {
-  const { id, slug, price, name, imgUrl, gallery } = product;
+  const { id, slug, price, name, imgUrl, gallery, stock } = product;
+  const isOutOfStock = !stock || stock <= 0;
 
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const cache = useCacheManager();
+  
   const displayTitle = name ?? slug ?? "Nombre Producto";
   const displayImage = imgUrl ?? gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
   const displayPrice = price ?? 50000;
@@ -36,7 +40,6 @@ export default function ProductCard({
   const [isHovered, setIsHovered] = useState(false);
   const [cartButtonPressed, setCartButtonPressed] = useState(false);
   const [detailsButtonPressed, setDetailsButtonPressed] = useState(false);
-  const [isConfirmRemoveOpen, setIsConfirmRemoveOpen] = useState(false);
 
   useEffect(() => {
     setIsLiked(Boolean(isInWishlist));
@@ -49,32 +52,8 @@ export default function ProductCard({
       alertAuthRequired().then(() => navigate(API_PATHS.auth.login));
       return;
     }
-    // Si actualmente está en wishlist, pedimos confirmación personalizada
-    if (isLiked) {
-      setIsConfirmRemoveOpen(true);
-      return;
-    }
-    // Agregar directamente
-    setIsLiked(true);
+    setIsLiked(!isLiked);
     onToggleWishlist(product);
-  };
-
-  const confirmRemove = (event) => {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    setIsConfirmRemoveOpen(false);
-    setIsLiked(false);
-    onToggleWishlist(product); // Ejecuta eliminación en hook
-  };
-
-  const cancelRemove = (event) => {
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    setIsConfirmRemoveOpen(false);
   };
 
   useEffect(() => {
@@ -112,7 +91,13 @@ export default function ProductCard({
         transition duration-300 ease-out
         hover:scale-[1.01]
       "
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        // Prefetch product details on hover
+        if (id) {
+          cache.prefetchProduct(id);
+        }
+      }}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Imagen base */}
@@ -145,11 +130,15 @@ export default function ProductCard({
         aria-hidden
       />
 
-      {showBadge && (
+      {isOutOfStock ? (
+        <Badge className="absolute top-[311px] left-[21px] z-30 h-[16.665px] w-[123px] bg-red-600 text-white">
+          SIN STOCK
+        </Badge>
+      ) : showBadge ? (
         <Badge className="absolute top-[311px] left-[21px] z-30 h-[16.665px] w-[123px]">
           {badgeText}
         </Badge>
-      )}
+      ) : null}
 
       <div
         className={`absolute inset-0 z-20 bg-[rgba(60,45,27,0.5)] mix-blend-multiply transition-opacity duration-300 ${
@@ -181,7 +170,7 @@ export default function ProductCard({
       <Link to={href} className="absolute inset-0" aria-label={`Ver detalle de ${displayTitle}`} />
 
       <div
-        className={`absolute left-1/2 top-1/2 z-30 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-5 transition-all duration-300 ${
+        className={`absolute left-1/2 top-1/2 z-30 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-3 transition-all duration-300 ${
           isHovered ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
         }`}
       >
@@ -191,10 +180,11 @@ export default function ProductCard({
           intent="primary"
           elevation="md"
           size="md"
-          motion="lift"
+          disabled={isOutOfStock}
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
+            if (isOutOfStock) return;
             if (!isAuthenticated) {
               alertAuthRequired().then(() => navigate(API_PATHS.auth.login));
               return;
@@ -205,12 +195,20 @@ export default function ProductCard({
           leadingIcon={
             <ShoppingCart
               size={18}
-              className={cartButtonPressed ? "text-white" : "text-(--color-primary3)"}
+              className="text-current"
             />
           }
-          className={`w-40 gap-3 transition-all ${cartButtonPressed ? "scale-95" : ""}`}
+          className={`
+            w-40 gap-3 transition-colors duration-200
+            border border-(--color-lightest)
+            ${cartButtonPressed 
+              ? "bg-(--color-primary3) text-white" 
+              : ""
+            }
+            ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
+          `}
         >
-          Agregar
+          {isOutOfStock ? "Sin stock" : "Agregar"}
         </Button>
 
         <Button
@@ -218,13 +216,14 @@ export default function ProductCard({
           appearance="outline"
           intent="inverse"
           size="md"
-          motion="lift"
           onClick={handleViewDetails}
           disabled={!href}
           leadingIcon={<Eye size={18} className="text-current" />}
-          className={`w-40 gap-3 transition-all ${
-            detailsButtonPressed ? "scale-95" : "hover:bg-white/10"
-          } ${!href ? "pointer-events-none opacity-40" : ""}`}
+          className={`
+            w-40 gap-3 transition-colors duration-200
+            hover:bg-white/10
+            ${!href ? "pointer-events-none opacity-40" : ""}
+          `}
         >
           Ver detalles
         </Button>
@@ -241,48 +240,9 @@ export default function ProductCard({
         </h3>
        
       </div>
-
-      {isConfirmRemoveOpen && (
-        <div
-          className="fixed inset-0 z-120 flex items-center justify-center bg-black/55 backdrop-blur-sm p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Confirmar eliminación de favorito"
-          onClick={cancelRemove}
-        >
-          <div
-            className="relative w-full max-w-xs rounded-xl bg-white p-6 text-center shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="mb-4 text-sm text-neutral-700">
-              ¿Eliminar este producto de tu lista de deseos?
-            </p>
-            <div className="flex justify-center gap-3">
-              <Button
-                type="button"
-                appearance="outline"
-                intent="neutral"
-                size="sm"
-                onClick={cancelRemove}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                appearance="solid"
-                intent="danger"
-                size="sm"
-                onClick={confirmRemove}
-              >
-                Eliminar
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </article>
   );
-}
+});
 
 ProductCard.propTypes = {
   product: ProductShape,
@@ -294,4 +254,5 @@ ProductCard.propTypes = {
   badgeText: PropTypes.string,
 };
 
+export default ProductCard;
 export { ProductCard };

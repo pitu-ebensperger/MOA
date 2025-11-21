@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MoveRight } from "lucide-react";
+import { MoveRight } from "@icons/lucide";
 import { API_PATHS } from "@/config/api-paths.js"
 
 const VARIANT_STYLES = {

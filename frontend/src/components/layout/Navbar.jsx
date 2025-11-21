@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
-import { ShoppingCart, LogOut, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, LogOut, LayoutDashboard, User } from "@icons/lucide";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth-context.js';
-import { useCart } from '@/modules/cart/hooks/useCart.js';
+import { useCartContext } from '@/context/cart-context.js';
 import { API_PATHS } from '@/config/api-paths.js';
 import { alertAuthRequired } from '@/utils/alerts.js';
 
@@ -17,7 +17,7 @@ export function Navbar({ onNavigate }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin, logout } = useAuth();
-  const { cartItems } = useCart();
+  const { cartItems } = useCartContext();
 
   const isActive = (href) => location.pathname === href;
 
@@ -80,8 +80,16 @@ export function Navbar({ onNavigate }) {
               >
                 <ShoppingCart className="nav-icon" />
                 {cartItems.length > 0 && (
-                  <span className="absolute top-0 right-0 h-3 w-3 rounded-full bg-(--color-primary1) shadow-sm" />
+                  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-(--color-primary1) shadow-sm" />
                 )}
+              </button>
+              <button
+                type="button"
+                aria-label="Ver perfil"
+                className="nav-icon-bg"
+                onClick={() => navigate('/profile')}
+              >
+                <User className="nav-icon" />
               </button>
               <button
                 onClick={handleLogout}

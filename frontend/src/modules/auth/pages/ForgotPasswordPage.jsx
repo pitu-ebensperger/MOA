@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import Swal from 'sweetalert2'
-import { Mail } from 'lucide-react'
+import { Mail } from "@icons/lucide"
 import { requestPasswordReset } from '@/services/auth.api.js'
+import { toast, confirm } from '@/components/ui'
 
 export default function ForgotPasswordPage(){
   const [email, setEmail] = useState('')
@@ -14,22 +14,20 @@ export default function ForgotPasswordPage(){
     // validación simple
     const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     if (!okEmail) {
-      Swal.fire({ icon: 'error', title: 'Correo inválido', text: 'Ingresa un correo válido.' })
+      toast.error('Ingresa un correo válido', { title: 'Correo inválido' })
       return
     }
 
     setLoading(true)
     try {
-      await requestPasswordReset(email.trim())
-      await Swal.fire({
-        icon: 'success',
-        title: 'Correo enviado',
-        text: 'Si el correo existe, recibirás instrucciones para restablecer tu contraseña.',
-        confirmButtonText: 'Entendido'
-      })
+      await requestPasswordReset({ email: email.trim() })
+      await confirm.info(
+        'Correo enviado',
+        'Si el correo existe, recibirás instrucciones para restablecer tu contraseña.'
+      )
       // Mantener en la misma página; si prefieres, redirige a /login
     } catch (err) {
-      Swal.fire({ icon: 'error', title: 'No se pudo enviar', text: err.message || 'Intenta nuevamente.' })
+      toast.error(err.message || 'Intenta nuevamente', { title: 'No se pudo enviar' })
     } finally {
       setLoading(false)
     }

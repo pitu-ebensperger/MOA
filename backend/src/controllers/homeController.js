@@ -35,9 +35,25 @@ export async function getHome(req, res) {
       ORDER BY producto_id;
     `);
 
+    // Obtener configuración de la tienda
+    const { rows: storeConfig } = await pool.query(`
+      SELECT 
+        nombre_tienda AS "nombreTienda",
+        descripcion,
+        direccion,
+        telefono,
+        email,
+        instagram_url AS "instagramUrl",
+        facebook_url AS "facebookUrl",
+        twitter_url AS "twitterUrl"
+      FROM configuracion_tienda
+      LIMIT 1
+    `);
+
     return res.json({
       categories: rowsCategories,
       featuredProducts: rowsProducts,
+      storeConfig: storeConfig[0] || null,
 
       editorialSections: [
         {

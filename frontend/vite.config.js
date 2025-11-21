@@ -61,7 +61,49 @@ export default defineConfig(({ mode }) => {
         '@services': path.resolve(__dirname, './src/services'),
         '@utils': path.resolve(__dirname, './src/utils'),
         '@config': path.resolve(__dirname, './src/config'),
+        '@icons': path.resolve(__dirname, './src/utils/icons'),
       },
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Vendor principal - React y routing
+            'react-core': ['react', 'react-dom', 'react-router-dom'],
+            // UI Components - Radix UI
+            'ui-components': [
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-label',
+              '@radix-ui/react-popover',
+              '@radix-ui/react-select',
+              '@radix-ui/react-slot',
+              '@radix-ui/react-tabs',
+              '@radix-ui/react-tooltip',
+            ],
+            // Data management - React Query y Table
+            'data-libs': [
+              '@tanstack/react-query',
+              '@tanstack/react-table',
+            ],
+            // Forms y validación
+            'forms': [
+              'react-hook-form',
+              '@hookform/resolvers',
+              'zod',
+            ],
+            // Charts y visualización
+            'charts': ['recharts'],
+            // Iconos
+            'icons': ['@heroicons/react', 'lucide-react'],
+            // Utilidades
+            'utils': ['clsx', 'tailwind-merge', 'class-variance-authority'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 1000,
+      // Optimización de sourcemaps para producción
+      sourcemap: mode === 'production' ? false : true,
     },
     server: {
       proxy,

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Save, RefreshCw, AlertCircle, CheckCircle2, Factory, Store } from 'lucide-react';
+import { Save, RefreshCw, AlertCircle, CheckCircle2, Factory, Store } from "@icons/lucide";
 import { getStoreConfig, updateStoreConfig, initializeStoreConfig } from '@/services/config.api.js';
 import { Button } from '@/components/ui/Button.jsx';
 import { Input } from '@/components/ui/Input.jsx';
 import { Textarea } from '@/components/shadcn/ui/textarea.jsx';
 import AdminPageHeader from '@/modules/admin/components/AdminPageHeader.jsx';
 
-export const StoreSettingsPage = () => {
+const StoreSettingsPage = () => {
   const [config, setConfig] = useState({
     nombre_tienda: '',
     descripcion: '',
@@ -349,3 +349,5 @@ export const StoreSettingsPage = () => {
     </div>
   );
 };
+
+export default StoreSettingsPage;

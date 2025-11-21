@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Heart, RefreshCw, Trash2, ShoppingCart, ArrowRight } from "lucide-react";
+import { Heart, RefreshCw, Trash2, ShoppingCart, ArrowRight } from "@icons/lucide";
+import { Link } from "react-router-dom";
 import ProductCard from "@/modules/products/components/ProductCard.jsx";
 import { useProducts } from "@/modules/products/hooks/useProducts.js";
 import { productsApi } from "@/services/products.api.js";
-import { useWishlist } from "@/modules/profile/hooks/useWishlist.js";
-import { useCart } from "@/modules/cart/hooks/useCart.js";
+import { useWishlistQuery, useToggleWishlist, useClearWishlist, useIsInWishlist } from "@/modules/profile/hooks/useWishlistQuery.js";
+import { useCartContext } from "@/context/cart-context.js";
 import { Button } from "@/components/shadcn/ui/button.jsx";
 import { EmptyPlaceholder, EmptyPlaceholderDescription, EmptyPlaceholderIcon, EmptyPlaceholderTitle } from "@/components/shadcn/ui/empty-state.jsx";
 import { Skeleton } from "@/components/ui/Skeleton.jsx";
@@ -14,8 +15,10 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 const WISHLIST_PRODUCT_FILTERS = Object.freeze({ limit: 100 });
 
 export const WishlistPage = () => {
-  const { addToCart } = useCart();
-  const { wishlist, isLoading: isLoadingWishlist, toggleWishlist, clearWishlist } = useWishlist();
+  const { addToCart } = useCartContext();
+  const { items: wishlist, isLoading: isLoadingWishlist } = useWishlistQuery();
+  const { toggle: toggleWishlist } = useToggleWishlist();
+  const { clear: clearWishlist } = useClearWishlist();
   const { products = [], isLoading: isLoadingProducts, error: productsError, refetch } = useProducts(WISHLIST_PRODUCT_FILTERS);
 
   const [isClearing, setIsClearing] = useState(false);
@@ -71,13 +74,24 @@ export const WishlistPage = () => {
     refetch?.();
   }, [refetch]);
 
-  const handleClearAll = useCallback(() => {
+  const handleClearAll = useCallback(async () => {
     if (!wishlistProducts.length) return;
-    const ok = window.confirm("¿Seguro que quieres limpiar todos tus favoritos?");
-    if (!ok) return;
+    
+    const { confirm, toast } = await import('@/components/ui');
+    const confirmed = await confirm.delete(
+      "¿Limpiar todos los favoritos?",
+      "Esta acción no se puede deshacer"
+    );
+    
+    if (!confirmed) return;
+    
     setIsClearing(true);
     try {
-      clearWishlist(); // Cliente (API podría implementar endpoint futuro)
+      await clearWishlist();
+      toast.success("Favoritos limpiados correctamente");
+    } catch (error) {
+      console.error('Error clearing wishlist:', error);
+      toast.error("Error al limpiar favoritos");
     } finally {
       setTimeout(() => setIsClearing(false), 400);
     }
@@ -150,16 +164,13 @@ export const WishlistPage = () => {
           <EmptyPlaceholderDescription>
             Explora el catálogo y marca como favorito lo que te guste para verlo aquí.
           </EmptyPlaceholderDescription>
-          <Button
-            as="a"
-            href="/productos"
-            variant="outline"
-            size="sm"
-            className="mt-2 gap-2"
+          <Link
+            to="/productos"
+            className="inline-flex items-center mt-2 gap-2 px-3 py-2 rounded-md border border-(--color-primary1) text-(--color-primary1) text-sm font-medium transition hover:bg-(--color-primary1) hover:text-white"
           >
             Buscar productos
             <ArrowRight className="h-4 w-4" />
-          </Button>
+          </Link>
         </EmptyPlaceholder>
       )}
 

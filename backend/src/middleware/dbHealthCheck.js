@@ -15,7 +15,6 @@ export const dbHealthCheck = async (req, res, next) => {
     // Intentar una reconexión automática
     try {
       await pool.query('SELECT 1');
-      console.log('Reconexión exitosa a la base de datos');
       next();
     } catch (retryError) {
       console.error('Fallo al reconectar:', retryError.message);
@@ -38,7 +37,6 @@ export const logPoolStats = (req, res, next) => {
       idleCount: pool.idleCount,
       waitingCount: pool.waitingCount
     };
-    console.log('📊 Pool Stats:', stats);
   }
   next();
 };

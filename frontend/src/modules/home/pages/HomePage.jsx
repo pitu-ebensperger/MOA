@@ -2,18 +2,14 @@ import ContactSection from "@/modules/home/components/ContactSection.jsx"
 import HeroSection from "@/modules/home/components/HeroSection.jsx"
 import ProductsSection from "@/modules/home/components/ProductsSection.jsx"
 import { useHomeLanding } from "@/modules/home/hooks/useHomeLanding.js"
-import { useCart } from "@/modules/cart/hooks/useCart.js"
+import { useCartContext } from "@/context/cart-context.js"
 
 export const HomePage = () => {
   const { home, isLoading, error } = useHomeLanding();
-  const { addToCart } = useCart();
-  console.log('--------');
-  console.log(home)
-  console.log('--------');
+  const { addToCart } = useCartContext();
 
   const categories = home?.categories ?? undefined;
   const featuredProducts = home?.featuredProducts ?? undefined;
-
   return (
     <div className="page">
       <HeroSection />
@@ -39,7 +35,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        <ContactSection contact={home?.contact} />
+        <ContactSection />
       </div>
     </div>
   );

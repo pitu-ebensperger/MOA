@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getPaginationRowModel, flexRender } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronUp, ChevronDown, ListFilter, Pencil, Check, X } from "lucide-react";
+import { ArrowUpDown, ChevronUp, ChevronDown, ListFilter, Pencil, Check, X } from "@icons/lucide";
 import { Pagination } from "@/components/ui/Pagination.jsx"
 import { IconButton } from "@/components/ui/Button.jsx"
 import { InputSm } from "@/components/ui/Input.jsx"

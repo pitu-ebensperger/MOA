@@ -85,6 +85,12 @@ CREATE TABLE productos (
     updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+-- Índices para optimización de productos
+CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos(categoria_id);
+CREATE INDEX IF NOT EXISTS idx_productos_status ON productos(status);
+CREATE INDEX IF NOT EXISTS idx_productos_slug ON productos(slug);
+CREATE INDEX IF NOT EXISTS idx_productos_sku ON productos(sku);
+
 CREATE TABLE carritos (
     carrito_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT REFERENCES usuarios (usuario_id) UNIQUE,
@@ -136,6 +142,12 @@ CREATE TABLE ordenes (
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
+-- Índices para optimización de órdenes
+CREATE INDEX IF NOT EXISTS idx_ordenes_usuario ON ordenes(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_ordenes_estado_pago ON ordenes(estado_pago);
+CREATE INDEX IF NOT EXISTS idx_ordenes_estado_envio ON ordenes(estado_envio);
+CREATE INDEX IF NOT EXISTS idx_ordenes_creado_en ON ordenes(creado_en DESC);
+
 CREATE TABLE orden_items (
     orden_item_id BIGSERIAL PRIMARY KEY,
     orden_id BIGINT REFERENCES ordenes (orden_id) ON DELETE CASCADE,
@@ -143,6 +155,10 @@ CREATE TABLE orden_items (
     cantidad INT NOT NULL CHECK (cantidad > 0),
     precio_unit INT NOT NULL
 );
+
+-- Índices para optimización de orden_items
+CREATE INDEX IF NOT EXISTS idx_orden_items_orden ON orden_items(orden_id);
+CREATE INDEX IF NOT EXISTS idx_orden_items_producto ON orden_items(producto_id);
 
 CREATE TABLE configuracion_tienda (
     id SERIAL PRIMARY KEY,
@@ -164,3 +180,16 @@ INSERT INTO configuracion_tienda (
 ) VALUES (
     'MOA', 'Muebles y decoración', 'Providencia 1234, Santiago, Chile', '+56 2 2345 6789', 'contacto@moa.cl', 'http://instagram.com/moa', '', ''
 );
+
+-- ===============================================
+-- Extensiones y índices para búsqueda de texto
+-- ===============================================
+
+-- Habilitar extensión pg_trgm para búsquedas de similitud
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- Índice GIN para búsqueda por similitud de nombre (trigram)
+CREATE INDEX IF NOT EXISTS idx_productos_nombre_trgm ON productos USING gin(nombre gin_trgm_ops);
+
+-- Índice GIN para búsqueda full-text en español
+CREATE INDEX IF NOT EXISTS idx_productos_search ON productos USING gin(to_tsvector('spanish', nombre || ' ' || COALESCE(descripcion, '')));

@@ -1,6 +1,6 @@
 //path/src/components/data/TanstackDataTable.jsx
-import React from "react";
-import { ListFilter } from "lucide-react";
+import React, { memo } from "react";
+import { ListFilter } from "@icons/lucide";
 import {
   useReactTable,
   getCoreRowModel,
@@ -10,7 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { Pagination } from "@/components/ui/Pagination.jsx"
 
-export function TanstackDataTable({
+export const TanstackDataTable = memo(function TanstackDataTable({
   columns,
   data,
   loading = false,
@@ -207,4 +207,4 @@ export function TanstackDataTable({
       )}
     </div>
   );
-}
+});

@@ -10,13 +10,15 @@ import {
   formatearFecha,
   mensajeTiempoEntrega
 } from "@/utils/orderTracking.js";
-import { Store, Phone, Mail } from "lucide-react";
+import { CheckCircle, Circle, Package, Truck, Mail, Phone } from "@icons/lucide";
+import { useStoreConfig } from "@/hooks/useStoreConfig.js";
 
 /**
  * Componente de Timeline de Estado de Orden
  * Muestra el progreso visual de una orden con estados y fechas estimadas
  */
 export default function OrderStatusTimeline({ order }) {
+  const { config } = useStoreConfig();
   // Si no hay orden, no mostrar nada
   if (!order) return null;
 
@@ -189,20 +191,20 @@ export default function OrderStatusTimeline({ order }) {
         </h3>
         <div className="space-y-2 text-sm text-blue-800">
           <a 
-            href="https://wa.me/56912345678" 
+            href={`https://wa.me/${config.telefono?.replace(/[^\d]/g, '')}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 transition-colors hover:text-blue-600 hover:underline"
           >
             <Phone className="h-4 w-4" />
-            WhatsApp: +56 9 1234 5678
+            WhatsApp: {config.telefono}
           </a>
           <a 
-            href="mailto:hola@moa.cl"
+            href={`mailto:${config.email}`}
             className="flex items-center gap-2 transition-colors hover:text-blue-600 hover:underline"
           >
             <Mail className="h-4 w-4" />
-            Email: hola@moa.cl
+            Email: {config.email}
           </a>
         </div>
       </div>

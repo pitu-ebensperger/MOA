@@ -1,5 +1,5 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
+import { X } from "@icons/lucide";
 import { cx } from "@/utils/ui-helpers.js"
 
 export function Dialog({ children, open, onOpenChange }) {
@@ -68,11 +68,19 @@ export function DialogHeader({ title, description, children }) {
 }
 
 export function DialogTitle({ children, className = "" }) {
-  return <h2 className={`text-lg font-semibold text-gray-900 ${className}`}>{children}</h2>;
+  return (
+    <DialogPrimitive.Title className={`text-lg font-semibold text-gray-900 ${className}`}>
+      {children}
+    </DialogPrimitive.Title>
+  );
 }
 
 export function DialogDescription({ children, className = "" }) {
-  return <p className={`text-sm text-gray-600 ${className}`}>{children}</p>;
+  return (
+    <DialogPrimitive.Description className={`text-sm text-gray-600 ${className}`}>
+      {children}
+    </DialogPrimitive.Description>
+  );
 }
 
 export function DialogFooter({ children, className = "" }) {

@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Mail, Lock, AlertCircle } from "@icons/lucide";
 import { useAuth, isAdminRole } from '@/context/auth-context.js'
 import { useRedirectAfterAuth } from '@/modules/auth/hooks/useRedirectAuth.jsx'
 import { Button } from '@/components/ui/Button.jsx'
@@ -10,6 +10,7 @@ import { API_PATHS } from '@/config/api-paths.js'
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate(); 
+  const location = useLocation();
   const redirect = useRedirectAfterAuth();
 
   const [email, setEmail] = useState('');
@@ -17,6 +18,21 @@ export default function LoginPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
+  
+  // Detectar si vino por sesión expirada
+  const sessionExpired = location.state?.expired;
+  const fromPath = location.state?.from?.pathname;
+
+  // Limpiar cualquier estado corrupto al montar
+  useEffect(() => {
+    // Si hay un token pero no hay usuario, limpiar todo
+    const token = localStorage.getItem('moa.accessToken');
+    const user = localStorage.getItem('moa.user');
+    if (token && !user) {
+      console.warn('[LoginPage] Token sin usuario detectado, limpiando...');
+      localStorage.clear();
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -36,7 +52,9 @@ export default function LoginPage() {
       const profile = await login({ email, password }); // AuthContext guarda token+user
       redirect({ adminOverride: isAdminRole(profile) });                        // redirige por rol
     } catch (err) {
-      setServerError(err?.data?.message || 'Credenciales inválidas');
+      console.error('[LoginPage] Error en login:', err);
+      const errorMessage = err?.data?.message || err?.message || 'Credenciales inválidas';
+      setServerError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -52,7 +70,22 @@ export default function LoginPage() {
             <p className="text-sm text-(--color-secondary1) mt-1">Bienvenido de vuelta</p>
           </header>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Alerta de sesión expirada */}
+          {sessionExpired && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-amber-900">
+                  Tu sesión ha expirado
+                </p>
+                <p className="text-xs text-amber-700">
+                  Por seguridad, necesitas iniciar sesión nuevamente{fromPath ? ' para acceder a ' + fromPath : ''}.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">{/* Email */}
             {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="flex items-center gap-2 text-sm text-neutral-700">
@@ -105,9 +138,8 @@ export default function LoginPage() {
 
                  <div className="mt-3 text-center">
                 <Link
-                  type="button"
-                  onClick={() => navigate(API_PATHS.auth.forgot)}
-                  className="text-sm text-muted no-underline hover:opacity-100 hover:text-[var(--color-secondary1)] hover:text-medium transition-colors"
+                  to={API_PATHS.auth.forgot}
+                  className="text-sm text-muted no-underline hover:opacity-100 hover:text-(--color-secondary1) hover:text-medium transition-colors"
                 >
                 ¿Olvidaste tu contraseña?
               </Link>

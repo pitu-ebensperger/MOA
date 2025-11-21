@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Dialog, DialogContent } from "@/components/ui/radix/Dialog.jsx"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { Price } from "@/components/data-display/Price.jsx"
-import { Mail, Phone, Calendar, MapPin, ShoppingBag, Package } from "lucide-react";
+import { Mail, Phone, Calendar, MapPin, ShoppingBag, Package } from "@icons/lucide";
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js"
 import { UserShape } from "@/utils/propTypes.js";
@@ -54,7 +54,7 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
   const createdAt = customer?.createdAt ?? null;
   const fullName = (firstName + " " + lastName).trim() || "Cliente";
 
-  // Hooks (si no hay id retornan arrays vacíos, mantener orden estable)
+  // Cargar órdenes del cliente con filtro backend
   const [customerOrders, setCustomerOrders] = React.useState([]);
 
   React.useEffect(() => {
@@ -65,15 +65,10 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
         return;
       }
       try {
-        // Pedimos un page grande para filtrar en memoria (hasta que exista endpoint por usuario)
-        const data = await ordersAdminApi.getAll({ page: 1, limit: 200 });
+        const data = await ordersAdminApi.getAll({ usuario_id: id, limit: 100 });
         const rawItems = data?.items || data?.data?.items || [];
-        const filtered = rawItems.filter((o) => {
-          const uid = o.userId || o.usuario_id || o.user_id;
-          return String(uid) === String(id);
-        });
-        filtered.sort((a, b) => new Date(b.createdAt || b.creado_en || 0) - new Date(a.createdAt || a.creado_en || 0));
-        if (active) setCustomerOrders(filtered);
+        rawItems.sort((a, b) => new Date(b.createdAt || b.creado_en || 0) - new Date(a.createdAt || a.creado_en || 0));
+        if (active) setCustomerOrders(rawItems);
       } catch (err) {
         console.error("Error cargando órdenes del cliente", err);
         if (active) setCustomerOrders([]);
@@ -81,6 +76,18 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
     }
     fetchOrders();
     return () => { active = false; };
+  }, [id]);
+
+  // Exponer refetch para que OrdersDrawer lo llame tras actualizar
+  const handleOrderUpdated = React.useCallback(() => {
+    if (!id) return;
+    ordersAdminApi.getAll({ usuario_id: id, limit: 100 })
+      .then(data => {
+        const rawItems = data?.items || data?.data?.items || [];
+        rawItems.sort((a, b) => new Date(b.createdAt || b.creado_en || 0) - new Date(a.createdAt || a.creado_en || 0));
+        setCustomerOrders(rawItems);
+      })
+      .catch(err => console.error("Error refrescando órdenes", err));
   }, [id]);
 
   const totalSpent = useMemo(() => {
@@ -213,7 +220,7 @@ export default function CustomerDrawer({ open, customer, onClose, onViewOrder })
                           <button
                             key={order.id}
                             type="button"
-                            onClick={() => onViewOrder?.(order)}
+                            onClick={() => onViewOrder?.(order, handleOrderUpdated)}
                             className="group w-full rounded-lg border border-(--color-border) bg-white p-3 text-left transition-all hover:border-(--color-primary1) hover:shadow-md"
                           >
                             <div className="flex items-start justify-between gap-3">

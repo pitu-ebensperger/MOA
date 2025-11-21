@@ -1,6 +1,7 @@
 {
   "name": "moa-monorepo",
   "private": true,
+  "type": "module",
   "workspaces": [
     "frontend",
     "backend"
@@ -31,6 +32,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.7",
-    "@tanstack/react-table": "^8.21.3"
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.12",
+    "nodemailer": "^7.0.10"
   }
 }

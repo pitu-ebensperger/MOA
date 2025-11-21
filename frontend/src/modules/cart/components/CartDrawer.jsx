@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { X, Trash2, ShoppingCart } from "lucide-react";
+import { X, Trash2, ShoppingCart } from "@icons/lucide";
 import { Button } from "@/components/ui/Button.jsx"
 import { Price } from "@/components/data-display/Price.jsx"
 
@@ -40,23 +40,22 @@ export const CartDrawer = () => {
     return cartItems.reduce((acc, item) => acc + Number(item.quantity || 1), 0);
   }, [cartItems, hasItems]);
 
+  // No renderizar el drawer si está cerrado (prevenir overlays trabados)
+  if (!isDrawerOpen) {
+    return null;
+  }
+
   return (
     <div
-      aria-hidden={!isDrawerOpen}
-      className={`fixed inset-0 z-1200 flex transition duration-300 ${
-        isDrawerOpen ? "pointer-events-auto" : "pointer-events-none"
-      }`}
+      aria-hidden={false}
+      className="fixed inset-0 z-1200 flex transition duration-300 pointer-events-auto"
     >
       <div
         onClick={closeDrawer}
-        className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
-          isDrawerOpen ? "opacity-100" : "opacity-0"
-        }`}
+        className="absolute inset-0 bg-black/40 transition-opacity duration-300 opacity-100"
       />
       <aside
-        className={`relative ml-auto flex w-full max-w-sm flex-col rounded-tl-3xl bg-(--color-lightest) p-6 shadow-[0_20px_45px_rgba(17,24,39,0.35)] transition-transform duration-300 transform ${
-          isDrawerOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className="relative ml-auto flex w-full max-w-sm flex-col rounded-tl-3xl bg-(--color-lightest) p-6 shadow-[0_20px_45px_rgba(17,24,39,0.35)] transition-transform duration-300 transform translate-x-0"
       >
         <header className="flex items-start justify-between gap-4">
           <div>

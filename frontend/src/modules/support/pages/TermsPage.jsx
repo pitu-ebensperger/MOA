@@ -1,4 +1,8 @@
+import { useStoreConfig } from "@/hooks/useStoreConfig.js"
+
 export const TermsPage = () => {
+  const { config } = useStoreConfig();
+
   return (
     <main className="bg-[#E6E0D8] min-h-screen px-8 py-50 text-[#453F34]">
       <section className="max-w-3xl mx-auto">
@@ -61,7 +65,7 @@ export const TermsPage = () => {
           siempre que el producto esté en su empaque original y sin daños. 
           No se aceptan devoluciones en productos personalizados o hechos a medida. 
           Para iniciar un proceso de devolución, contáctanos a 
-          <span className="font-medium text-[#443114]"> contacto@moa.com</span>.
+          <span className="font-medium text-[#443114]"> {config.email}</span>.
         </p>
 
         <h2 className="text-2xl font-semibold text-[#443114] mb-3 mt-8">
@@ -95,7 +99,7 @@ export const TermsPage = () => {
         </h2>
         <p className="leading-relaxed">
           Si tienes preguntas o inquietudes sobre estos Términos y Condiciones, 
-          escríbenos a <span className="font-medium text-[#443114]"> contacto@moa.com</span>.
+          escríbenos a <span className="font-medium text-[#443114]"> {config.email}</span>.
         </p>
       </section>
     </main>

@@ -8,7 +8,7 @@ import {
   AlertTriangle,
   Clock,
   Mail
-} from 'lucide-react';
+} from "@icons/lucide";
 import { alerts } from '@/utils/sweetalert.js';
 
 export const ServerErrorPage = ({ 

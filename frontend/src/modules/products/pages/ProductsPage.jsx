@@ -13,15 +13,17 @@ import { useCategories } from "@/modules/products/hooks/useCategories.js"
 import { useProducts } from "@/modules/products/hooks/useProducts.js"
 import { useProductFilters } from "@/modules/products/hooks/useProductFilters.js"
 import { useCatalogControls } from "@/modules/products/hooks/useCatalogControls.js"
-import { useCart } from "@/modules/cart/hooks/useCart.js"
+import { useCartContext } from "@/context/cart-context.js"
+import { useDebounce } from "@/hooks/useDebounce.js"
 
 export default function ProductsPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const searchQuery = (searchParams.get("search") ?? searchParams.get("q") ?? "").trim();
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
   const productQueryFilters = useMemo(
-    () => (searchQuery ? { q: searchQuery } : undefined),
-    [searchQuery],
+    () => (debouncedSearchQuery ? { q: debouncedSearchQuery } : undefined),
+    [debouncedSearchQuery],
   );
   const handleClearSearch = () => {
     if (!searchQuery) return;
@@ -31,7 +33,7 @@ export default function ProductsPage() {
   const { products: fetchedProducts, isLoading, error } = useProducts(productQueryFilters);
   const { categories: fetchedCategories } = useCategories();
 
-  const { addToCart } = useCart();
+  const { addToCart } = useCartContext();
 
   const {
     sort,

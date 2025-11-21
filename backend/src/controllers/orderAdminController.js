@@ -1,4 +1,8 @@
 import orderAdminModel from "../models/orderAdminModel.js";
+import {
+  SHIPPING_COMPANY_LABELS,
+  normalizeShippingCompany,
+} from "../../../shared/constants/shipping-companies.js";
 
 const CSV_COLUMNS = [
   { label: "Orden ID", key: "orden_id" },
@@ -54,6 +58,7 @@ const getAllOrders = async (req, res) => {
       fecha_desde,
       fecha_hasta,
       search,
+      usuario_id,
       order_by = 'creado_en',
       order_dir = 'DESC',
     } = req.query;
@@ -67,6 +72,7 @@ const getAllOrders = async (req, res) => {
       fecha_desde,
       fecha_hasta,
       search,
+      usuario_id,
       order_by,
       order_dir,
     });
@@ -193,12 +199,13 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
+    const normalizedEmpresaEnvio = empresa_envio ? normalizeShippingCompany(empresa_envio) : undefined;
+
     // Validar empresas de envío válidas
-    const validEmpresasEnvio = ['Chilexpress', 'Blue Express', 'Starken', 'Correos de Chile', 'Retiro en tienda'];
-    if (empresa_envio && !validEmpresasEnvio.includes(empresa_envio)) {
+    if (empresa_envio && !normalizedEmpresaEnvio) {
       return res.status(400).json({
         success: false,
-        message: `Empresa de envío inválida. Valores permitidos: ${validEmpresasEnvio.join(', ')}`,
+        message: `Empresa de envío inválida. Valores permitidos: ${SHIPPING_COMPANY_LABELS.join(', ')}`,
       });
     }
 
@@ -220,7 +227,7 @@ const updateOrderStatus = async (req, res) => {
       fecha_envio,
       fecha_entrega_real,
       numero_seguimiento,
-      empresa_envio,
+      empresa_envio: normalizedEmpresaEnvio,
     });
 
     res.status(200).json({
