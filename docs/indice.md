@@ -12,7 +12,8 @@
     - ├── [`DESIGN_SYSTEM.md`](misDOCS/DESIGN_SYSTEM.md)
     - ├── [`BACKEND_ANALISIS_PENDIENTES.md`](misDOCS/BACKEND_ANALISIS_PENDIENTES.md)
     - ├── [`BACKEND_PENDIENTES.md`](misDOCS/BACKEND_PENDIENTES.md)
-    - └── [`ENDPOINTS_Y_MIGRACION.md`](misDOCS/ENDPOINTS_Y_MIGRACION.md)
+    - ├── [`ENDPOINTS_Y_MIGRACION.md`](misDOCS/ENDPOINTS_Y_MIGRACION.md)
+    - └── [`GITHUB_COPILOT_AGENTS.md`](misDOCS/GITHUB_COPILOT_AGENTS.md)
 - ├── `frontend/`
   - ├── [`package.json`](../frontend/package.json) · scripts `dev`, `build`, `preview`.
   - ├── [`vite.config.js`](../frontend/vite.config.js) · configuración Vite + plugins React/Tailwind.

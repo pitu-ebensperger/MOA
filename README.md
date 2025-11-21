@@ -32,6 +32,7 @@ Ejecutar backend: `npm run -w backend dev`
 
 - [Estructura proyecto y Progreso](./docs/STATUS.md)
 - [Listado de dependecias](./docs/DEPENDENCIAS.md)
+- [GitHub Copilot: Cloud vs Local Agent](./docs/misDOCS/GITHUB_COPILOT_AGENTS.md)
 
 ### Otros
 
