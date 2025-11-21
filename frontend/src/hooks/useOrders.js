@@ -23,7 +23,7 @@ export const useOrders = () => {
   // Obtener una orden específica
   const getOrderById = (id) => orders.find((o) => o.id === id);
 
-  // Borrar  órdenes 
+  // Borrar  órdenes
   const clearOrders = () => {
     setOrders([]);
   };

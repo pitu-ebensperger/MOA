@@ -1,8 +1,10 @@
 import ProductCard from "./ProductCard.jsx";
 import { useWishlist } from "../../profile/hooks/useWishlist.js";
+import { useCartContext } from "@/context/cart-context.js";
 
-export default function ProductGallery({ products = [], onAddToCart }) {
+export default function ProductGallery({ products = [] }) {
   const { wishlist, toggleWishlist } = useWishlist();
+  const { addToCart } = useCartContext(); 
 
   if (!Array.isArray(products) || products.length === 0) {
     return (
@@ -26,13 +28,13 @@ export default function ProductGallery({ products = [], onAddToCart }) {
             product={product}
             isInWishlist={isSaved}
             onToggleWishlist={toggleWishlist}
-
-            onAddToCart={() => onAddToCart(product)}
+            onAddToCart={() => addToCart(product)}
           />
         );
       })}
     </section>
   );
 }
+
 
 

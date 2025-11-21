@@ -81,9 +81,13 @@ CREATE TABLE wishlist_items (
 
 CREATE TABLE ordenes (
     orden_id BIGSERIAL PRIMARY KEY,
-    order_code TEXT UNIQUE NOT NULL, -- MOA-YYYYMMDD-XXXX
+    order_code TEXT UNIQUE NOT NULL,
     usuario_id BIGINT REFERENCES usuarios (usuario_id),
     total_cents INT NOT NULL,
+    delivery_method TEXT,
+    payment_method TEXT,
+    notes TEXT,
+    status TEXT DEFAULT 'pendiente',
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 

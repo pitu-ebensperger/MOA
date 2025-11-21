@@ -6,13 +6,18 @@ import { createCategoryMatcher } from "../../products/utils/products.js";
 import { ALL_CATEGORY_ID } from "../../../config/constants.js";
 import { API_PATHS } from "../../../config/api-paths.js";
 import { buildCategoryTabs, normalizeFeaturedProduct } from "../../../utils/normalizers.js";
+import { useCartContext } from "@/context/cart-context.js";
+import { useWishlist } from "@/modules/profile/hooks/useWishlist.js";
 
 export default function ProductsSection({ products, categories }) {
+  const { addToCart } = useCartContext() ?? {};
+  const { wishlist, toggleWishlist } = useWishlist() ?? {};
+
   const tabs = useMemo(() => buildCategoryTabs(categories), [categories]);
   const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
   const matchCategory = useMemo(
     () => createCategoryMatcher(Array.isArray(categories) ? categories : []),
-    [categories],
+    [categories]
   );
 
   useEffect(() => {
@@ -27,7 +32,7 @@ export default function ProductsSection({ products, categories }) {
     const source = Array.isArray(products) ? products : [];
     const normalized = source.map((product, index) => normalizeFeaturedProduct(product, index));
     const filtered = normalized.filter((product) =>
-      matchCategory(product, activeCategory),
+      matchCategory(product, activeCategory)
     );
     return filtered.slice(0, 4);
   }, [products, activeCategory, matchCategory]);
@@ -70,9 +75,23 @@ export default function ProductsSection({ products, categories }) {
 
       {items.length ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {items.map((product) => {
+            const isSaved =
+              wishlist?.some(
+                (item) =>
+                  item.producto_id === product.id || item.id === product.id
+              ) ?? false;
+
+            return (
+              <ProductCard
+                key={product.id}
+                product={product}
+                isInWishlist={isSaved}
+                onToggleWishlist={toggleWishlist}
+                onAddToCart={() => addToCart(product)}
+              />
+            );
+          })}
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-neutral-200 bg-white/80 px-6 py-10 text-center text-sm text-neutral-500">

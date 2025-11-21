@@ -1,8 +1,9 @@
+import { useMyOrders } from "@/modules/profile/hooks/useMyOrders.js";
 import Card from "./Card.jsx";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 
-const normalizeOrderProduct = (product, index) => {
-  if (!product || typeof product !== "object") {
+const normalizeOrderProduct = (item, index) => {
+  if (!item) {
     return {
       id: `order-${index}`,
       name: `Producto ${index + 1}`,
@@ -10,46 +11,70 @@ const normalizeOrderProduct = (product, index) => {
       img: DEFAULT_PLACEHOLDER_IMAGE,
     };
   }
-  const price = Number(product.price ?? 0);
+
+  const img =
+    item.img_url ??
+    (Array.isArray(item.gallery) ? item.gallery[0] : null) ??
+    DEFAULT_PLACEHOLDER_IMAGE;
+
   return {
-    id: product.id ?? product.slug ?? `order-${index}`,
-    name: product.name ?? product.slug ?? `Producto ${index + 1}`,
-    price: Number.isFinite(price) ? price : 0,
-    img: product.img ?? product.imgUrl ?? product.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE,
+    id: item.producto_id ?? item.id ?? `order-${index}`,
+    name: item.nombre ?? `Producto ${index + 1}`,
+    price: item.precio_unit ?? 0,
+    img,
   };
 };
 
-const OrderSection = ({ products = [], isLoading = false, error = null }) => {
-  const recentPurchases = (Array.isArray(products) ? products : [])
-    .slice(0, 4)
-    .map(normalizeOrderProduct);
+
+export default function OrderSection() {
+  const { orders, isLoading, error } = useMyOrders();
+
+  const allItems = orders.flatMap(o => o.items ?? []);
+
+  const uniqueMap = new Map();
+  for (const item of allItems) {
+    const id = item.producto_id ?? item.product_id ?? item.id;
+    if (!uniqueMap.has(id)) {
+      uniqueMap.set(id, item);
+    }
+  }
+
+  const uniqueItems = Array.from(uniqueMap.values());
+
+  const recentPurchases = uniqueItems.slice(0, 4).map(normalizeOrderProduct);
   const hasPurchases = recentPurchases.length > 0;
 
   return (
     <>
-      <h2 className="font-italiana text-2xl text-dark mt-24 mb-10 flex justify-center">Mis Compras</h2>
+      <h2 className="font-italiana text-2xl text-dark mt-24 mb-10 flex justify-center">
+        Mis Compras
+      </h2>
+
       {isLoading && (
-        <p className="text-center text-sm text-dark/70">Cargando tus compras recientes...</p>
+        <p className="text-center text-sm text-dark/70">Cargando tus compras...</p>
       )}
+
       {!isLoading && error && (
-        <p role="alert" className="text-center text-sm text-red-600">
-          No pudimos cargar tus compras. Vuelve a intentarlo.
+        <p className="text-center text-sm text-red-600">
+          No pudimos cargar tus compras.
         </p>
       )}
-      {!isLoading && !error && hasPurchases ? (
+
+      {!isLoading && !error && hasPurchases && (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-          {recentPurchases.map((product) => (
-            <Card key={product.id} data={product} />
+          {recentPurchases.map((p) => (
+            <Card key={p.id} data={p} />
           ))}
         </div>
-      ) : null}
+      )}
+
       {!isLoading && !error && !hasPurchases && (
         <div className="rounded-xl border border-dashed border-primary2/40 bg-white/60 p-8 text-center text-sm text-dark/70">
-          Aún no registras compras recientes.
+          Aún no registras compras.
         </div>
       )}
     </>
   );
-};
+}
 
-export default OrderSection;
+

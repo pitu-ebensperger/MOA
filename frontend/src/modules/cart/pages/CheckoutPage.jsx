@@ -26,6 +26,9 @@ import {
   Separator,
   Textarea,
 } from "../../../components/shadcn/ui/index.js";
+import { ordersApi } from "../../../services/orders.api.js";
+
+
 
 const buildItemImage = (item) =>
   item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
@@ -58,14 +61,36 @@ export const CheckoutPage = () => {
   const shippingCost = hasItems ? deliveryInfo.cost : 0;
   const grandTotal = total + shippingCost;
 
-  const handlePay = () => {
-    if (!hasItems) {
-      alert("Tu carrito está vacío 🛒");
-      return;
-    }
+const handlePay = async () => {
+  if (!hasItems) {
+    alert("Tu carrito está vacío");
+    return;
+  }
+
+  try {
+    const payload = {
+      items: cartItems.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+        price_cents: item.price, // o price_cents si ya lo tienes
+      })),
+      total_cents: total,
+      delivery_method: deliveryMethod,
+      payment_method: paymentMethod,
+      notes,
+    };
+
+    const response = await ordersApi.create(payload);
+
     clearCart();
-    alert("¡Gracias por tu compra! 🛍️");
-  };
+
+    alert(`Compra exitosa. Código: ${response.order_code}`);
+  } catch (error) {
+    console.error("Error creando orden:", error);
+    alert("No pudimos procesar tu compra, intenta nuevamente.");
+  }
+};
+
 
   return (
     <main className="page container-px mx-auto max-w-6xl py-12">
