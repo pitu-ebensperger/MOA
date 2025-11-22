@@ -41,6 +41,7 @@ Thumbs.db
 scripts/dev/
 frontend/dev-pages/
 **/styleguide/
+src/modules/styleguide/
 
 # Temporary
 *.tmp
@@ -56,11 +57,17 @@ snapshots/*.txt
 # Development docs (mantener docs principales)
 docs/development/archives/
 docs/drafts/
+docs/*.md
 *.draft.md
+docs/
+TODO.md
+.TODO.md
 
 # Copilot temp
 .copilot-temp
 .qodo/
+
+
 
 
 
