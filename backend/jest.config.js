@@ -1,6 +1,8 @@
 export default {
   testEnvironment: "node",
-  transform: {},
+  transform: {
+    "^.+\\.m?js$": ["babel-jest", { presets: ["@babel/preset-env"] }]
+  },
   testMatch: ["**/__tests__/**/*.test.js"],
   coveragePathIgnorePatterns: ["/node_modules/"],
   collectCoverageFrom: [

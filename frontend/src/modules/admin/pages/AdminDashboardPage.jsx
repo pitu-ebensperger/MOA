@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import PropTypes from "prop-types";
 import {
   Activity,
@@ -14,7 +14,14 @@ import {
   BarChart3,
   Clock,
   Target,
-} from "@icons/lucide";
+  Tag,
+  Box,
+  Sofa,
+  Armchair,
+  Lightbulb,
+  Sparkles,
+  Home,
+} from "lucide-react";
 
 import { useAdminDashboard } from "@/modules/admin/hooks/useAdminDashboard.js";
 import { Button } from "@/components/ui/Button.jsx";
@@ -27,30 +34,45 @@ import {
   AnimatedKPICard,
   SparklineChart,
   ProgressRing,
-  HeatMapChart,
   ComparisonCard,
 } from "@/components/charts/index.js";
 import { formatCurrencyCLP } from "@/utils/currency.js";
 import { formatDate_ddMMyyyy } from "@/utils/date.js";
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
+import PaymentMethodsChart from "@/modules/admin/components/PaymentMethodsChart.jsx";
+import ShippingMethodsChart from "@/modules/admin/components/ShippingMethodsChart.jsx";
+import { ROUTES } from "@/routes/routes.js";
 
-const formatCount = (value) => {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return "0";
-  return number.toLocaleString("es-CL");
+// Icon mapping outside component to prevent recreation
+const CATEGORY_ICON_MAP = {
+  muebles: Sofa,
+  sillas: Armchair,
+  mesas: Box,
+  decoracion: Sparkles,
+  iluminacion: Lightbulb,
+  accesorios: Home,
 };
+
+const CATEGORY_COLORS = [
+  'var(--color-primary1)',
+  'var(--color-secondary1)',
+  'var(--color-primary2)',
+  'var(--color-success)',
+  'var(--color-warning)',
+  'var(--color-secondary2)'
+];
 
 // Componente de Card envolvente para gráficos
 const ChartCard = ({ title, subtitle, children, loading, action, className = "" }) => (
-  <motion.div
+  <Motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5 }}
-    className={`rounded-3xl border border-(--color-border) bg-(--color-neutral1) p-6 shadow-(--shadow-sm) ${className}`}
+    className={`rounded-2xl bg-white p-4 sm:p-6 ${className}`}
   >
-    <div className="mb-6 flex items-center justify-between">
+    <div className="mb-4 flex items-center justify-between">
       <div>
-        <h3 className="text-lg font-semibold text-(--text-strong)">{title}</h3>
+        <h3 className="text-base font-semibold text-(--text-strong)">{title}</h3>
         {subtitle && <p className="mt-1 text-sm text-(--text-secondary1)">{subtitle}</p>}
       </div>
       {action}
@@ -63,7 +85,7 @@ const ChartCard = ({ title, subtitle, children, loading, action, className = "" 
     ) : (
       children
     )}
-  </motion.div>
+  </Motion.div>
 );
 
 ChartCard.propTypes = {
@@ -77,6 +99,7 @@ ChartCard.propTypes = {
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [categoryMetric, setCategoryMetric] = useState("revenue"); // 'revenue' | 'orders'
   const { data: dashboardData, isLoading, isError, refetch } = useAdminDashboard();
 
   const metrics = useMemo(() => dashboardData?.metrics || {}, [dashboardData]);
@@ -85,8 +108,9 @@ export default function AdminDashboardPage() {
   const stock = useMemo(() => dashboardData?.stock || {}, [dashboardData]);
   const topProducts = useMemo(() => dashboardData?.topProducts || [], [dashboardData]);
   const categories = useMemo(() => dashboardData?.categories || [], [dashboardData]);
-  const orderDistribution = useMemo(() => dashboardData?.orderDistribution || [], [dashboardData]);
+  // const orderDistribution = useMemo(() => dashboardData?.orderDistribution || [], [dashboardData]);
   const recentOrders = useMemo(() => dashboardData?.recentOrders || [], [dashboardData]);
+  const customerRegistrations = useMemo(() => dashboardData?.customerRegistrations || [], [dashboardData]);
 
   // Prepare chart data
   const revenueChartData = useMemo(() => {
@@ -104,34 +128,31 @@ export default function AdminDashboardPage() {
     }));
   }, [categories]);
 
-  const orderDistributionData = useMemo(() => {
-    return orderDistribution.map((item) => ({
-      period: item.period,
-      orderCount: item.orders || 0,
-      revenue: item.revenue || 0,
-    }));
-  }, [orderDistribution]);
+  // Compute category performance data based on selected metric
+  const categoryPerformanceData = useMemo(() => {
+    if (categories.length === 0) return { pieData: [], totalSelected: 0 };
 
-  const stockPieData = useMemo(() => {
-    const total = stock.totalItems || 1;
-    const healthy = Math.max(0, total - (stock.lowStockCount || 0) - (stock.outOfStockCount || 0));
-    return [
-      { name: "Stock Saludable", value: healthy, percentage: ((healthy / total) * 100).toFixed(1), color: "var(--color-success)" },
-      { name: "Stock Bajo", value: stock.lowStockCount || 0, percentage: (((stock.lowStockCount || 0) / total) * 100).toFixed(1), color: "var(--color-warning)" },
-      { name: "Sin Stock", value: stock.outOfStockCount || 0, percentage: (((stock.outOfStockCount || 0) / total) * 100).toFixed(1), color: "var(--color-error)" },
-    ].filter((item) => item.value > 0);
-  }, [stock]);
+    const totalSelected = categories.reduce((sum, c) => {
+      const val = categoryMetric === 'revenue' ? (c.revenue || 0) : (c.orders || 0);
+      return sum + val;
+    }, 0);
 
-  // Mock data para heatmap (simulando actividad por día/hora)
-  const heatmapData = useMemo(() => {
-    const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-    const hours = ["9-12", "12-15", "15-18", "18-21"];
-    return days.map(() =>
-      hours.map(() => ({
-        value: Math.floor(Math.random() * 100),
-      }))
-    );
-  }, []);
+    const pieData = categories.slice(0, 6).map((cat, idx) => {
+      const rawValue = categoryMetric === 'revenue' ? (cat.revenue || 0) : (cat.orders || 0);
+      const percentage = totalSelected > 0 ? ((rawValue / totalSelected) * 100).toFixed(1) : '0.0';
+      const key = (cat.name || '').toLowerCase();
+      const IconComp = CATEGORY_ICON_MAP[key] || Tag;
+      return {
+        name: cat.name,
+        value: rawValue,
+        percentage,
+        icon: IconComp,
+        color: CATEGORY_COLORS[idx % CATEGORY_COLORS.length]
+      };
+    });
+
+    return { pieData, totalSelected };
+  }, [categories, categoryMetric]);
 
   return (
     <section className="space-y-8">
@@ -181,7 +202,7 @@ export default function AdminDashboardPage() {
 
       {/* Error State */}
       {isError && (
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl border border-error/30 bg-error/[0.06] p-6"
@@ -196,7 +217,7 @@ export default function AdminDashboardPage() {
               </Button>
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
       )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -204,16 +225,16 @@ export default function AdminDashboardPage() {
         {/* Overview Tab */}
         <TabsContent value="overview">
           <AnimatePresence mode="wait">
-            <motion.div
+            <Motion.div
               key="overview"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="space-y-6"
+              className="space-y-4"
             >
               {/* Main Metrics with Animation */}
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <AnimatedKPICard
                   title="Ingresos del mes"
                   value={metrics.monthlyRevenue || 0}
@@ -229,7 +250,9 @@ export default function AdminDashboardPage() {
                 <AnimatedKPICard
                   title="Pedidos totales"
                   value={metrics.totalOrders || 0}
+                  previousValue={metrics.previousMonthOrders || 0}
                   icon={ShoppingCart}
+                  trend
                   color="var(--color-primary1)"
                   loading={isLoading}
                   delay={0.1}
@@ -238,7 +261,9 @@ export default function AdminDashboardPage() {
                 <AnimatedKPICard
                   title="Productos activos"
                   value={metrics.totalProducts || 0}
+                  previousValue={Math.floor((metrics.totalProducts || 0) * 0.95)}
                   icon={Package}
+                  trend
                   color="var(--color-secondary1)"
                   loading={isLoading}
                   delay={0.2}
@@ -247,7 +272,9 @@ export default function AdminDashboardPage() {
                 <AnimatedKPICard
                   title="Clientes totales"
                   value={metrics.totalCustomers || 0}
+                  previousValue={metrics.previousMonthCustomers || 0}
                   icon={Users}
+                  trend
                   color="var(--color-primary2)"
                   loading={isLoading}
                   delay={0.3}
@@ -255,7 +282,7 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Charts Row 1 */}
-              <div className="grid gap-6 lg:grid-cols-2">
+              <div className="grid gap-4 lg:grid-cols-2">
                 <ChartCard title="Ingresos diarios" subtitle="Últimos 30 días" loading={isLoading}>
                   <AreaChart
                     data={revenueChartData}
@@ -268,60 +295,316 @@ export default function AdminDashboardPage() {
                       },
                     ]}
                     xAxisKey="date"
-                    height={300}
+                    height={240}
                     tooltipFormatter={(value) => formatCurrencyCLP(value)}
                     fillOpacity={0.2}
                   />
                 </ChartCard>
 
-                <ChartCard title="Distribución de pedidos" subtitle="Por día de la semana" loading={isLoading}>
-                  <BarChart
-                    data={orderDistributionData}
-                    bars={[{ dataKey: "orderCount", name: "Pedidos", useMultiColors: true }]}
-                    xAxisKey="period"
-                    height={300}
-                    barSize={40}
-                  />
+                <ChartCard title="Ventas por categoría" subtitle="Distribución de pedidos" loading={isLoading}>
+                  {categoryRevenueData.length > 0 ? (
+                    <BarChart
+                      data={categoryRevenueData}
+                      bars={[{ dataKey: "orders", name: "Pedidos", useMultiColors: true }]}
+                      xAxisKey="name"
+                      height={240}
+                      layout="vertical"
+                      barSize={40}
+                    />
+                  ) : (
+                    <div className="flex h-60 items-center justify-center">
+                      <p className="text-sm text-(--text-muted)">No hay datos de categorías disponibles</p>
+                    </div>
+                  )}
                 </ChartCard>
               </div>
 
-              {/* Stock & Categories */}
-              <div className="grid gap-6 lg:grid-cols-3">
-                <ChartCard title="Top categorías" subtitle="Por ingresos" loading={isLoading} className="lg:col-span-2">
+              {/* NEW: Charts Row 2 - Payment & Shipping Methods */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <PaymentMethodsChart periodo={30} />
+                <ShippingMethodsChart periodo={30} />
+              </div>
+            </Motion.div>
+          </AnimatePresence>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics">
+          <AnimatePresence mode="wait">
+            <Motion.div
+              key="analytics"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Comparison Cards */}
+              <div className="grid gap-4 lg:grid-cols-3">
+                <ComparisonCard
+                  title="Ingresos"
+                  currentValue={metrics.monthlyRevenue || 0}
+                  previousValue={metrics.previousMonthRevenue || 0}
+                  formatter={formatCurrencyCLP}
+                  color="var(--color-success)"
+                  delay={0}
+                />
+
+                <ComparisonCard
+                  title="Pedidos"
+                  currentValue={sales.totalTransactions || 0}
+                  previousValue={Math.floor((sales.totalTransactions || 0) * 0.85)}
+                  color="var(--color-primary1)"
+                  delay={0.1}
+                />
+
+                <ComparisonCard
+                  title="Promedio por pedido"
+                  currentValue={sales.averageOrderValue || 0}
+                  previousValue={Math.floor((sales.averageOrderValue || 0) * 0.92)}
+                  formatter={formatCurrencyCLP}
+                  color="var(--color-secondary1)"
+                  delay={0.2}
+                />
+              </div>
+
+              {/* Conversion & Top Performance */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                <ChartCard title="Conversión de usuarios" subtitle="Visitantes vs Compradores" loading={isLoading}>
+                  <div className="space-y-6">
+                    <div className="rounded-2xl bg-(--color-primary4)/10 p-4 text-center">
+                      <p className="text-sm text-(--text-muted)">Tasa de Conversión</p>
+                      <p className="mt-2 text-4xl font-bold text-(--color-success)">{conversion.overallRate || 0}%</p>
+                    </div>
+                    <BarChart
+                      data={[
+                        { name: "Visitantes", value: conversion.visitorCount || 0 },
+                        { name: "Compradores", value: conversion.purchaserCount || 0 },
+                      ]}
+                      bars={[{ dataKey: "value", name: "Usuarios" }]}
+                      xAxisKey="name"
+                      height={220}
+                      layout="horizontal"
+                      colors={["var(--color-primary1)", "var(--color-success)"]}
+                    />
+                  </div>
+                </ChartCard>
+
+                <ChartCard title="Productos destacados" subtitle="Top performance" loading={isLoading}>
+                  <div className="space-y-4">
+                    {topProducts.slice(0, 2).map((product, index) => (
+                      <Motion.div
+                        key={product.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="rounded-2xl border border-(--color-border) bg-white p-4"
+                      >
+                        <div className="mb-3 flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-(--text-strong)">{product.name}</h4>
+                            <p className="mt-1 text-xs text-(--text-muted)">{product.sales} ventas</p>
+                          </div>
+                          {index === 0 ? (
+                            <div className="rounded-full bg-(--color-success)/10 px-3 py-1">
+                              <p className="text-xs font-semibold text-(--color-success)">Más vendido</p>
+                            </div>
+                          ) : (
+                            <div className="rounded-full bg-(--color-primary1)/10 px-3 py-1">
+                              <p className="text-xs font-semibold text-(--color-primary1)">{product.conversionRate}% conv.</p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <SparklineChart
+                            data={[...new Array(7)].map(() => Math.random() * 100 + 50)}
+                            width={80}
+                            height={40}
+                            color="var(--color-primary1)"
+                            fillColor="var(--color-primary1)"
+                          />
+                          <span className="text-xl font-bold text-(--color-primary1)">{formatCurrencyCLP(product.revenue)}</span>
+                        </div>
+                      </Motion.div>
+                    ))}
+                  </div>
+                </ChartCard>
+              </div>
+            </Motion.div>
+          </AnimatePresence>
+        </TabsContent>
+
+        {/* Products Tab */}
+        <TabsContent value="products">
+          <AnimatePresence mode="wait">
+            <Motion.div
+              key="products"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Product Metrics (sin stock bajo / sin stock, combinados más abajo) */}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+                <AnimatedKPICard
+                  title="Productos totales"
+                  value={metrics.totalProducts || 0}
+                  icon={Package}
+                  color="var(--color-primary1)"
+                  loading={isLoading}
+                />
+
+                <AnimatedKPICard
+                  title="Stock saludable"
+                  value={stock.totalItems - stock.lowStockCount - stock.outOfStockCount || 0}
+                  icon={Target}
+                  color="var(--color-success)"
+                  loading={isLoading}
+                  delay={0.1}
+                />
+              </div>
+
+              {/* Product Performance */}
+              <div className="grid gap-6 lg:grid-cols-2">
+                <ChartCard title="Top Productos por Ingresos" loading={isLoading}>
                   <BarChart
-                    data={categoryRevenueData}
-                    bars={[{ dataKey: "revenue", name: "Ingresos" }]}
+                    data={topProducts.slice(0, 8).map((p) => ({ name: p.name, value: p.revenue }))}
+                    bars={[{ dataKey: "value", name: "Ingresos" }]}
                     xAxisKey="name"
-                    height={300}
+                    height={350}
                     layout="horizontal"
-                    tooltipFormatter={(value) => formatCurrencyCLP(value)}
-                    colors={[
-                      "var(--color-primary1)",
-                      "var(--color-secondary1)",
-                      "var(--color-primary2)",
-                      "var(--color-secondary2)",
-                      "var(--color-primary3)",
-                      "var(--color-success)",
-                    ]}
+                    tooltipFormatter={formatCurrencyCLP}
+                    colors={["var(--color-primary1)", "var(--color-secondary1)", "var(--color-primary2)"]}
                   />
                 </ChartCard>
 
-                <ChartCard title="Estado del inventario" subtitle="Distribución actual" loading={isLoading}>
-                  <PieChart
-                    data={stockPieData}
-                    height={300}
-                    innerRadius={60}
-                    showLegend
-                    showLabels
-                  />
+                <ChartCard
+                  title="Categorías Performance"
+                  loading={isLoading}
+                  action={(
+                    <div className="inline-flex overflow-hidden rounded-md border border-(--color-border)">
+                      <Button
+                        appearance={categoryMetric === 'revenue' ? 'solid' : 'ghost'}
+                        intent="primary"
+                        size="xs"
+                        className="rounded-none"
+                        onClick={() => setCategoryMetric('revenue')}
+                      >Ingresos</Button>
+                      <Button
+                        appearance={categoryMetric === 'orders' ? 'solid' : 'ghost'}
+                        intent="primary"
+                        size="xs"
+                        className="-ml-px rounded-none border-l border-(--color-border)"
+                        onClick={() => setCategoryMetric('orders')}
+                      >Órdenes</Button>
+                    </div>
+                  )}
+                >
+                  {categoryPerformanceData.pieData.length > 0 ? (
+                    <div className="flex flex-col items-center">
+                      <PieChart
+                        data={categoryPerformanceData.pieData}
+                        height={300}
+                        innerRadius={40}
+                        outerRadius={80}
+                        showLegend={false}
+                        showLabels={false}
+                        tooltipFormatter={categoryMetric === 'revenue' ? formatCurrencyCLP : (v) => v?.toLocaleString('es-CL')}
+                        legendRenderer={null}
+                      />
+                      {/* Leyenda debajo del gráfico */}
+                      <div className="mt-4 w-full max-w-md space-y-3 px-2 sm:px-4">
+                        {categoryPerformanceData.pieData.map((item) => {
+                          const formattedValue = categoryMetric === 'revenue'
+                            ? formatCurrencyCLP(item.value || 0)
+                            : `${item.value.toLocaleString('es-CL')} ord.`;
+                          return (
+                            <div key={item.name} className="flex items-center justify-between text-base">
+                              <div className="flex items-center gap-2">
+                                <item.icon className="h-4 w-4" style={{ color: item.color }} />
+                                <span className="font-semibold" style={{ color: item.color }}>{item.name}</span>
+                              </div>
+                              <span className="text-(--text-muted)">{formattedValue} · {item.percentage}%</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex h-64 items-center justify-center">
+                      <p className="text-sm text-(--text-muted)">No hay datos de categorías</p>
+                    </div>
+                  )}
                 </ChartCard>
               </div>
+
+              {/* Inventario y alertas combinadas */}
+              <ChartCard title="Estado de inventario" subtitle="Stock bajo y sin stock" loading={isLoading}>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="rounded-2xl border border-warning/30 bg-warning/10 p-4"
+                      onClick={() => window.location.href = `${ROUTES.admin.products}?low_stock=1`}
+                    >
+                      <AlertTriangle className="mb-2 h-6 w-6 text-warning" />
+                      <p className="text-2xl font-bold text-warning">{stock.lowStockCount || 0}</p>
+                      <p className="text-xs text-warning/70">Stock bajo</p>
+                    </Motion.div>
+
+                    <Motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      className="rounded-2xl border border-error/30 bg-error/10 p-4 cursor-pointer"
+                      onClick={() => window.location.href = `${ROUTES.admin.products}?low_stock=1`}
+                    >
+                      <AlertTriangle className="mb-2 h-6 w-6 text-error" />
+                      <p className="text-2xl font-bold text-error">{stock.outOfStockCount || 0}</p>
+                      <p className="text-xs text-error/70">Sin stock</p>
+                    </Motion.div>
+                  </div>
+
+                  {(stock.lowStockProducts?.length > 0 || stock.outOfStockProducts?.length > 0) && (
+                    <div className="rounded-2xl border border-(--color-border) bg-(--color-neutral2) p-4">
+                      <h4 className="mb-3 text-sm font-semibold text-(--text-strong)">Productos críticos</h4>
+                      <div className="space-y-2">
+                        {[...(stock.outOfStockProducts || []).slice(0, 3), ...(stock.lowStockProducts || []).slice(0, 2)].map(
+                          (product, index) => (
+                            <Motion.div
+                              key={product.id}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.4 + index * 0.1 }}
+                              className="flex items-center justify-between rounded-xl bg-white p-3 cursor-pointer"
+                              onClick={() => window.location.href = `${ROUTES.admin.products}?low_stock=1`}
+                            >
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-(--text-strong)">{product.name}</p>
+                                <p className="text-xs text-(--text-muted)">{product.sku}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className={`text-sm font-bold ${product.currentStock === 0 ? "text-error" : "text-warning"}`}>
+                                  {product.currentStock} unidades
+                                </p>
+                              </div>
+                            </Motion.div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ChartCard>
 
               {/* Top Products with Sparklines */}
               <ChartCard title="Productos Destacados" loading={isLoading}>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {topProducts.slice(0, 6).map((product, index) => (
-                    <motion.div
+                    <Motion.div
                       key={product.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -345,186 +628,27 @@ export default function AdminDashboardPage() {
                         <span className="text-lg font-bold text-(--color-primary1)">{formatCurrencyCLP(product.revenue)}</span>
                         <span className="text-xs text-(--color-success)">{product.conversionRate}% conv.</span>
                       </div>
-                    </motion.div>
+                    </Motion.div>
                   ))}
                 </div>
               </ChartCard>
-            </motion.div>
-          </AnimatePresence>
-        </TabsContent>
-
-        {/* Analytics Tab */}
-        <TabsContent value="analytics">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key="analytics"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              {/* Comparison Cards */}
-              <div className="grid gap-6 lg:grid-cols-3">
-                <ComparisonCard
-                  title="Ingresos"
-                  currentValue={metrics.monthlyRevenue || 0}
-                  previousValue={metrics.previousMonthRevenue || 0}
-                  formatter={formatCurrencyCLP}
-                  color="var(--color-success)"
-                  delay={0}
-                />
-
-                <ComparisonCard
-                  title="Pedidos"
-                  currentValue={sales.totalTransactions || 0}
-                  previousValue={Math.floor((sales.totalTransactions || 0) * 0.85)}
-                  color="var(--color-primary1)"
-                  delay={0.1}
-                />
-
-                <ComparisonCard
-                  title="Ticket Promedio"
-                  currentValue={sales.averageOrderValue || 0}
-                  previousValue={Math.floor((sales.averageOrderValue || 0) * 0.92)}
-                  formatter={formatCurrencyCLP}
-                  color="var(--color-secondary1)"
-                  delay={0.2}
-                />
-              </div>
-
-              {/* Conversion & Activity */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ChartCard title="Tasa de Conversión" subtitle="Mensual" loading={isLoading}>
-                  <div className="flex items-center justify-center py-8">
-                    <ProgressRing
-                      progress={conversion.overallRate || 0}
-                      size={200}
-                      strokeWidth={16}
-                      color="var(--color-success)"
-                      label="Conversión"
-                    />
-                  </div>
-                  <div className="mt-6 grid grid-cols-2 gap-4 rounded-2xl bg-(--color-neutral2) p-4">
-                    <div>
-                      <p className="text-sm text-(--text-muted)">Visitantes</p>
-                      <p className="mt-1 text-2xl font-bold text-(--text-strong)">{formatCount(conversion.visitorCount || 0)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-(--text-muted)">Compradores</p>
-                      <p className="mt-1 text-2xl font-bold text-(--color-success)">{formatCount(conversion.purchaserCount || 0)}</p>
-                    </div>
-                  </div>
-                </ChartCard>
-
-                <ChartCard title="Actividad por horario" subtitle="Patrones de compra" loading={isLoading}>
-                  <HeatMapChart
-                    data={heatmapData}
-                    xLabels={["9-12", "12-15", "15-18", "18-21"]}
-                    yLabels={["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]}
-                    showValues
-                    cellSize={45}
-                  />
-                </ChartCard>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </TabsContent>
-
-        {/* Products Tab */}
-        <TabsContent value="products">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key="products"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              {/* Product Metrics */}
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <AnimatedKPICard
-                  title="Productos totales"
-                  value={metrics.totalProducts || 0}
-                  icon={Package}
-                  color="var(--color-primary1)"
-                  loading={isLoading}
-                />
-
-                <AnimatedKPICard
-                  title="Stock saludable"
-                  value={stock.totalItems - stock.lowStockCount - stock.outOfStockCount || 0}
-                  icon={Target}
-                  color="var(--color-success)"
-                  loading={isLoading}
-                  delay={0.1}
-                />
-
-                <AnimatedKPICard
-                  title="Stock bajo"
-                  value={stock.lowStockCount || 0}
-                  icon={AlertTriangle}
-                  color="var(--color-warning)"
-                  loading={isLoading}
-                  delay={0.2}
-                />
-
-                <AnimatedKPICard
-                  title="Sin stock"
-                  value={stock.outOfStockCount || 0}
-                  icon={AlertTriangle}
-                  color="var(--color-error)"
-                  loading={isLoading}
-                  delay={0.3}
-                />
-              </div>
-
-              {/* Product Performance */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <ChartCard title="Top Productos por Ingresos" loading={isLoading}>
-                  <BarChart
-                    data={topProducts.slice(0, 8).map((p) => ({ name: p.name, value: p.revenue }))}
-                    bars={[{ dataKey: "value", name: "Ingresos" }]}
-                    xAxisKey="name"
-                    height={350}
-                    layout="horizontal"
-                    tooltipFormatter={formatCurrencyCLP}
-                    colors={["var(--color-primary1)", "var(--color-secondary1)", "var(--color-primary2)"]}
-                  />
-                </ChartCard>
-
-                <ChartCard title="Categorías Performance" loading={isLoading}>
-                  <PieChart
-                    data={categories.slice(0, 6).map((cat) => ({
-                      name: cat.name,
-                      value: cat.revenue,
-                      percentage: ((cat.revenue / categories.reduce((sum, c) => sum + c.revenue, 0)) * 100).toFixed(1),
-                    }))}
-                    height={350}
-                    innerRadius={70}
-                    showLegend
-                    tooltipFormatter={formatCurrencyCLP}
-                  />
-                </ChartCard>
-              </div>
-            </motion.div>
+            </Motion.div>
           </AnimatePresence>
         </TabsContent>
 
         {/* Customers Tab */}
         <TabsContent value="customers">
           <AnimatePresence mode="wait">
-            <motion.div
+            <Motion.div
               key="customers"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
               {/* Customer Metrics */}
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <AnimatedKPICard
                   title="Total Clientes"
                   value={metrics.totalCustomers || 0}
@@ -553,7 +677,7 @@ export default function AdminDashboardPage() {
                 />
 
                 <AnimatedKPICard
-                  title="Ticket promedio"
+                  title="Promedio por pedido"
                   value={sales.averageOrderValue || 0}
                   prefix="$"
                   icon={DollarSign}
@@ -562,6 +686,27 @@ export default function AdminDashboardPage() {
                   delay={0.3}
                 />
               </div>
+
+              {/* New Registrations Chart */}
+              <ChartCard title="Nuevos registros" subtitle="Últimos 30 días" loading={isLoading}>
+                <AreaChart
+                  data={customerRegistrations.map(item => ({
+                    name: new Date(item.date).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' }),
+                    registros: item.registrations,
+                  }))}
+                  areas={[{ 
+                    dataKey: 'registros', 
+                    name: 'Registros', 
+                    strokeColor: 'var(--color-primary1)',
+                    fillColor: 'var(--color-primary1)'
+                  }]}
+                  xAxisKey="name"
+                  height={260}
+                  fillOpacity={0.3}
+                  strokeWidth={2}
+                  curve="monotone"
+                />
+              </ChartCard>
 
               {/* Customer Insights */}
               <div className="grid gap-6 lg:grid-cols-3">
@@ -594,35 +739,36 @@ export default function AdminDashboardPage() {
                     data={categories.slice(0, 5).map((cat) => ({
                       name: cat.name,
                       ordenes: cat.orders,
-                      ingresos: cat.revenue,
+                      ingresos: cat.revenue / 1000,
                     }))}
                     bars={[
                       { dataKey: "ordenes", name: "Órdenes", color: "var(--color-primary1)" },
-                      { dataKey: "ingresos", name: "Ingresos", color: "var(--color-success)" },
+                      { dataKey: "ingresos", name: "Ingresos (miles)", color: "var(--color-success)" },
                     ]}
                     xAxisKey="name"
                     height={300}
+                    layout="horizontal"
                     showLegend
                   />
                 </ChartCard>
               </div>
-            </motion.div>
+            </Motion.div>
           </AnimatePresence>
         </TabsContent>
 
         {/* Operations Tab */}
         <TabsContent value="operations">
           <AnimatePresence mode="wait">
-            <motion.div
+            <Motion.div
               key="operations"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
               {/* Operations Metrics */}
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <AnimatedKPICard
                   title="Órdenes totales"
                   value={metrics.totalOrders || 0}
@@ -659,13 +805,114 @@ export default function AdminDashboardPage() {
                 />
               </div>
 
-              {/* Recent Orders & Stock Alerts */}
+              {/* Order Status Distribution */}
+              <ChartCard title="Estado de pedidos" subtitle="Distribución por estado" loading={isLoading}>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {/* Pendientes */}
+                  <Motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm text-(--text-muted)">Pendientes</span>
+                      <span className="text-xs text-(--text-muted)">
+                        {metrics.totalOrders > 0 ? Math.round(((metrics.orderStatusCounts?.pending || 0) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold text-(--text-strong)">{metrics.orderStatusCounts?.pending || 0}</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <Motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${metrics.totalOrders > 0 ? ((metrics.orderStatusCounts?.pending || 0) / metrics.totalOrders) * 100 : 0}%` }}
+                        transition={{ duration: 1, delay: 0.3 }}
+                        className="h-full rounded-full bg-(--color-warning)"
+                      />
+                    </div>
+                  </Motion.div>
+
+                  {/* En proceso */}
+                  <Motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm text-(--text-muted)">En proceso</span>
+                      <span className="text-xs text-(--text-muted)">
+                        {metrics.totalOrders > 0 ? Math.round(((metrics.orderStatusCounts?.processing || 0) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold text-(--text-strong)">{metrics.orderStatusCounts?.processing || 0}</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <Motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${metrics.totalOrders > 0 ? ((metrics.orderStatusCounts?.processing || 0) / metrics.totalOrders) * 100 : 0}%` }}
+                        transition={{ duration: 1, delay: 0.4 }}
+                        className="h-full rounded-full bg-(--color-primary1)"
+                      />
+                    </div>
+                  </Motion.div>
+
+                  {/* Enviados */}
+                  <Motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm text-(--text-muted)">Enviados</span>
+                      <span className="text-xs text-(--text-muted)">
+                        {metrics.totalOrders > 0 ? Math.round(((metrics.orderStatusCounts?.shipped || 0) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold text-(--text-strong)">{metrics.orderStatusCounts?.shipped || 0}</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <Motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${metrics.totalOrders > 0 ? ((metrics.orderStatusCounts?.shipped || 0) / metrics.totalOrders) * 100 : 0}%` }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                        className="h-full rounded-full bg-(--color-secondary1)"
+                      />
+                    </div>
+                  </Motion.div>
+
+                  {/* Completados */}
+                  <Motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-sm text-(--text-muted)">Completados</span>
+                      <span className="text-xs text-(--text-muted)">
+                        {metrics.totalOrders > 0 ? Math.round(((metrics.orderStatusCounts?.delivered || 0) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-3xl font-bold text-(--text-strong)">{metrics.orderStatusCounts?.delivered || 0}</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <Motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${metrics.totalOrders > 0 ? ((metrics.orderStatusCounts?.delivered || 0) / metrics.totalOrders) * 100 : 0}%` }}
+                        transition={{ duration: 1, delay: 0.6 }}
+                        className="h-full rounded-full bg-(--color-success)"
+                      />
+                    </div>
+                  </Motion.div>
+                </div>
+              </ChartCard>
+
+              {/* Recent Orders */}
               <div className="grid gap-6 lg:grid-cols-2">
                 <ChartCard title="Últimos pedidos" subtitle="Actividad reciente" loading={isLoading}>
                   {recentOrders.length > 0 ? (
                     <div className="space-y-3">
                       {recentOrders.map((order, index) => (
-                        <motion.div
+                        <Motion.div
                           key={order.id || order.orden_id}
                           initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
@@ -684,7 +931,7 @@ export default function AdminDashboardPage() {
                             </p>
                           </div>
                           <StatusPill status={order.estado_pago || order.status || "pending"} domain="order" />
-                        </motion.div>
+                        </Motion.div>
                       ))}
                     </div>
                   ) : (
@@ -693,65 +940,109 @@ export default function AdminDashboardPage() {
                     </div>
                   )}
                 </ChartCard>
-
-                <ChartCard title="Alertas de inventario" subtitle="Requieren atención" loading={isLoading}>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                        className="rounded-2xl border border-warning/30 bg-warning/10 p-4"
-                      >
-                        <AlertTriangle className="mb-2 h-6 w-6 text-warning" />
-                        <p className="text-2xl font-bold text-warning">{stock.lowStockCount || 0}</p>
-                        <p className="text-xs text-warning/70">Stock bajo</p>
-                      </motion.div>
-
-                      <motion.div
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="rounded-2xl border border-error/30 bg-error/10 p-4"
-                      >
-                        <AlertTriangle className="mb-2 h-6 w-6 text-error" />
-                        <p className="text-2xl font-bold text-error">{stock.outOfStockCount || 0}</p>
-                        <p className="text-xs text-error/70">Sin stock</p>
-                      </motion.div>
-                    </div>
-
-                    {(stock.lowStockProducts?.length > 0 || stock.outOfStockProducts?.length > 0) && (
-                      <div className="rounded-2xl border border-(--color-border) bg-(--color-neutral2) p-4">
-                        <h4 className="mb-3 text-sm font-semibold text-(--text-strong)">Productos críticos</h4>
-                        <div className="space-y-2">
-                          {[...(stock.outOfStockProducts || []).slice(0, 3), ...(stock.lowStockProducts || []).slice(0, 2)].map(
-                            (product, index) => (
-                              <motion.div
-                                key={product.id}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.4 + index * 0.1 }}
-                                className="flex items-center justify-between rounded-xl bg-white p-3"
-                              >
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium text-(--text-strong)">{product.name}</p>
-                                  <p className="text-xs text-(--text-muted)">{product.sku}</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className={`text-sm font-bold ${product.currentStock === 0 ? "text-error" : "text-warning"}`}>
-                                    {product.currentStock} unidades
-                                  </p>
-                                </div>
-                              </motion.div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </ChartCard>
               </div>
-            </motion.div>
+
+              {/* Operational Performance Metrics */}
+              <ChartCard title="Rendimiento operacional" subtitle="Métricas clave de eficiencia" loading={isLoading}>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <Motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="rounded-2xl border border-(--color-border) bg-(--color-neutral2) p-4"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <Package className="h-5 w-5 text-(--color-primary1)" />
+                      <span className="text-xs font-semibold text-(--color-success)">
+                        {metrics.totalOrders > 0 ? Math.round(((metrics.orderStatusCounts?.delivered || 0) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-(--text-strong)">
+                      {metrics.orderStatusCounts?.delivered || 0}
+                    </p>
+                    <p className="mt-1 text-xs text-(--text-muted)">Entregas completadas</p>
+                    <div className="mt-3 h-1 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <div 
+                        className="h-full rounded-full bg-(--color-success)" 
+                        style={{ width: `${metrics.totalOrders > 0 ? ((metrics.orderStatusCounts?.delivered || 0) / metrics.totalOrders) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </Motion.div>
+
+                  <Motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="rounded-2xl border border-(--color-border) bg-(--color-neutral2) p-4"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <Truck className="h-5 w-5 text-(--color-secondary1)" />
+                      <span className="text-xs font-semibold text-(--color-secondary1)">
+                        {metrics.totalOrders > 0 ? Math.round(((metrics.orderStatusCounts?.shipped || 0) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-(--text-strong)">
+                      {metrics.orderStatusCounts?.shipped || 0}
+                    </p>
+                    <p className="mt-1 text-xs text-(--text-muted)">En tránsito</p>
+                    <div className="mt-3 h-1 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <div 
+                        className="h-full rounded-full bg-(--color-secondary1)" 
+                        style={{ width: `${metrics.totalOrders > 0 ? ((metrics.orderStatusCounts?.shipped || 0) / metrics.totalOrders) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </Motion.div>
+
+                  <Motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="rounded-2xl border border-(--color-border) bg-(--color-neutral2) p-4"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <Clock className="h-5 w-5 text-(--color-warning)" />
+                      <span className="text-xs font-semibold text-(--color-warning)">
+                        {metrics.totalOrders > 0 ? Math.round((((metrics.orderStatusCounts?.pending || 0) + (metrics.orderStatusCounts?.processing || 0)) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-(--text-strong)">
+                      {(metrics.orderStatusCounts?.pending || 0) + (metrics.orderStatusCounts?.processing || 0)}
+                    </p>
+                    <p className="mt-1 text-xs text-(--text-muted)">Pendientes de procesar</p>
+                    <div className="mt-3 h-1 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <div 
+                        className="h-full rounded-full bg-(--color-warning)" 
+                        style={{ width: `${metrics.totalOrders > 0 ? (((metrics.orderStatusCounts?.pending || 0) + (metrics.orderStatusCounts?.processing || 0)) / metrics.totalOrders) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </Motion.div>
+
+                  <Motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="rounded-2xl border border-(--color-border) bg-(--color-neutral2) p-4"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <TrendingUp className="h-5 w-5 text-(--color-primary1)" />
+                      <span className="text-xs font-semibold text-(--color-primary1)">
+                        {metrics.totalOrders > 0 ? Math.round((((metrics.orderStatusCounts?.delivered || 0) + (metrics.orderStatusCounts?.shipped || 0)) / metrics.totalOrders) * 100) : 0}%
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-(--text-strong)">
+                      {sales.averageOrderValue > 0 ? formatCurrencyCLP(sales.averageOrderValue) : "$0"}
+                    </p>
+                    <p className="mt-1 text-xs text-(--text-muted)">Valor promedio orden</p>
+                    <div className="mt-3 h-1 overflow-hidden rounded-full bg-(--color-neutral3)">
+                      <div 
+                        className="h-full rounded-full bg-(--color-primary1)" 
+                        style={{ width: `${metrics.totalOrders > 0 ? (((metrics.orderStatusCounts?.delivered || 0) + (metrics.orderStatusCounts?.shipped || 0)) / metrics.totalOrders) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </Motion.div>
+                </div>
+              </ChartCard>
+            </Motion.div>
           </AnimatePresence>
         </TabsContent>
       </Tabs>

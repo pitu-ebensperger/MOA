@@ -59,8 +59,8 @@ export const verifyAdmin = async (req, res, next) => {
     }
 
     // Verificar que el usuario tiene rol de administrador
-    const lowerRoleCode = user.rolCode?.toLowerCase();
-    const isAdminUser = lowerRoleCode === 'admin';
+    const lowerRoleCode = user.rolCode?.toUpperCase();
+    const isAdminUser = lowerRoleCode === 'ADMIN';
     const normalizedEmail = user.email?.toLowerCase();
     const isDemoUser = normalizedEmail && DEMO_USER_EMAILS.has(normalizedEmail);
 
@@ -74,8 +74,7 @@ export const verifyAdmin = async (req, res, next) => {
       usuario_id: user.id,
       email: user.email,
       nombre: user.nombre,
-      rol: isDemoUser ? "admin" : user.rol,
-      rol_code: isDemoUser ? "ADMIN" : user.rolCode,
+      role_code: isDemoUser ? "ADMIN" : user.rolCode,
       public_id: user.publicId
     };
 
@@ -113,14 +112,13 @@ export const optionalAdminVerify = async (req, res, next) => {
     
     const normalizedEmail = user?.email?.toLowerCase();
     const isDemoUser = normalizedEmail && DEMO_USER_EMAILS.has(normalizedEmail);
-    if (user && (user.rolCode?.toLowerCase() === 'admin' || isDemoUser)) {
+    if (user && (user.rolCode?.toUpperCase() === 'ADMIN' || isDemoUser)) {
       req.user = {
         id: user.id,
         usuario_id: user.id,
         email: user.email,
         nombre: user.nombre,
-        rol: user.rol,
-        rol_code: user.rolCode,
+        role_code: user.rolCode,
         public_id: user.publicId
       };
       req.admin = true;

@@ -1,5 +1,5 @@
 //path/frontend/src/modules/admin/utils/productsColumns.jsx
-import { AlertTriangle, Eye, Edit3, Copy, Trash2, Filter, Check } from "@icons/lucide";
+import { AlertTriangle, Eye, Edit3, Copy, Trash2, Filter, Check } from "lucide-react";
 import { formatCurrencyCLP } from "@/utils/currency.js"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { LOW_STOCK_THRESHOLD } from "@/config/constants.js"
@@ -190,6 +190,7 @@ export function buildProductColumns({
     {
       id: "actions",
       header: "",
+      meta: { align: "right" },
       cell: ({ row }) => {
         const product = row.original;
 

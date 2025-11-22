@@ -107,6 +107,21 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       proxy,
+      hmr: {
+        overlay: true,
+      },
+      watch: {
+        usePolling: false,
+        interval: 100,
+      },
+    },
+    optimizeDeps: {
+      include: [
+        'react',
+        'react-dom',
+        'react-router-dom',
+        '@tanstack/react-query',
+      ],
     },
   };
 })

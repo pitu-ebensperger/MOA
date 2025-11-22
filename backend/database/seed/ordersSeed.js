@@ -1,4 +1,4 @@
--- Active: 1763432009398@@127.0.0.1@5432@postgres
+// Seed histórico de órdenes
 import pool from "../config.js";
 import { ORDER_HISTORY } from "./ordersData.js";
 
@@ -22,7 +22,8 @@ async function seedOrders() {
     const productMap = new Map(products.map((product) => [product.slug, product]));
 
     if (!products.length) {
-      console.warn("No se encontraron productos para los pedidos de historia.");
+      console.error("FATAL: No se encontraron productos en la BD. Ejecuta 'npm run seed:products' primero.");
+      process.exit(1);
     }
 
     for (const order of ORDER_HISTORY) {

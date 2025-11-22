@@ -1,4 +1,4 @@
-import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from "@icons/lucide";
+import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { API_PATHS } from "@/config/api-paths.js";
 import { useStoreConfig } from "@/hooks/useStoreConfig.js";

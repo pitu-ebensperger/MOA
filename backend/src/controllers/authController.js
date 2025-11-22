@@ -22,16 +22,21 @@ export const loginUser = async (req, res, next) => {
     if (!JWT_SECRET) {
       throw new AppError("JWT secret no configurado", 500);
     }
+    // JWT con expiración diferenciada por rol
+    const isAdmin = user.rol_code === 'ADMIN';
+    const expiresIn = isAdmin 
+      ? (process.env.JWT_ADMIN_EXPIRES_IN || '7d')  // Admin: 7 días por defecto
+      : (process.env.JWT_EXPIRES_IN || '24h');      // Cliente: 24h por defecto
+
     const token = jwt.sign(
       { 
         id: user.usuario_id, 
         email: user.email,
-        role_code: user.rol_code,
-        rol: user.rol
+        role_code: user.rol_code
       },
       JWT_SECRET,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN,
+        expiresIn,
       }
     );
 
@@ -42,7 +47,6 @@ export const loginUser = async (req, res, next) => {
         nombre: user.nombre,
         email: user.email,
         telefono: user.telefono,
-        rol: user.rol,
         role_code: user.rol_code,
       },
     });
@@ -77,11 +81,72 @@ export const getUser = async (req, res, next) => {
       nombre: user.nombre,
       email: user.email,
       telefono: user.telefono,
-      rol: user.rol ?? user.role ?? null,
       role_code: user.rol_code ?? user.role_code ?? user.rolCode ?? null,
     };
 
     res.status(200).json(profile);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Renovar token JWT - Extiende la sesión actual
+ * El usuario debe estar autenticado (token válido)
+ */
+export const refreshToken = async (req, res, next) => {
+  try {
+    const authPayload = req.user;
+    if (!authPayload) {
+      throw new UnauthorizedError("No autorizado");
+    }
+
+    if (!JWT_SECRET) {
+      throw new AppError("JWT secret no configurado", 500);
+    }
+
+    // Buscar usuario para obtener datos actualizados
+    const { id: usuarioId, email, role_code } = authPayload;
+    let user = null;
+
+    if (usuarioId) {
+      user = await getUserByIdModel(usuarioId);
+    } else if (email) {
+      user = await findUserModel(email);
+    }
+
+    if (!user) {
+      throw new NotFoundError("Usuario");
+    }
+
+    // Generar nuevo token con misma expiración que login
+    const isAdmin = user.rol_code === 'ADMIN';
+    const expiresIn = isAdmin 
+      ? (process.env.JWT_ADMIN_EXPIRES_IN || '7d')
+      : (process.env.JWT_EXPIRES_IN || '24h');
+
+    const newToken = jwt.sign(
+      { 
+        id: user.usuario_id, 
+        email: user.email,
+        role_code: user.rol_code
+      },
+      JWT_SECRET,
+      {
+        expiresIn,
+      }
+    );
+
+    return res.status(200).json({
+      token: newToken,
+      user: {
+        id: user.usuario_id,
+        nombre: user.nombre,
+        email: user.email,
+        telefono: user.telefono,
+        role_code: user.rol_code,
+      },
+    });
   } catch (error) {
     next(error);
   }

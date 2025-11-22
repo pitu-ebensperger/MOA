@@ -75,7 +75,7 @@ export const UserShape = PropTypes.shape({
   email: PropTypes.string.isRequired,
   telefono: PropTypes.string,
   phone: PropTypes.string,
-  rol: PropTypes.string,
+  role_code: PropTypes.string,
   role: PropTypes.string,
   role_code: PropTypes.string,
   rol_code: PropTypes.string,

@@ -31,9 +31,9 @@
   --btn-font-weight: var(--weight-medium);
   --btn-line-height: 1.15;
   --btn-border-width: 1px;
-  --btn-gap: 0.55rem;
-  --btn-icon-gap-left: 0.6rem;
-  --btn-icon-gap-right: 0.6rem;
+  --btn-gap: 0.4rem;
+  --btn-icon-gap-left: 0.35rem;
+  --btn-icon-gap-right: 0.35rem;
 
   --btn-motion-distance: 6px;
 }
@@ -105,9 +105,11 @@
 .btn[data-disabled="true"],
 .btn:disabled {
   pointer-events: none;
-  opacity: 0.6;
+  opacity: 1;
   box-shadow: none;
   cursor: not-allowed;
+  background-color: color-mix(in srgb, var(--btn-surface) 80%, transparent);
+  color: color-mix(in srgb, var(--btn-foreground) 85%, transparent);
 }
 
 .btn[data-loading="true"] {
@@ -187,6 +189,15 @@
   margin: 0;
 }
 
+.btn[data-disabled="true"] .btn-label,
+.btn[data-disabled="true"] .btn-icon,
+.btn[data-disabled="true"] .btn-spinner,
+.btn:disabled .btn-label,
+.btn:disabled .btn-icon,
+.btn:disabled .btn-spinner {
+  opacity: 0.7;
+}
+
 /* Alignment helpers ---------------------------------------------------- */
 
 .btn[data-align="start"] {
@@ -216,8 +227,26 @@
 }
 
 .btn[data-intent="neutral"] {
-  --btn-color-base: var(--color-neutral3);
-  --btn-color-contrast: var(--color-dark);
+  --btn-color-base: var(--color-neutral);
+  --btn-color-contrast: var(--color-neutral);
+}
+
+.btn[data-intent="neutral"][data-appearance="solid"] {
+  --btn-surface: var(--color-neutral4);
+  --btn-foreground: var(--color-white);
+  --btn-border-color: var(--color-neutral4);
+  --btn-surface-hover: color-mix(in srgb, var(--color-neutral4) 92%, #000 8%);
+  --btn-surface-active: color-mix(in srgb, var(--color-neutral4) 86%, #000 14%);
+  --btn-color-contrast: var(--color-white);
+}
+
+.btn[data-intent="neutral"][data-appearance="soft"],
+.btn[data-intent="neutral"][data-appearance="tinted"] {
+  --btn-surface: var(--color-neutral3);
+  --btn-foreground: var(--color-neutral);
+  --btn-border-color: color-mix(in srgb, var(--color-neutral3) 65%, transparent);
+  --btn-surface-hover: color-mix(in srgb, var(--color-neutral3) 94%, #000 6%);
+  --btn-surface-active: color-mix(in srgb, var(--color-neutral3) 90%, #000 10%);
 }
 
 .btn[data-intent="info"] {
@@ -228,16 +257,24 @@
 .btn[data-intent="success"] {
   --btn-color-base: var(--color-success);
   --btn-color-contrast: var(--color-white);
+  --btn-ghost-hover-bg: var(--color-success-veil);
 }
 
 .btn[data-intent="warning"] {
   --btn-color-base: var(--color-warning);
-  --btn-color-contrast: var(--color-dark);
+  --btn-color-contrast: var(--color-white);
+  --btn-ghost-hover-bg: var(--color-warning-veil);
+}
+
+.btn[data-intent="warning"][data-appearance="solid"] {
+  --btn-foreground: var(--color-white);
+  --btn-foreground-hover: var(--color-white);
 }
 
 .btn[data-intent="danger"] {
   --btn-color-base: var(--color-error);
   --btn-color-contrast: var(--color-white);
+  --btn-ghost-hover-bg: var(--color-error-veil);
 }
 
 .btn[data-intent="inverse"] {
@@ -294,15 +331,36 @@
   --btn-surface: transparent;
   --btn-foreground: var(--btn-color-base);
   --btn-border-color: transparent;
-  --btn-surface-hover: color-mix(in srgb, var(--btn-color-base) 10%, transparent);
+  --btn-surface-hover: var(--btn-ghost-hover-bg, color-mix(in srgb, var(--btn-color-base) 10%, transparent));
   --btn-surface-active: color-mix(in srgb, var(--btn-color-base) 18%, transparent);
   box-shadow: none;
+}
+
+.btn[data-appearance="ghost2"] {
+  --btn-surface: transparent;
+  --btn-foreground: var(--btn-color-base);
+  --btn-border-color: transparent;
+  --btn-surface-hover: transparent;
+  --btn-surface-active: transparent;
+  box-shadow: none;
+}
+
+.btn[data-appearance="ghost2"]:not([data-disabled="true"]):hover,
+.btn[data-appearance="ghost2"]:not(:disabled):hover {
+  box-shadow: 0 1px 3px 2px rgb(78 59 30 / 18%);
+}
+
+.btn[data-appearance="ghost2"]:not([data-disabled="true"]):active,
+.btn[data-appearance="ghost2"]:not(:disabled):active {
+  box-shadow: 0 3px 10px 2px rgb(78 59 30 / 22%);
 }
 
 .btn[data-appearance="link"] {
   --btn-surface: transparent;
   --btn-foreground: var(--btn-color-base);
   --btn-border-color: transparent;
+  --btn-surface-hover: var(--btn-ghost-hover-bg, color-mix(in srgb, var(--btn-color-base) 10%, transparent));
+  --btn-surface-active: color-mix(in srgb, var(--btn-color-base) 18%, transparent);
   --btn-gap: 0.4rem;
   padding-inline: 0.1rem;
   min-height: auto;
@@ -379,11 +437,11 @@
 }
 
 .btn-icon-left {
-  margin-right: var(--btn-icon-gap-left, 0.6rem);
+  margin-right: var(--btn-icon-gap-left, 0.35rem);
 }
 
 .btn-icon-right {
-  margin-left: var(--btn-icon-gap-right, 0.6rem);
+  margin-left: var(--btn-icon-gap-right, 0.35rem);
 }
 
 .btn-spinner {

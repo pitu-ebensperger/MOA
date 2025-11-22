@@ -1,12 +1,11 @@
 import PropTypes from "prop-types";
 import { memo, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, Heart, ShoppingCart } from "@icons/lucide";
+import { Eye, Heart, ShoppingCart } from "lucide-react";
 import { Price } from "@/components/data-display/Price.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { API_PATHS } from "@/config/api-paths.js"
 import { useAuth } from "@/context/auth-context.js"
-import { alertAuthRequired } from '@/utils/alerts.js'
 import { ProductShape } from "@/utils/propTypes.js"
 import { useCacheManager } from "@/hooks/useCacheManager.js"
 
@@ -49,7 +48,7 @@ const ProductCard = memo(function ProductCard({
     event.preventDefault();
     event.stopPropagation();
     if (!isAuthenticated) {
-      alertAuthRequired().then(() => navigate(API_PATHS.auth.login));
+      // No redirigir - solo prevenir acción
       return;
     }
     setIsLiked(!isLiked);
@@ -150,11 +149,14 @@ const ProductCard = memo(function ProductCard({
       <button
         type="button"
         onClick={handleWishlistToggle}
-        className="
+        disabled={!isAuthenticated}
+        title={!isAuthenticated ? "Inicia sesión para guardar favoritos" : (isLiked ? "Quitar de favoritos" : "Agregar a favoritos")}
+        className={`
           absolute right-4 top-4 z-30 flex size-10 items-center justify-center rounded-full
           bg-white/20 text-white backdrop-blur-md
           transition hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60
-        "
+          ${!isAuthenticated ? 'opacity-60 cursor-not-allowed' : ''}
+        `}
         aria-label={isLiked ? "Quitar de favoritos" : "Agregar a favoritos"}
         aria-pressed={isLiked}
       >
@@ -180,15 +182,12 @@ const ProductCard = memo(function ProductCard({
           intent="primary"
           elevation="md"
           size="md"
-          disabled={isOutOfStock}
+          disabled={isOutOfStock || !isAuthenticated}
+          title={!isAuthenticated ? "Inicia sesión para agregar al carrito" : (isOutOfStock ? "Sin stock" : "Agregar al carrito")}
           onClick={(event) => {
             event.preventDefault();
             event.stopPropagation();
-            if (isOutOfStock) return;
-            if (!isAuthenticated) {
-              alertAuthRequired().then(() => navigate(API_PATHS.auth.login));
-              return;
-            }
+            if (isOutOfStock || !isAuthenticated) return;
             setCartButtonPressed(true);
             onAddToCart(product);
           }}
@@ -205,10 +204,10 @@ const ProductCard = memo(function ProductCard({
               ? "bg-(--color-primary3) text-white" 
               : ""
             }
-            ${isOutOfStock ? "opacity-50 cursor-not-allowed" : ""}
+            ${isOutOfStock || !isAuthenticated ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
-          {isOutOfStock ? "Sin stock" : "Agregar"}
+          {isOutOfStock ? "Sin stock" : !isAuthenticated ? "Inicia sesión" : "Agregar"}
         </Button>
 
         <Button

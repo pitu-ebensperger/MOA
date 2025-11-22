@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Lock } from "@icons/lucide"
+import { Lock } from "lucide-react"
 import { resetPassword } from '@/services/auth.api.js'
 import { API_PATHS } from '@/config/api-paths.js'
 import { toast, confirm } from '@/components/ui'
+import { validatePassword, validatePasswordMatch } from '@/utils/validation';
 
 export default function ResetPasswordPage(){
   const navigate = useNavigate()
@@ -25,14 +26,17 @@ export default function ResetPasswordPage(){
     e.preventDefault()
     if (loading) return
 
-    // validaciones mínimas
-    if (password.length < 8) {
-      toast.error('Mínimo 8 caracteres', { title: 'Contraseña muy corta' })
-      return
+    // Validaciones usando utilidades centralizadas
+    const passwordValidation = validatePassword(password, { minLength: 8 });
+    if (!passwordValidation.valid) {
+      toast.error(passwordValidation.error, { title: 'Contraseña inválida' });
+      return;
     }
-    if (password !== confirmPassword) {
-      toast.error('Las contraseñas no coinciden', { title: 'No coincide' })
-      return
+    
+    const matchValidation = validatePasswordMatch(password, confirmPassword);
+    if (!matchValidation.valid) {
+      toast.error(matchValidation.error, { title: 'No coincide' });
+      return;
     }
 
     setLoading(true)

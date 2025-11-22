@@ -27,7 +27,7 @@ export const TabsList = ({ children, className, ...props }) => {
   return (
     <div
       className={cn(
-        "inline-flex h-10 items-center justify-center rounded-2xl bg-neutral-100 p-1 text-neutral-500 transition",
+        "inline-flex items-center justify-center text-(--text-weak) transition gap-2",
         className
       )}
       {...props}
@@ -51,12 +51,12 @@ export const TabsTrigger = ({ value, children, className, disabled, ...props }) 
       disabled={disabled}
       onClick={() => context.onValueChange(value)}
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium ring-offset-white transition-all",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary1 focus-visible:ring-offset-2",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium border transition-all duration-200",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-primary1) focus-visible:ring-offset-2",
         "disabled:pointer-events-none disabled:opacity-50",
         isActive
-          ? "bg-white text-primary1 shadow-sm border border-primary1/20"
-          : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50",
+          ? "bg-(--color-primary1) text-white border-(--color-primary1)"
+          : "bg-white text-(--text-secondary1) border-(--color-border) hover:text-(--text-strong) hover:border-(--color-primary1)/30",
         className
       )}
       {...props}

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, ShoppingBag, LayoutGrid, Rows } from "@icons/lucide";
+import { Mail, Phone, Calendar, RefreshCw, UserPlus, MoreHorizontal, Eye, Edit3, ShoppingBag, LayoutGrid, Rows } from "lucide-react";
 import { toast } from '@/components/ui';
 import { useDebounce } from '@/hooks/useDebounce.js';
 import CustomerDrawer from "@/modules/admin/components/CustomerDrawer.jsx"
@@ -16,6 +16,7 @@ import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/radix/Dialog.jsx";
 import { Input } from "@/components/ui/Input.jsx";
+import { Select } from "@/components/ui/Select.jsx";
 import { customersAdminApi } from "@/services/customersAdmin.api.js";
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 import { ResponsiveRowActions } from "@/components/ui/ResponsiveRowActions.jsx";
@@ -43,7 +44,7 @@ const normalizeCustomerRecord = (customer = {}) => {
   const lastName = nameParts.slice(1).join(" ");
   return {
     ...customer,
-    status: customer.status ?? customer.rol ?? "activo",
+    status: customer.status ?? "activo",
     firstName,
     lastName,
     phone: customer.telefono ?? customer.phone ?? "",
@@ -123,7 +124,7 @@ export default function CustomersPage() {
           email: newCustomerForm.email.trim(),
           telefono: newCustomerForm.phone.trim(),
           status: newCustomerForm.status || "activo",
-          rol: "cliente",
+          rol_code: "CLIENT",
         };
         const response = await customersAdminApi.create(payload);
         const createdCustomer = response?.data?.data ?? response?.data ?? response;
@@ -203,7 +204,7 @@ export default function CustomersPage() {
       nombre: customer?.nombre ?? "",
       email: customer?.email ?? "",
       telefono: customer?.telefono ?? "",
-      status: customer?.status ?? customer?.rol ?? "activo",
+      status: customer?.status ?? "activo",
     });
   }, []);
 
@@ -258,6 +259,17 @@ export default function CustomersPage() {
           } }
           placeholder="Buscar por nombre, email…"
           className="flex-1 max-w-2xl" />
+        <div className="w-48">
+          <Select
+            label="Estado"
+            size="sm"
+            variant="ghost"
+            placeholder=""
+            value={statusFilter}
+            onChange={(e) => handleStatusFilter(e.target.value)}
+            options={USER_STATUS_OPTIONS}
+          />
+        </div>
         <div className="ml-auto flex items-center gap-2">
           <div className="flex items-center gap-0.5 rounded-md border border-(--color-border) p-0.5">
             <TooltipNeutral label="List" position="bottom">
@@ -305,7 +317,7 @@ export default function CustomersPage() {
         </div>
       </TableToolbar>
     ),
-    [search, viewMode, handleRefresh, handleStatusFilter]
+    [search, statusFilter, viewMode, handleRefresh, handleStatusFilter]
   );
 
   return (
@@ -336,29 +348,31 @@ export default function CustomersPage() {
             <VirtualizedTable
               data={filteredCustomers}
               columns={[
-                { key: 'cliente', header: 'Cliente', width: '300px' },
+                { key: 'nombre', header: 'Nombre', width: '180px' },
+                { key: 'correo', header: 'Correo', width: '260px' },
                 { key: 'pedidos', header: 'Pedidos', width: '120px' },
                 { key: 'estado', header: 'Estado', width: '180px' },
                 { key: 'registro', header: 'Registro', width: '150px' },
-                { key: 'acciones', header: '', width: '100px' },
               ]}
               renderRow={(customer) => (
                 <div
                   className="grid items-center"
                   style={{
-                    gridTemplateColumns: '300px 120px 180px 150px 100px',
+                    gridTemplateColumns: '180px 260px 120px 180px 150px',
                     height: '70px',
                   }}
                 >
-                  {/* Cliente */}
-                  <div className="flex flex-col gap-0.5 px-4">
-                    <span className="text-sm font-medium text-neutral-900">
+                  {/* Nombre */}
+                  <div className="px-4 flex items-center">
+                    <span className="text-sm font-medium text-neutral-900 truncate" title={customer.nombre}>
                       {customer.nombre}
                     </span>
-                    <span className="flex items-center gap-1 text-xs text-neutral-500">
-                      <Mail className="h-3 w-3" />
-                      {customer.email}
-                    </span>
+                  </div>
+
+                  {/* Correo */}
+                  <div className="px-4 flex items-center gap-1">
+                    <Mail className="h-3.5 w-3.5 text-neutral-500" />
+                    <span className="text-xs text-neutral-600 truncate" title={customer.email}>{customer.email}</span>
                   </div>
 
                   {/* Pedidos */}
@@ -401,27 +415,6 @@ export default function CustomersPage() {
                   <div className="flex items-center gap-1 px-4 text-sm text-neutral-600">
                     <Calendar className="h-3.5 w-3.5" />
                     {formatDate_ddMMyyyy(customer.createdAt)}
-                  </div>
-
-                  {/* Acciones */}
-                  <div className="px-4 flex justify-end">
-                    <ResponsiveRowActions
-                      actions={[
-                        {
-                          key: "view",
-                          label: "Ver perfil",
-                          icon: Eye,
-                          onAction: () => setSelectedCustomer(customer),
-                        },
-                        {
-                          key: "edit",
-                          label: "Editar",
-                          icon: Edit3,
-                          onAction: () => handleOpenEditDialog(customer),
-                        },
-                      ]}
-                      menuLabel={`Acciones para ${customer.nombre}`}
-                    />
                   </div>
                 </div>
               )}
@@ -494,6 +487,10 @@ export default function CustomersPage() {
                         <DropdownMenuItem onSelect={() => setSelectedCustomer(customer)}>
                           <Eye className="mr-2 h-4 w-4" />
                           Ver perfil
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={() => handleOpenEditDialog(customer)}>
+                          <Edit3 className="mr-2 h-4 w-4" />
+                          Editar
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -675,7 +672,7 @@ export default function CustomersPage() {
                 id="edit-customer-status"
                 value={editForm.status}
                 onChange={handleEditFormChange("status")}
-                className="w-full rounded-lg border border-(--color-border) bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-(--color-primary1) focus:bg-white">
+                className="w-full rounded-lg border border-(--color-border) bg-neutral-50 px-3 py-2 text-sm outline-none focus:border-(--color-primary1) focus:bg-white"
               >
                 {STATUS_FILTER_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>

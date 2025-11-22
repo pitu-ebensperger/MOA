@@ -14,32 +14,36 @@ const AuthStateContext = createContext(null);
 const AuthActionsContext = createContext(null);
 const AuthMetaContext = createContext(null);
 
-export const useAuthState = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuthState() {
   const context = useContext(AuthStateContext);
   if (!context) {
     throw new Error('useAuthState debe usarse dentro de AuthProvider');
   }
   return context;
-};
+}
 
-export const useAuthActions = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuthActions() {
   const context = useContext(AuthActionsContext);
   if (!context) {
     throw new Error('useAuthActions debe usarse dentro de AuthProvider');
   }
   return context;
-};
+}
 
-export const useAuthMeta = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuthMeta() {
   const context = useContext(AuthMetaContext);
   if (!context) {
     throw new Error('useAuthMeta debe usarse dentro de AuthProvider');
   }
   return context;
-};
+}
 
 // Hook combinado para backwards compatibility
-export const useAuth = () => {
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuth() {
   const state = useAuthState();
   const actions = useAuthActions();
   const meta = useAuthMeta();
@@ -49,7 +53,7 @@ export const useAuth = () => {
     ...actions,
     ...meta,
   };
-};
+}
 
 /**
  * AuthProviderOptimized - Versión optimizada con contextos divididos

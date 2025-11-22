@@ -3,11 +3,11 @@ import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useAuth } from "@/context/auth-context.js"
 import { cartApi } from "@/services/cart.api.js"
 import { API_PATHS } from "@/config/api-paths.js"
-import { alertAuthRequired, alertError } from '@/utils/alerts.js'
+import { alertError } from '@/utils/alerts.js'
 import { productsApi } from "@/services/products.api.js"
 
 const CART_STORAGE_KEY = "cart";
-const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true' || import.meta.env?.MODE === 'development';
+const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true';
 const debugWarn = (...args) => { if (DEBUG_LOGS) console.warn(...args); };
 const debugError = (...args) => { if (DEBUG_LOGS) console.error(...args); };
 
@@ -24,9 +24,7 @@ export const useCart = () => {
 
   const ensureAuthenticated = () => {
     if (isSessionReady) return true;
-    alertAuthRequired().then(() => {
-      window.location.assign(API_PATHS.auth.login);
-    });
+    globalThis.location.href = `${API_PATHS.auth.login}?authRequired=true`;
     return false;
   };
 

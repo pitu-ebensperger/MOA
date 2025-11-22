@@ -1,31 +1,87 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock, AlertCircle } from "@icons/lucide";
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Mail, Lock, X, Clock, ShoppingCart } from "lucide-react";
 import { useAuth, isAdminRole } from '@/context/auth-context.js'
 import { useRedirectAfterAuth } from '@/modules/auth/hooks/useRedirectAuth.jsx'
 import { Button } from '@/components/ui/Button.jsx'
 import { API_PATHS } from '@/config/api-paths.js'
+import { validateEmail, validatePassword } from '@/utils/validation';
 
 
 export default function LoginPage() {
   const { login } = useAuth();
-  const navigate = useNavigate(); 
   const location = useLocation();
+  const navigate = useNavigate();
   const redirect = useRedirectAfterAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
 
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
   
-  // Detectar si vino por sesión expirada
-  const sessionExpired = location.state?.expired;
-  const fromPath = location.state?.from?.pathname;
+  // Estados de modales independientes (NO dependen de location.state)
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
+  const [showAuthRequiredBanner, setShowAuthRequiredBanner] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [welcomeUserName, setWelcomeUserName] = useState('');
+  const [expiredFromPath, setExpiredFromPath] = useState('');
 
-  // Limpiar cualquier estado corrupto al montar
+  // Detectar estados SOLO UNA VEZ al montar y limpiar inmediatamente
   useEffect(() => {
-    // Si hay un token pero no hay usuario, limpiar todo
+    const sessionExpired = location.state?.expired;
+    const authRequired = location.state?.authRequired;
+    const registered = location.state?.registered;
+    const userName = location.state?.userName;
+    const fromPath = location.state?.from?.pathname;
+
+    if (sessionExpired) {
+      setShowExpiredModal(true);
+      setExpiredFromPath(fromPath || '');
+    }
+    
+    if (authRequired) {
+      setShowAuthRequiredBanner(true);
+      const timer = setTimeout(() => setShowAuthRequiredBanner(false), 8000);
+      return () => clearTimeout(timer);
+    }
+    
+    if (registered) {
+      setShowWelcomeModal(true);
+      setWelcomeUserName(userName || '');
+      // Auto-cerrar después de 5 segundos
+      const timer = setTimeout(() => setShowWelcomeModal(false), 5000);
+      
+      // LIMPIAR location.state INMEDIATAMENTE usando React Router
+      navigate(location.pathname, { replace: true, state: {} });
+      
+      return () => clearTimeout(timer);
+    }
+    
+    // Si hubo cualquier estado, limpiar después de procesarlo
+    if (sessionExpired || authRequired || registered) {
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []); // ← Solo al montar, NUNCA más
+
+  // Body scroll lock cuando hay modales abiertos
+  useEffect(() => {
+    const hasModal = showWelcomeModal || showExpiredModal;
+    if (hasModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    // Cleanup al desmontar
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showWelcomeModal, showExpiredModal]);
+
+
+  useEffect(() => {  // Limpiar cualquier estado corrupto al montar
+    // Si token pero no usarlo, limpiar todo
     const token = localStorage.getItem('moa.accessToken');
     const user = localStorage.getItem('moa.user');
     if (token && !user) {
@@ -36,16 +92,29 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setServerError('');
 
-/* // Validaciones básicas
-    const ve = validateEmail(email);
-    const vp = validatePassword(password, 6);
+    // Validaciones de formato
     const nextErrors = {};
-    console.log(ve, vp)
-    if (!ve) nextErrors.email = ve.error || 'Email no válido';
-    if (!vp) nextErrors.password = vp.error || 'Contraseña inválida';
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) return; */
+    
+    // Validar email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.valid) {
+      nextErrors.email = emailValidation.error;
+    }
+    
+    // Validar password
+    const passwordValidation = validatePassword(password, { minLength: 6 });
+    if (!passwordValidation.valid) {
+      nextErrors.password = passwordValidation.error;
+    }
+    
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+
     try {
       setSubmitting(true);
       setServerError('');
@@ -62,30 +131,145 @@ export default function LoginPage() {
 
   return (
     <div className="page">
+    
+    {/* Modal de bienvenida (después de registro) - FUERA del contenedor principal */}
+    {showWelcomeModal && (
+      <div 
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4"
+        onClick={() => setShowWelcomeModal(false)}
+      >
+        <div 
+          className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header decorativo con gradiente MOA */}
+          <div className="bg-gradient-to-br from-[#D4704B] via-[#B8653F] to-[#8B4513] px-8 pt-8 pb-6 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-md mb-4">
+              <span className="text-4xl">🎉</span>
+            </div>
+            <h3 className="text-2xl font-serif font-bold text-white mb-2">
+              ¡Bienvenido a MOA{welcomeUserName ? `, ${welcomeUserName.split(' ')[0]}` : ''}!
+            </h3>
+            <p className="text-white/90 text-sm">
+              Tu cuenta ha sido creada exitosamente
+            </p>
+          </div>
+          
+          {/* Contenido */}
+          <div className="px-8 py-6">
+            <p className="text-center text-(--color-text-secondary) text-sm leading-relaxed mb-6">
+              Ahora puedes iniciar sesión para comenzar a explorar nuestra colección de muebles artesanales y decoración única.
+            </p>
+            
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => setShowWelcomeModal(false)}
+                shape="pill"
+                motion="lift"
+                className="w-full"
+              >
+                Iniciar sesión
+              </Button>
+              <button
+                onClick={() => setShowWelcomeModal(false)}
+                className="text-sm text-(--color-text-muted) hover:text-(--color-primary1) transition-colors"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Modal de sesión expirada - FUERA del contenedor principal */}
+    {showExpiredModal && (
+      <div 
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4"
+        onClick={() => setShowExpiredModal(false)}
+      >
+        <div 
+          className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header con tono amber para advertencia */}
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 px-8 pt-8 pb-6 border-b border-amber-100">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold text-(--color-primary1) mb-2">
+                  Tu sesión ha expirado
+                </h3>
+                <p className="text-sm text-(--color-text-secondary) leading-relaxed">
+                  Por tu seguridad, necesitas volver a iniciar sesión{expiredFromPath ? ` para acceder a ${expiredFromPath}` : ''}.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Contenido */}
+          <div className="px-8 py-6">
+            <div className="bg-amber-50/50 rounded-xl p-4 mb-6 border border-amber-100">
+              <p className="text-xs text-(--color-text-muted) text-center">
+                Las sesiones expiran después de 24 horas de inactividad para proteger tu cuenta.
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => setShowExpiredModal(false)}
+                shape="pill"
+                motion="lift"
+                className="w-full"
+              >
+                Entendido
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
     <main className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md animate-fade-in-up">
+        
+        {/* Banner superior: Auth requerido */}
+        {showAuthRequiredBanner && (
+          <div className="mb-6 relative animate-fade-in">
+            <div className="bg-amber-50/90 backdrop-blur-sm border-l-4 border-[#D4704B] rounded-lg p-4 pr-10 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="shrink-0 w-8 h-8 rounded-full bg-[#D4704B]/10 flex items-center justify-center">
+                  <ShoppingCart className="h-4 w-4 text-[#D4704B]" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-[#8B4513]">
+                    Para comprar, inicia sesión primero
+                  </p>
+                  <p className="text-xs text-[#A0522D]/90 mt-1 leading-relaxed">
+                    Necesitas una cuenta para agregar productos al carrito y guardar tus favoritos.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAuthRequiredBanner(false)}
+                className="absolute top-3 right-3 p-1 rounded-lg hover:bg-[#D4704B]/10 text-[#D4704B]/60 hover:text-[#D4704B] transition-colors"
+                aria-label="Cerrar"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white/75 backdrop-blur rounded-xl shadow-sm p-6 md:p-8">
           <header className="text-center mb-6">
             <h1 className="font-serif text-3xl text-(--color-primary1)">Iniciar sesión</h1>
             <p className="text-sm text-(--color-secondary1) mt-1">Bienvenido de vuelta</p>
           </header>
 
-          {/* Alerta de sesión expirada */}
-          {sessionExpired && (
-            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-amber-900">
-                  Tu sesión ha expirado
-                </p>
-                <p className="text-xs text-amber-700">
-                  Por seguridad, necesitas iniciar sesión nuevamente{fromPath ? ' para acceder a ' + fromPath : ''}.
-                </p>
-              </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-5">{/* Email */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div className="space-y-2">
               <label htmlFor="email" className="flex items-center gap-2 text-sm text-neutral-700">
@@ -97,11 +281,22 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="username"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-500 focus:ring-2 ring-neutral-200"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors(prev => ({...prev, email: ''}));
+                }}
+                className={`w-full rounded-lg border px-3 py-2 outline-none transition focus:ring-2 ${
+                  errors.email 
+                    ? 'border-[#cc5f49] focus:border-[#cc5f49] ring-[#cc5f49]/20' 
+                    : 'border-neutral-300 focus:border-neutral-500 ring-neutral-200'
+                }`}
                 placeholder="tu@email.com"
-                required
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? 'email-error' : undefined}
               />
+              {errors.email && (
+                <p id="email-error" className="text-sm text-[#cc5f49] mt-1">{errors.email}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -115,15 +310,26 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 outline-none transition focus:border-neutral-500 focus:ring-2 ring-neutral-200"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors(prev => ({...prev, password: ''}));
+                }}
+                className={`w-full rounded-lg border px-3 py-2 outline-none transition focus:ring-2 ${
+                  errors.password 
+                    ? 'border-[#cc5f49] focus:border-[#cc5f49] ring-[#cc5f49]/20' 
+                    : 'border-neutral-300 focus:border-neutral-500 ring-neutral-200'
+                }`}
                 placeholder="••••••••"
-                required
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? 'password-error' : undefined}
               />
+              {errors.password && (
+                <p id="password-error" className="text-sm text-[#cc5f49] mt-1">{errors.password}</p>
+              )}
             </div>
 
             {serverError && (
-              <p className="text-sm text-red-600 -mt-2">{serverError}</p>
+              <p className="text-sm text-[#cc5f49] -mt-2">{serverError}</p>
             )}
             <div className='flex flex-col items-center justify-center w-full'> 
               <Button

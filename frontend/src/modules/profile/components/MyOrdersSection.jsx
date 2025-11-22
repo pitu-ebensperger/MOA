@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { formatCurrencyCLP } from "@/utils/currency.js";
 import { useNavigate, Link } from "react-router-dom";
-import { ChevronRight } from "@icons/lucide";
+import { ChevronRight } from "lucide-react";
 
 const normalizeOrder = (order, index) => {
   if (!order || typeof order !== "object") {
@@ -33,9 +33,11 @@ const orderPropShape = PropTypes.shape({
   items: PropTypes.arrayOf(PropTypes.object),
   creado_en: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   createdAt: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  estado_envio: PropTypes.string,
+  estado_pago: PropTypes.string,
 });
 
-const OrderSection = ({ orders = [], isLoading = false, error = null }) => {
+const MyOrdersSection = ({ orders = [], isLoading = false, error = null }) => {
   const navigate = useNavigate();
   const recentOrders = (Array.isArray(orders) ? orders : [])
     .slice(0, 6)
@@ -119,10 +121,16 @@ const OrderSection = ({ orders = [], isLoading = false, error = null }) => {
   );
 };
 
-OrderSection.propTypes = {
+MyOrdersSection.propTypes = {
   orders: PropTypes.arrayOf(orderPropShape),
   isLoading: PropTypes.bool,
-  error: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.node, PropTypes.instanceOf(Error)]),
 };
 
-export default OrderSection;
+MyOrdersSection.defaultProps = {
+  orders: [],
+  isLoading: false,
+  error: null,
+};
+
+export default MyOrdersSection;

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -6,11 +6,9 @@ import {
   RefreshCw,
   Download,
   Eye,
-  Edit,
   AlertCircle,
-  X,
-  Save,
-} from "@icons/lucide";
+} from "lucide-react";
+import { utils as XLSXUtils, writeFile as writeXLSXFile } from 'xlsx';
 
 import { useAdminOrders } from '@/modules/admin/hooks/useAdminOrders.js';
 import { ordersAdminApi } from '@/services/ordersAdmin.api.js';
@@ -20,10 +18,11 @@ import { Button, IconButton } from '@/components/ui/Button.jsx';
 import { Input } from '@/components/ui/Input.jsx';
 import { Select } from '@/components/ui/Select.jsx';
 import { StatusPill } from '@/components/ui/StatusPill.jsx';
-import { VirtualizedTable } from '@/components/data-display/VirtualizedTable.jsx';
+import { TanstackDataTable } from '@/components/data-display/DataTable.jsx';
+import { Pagination } from '@/components/ui/Pagination.jsx';
 import { TableToolbar, TableSearch } from '@/components/data-display/TableToolbar.jsx';
-import { ResponsiveRowActions } from '@/components/ui/ResponsiveRowActions.jsx';
 import { TooltipNeutral } from '@/components/ui/Tooltip.jsx';
+import { buildOrderColumns } from '@/modules/admin/utils/ordersColumns.jsx';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -31,9 +30,9 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/radix/DropdownMenu.jsx';
 
-import { formatCurrencyCLP } from '@/utils/currency.js';
-import { formatDateTime } from '@/utils/date.js';
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
+import { useErrorHandler, useFormErrorHandler } from '@/hooks/useErrorHandler.js';
+import { confirm } from '@/components/ui';
 
 // Estados y opciones
 const ESTADOS_PAGO = [
@@ -65,7 +64,7 @@ const METODOS_DESPACHO = [
 
 const DEFAULT_FILTERS = {
   page: 1,
-  limit: 20,
+  limit: 10,
   search: '',
   estado_pago: '',
   estado_envio: '',
@@ -74,9 +73,30 @@ const DEFAULT_FILTERS = {
   fecha_hasta: '',
 };
 
-// API solo devuelve CSV, así que restringimos la UI al formato soportado
 const EXPORT_FORMATS = [
   { label: 'CSV', value: 'csv', extension: 'csv' },
+  { label: 'JSON', value: 'json', extension: 'json' },
+  { label: 'Excel (XLSX)', value: 'xlsx', extension: 'xlsx' },
+];
+
+const EXPORT_CHUNK_SIZE = 200;
+
+const EXPORT_COLUMNS = [
+  { key: 'orden_id', label: 'ID orden' },
+  { key: 'codigo', label: 'Código' },
+  { key: 'cliente', label: 'Cliente' },
+  { key: 'email', label: 'Email' },
+  { key: 'telefono', label: 'Teléfono' },
+  { key: 'estado_pago', label: 'Estado pago' },
+  { key: 'estado_envio', label: 'Estado envío' },
+  { key: 'metodo_pago', label: 'Método de pago' },
+  { key: 'metodo_despacho', label: 'Método de despacho' },
+  { key: 'total_items', label: 'Ítems' },
+  { key: 'subtotal', label: 'Subtotal (CLP)' },
+  { key: 'envio', label: 'Envío (CLP)' },
+  { key: 'total', label: 'Total (CLP)' },
+  { key: 'fecha_creacion', label: 'Creado en' },
+  { key: 'fecha_actualizacion', label: 'Actualizado en' },
 ];
 
 const PAGE_ALERT_STYLES = {
@@ -100,31 +120,22 @@ const buildExportFileName = (extension) => {
   return `pedidos-moa-${new Date().toISOString().split('T')[0]}.${extension}`;
 };
 
-// Mapeo de colores para estados
-const getStatusColor = (estado, tipo) => {
-  if (tipo === 'pago') {
-    switch (estado) {
-      case 'pendiente': return 'warning';
-      case 'procesando': return 'info';
-      case 'pagado': return 'success';
-      case 'fallido': return 'error';
-      case 'reembolsado': return 'neutral';
-      case 'cancelado': return 'error';
-      default: return 'neutral';
-    }
-  } else if (tipo === 'envio') {
-    switch (estado) {
-      case 'preparacion': return 'warning';
-      case 'empaquetado': return 'info';
-      case 'enviado': return 'info';
-      case 'en_transito': return 'primary';
-      case 'entregado': return 'success';
-      case 'devuelto': return 'error';
-      default: return 'neutral';
+const toPesos = (value, fallback) => {
+  if (value !== null && value !== undefined) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) {
+      return Math.round(parsed);
     }
   }
-  return 'neutral';
+  if (fallback !== null && fallback !== undefined) {
+    const parsed = Number(fallback);
+    if (Number.isFinite(parsed)) {
+      return Math.round(parsed);
+    }
+  }
+  return 0;
 };
+
 
 const formatEstado = (estado) => {
   if (!estado) return 'N/A';
@@ -133,6 +144,83 @@ const formatEstado = (estado) => {
     .toLowerCase()
     .replace(/_/g, ' ')
     .replace(/^\w|(?:\s)\w/g, (char) => char.toUpperCase());
+};
+
+const mapOrderToExportRow = (order = {}) => {
+  const totalItems =
+    order.totalItems ??
+    order.total_items ??
+    (Array.isArray(order.items) ? order.items.length : 0);
+
+  return {
+    orden_id: order.orden_id ?? order.id ?? '',
+    codigo: order.orderCode ?? order.number ?? '',
+    cliente: order.userName ?? 'Sin nombre',
+    email: order.userEmail ?? '',
+    telefono: order.userPhone ?? '',
+    estado_pago: order.estado_pago ? formatEstado(order.estado_pago) : 'N/A',
+    estado_envio: order.estado_envio ? formatEstado(order.estado_envio) : 'N/A',
+    metodo_pago: order.metodo_pago ? formatEstado(order.metodo_pago) : 'N/A',
+    metodo_despacho: order.metodo_despacho
+      ? formatEstado(order.metodo_despacho)
+      : 'N/A',
+    total_items: totalItems,
+    subtotal: toPesos(
+      order.subtotal,
+      order.subtotal_cents ? order.subtotal_cents / 100 : undefined,
+    ),
+    envio: toPesos(
+      order.shipping,
+      order.envio_cents ? order.envio_cents / 100 : undefined,
+    ),
+    total: toPesos(
+      order.total,
+      order.total_cents ? order.total_cents / 100 : undefined,
+    ),
+    fecha_creacion: order.createdAt ?? order.creado_en ?? '',
+    fecha_actualizacion: order.updatedAt ?? order.actualizado_en ?? '',
+  };
+};
+
+const escapeCsvValue = (value) => {
+  if (value === null || value === undefined) return '';
+  const stringValue = String(value).replace(/\r?\n/g, ' ').trim();
+  if (stringValue === '') return '';
+  if (/[",;]/.test(stringValue)) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+  return stringValue;
+};
+
+const buildCsvFromRows = (rows = []) => {
+  const headers = EXPORT_COLUMNS.map((column) => column.label);
+  const csvLines = [
+    headers.join(','),
+    ...rows.map((row) =>
+      EXPORT_COLUMNS.map((column) => escapeCsvValue(row[column.key])).join(','),
+    ),
+  ];
+  return csvLines.join('\n');
+};
+
+const downloadBlobFile = (content, type, extension) => {
+  const blob = new Blob([content], { type });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = buildExportFileName(extension);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+const exportRowsToXlsx = (rows = []) => {
+  if (!rows.length) return;
+  const worksheet = XLSXUtils.json_to_sheet(rows);
+  const workbook = XLSXUtils.book_new();
+  XLSXUtils.book_append_sheet(workbook, worksheet, 'Pedidos');
+  writeXLSXFile(workbook, buildExportFileName('xlsx'));
 };
 
 // Sin componente OrderFilters - se usa TableToolbar inline
@@ -150,15 +238,23 @@ export default function OrdersAdminPage() {
   const [pageAlert, setPageAlert] = useState(null);
   
   // Estados para edición inline
-  const [editingRowId, setEditingRowId] = useState(null);
-  const [editingValues, setEditingValues] = useState({});
-  const [savingRowId, setSavingRowId] = useState(null);
+  const { handleError } = useErrorHandler({
+    showAlert: false,
+    defaultMessage: 'Ocurrió un problema al gestionar los pedidos',
+  });
+  const {
+    fieldErrors,
+    setFieldError,
+    clearFieldError,
+    clearAllErrors,
+  } = useFormErrorHandler();
+  const lastOrdersErrorRef = useRef(null);
 
   // Aplicar debounce al campo search
   const debouncedSearch = useDebounce(filters.search, 400);
   const debouncedFilters = useMemo(() => {
     return { ...filters, search: debouncedSearch };
-  }, [filters.page, filters.limit, debouncedSearch, filters.estado_pago, filters.estado_envio, filters.metodo_despacho, filters.fecha_desde, filters.fecha_hasta]);
+  }, [filters, debouncedSearch]);
 
   useEffect(() => {
     if (!pageAlert) return;
@@ -176,6 +272,13 @@ export default function OrdersAdminPage() {
     error,
     refetch
   } = useAdminOrders(debouncedFilters);
+  useEffect(() => {
+    if (!error) return;
+    const signature = `${error?.message ?? ''}|${error?.status ?? ''}`;
+    if (lastOrdersErrorRef.current === signature) return;
+    lastOrdersErrorRef.current = signature;
+    handleError(error, 'No se pudieron cargar las órdenes');
+  }, [error, handleError]);
 
   const ordersData = orders ?? [];
 
@@ -185,244 +288,120 @@ export default function OrdersAdminPage() {
   }, [filters]);
 
   // Handlers
-  const handleFiltersChange = useCallback((newFilters) => {
-    setFilters(newFilters);
-  }, []);
+  const validateDateRange = useCallback((nextFilters) => {
+    const { fecha_desde, fecha_hasta } = nextFilters;
+    if (fecha_desde && fecha_hasta && fecha_desde > fecha_hasta) {
+      setFieldError('fecha_rango', 'La fecha hasta debe ser igual o posterior a la fecha desde');
+      return false;
+    }
+    clearFieldError('fecha_rango');
+    return true;
+  }, [setFieldError, clearFieldError]);
 
   const handleFilterChange = useCallback((key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
-  }, []);
+    setFilters(prev => {
+      const next = { ...prev, [key]: value, page: key === 'page' ? value : 1 };
+      if (key === 'fecha_desde' || key === 'fecha_hasta') {
+        validateDateRange(next);
+      }
+      return next;
+    });
+  }, [validateDateRange]);
 
   const handlePageChange = useCallback((newPage) => {
     setFilters(prev => ({ ...prev, page: newPage }));
   }, []);
 
   const resetFilters = useCallback(() => {
+    clearAllErrors();
     setFilters({ ...DEFAULT_FILTERS });
-  }, []);
+  }, [clearAllErrors]);
 
   const showPageAlert = useCallback((message, type = 'success') => {
     setPageAlert({ message, type });
   }, []);
 
-  // Handlers para edición inline
-  const handleStartEdit = useCallback((order) => {
-    setEditingRowId(order.orden_id);
-    setEditingValues({
-      estado_pago: order.estado_pago,
-      estado_envio: order.estado_envio,
-    });
-  }, []);
+  const fetchOrdersForExport = useCallback(async () => {
+    // Re-fetch all rows (not just current page) so los archivos incluyen filtros activos.
+    const filtersWithoutPagination = { ...filters };
+    delete filtersWithoutPagination.page;
+    delete filtersWithoutPagination.limit;
 
-  const handleCancelEdit = useCallback(() => {
-    setEditingRowId(null);
-    setEditingValues({});
-  }, []);
+    const baseParams = {
+      ...compactFilters(filtersWithoutPagination),
+      order_by: 'creado_en',
+      order_dir: 'DESC',
+    };
 
-  const handleSaveInline = useCallback(async (order) => {
-    try {
-      setSavingRowId(order.orden_id);
-      await ordersAdminApi.updateStatus(order.orden_id, editingValues);
-      showPageAlert('Estado actualizado correctamente', 'success');
-      setEditingRowId(null);
-      setEditingValues({});
-      refetch();
-    } catch (error) {
-      console.error('Error updating order:', error);
-      showPageAlert('Error al actualizar el estado', 'error');
-    } finally {
-      setSavingRowId(null);
+    const collected = [];
+    let offset = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await ordersAdminApi.getAll({
+        ...baseParams,
+        limit: EXPORT_CHUNK_SIZE,
+        offset,
+      });
+
+      const chunk = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response)
+          ? response
+          : [];
+
+      if (chunk.length) {
+        collected.push(...chunk);
+      }
+
+      const pagination = response?.pagination;
+      const limitUsed = pagination?.limit ?? EXPORT_CHUNK_SIZE;
+      const totalAvailable = pagination?.total ?? collected.length;
+
+      offset += limitUsed;
+
+      if (chunk.length === 0) {
+        hasMore = false;
+      } else if (pagination) {
+        hasMore = offset < totalAvailable;
+      } else {
+        hasMore = chunk.length === limitUsed;
+      }
     }
-  }, [editingValues, refetch, showPageAlert]);
 
-  const handleFieldChange = useCallback((field, value) => {
-    setEditingValues(prev => ({ ...prev, [field]: value }));
-  }, []);
+    return collected;
+  }, [filters]);
 
   const handleViewDetails = useCallback((order) => {
     navigate(`/admin/orders/${order.orden_id}`);
   }, [navigate]);
 
-  // orderColumns ya no es necesario con VirtualizedTable (renderRow inline)
-  // Se mantiene por si se necesita migrar de vuelta a DataTableV2
-  const _orderColumns = useMemo(
-    () => [
-      {
-        accessorKey: "order_code",
-        header: "Orden",
-        cell: ({ row }) => (
-          <div className="space-y-1">
-            <p className="font-mono text-sm font-semibold text-(--text-strong)">
-              {row.original.order_code}
-            </p>
-            <p className="text-xs text-(--text-secondary1)">
-              {formatDateTime(row.original.creado_en)}
-            </p>
-          </div>
-        ),
-      },
-      {
-        id: "customer",
-        header: "Cliente",
-        cell: ({ row }) => (
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-(--text-strong)">
-              {row.original.userName || row.original.usuario_nombre || "N/A"}
-            </p>
-            <p className="text-xs text-(--text-secondary1)">
-              {row.original.userEmail || row.original.usuario_email || "N/A"}
-            </p>
-          </div>
-        ),
-      },
-      {
-        id: "total",
-        header: "Total",
-        meta: { align: "right" },
-        cell: ({ row }) => (
-          <div className="space-y-1 text-right">
-            <p className="text-sm font-semibold text-(--text-strong)">
-              {formatCurrencyCLP(row.original.total_cents)}
-            </p>
-            <p className="text-xs text-(--text-secondary1)">
-              {row.original.total_items ?? 0}{" "}
-              {row.original.total_items === 1 ? "item" : "items"}
-            </p>
-          </div>
-        ),
-      },
-      {
-        accessorKey: "estado_pago",
-        header: "Pago",
-        cell: ({ row }) => {
-          const isEditing = editingRowId === row.original.orden_id;
-          
-          if (isEditing) {
-            return (
-              <Select
-                value={editingValues.estado_pago || row.original.estado_pago}
-                onChange={(e) => handleFieldChange('estado_pago', e.target.value)}
-                className="w-full min-w-[140px]"
-                size="sm"
-              >
-                {ESTADOS_PAGO.filter(e => e.value).map(estado => (
-                  <option key={estado.value} value={estado.value}>
-                    {estado.label}
-                  </option>
-                ))}
-              </Select>
-            );
-          }
-          
-          return (
-            <StatusPill
-              status={row.original.estado_pago}
-              intent={getStatusColor(row.original.estado_pago, 'pago')}
-              size="sm"
-            >
-              {formatEstado(row.original.estado_pago)}
-            </StatusPill>
-          );
-        },
-      },
-      {
-        accessorKey: "estado_envio",
-        header: "Envío",
-        cell: ({ row }) => {
-          const isEditing = editingRowId === row.original.orden_id;
-          
-          if (isEditing) {
-            return (
-              <Select
-                value={editingValues.estado_envio || row.original.estado_envio}
-                onChange={(e) => handleFieldChange('estado_envio', e.target.value)}
-                className="w-full min-w-[140px]"
-                size="sm"
-              >
-                {ESTADOS_ENVIO.filter(e => e.value).map(estado => (
-                  <option key={estado.value} value={estado.value}>
-                    {estado.label}
-                  </option>
-                ))}
-              </Select>
-            );
-          }
-          
-          return (
-            <StatusPill
-              status={row.original.estado_envio}
-              intent={getStatusColor(row.original.estado_envio, 'envio')}
-              size="sm"
-            >
-              {formatEstado(row.original.estado_envio)}
-            </StatusPill>
-          );
-        },
-      },
-      {
-        id: "metodo_despacho",
-        header: "Despacho",
-        cell: ({ row }) => {
-          const comuna = row.original.comuna;
-          const region = row.original.region;
-          const method = row.original.metodo_despacho
-            ? formatEstado(row.original.metodo_despacho)
-            : "Standard";
-          return (
-            <div className="space-y-1">
-              <p className="text-sm text-(--text-strong)">{method}</p>
-              {comuna && (
-                <p className="text-xs text-(--text-secondary1)">
-                  {comuna}
-                  {region ? `, ${region}` : ""}
-                </p>
-              )}
-            </div>
-          );
-        },
-      },
-    ],
-    [editingRowId, editingValues, handleFieldChange],
-  );
+  const handleCancelOrder = useCallback(async (order) => {
+    const orderId = order?.orden_id ?? order?.id;
+    if (!orderId) return;
 
-  const orderRowActions = useCallback((row) => {
-    const isEditing = editingRowId === row.orden_id;
-    const isSaving = savingRowId === row.orden_id;
-    
-    if (isEditing) {
-      return [
-        {
-          key: "save",
-          label: isSaving ? "Guardando..." : "Guardar",
-          icon: Save,
-          onAction: () => handleSaveInline(row),
-          disabled: isSaving,
-        },
-        {
-          key: "cancel",
-          label: "Cancelar",
-          icon: X,
-          onAction: handleCancelEdit,
-          disabled: isSaving,
-        },
-      ];
+    const label = order?.order_code ?? order?.number ?? orderId;
+    const confirmed = await confirm.delete(
+      label ? `¿Cancelar la orden ${label}?` : "¿Cancelar esta orden?",
+      "Esta acción no se puede deshacer"
+    );
+
+    if (!confirmed) {
+      return;
     }
-    
-    return [
-      {
-        key: "view",
-        label: "Ver detalles",
-        icon: Eye,
-        onAction: () => handleViewDetails(row),
-      },
-      {
-        key: "edit",
-        label: "Editar estado",
-        icon: Edit,
-        onAction: () => handleStartEdit(row),
-      },
-    ];
-  }, [editingRowId, savingRowId, handleSaveInline, handleCancelEdit, handleViewDetails, handleStartEdit]);
+
+    try {
+      await ordersAdminApi.updateStatus(orderId, {
+        estado_pago: 'cancelado',
+        motivo_cambio: 'Cancelado por administrador',
+      });
+      showPageAlert('Orden cancelada correctamente', 'success');
+      refetch();
+    } catch (error) {
+      handleError(error, 'No se pudo cancelar la orden');
+      showPageAlert('No se pudo cancelar la orden', 'error');
+    }
+  }, [handleError, refetch, showPageAlert]);
 
   const handleExport = useCallback(async (format) => {
     if (ordersData.length === 0) {
@@ -432,35 +411,38 @@ export default function OrdersAdminPage() {
 
     try {
       setIsExporting(true);
-      const filtersWithoutPagination = { ...filters };
-      delete filtersWithoutPagination.page;
-      delete filtersWithoutPagination.limit;
-      const params = {
-        ...compactFilters(filtersWithoutPagination),
-        order_by: 'creado_en',
-        order_dir: 'DESC',
-      };
+      const exportOrders = await fetchOrdersForExport();
 
-      const blob = await ordersAdminApi.exportOrders(params, format);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      const formatConfig = EXPORT_FORMATS.find((item) => item.value === format);
-      const extension = formatConfig?.extension || format;
-      link.href = url;
-      link.download = buildExportFileName(extension);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      if (!exportOrders.length) {
+        showPageAlert('No hay datos para exportar con los filtros actuales', 'warning');
+        return;
+      }
 
-      showPageAlert(`${formatConfig?.label ?? format.toUpperCase()} listo para descargar`, 'success');
+      const formattedRows = exportOrders.map(mapOrderToExportRow);
+      const targetFormat = format ?? 'csv';
+
+      if (targetFormat === 'json') {
+        downloadBlobFile(
+          JSON.stringify(formattedRows, null, 2),
+          'application/json',
+          'json',
+        );
+      } else if (targetFormat === 'xlsx') {
+        exportRowsToXlsx(formattedRows);
+      } else {
+        const csvContent = buildCsvFromRows(formattedRows);
+        downloadBlobFile(csvContent, 'text/csv;charset=utf-8;', 'csv');
+      }
+
+      const formatConfig = EXPORT_FORMATS.find((item) => item.value === targetFormat);
+      showPageAlert(`${formatConfig?.label ?? targetFormat.toUpperCase()} listo para descargar`, 'success');
     } catch (error) {
-      console.error('Error exporting orders:', error);
+      handleError(error, 'Error al exportar pedidos');
       showPageAlert('Error al exportar pedidos', 'error');
     } finally {
       setIsExporting(false);
     }
-  }, [filters, ordersData.length, showPageAlert]);
+  }, [fetchOrdersForExport, ordersData.length, showPageAlert, handleError]);
 
   const toolbar = useMemo(
     () => () => (
@@ -522,6 +504,14 @@ export default function OrdersAdminPage() {
       </TableToolbar>
     ),
     [filters.search, showAdvancedFilters, isExporting, ordersData.length, handleFilterChange, refetch, handleExport]
+  );
+  const tableColumns = useMemo(
+    () =>
+      buildOrderColumns({
+        onOpen: handleViewDetails,
+        onCancel: handleCancelOrder,
+      }),
+    [handleViewDetails, handleCancelOrder],
   );
 
   const emptyStateMessage = hasActiveFilters ? (
@@ -662,6 +652,9 @@ export default function OrdersAdminPage() {
                 onChange={(e) => handleFilterChange('fecha_hasta', e.target.value)}
                 className="w-full"
               />
+              {fieldErrors.fecha_rango && (
+                <p className="text-xs text-(--color-error)">{fieldErrors.fecha_rango}</p>
+              )}
             </div>
 
             <div className="flex items-end">
@@ -690,165 +683,24 @@ export default function OrdersAdminPage() {
           {emptyStateMessage}
         </div>
       ) : (
-        <VirtualizedTable
-          data={ordersData}
-          columns={[
-            { key: 'orden', header: 'Orden', width: '200px' },
-            { key: 'cliente', header: 'Cliente', width: '200px' },
-            { key: 'total', header: 'Total', width: '150px' },
-            { key: 'pago', header: 'Pago', width: '150px' },
-            { key: 'envio', header: 'Envío', width: '150px' },
-            { key: 'despacho', header: 'Despacho', width: '180px' },
-            { key: 'acciones', header: '', width: '100px' },
-          ]}
-          renderRow={(order) => {
-            const isEditing = editingRowId === order.orden_id;
-
-            return (
-              <div
-                className="grid items-center"
-                style={{
-                  gridTemplateColumns: '200px 200px 150px 150px 150px 180px 100px',
-                  height: '80px',
-                }}
-              >
-                {/* Orden */}
-                <div className="px-4 space-y-1">
-                  <p className="font-mono text-sm font-semibold text-neutral-900">
-                    {order.order_code}
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    {formatDateTime(order.creado_en)}
-                  </p>
-                </div>
-
-                {/* Cliente */}
-                <div className="px-4 space-y-1">
-                  <p className="text-sm font-medium text-neutral-900">
-                    {order.userName || order.usuario_nombre || 'N/A'}
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    {order.userEmail || order.usuario_email || 'N/A'}
-                  </p>
-                </div>
-
-                {/* Total */}
-                <div className="px-4 text-right space-y-1">
-                  <p className="text-sm font-semibold text-neutral-900">
-                    {formatCurrencyCLP(order.total_cents)}
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    {order.total_items ?? 0} {order.total_items === 1 ? 'item' : 'items'}
-                  </p>
-                </div>
-
-                {/* Estado Pago */}
-                <div className="px-4">
-                  {isEditing ? (
-                    <Select
-                      value={editingValues.estado_pago || order.estado_pago}
-                      onChange={(e) => handleFieldChange('estado_pago', e.target.value)}
-                      className="w-full"
-                      size="sm"
-                    >
-                      {ESTADOS_PAGO.filter(e => e.value).map(estado => (
-                        <option key={estado.value} value={estado.value}>
-                          {estado.label}
-                        </option>
-                      ))}
-                    </Select>
-                  ) : (
-                    <StatusPill
-                      status={order.estado_pago}
-                      intent={getStatusColor(order.estado_pago, 'pago')}
-                      size="sm"
-                    >
-                      {formatEstado(order.estado_pago)}
-                    </StatusPill>
-                  )}
-                </div>
-
-                {/* Estado Envío */}
-                <div className="px-4">
-                  {isEditing ? (
-                    <Select
-                      value={editingValues.estado_envio || order.estado_envio}
-                      onChange={(e) => handleFieldChange('estado_envio', e.target.value)}
-                      className="w-full"
-                      size="sm"
-                    >
-                      {ESTADOS_ENVIO.filter(e => e.value).map(estado => (
-                        <option key={estado.value} value={estado.value}>
-                          {estado.label}
-                        </option>
-                      ))}
-                    </Select>
-                  ) : (
-                    <StatusPill
-                      status={order.estado_envio}
-                      intent={getStatusColor(order.estado_envio, 'envio')}
-                      size="sm"
-                    >
-                      {formatEstado(order.estado_envio)}
-                    </StatusPill>
-                  )}
-                </div>
-
-                {/* Método Despacho */}
-                <div className="px-4 space-y-1">
-                  <p className="text-sm text-neutral-900">
-                    {order.metodo_despacho ? formatEstado(order.metodo_despacho) : 'Standard'}
-                  </p>
-                  {order.comuna && (
-                    <p className="text-xs text-neutral-500">
-                      {order.comuna}{order.region ? `, ${order.region}` : ''}
-                    </p>
-                  )}
-                </div>
-
-                {/* Acciones */}
-                <div className="px-4 flex justify-end">
-                  <ResponsiveRowActions
-                    actions={orderRowActions(order)}
-                    menuLabel={`Acciones para orden ${order.order_code}`}
-                  />
-                </div>
-              </div>
-            );
-          }}
-          rowHeight={80}
-          overscan={5}
-          className="mt-4"
-        />
-      )}
-
-      {/* Paginación */}
-      {ordersData.length > 0 && (
-        <div className="mt-4 rounded-xl border border-neutral-200 bg-white p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-neutral-600">
-              Mostrando {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} de {total} órdenes
-            </p>
-            <div className="flex gap-2">
-              <Button
-                appearance="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => handlePageChange(page - 1)}
-              >
-                Anterior
-              </Button>
-              <Button
-                appearance="outline"
-                size="sm"
-                disabled={page * pageSize >= total}
-                onClick={() => handlePageChange(page + 1)}
-              >
-                Siguiente
-              </Button>
+        <>
+          <TanstackDataTable
+            columns={tableColumns}
+            data={ordersData}
+          />
+          
+          {/* Paginación integrada */}
+          {ordersData.length > 0 && (
+            <div className="mt-3">
+              <Pagination
+                page={page}
+                totalPages={Math.ceil(total / pageSize)}
+                totalItems={total}
+                onPageChange={handlePageChange}
+              />
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
     </div>

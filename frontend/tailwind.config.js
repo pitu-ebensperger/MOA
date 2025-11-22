@@ -37,6 +37,18 @@ export default {
       success: "var(--color-success)",
       warning: "var(--color-warning)",
       error: "var(--color-error)",
+      neutral: {
+        50: "var(--color-neutral2)",
+        100: "var(--color-neutral1)",
+        200: "#F3EDE5",
+        300: "var(--color-neutral3)",
+        400: "var(--color-neutral4)",
+        500: "#C3B7A9",
+        600: "var(--color-neutral)",
+        700: "#8A7D71",
+        800: "var(--color-secondary2)",
+        900: "var(--color-primary2)",
+      },
     },
 
     extend: {

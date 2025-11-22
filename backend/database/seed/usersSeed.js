@@ -8,7 +8,6 @@ const ADMIN_PROFILE = {
   email: "admin@moa.cl",
   telefono: "+56900000000",
   password: process.env.ADMIN_PASSWORD,
-  rol: "admin",
   rol_code: "ADMIN",
 };
 
@@ -31,7 +30,6 @@ async function cleanupNonAdminUsers() {
     { text: "DELETE FROM ordenes WHERE usuario_id = ANY($1)", values: [extraIds] },
     { text: "DELETE FROM carritos WHERE usuario_id = ANY($1)", values: [extraIds] },
     { text: "DELETE FROM wishlists WHERE usuario_id = ANY($1)", values: [extraIds] },
-    { text: "DELETE FROM metodos_pago WHERE usuario_id = ANY($1)", values: [extraIds] },
     { text: "DELETE FROM direcciones WHERE usuario_id = ANY($1)", values: [extraIds] },
     { text: "DELETE FROM usuarios WHERE usuario_id = ANY($1)", values: [extraIds] },
   ];
@@ -48,13 +46,12 @@ async function cleanupNonAdminUsers() {
 async function seedAdminUser() {
   const passwordHash = bcrypt.hashSync(ADMIN_PROFILE.password, 10);
   const sql = `
-    INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code)
+    VALUES ($1, $2, $3, $4, $5, $6)
     ON CONFLICT (email) DO UPDATE SET
       nombre = EXCLUDED.nombre,
       telefono = EXCLUDED.telefono,
       password_hash = EXCLUDED.password_hash,
-      rol = EXCLUDED.rol,
       rol_code = EXCLUDED.rol_code
   `;
   const values = [
@@ -63,7 +60,6 @@ async function seedAdminUser() {
     ADMIN_PROFILE.email,
     ADMIN_PROFILE.telefono,
     passwordHash,
-    ADMIN_PROFILE.rol,
     ADMIN_PROFILE.rol_code,
   ];
 

@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 /**
  * ProgressRing - Anillo de progreso circular animado
@@ -34,7 +34,7 @@ export const ProgressRing = ({
         />
 
         {/* Progress circle */}
-        <motion.circle
+        <Motion.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -55,7 +55,7 @@ export const ProgressRing = ({
       {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {showPercentage && (
-          <motion.div
+          <Motion.div
             initial={animate ? { opacity: 0, scale: 0.5 } : false}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
@@ -63,11 +63,11 @@ export const ProgressRing = ({
             style={{ color }}
           >
             {Math.round(progress)}%
-          </motion.div>
+          </Motion.div>
         )}
         
         {value && !showPercentage && (
-          <motion.div
+          <Motion.div
             initial={animate ? { opacity: 0, scale: 0.5 } : false}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
@@ -75,18 +75,18 @@ export const ProgressRing = ({
             style={{ color }}
           >
             {value}
-          </motion.div>
+          </Motion.div>
         )}
 
         {label && (
-          <motion.div
+          <Motion.div
             initial={animate ? { opacity: 0, y: 5 } : false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.4 }}
             className="mt-1 text-xs text-(--text-muted)"
           >
             {label}
-          </motion.div>
+          </Motion.div>
         )}
       </div>
     </div>

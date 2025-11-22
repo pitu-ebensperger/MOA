@@ -1,6 +1,7 @@
 import pool from "../../database/config.js";
 import { NotFoundError, ValidationError, ForbiddenError } from "../utils/error.utils.js";
 import { createAdminCustomerModel, updateAdminCustomerModel } from "../models/usersModel.js";
+import configModel from "../models/configModel.js";
 
 const safeNumber = (value) => {
   if (value === null || value === undefined) return 0;
@@ -214,7 +215,7 @@ export class AdminController {
         pool.query("SELECT COUNT(*)::int AS total_products FROM productos WHERE status = 'activo'"),
         pool.query("SELECT COUNT(*)::int AS total_orders FROM ordenes"),
         pool.query("SELECT COALESCE(SUM(total_cents), 0)::bigint AS total_revenue FROM ordenes"),
-        pool.query("SELECT COUNT(*)::int AS total_customers FROM usuarios WHERE rol != 'admin'"),
+        pool.query("SELECT COUNT(*)::int AS total_customers FROM usuarios WHERE rol_code != 'ADMIN'"),
         pool.query("SELECT estado_pago, estado_envio, COUNT(*)::int AS count FROM ordenes GROUP BY estado_pago, estado_envio"),
       ]);
 
@@ -352,7 +353,7 @@ export class AdminController {
         categoriesResult,
         trendResult,
       ] = await Promise.all([
-        pool.query("SELECT COUNT(*)::int AS visitor_count FROM usuarios WHERE rol != 'admin'"),
+        pool.query("SELECT COUNT(*)::int AS visitor_count FROM usuarios WHERE rol_code != 'ADMIN'"),
         pool.query("SELECT COUNT(DISTINCT usuario_id)::int AS purchaser_count FROM ordenes"),
         pool.query("SELECT COUNT(*)::int AS total_orders FROM ordenes"),
         pool.query(
@@ -649,6 +650,46 @@ export class AdminController {
     }
   }
 
+  static async getCustomerRegistrations(req, res, next) {
+    try {
+      const days = 30;
+      const endDate = new Date();
+      endDate.setHours(0, 0, 0, 0);
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - (days - 1));
+
+      const { rows } = await pool.query(
+        `
+          SELECT DATE_TRUNC('day', creado_en) AS period, COUNT(*)::int AS registrations
+          FROM usuarios
+          WHERE rol_code != 'ADMIN' AND creado_en >= $1
+          GROUP BY 1
+          ORDER BY 1 ASC
+        `,
+        [startDate.toISOString()]
+      );
+
+      // Build complete daily series including missing days
+      const map = new Map();
+      rows.forEach(r => {
+        const key = new Date(r.period).toISOString().split('T')[0];
+        map.set(key, r.registrations);
+      });
+
+      const series = [];
+      const cursor = new Date(startDate);
+      while (cursor <= endDate) {
+        const key = cursor.toISOString().split('T')[0];
+        series.push({ date: key, registrations: map.get(key) || 0 });
+        cursor.setDate(cursor.getDate() + 1);
+      }
+
+      res.json({ success: true, data: series });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getUsers(req, res, next) {
     try {
       const { page = "1", limit = "20", search = "" } = req.query;
@@ -658,7 +699,7 @@ export class AdminController {
       const pageSize = Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 20;
       const offset = (pageNumber - 1) * pageSize;
 
-      const whereClauses = ["lower(rol) != 'admin'"];
+      const whereClauses = ["rol_code != 'ADMIN'"];
       const whereValues = [];
 
       if (search) {
@@ -681,7 +722,6 @@ export class AdminController {
           nombre,
           email,
           telefono,
-          rol,
           status,
           rol_code AS "rolCode",
           creado_en AS "createdAt",
@@ -722,7 +762,7 @@ export class AdminController {
 
   static async createCustomer(req, res, next) {
     try {
-      const { nombre, email, telefono, rol, password, status } = req.body;
+      const { nombre, email, telefono, rol_code, password, status } = req.body;
 
       if (!nombre || !email) {
         return res.status(400).json({
@@ -736,7 +776,7 @@ export class AdminController {
         email,
         telefono,
         password,
-        rol: rol || "cliente",
+        rol_code: rol_code || "CLIENT",
         status: status || "activo",
       });
 
@@ -760,9 +800,9 @@ export class AdminController {
   static async updateCustomer(req, res, next) {
     try {
       const { id } = req.params;
-      const { nombre, email, telefono, status, rol } = req.body;
+      const { nombre, email, telefono, status, rol_code } = req.body;
 
-      if (!nombre && !email && !telefono && !status && !rol) {
+      if (!nombre && !email && !telefono && !status && !rol_code) {
         return res.status(400).json({
           success: false,
           message: "Debes proporcionar al menos un campo para actualizar",
@@ -779,8 +819,8 @@ export class AdminController {
         updates.status = status;
       }
 
-      if (rol) {
-        updates.rol = rol;
+      if (rol_code) {
+        updates.rol_code = rol_code;
       }
 
       const updatedCustomer = await updateAdminCustomerModel({
@@ -809,10 +849,10 @@ export class AdminController {
   static async updateUserRole(req, res, next) {
     try {
       const { id } = req.params;
-      const { rol, rolCode } = req.body;
+      const { rolCode } = req.body;
 
-      if (!rol || !rolCode) {
-        throw new ValidationError('Rol y código de rol son requeridos');
+      if (!rolCode) {
+        throw new ValidationError('Código de rol es requerido');
       }
 
       const userCheck = await pool.query(
@@ -824,16 +864,16 @@ export class AdminController {
         throw new NotFoundError('Usuario');
       }
 
-      if (parseInt(id) === req.user.id && rolCode.toLowerCase() !== 'admin') {
+      if (parseInt(id) === req.user.id && rolCode.toUpperCase() !== 'ADMIN') {
         throw new ForbiddenError('No puedes remover tus propios privilegios de administrador');
       }
 
       const updateResult = await pool.query(
         `UPDATE usuarios 
-         SET rol = $1, rol_code = $2 
-         WHERE usuario_id = $3 
-         RETURNING usuario_id AS id, nombre, email, rol, rol_code AS "rolCode"`,
-        [rol, rolCode, id]
+         SET rol_code = $1 
+         WHERE usuario_id = $2 
+         RETURNING usuario_id AS id, nombre, email, rol_code AS "rolCode"`,
+        [rolCode, id]
       );
 
       res.json({
@@ -848,39 +888,59 @@ export class AdminController {
 
   static async getStoreConfig(req, res, next) {
     try {
-      // TODO: Implementar tabla de configuraciones
-      const defaultConfig = {
-        nombre_tienda: 'MOA',
-        descripcion: 'Muebles y decoración de diseño contemporáneo',
-        direccion: 'Providencia 1234, Santiago, Chile',
-        telefono: '+56 2 2345 6789',
-        email: 'hola@moastudio.cl',
-        instagram_url: 'https://instagram.com/moastudio',
-        facebook_url: 'https://facebook.com/moastudio',
-        twitter_url: 'https://twitter.com/moastudio'
-      };
+      const config = await configModel.getConfig();
 
       res.json({
         success: true,
-        data: defaultConfig
+        data: config,
       });
     } catch (error) {
+      console.error("Error obteniendo configuración tienda:", error);
       next(error);
     }
   }
 
   static async updateStoreConfig(req, res, next) {
     try {
-      const config = req.body;
-      
-      // TODO: Implementar actualización real de configuraciones
-      
+      const config = req.body ?? {};
+
+      if (!Object.keys(config).length) {
+        throw new ValidationError("Debe proporcionar al menos un campo para actualizar");
+      }
+
+      if (config.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(config.email)) {
+          throw new ValidationError("Formato de email inválido");
+        }
+      }
+
+      const socialFields = ["instagram_url", "facebook_url", "twitter_url"];
+      for (const field of socialFields) {
+        if (!config[field]) continue;
+        try {
+          new URL(config[field]);
+        } catch {
+          throw new ValidationError(`URL inválida en el campo ${field}`);
+        }
+      }
+
+      const userId =
+        req.user?.id_usuario ?? req.user?.usuario_id ?? req.user?.id;
+
+      if (!userId) {
+        throw new ForbiddenError("No se pudo determinar el usuario autenticado");
+      }
+
+      const updatedConfig = await configModel.updateConfig(config, userId);
+
       res.json({
         success: true,
-        message: 'Configuración actualizada correctamente',
-        data: config
+        message: "Configuración actualizada correctamente",
+        data: updatedConfig,
       });
     } catch (error) {
+      console.error("Error actualizando configuración tienda:", error);
       next(error);
     }
   }

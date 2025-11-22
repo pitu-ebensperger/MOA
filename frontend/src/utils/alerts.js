@@ -42,17 +42,5 @@ export const alertGlobalError = () => base({
   confirmButtonText: 'Cerrar',
 });
 
-// Auth required (login prompt)
-export const alertAuthRequired = () => base({
-  title: 'Inicia sesión',
-  html: `<p class='swal-p'>Debes iniciar sesión para usar el carrito y tu lista de deseos.</p>`,
-  confirmButtonText: 'Ir a login',
-  showCloseButton: true,
-  customClass: {
-    popup: 'swal-popup',
-    title: 'swal-title',
-    htmlContainer: 'swal-html',
-    confirmButton: 'swal-btn swal-btn-confirm swal-btn-pill',
-    closeButton: 'swal-close-btn'
-  }
-});
+// Auth required - removed (use navigate with state instead)
+// Example: navigate('/login', { state: { authRequired: true } })

@@ -53,6 +53,12 @@ export const authApi = {
     )
     return res
   },
+
+  // Renovar token JWT (extender sesión)
+  async refreshToken() {
+    const res = await apiClient.private.post('/auth/refresh-token')
+    return res
+  },
 }
 
 // (Opcional) Exponer funciones con nombre si te gusta ese estilo:

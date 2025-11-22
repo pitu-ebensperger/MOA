@@ -18,9 +18,16 @@
     --color-light-beige: #f6efe7;
     --color-beige: #e9dccb;
 
-    --color-success: #7A8B6F;
-    --color-warning: #B8956A;
-    --color-error: #B8836B;
+    --color-success: #7A8F6C;
+    --color-warning: #C39458;
+    --color-error: #C37460;
+    --color-success-veil: rgba(120, 153, 98, 0.2);   /* overlays for hover/ghost states */
+    --color-warning-veil: rgba(204, 149, 79, 0.2);
+    --color-error-veil: rgba(204, 111, 87, 0.2);
+    --color-success-soft: rgba(106, 133, 94, 0.2);
+    --color-warning-soft: rgba(187, 132, 68, 0.2);
+    --color-warning-lightest: #fef8ea;
+    --color-error-soft: rgba(192, 104, 82, 0.2);
 
     --color-light: #ede7e0;
     --color-lightest:rgba(248, 247, 245, 1);

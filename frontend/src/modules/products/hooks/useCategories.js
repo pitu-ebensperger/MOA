@@ -35,7 +35,7 @@ export function useCategories({ enabled = true } = {}) {
 }
 
 // Hook para obtener categoría individual
-export function useCategory(categoryId, options = {}) {
+export function useCategory(categoryId) {
   const { categories } = useCategories();
   
   return useMemo(() => {

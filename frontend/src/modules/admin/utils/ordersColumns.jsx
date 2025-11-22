@@ -2,7 +2,7 @@ import { formatDate_ddMMyyyy } from "@/utils/date.js"
 import { formatCurrencyCLP } from "@/utils/currency.js"
 import { StatusPill } from "@/components/ui/StatusPill.jsx"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/radix/DropdownMenu.jsx"
-import { Eye, XCircle } from "@icons/lucide";
+import { Eye, XCircle } from "lucide-react";
 import { ResponsiveRowActions } from "@/components/ui/ResponsiveRowActions.jsx";
 
 export const buildOrderColumns = ({ onOpen, onUpdateStatus, onCancel }) => [

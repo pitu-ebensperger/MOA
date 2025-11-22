@@ -6,6 +6,10 @@ import { authApi } from "@/services/auth.api.js"
 import { AuthContext, isAdminRole } from "@/context/auth-context.js"
 import { usePersistentState } from "@/hooks/usePersistentState.js"
 import { useNavigate } from "react-router-dom";
+import { observability } from '@/services/observability.js';
+import { useSessionMonitor } from "@/hooks/useSessionMonitor.js";
+import { SessionExpirationDialog } from "@/components/auth/SessionExpirationDialog.jsx";
+import { Alert } from "@/components/ui/Alert.jsx";
 
 
 // ---- Constantes y utilidades ----------------------------------
@@ -18,7 +22,7 @@ const safeParseJson = (value) => {
 };
 
 const identity = (value) => value;
-const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true' || import.meta.env?.MODE === 'development';
+const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true';
 const debugWarn = (...args) => { if (DEBUG_LOGS) console.warn(...args); };
 const debugError = (...args) => { if (DEBUG_LOGS) console.error(...args); };
 
@@ -53,6 +57,8 @@ export const AuthProvider = ({ children }) => {
     return STATUS.IDLE;
   });
   const [error, setError] = useState(null);
+  const [showExpirationDialog, setShowExpirationDialog] = useState(false);
+  const [showExpiredAlert, setShowExpiredAlert] = useState(false);
   const navigate = useNavigate();
 
   // --- Sync helpers (token/user <-> storage + api-client) -------
@@ -89,14 +95,15 @@ export const AuthProvider = ({ children }) => {
       syncUser(null);
       setStatus(STATUS.IDLE);
     }
-  }, []); // Solo al montar, eliminar dependencias para evitar re-ejecución
+  }, [syncToken, syncUser]); // Dependencias estables para mantener limpieza inicial
 
-  const logout = useCallback(() => {
+  const logout = useCallback((reason = null) => {
     // Limpiar token y perfil
     syncToken(null);
     syncUser(null);
     setStatus(STATUS.IDLE);
     setError(null);
+    setShowExpirationDialog(false);
     
     // Limpiar overflow:hidden del body por si quedó trabado
     if (typeof document !== 'undefined' && document.body) {
@@ -120,12 +127,19 @@ export const AuthProvider = ({ children }) => {
       debugWarn('[AuthContext] Error limpiando cache de QueryClient', e);
     }
     
+    // Mostrar alerta de sesión expirada si es por expiración
+    if (reason === 'expired') {
+      setShowExpiredAlert(true);
+      // Auto-ocultar después de 5 segundos
+      setTimeout(() => setShowExpiredAlert(false), 5000);
+    }
+    
     // Redirigir según contexto: admin → login, otros → home
     const currentPath = window.location.pathname;
     const isAdminPath = currentPath.startsWith('/admin');
     
-    if (isAdminPath) {
-      navigate("/login", { replace: true, state: { from: currentPath, expired: true } });
+    if (isAdminPath || reason === 'expired') {
+      navigate("/login", { replace: true, state: { from: currentPath, expired: reason === 'expired' } });
     } else {
       navigate("/", { replace: true });
     }
@@ -177,6 +191,14 @@ export const AuthProvider = ({ children }) => {
       }
     }
   }, [status]);
+
+  useEffect(() => {
+    if (status === STATUS.AUTH && user && token) {
+      observability.identifyUser(user);
+    } else if (!token) {
+      observability.clearUser();
+    }
+  }, [status, user, token]);
 
   // Si hay token pero no user, intenta cargar perfil (validación de sesión silenciosa)
   useEffect(() => {
@@ -283,6 +305,43 @@ export const AuthProvider = ({ children }) => {
     }
   }, [syncUser, logout]);
 
+  // Extender sesión (renovar token)
+  const extendSession = useCallback(async () => {
+    try {
+      const { token: newToken, user: profile } = await authApi.refreshToken();
+      syncToken(newToken);
+      syncUser(profile);
+      setShowExpirationDialog(false);
+      return true;
+    } catch (err) {
+      debugError('[AuthContext] Error extendiendo sesión:', err);
+      logout('expired');
+      return false;
+    }
+  }, [syncToken, syncUser, logout]);
+
+  // Handlers para el monitor de sesión
+  const handleSessionExpired = useCallback(() => {
+    debugWarn('[AuthContext] 🔒 Sesión expirada, cerrando...');
+    logout('expired');
+  }, [logout]);
+
+  const handleSessionWarning = useCallback((minutesRemaining) => {
+    debugWarn(`[AuthContext] ⚠️ Sesión expira en ${minutesRemaining} minutos`);
+    // Solo mostrar warning si el usuario NO es admin (admin tiene 7 días)
+    if (user && user.role_code !== 'ADMIN') {
+      setShowExpirationDialog(true);
+    }
+  }, [user]);
+
+  // Monitorear expiración del token
+  useSessionMonitor({
+    token,
+    onExpired: handleSessionExpired,
+    onWarning: handleSessionWarning,
+    warningMinutes: 5, // Avisar 5 minutos antes
+  });
+
   const value = useMemo(
     () => ({
       user,
@@ -295,8 +354,9 @@ export const AuthProvider = ({ children }) => {
       register,
       logout,
       refreshProfile,
+      extendSession,
     }),
-    [user, token, status, error, login, register, logout, refreshProfile],
+    [user, token, status, error, login, register, logout, refreshProfile, extendSession],
   );
 
   // Loader global solo si hay sesión completa cargándose (token + user guardados)
@@ -315,6 +375,30 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={value}>
       {children}
+      
+      {/* Diálogo de sesión por expirar */}
+      <SessionExpirationDialog
+        open={showExpirationDialog}
+        minutesRemaining={5}
+        onExtend={extendSession}
+        onLogout={() => logout('expired')}
+        onDismiss={() => setShowExpirationDialog(false)}
+      />
+      
+      {/* Alerta de sesión expirada (fija en top) */}
+      {showExpiredAlert && (
+        <div className="fixed left-1/2 top-[80px] z-[var(--z-modal,1050)] w-full max-w-lg -translate-x-1/2 px-4">
+          <Alert
+            variant="warning"
+            title="Sesión expirada"
+            dismissible
+            onDismiss={() => setShowExpiredAlert(false)}
+            className="border-[color:var(--color-warning)]/50 bg-[var(--color-warning-veil)] backdrop-blur-md shadow-lg"
+          >
+            Tu sesión ha expirado por inactividad. Por favor, inicia sesión nuevamente.
+          </Alert>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 };

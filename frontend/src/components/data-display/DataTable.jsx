@@ -1,6 +1,6 @@
 //path/src/components/data/TanstackDataTable.jsx
 import React, { memo } from "react";
-import { ListFilter } from "@icons/lucide";
+import { ListFilter } from "lucide-react";
 import {
   useReactTable,
   getCoreRowModel,

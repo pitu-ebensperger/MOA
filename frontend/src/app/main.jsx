@@ -9,6 +9,7 @@ import { CartProvider } from "@/context/cartContext.jsx"
 
 import { App } from '@/app/App.jsx'
 import { MessageProvider } from '@/components/ui'
+import { observability } from '@/services/observability.js';
 
 import '../styles/global.css'
 import '../styles/tokens.css'
@@ -32,7 +33,7 @@ const queryClient = new QueryClient({
         console.error('[React Query - Query Error]', error);
         // En producción, enviar a servicio de logging
         if (import.meta.env.PROD) {
-          // TODO: Sentry.captureException(error);
+          observability.captureException(error, { source: 'react-query:query' });
         }
       },
       // Configuración de retry
@@ -59,7 +60,7 @@ const queryClient = new QueryClient({
         console.error('[React Query - Mutation Error]', error);
         // En producción, enviar a servicio de logging
         if (import.meta.env.PROD) {
-          // TODO: Sentry.captureException(error);
+          observability.captureException(error, { source: 'react-query:mutation' });
         }
       },
     },
@@ -76,7 +77,9 @@ if (typeof globalThis.window !== 'undefined') {
 
   window.addEventListener('offline', () => {
     console.warn('[Network] Sin conexión a internet');
-    // Opcional: mostrar toast/banner
+    if (import.meta.env.PROD) {
+      observability.captureMessage('network_offline', { level: 'warning' });
+    }
   });
 }
 
@@ -97,7 +100,7 @@ if (import.meta.env.PROD && typeof console !== 'undefined') {
     
     if (!shouldSuppress) {
       // Enviar a servicio de logging en lugar de mostrar en consola
-      // TODO: Sentry.captureException(new Error(message));
+      observability.captureException(new Error(message), { source: 'console.error override' });
       // Mientras tanto, log simple sin stack trace
       originalError('[Error]', message);
     }

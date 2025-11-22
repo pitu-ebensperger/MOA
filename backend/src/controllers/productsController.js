@@ -514,6 +514,57 @@ export const productsController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  /**
+   * Exportar productos a CSV (respeta filtros)
+   * GET /admin/productos/export?search=&status=&categoryId=&onlyLowStock=
+   */
+  async exportProductsCSV(req, res, next) {
+    try {
+      const { search, status, categoryId, onlyLowStock } = req.query;
+
+      // Obtener TODOS los productos respetando filtros (sin paginación)
+      const options = {
+        page: 1,
+        limit: 10000, // Límite alto para obtener todos
+        search,
+        categoryId: categoryId ? parseInt(categoryId) : null,
+        status,
+        onlyLowStock: onlyLowStock === 'true'
+      };
+
+      const result = await productsModel.getAll(options);
+      
+      // Obtener categorías para mapeo
+      const categories = await categoriesModel.getAll();
+      const categoryMap = Object.fromEntries(
+        categories.map(c => [c.id, c.name])
+      );
+
+      // Generar CSV
+      const headers = ['SKU', 'Nombre', 'Categoría', 'Precio (CLP)', 'Stock', 'Estado'];
+      const rows = result.items.map(item => [
+        item.sku || '',
+        `"${(item.name || '').replace(/"/g, '""')}"`, // Escape comillas dobles
+        `"${(categoryMap[item.fk_category_id] || '').replace(/"/g, '""')}"`,
+        Math.round((item.price || 0) / 100), // Convertir de centavos a pesos
+        item.stock || 0,
+        item.status || ''
+      ]);
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+      ].join('\n');
+
+      // Headers para descarga
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="productos_moa_${new Date().toISOString().split('T')[0]}.csv"`);
+      res.send('\uFEFF' + csvContent); // BOM para UTF-8 en Excel
+    } catch (error) {
+      next(error);
+    }
   }
 };
 
@@ -528,3 +579,4 @@ export const updateStock = productsController.updateStock;
 export const getLowStockProducts = productsController.getLowStockProducts;
 export const getProductStats = productsController.getProductStats;
 export const searchProducts = productsController.searchProducts;
+export const exportProductsCSV = productsController.exportProductsCSV;

@@ -72,8 +72,6 @@ export const BarChart = ({
     );
   }
 
-  const isVertical = layout === 'vertical';
-
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBarChart data={data} layout={layout}>
@@ -82,11 +80,9 @@ export const BarChart = ({
             strokeDasharray="3 3"
             stroke="var(--color-border)"
             opacity={0.3}
-            horizontal={isVertical}
-            vertical={!isVertical}
           />
         )}
-        {isVertical ? (
+        {layout === 'vertical' ? (
           <>
             <XAxis
               dataKey={xAxisKey}
@@ -114,7 +110,7 @@ export const BarChart = ({
               stroke="var(--text-muted)"
               tick={{ fill: 'var(--text-secondary1)', fontSize: 12 }}
               axisLine={{ stroke: 'var(--color-border)' }}
-              width={100}
+              width={120}
             />
           </>
         )}

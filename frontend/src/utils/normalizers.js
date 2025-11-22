@@ -2,19 +2,19 @@ import { toNum } from "@/utils/number.js"
 import { ALL_CATEGORY_ID } from "@/config/constants.js"
 
 export const normalizeProduct = (p = {}) => {
-  const id = p.id ?? null;
-  const name = p.name ?? ""; 
+  const id = p.id ?? p.producto_id ?? null;
+  const name = p.name ?? p.nombre ?? ""; 
   const slug = p.slug != null ? String(p.slug) : null;
   const sku = p.sku ?? null;
 
   // Convert prices from cents to CLP pesos (divide by 100)
-  const rawPrice = toNum(p.price) ?? toNum(p.priceCents);
+  const rawPrice = toNum(p.price) ?? toNum(p.priceCents) ?? toNum(p.precio_cents);
   const price = rawPrice ? rawPrice / 100 : null;
   
-  const rawCompareAtPrice = toNum(p.compareAtPrice) ?? toNum(p.compareAtPriceCents);
+  const rawCompareAtPrice = toNum(p.compareAtPrice) ?? toNum(p.compareAtPriceCents) ?? toNum(p.compare_at_price_cents);
   const compareAtPrice = rawCompareAtPrice ? rawCompareAtPrice / 100 : null;
 
-  const imgUrl = p.imgUrl ?? p.imageUrl ?? null;
+  const imgUrl = p.imgUrl ?? p.imageUrl ?? p.img_url ?? null;
   const gallery = Array.isArray(p.gallery) && p.gallery.length ? p.gallery : (imgUrl ? [imgUrl] : []);
 
   const stock = toNum(p.stock);
@@ -40,7 +40,7 @@ export const normalizeProduct = (p = {}) => {
     price,
     compareAtPrice,
     stock: stockSafe,
-    description: p.description ?? "",
+    description: p.description ?? p.descripcion ?? "",
     imgUrl,
     gallery,
     badge,
@@ -51,9 +51,11 @@ export const normalizeProduct = (p = {}) => {
     color: p.color ?? null,
     dimensions: p.dimensions ?? null,
     weight: p.weight ?? null,
-    createdAt: p.createdAt ?? null,
-    updatedAt: p.updatedAt ?? null,
-    fk_category_id: p.fk_category_id ?? p.categoryId ?? null,
+    createdAt: p.createdAt ?? p.created_at ?? null,
+    updatedAt: p.updatedAt ?? p.updated_at ?? null,
+    fk_category_id: p.fk_category_id ?? p.categoryId ?? p.categoria_id ?? null,
+    categoryName: p.categoryName ?? p.categoria_nombre ?? null,
+    categorySlug: p.categorySlug ?? p.categoria_slug ?? null,
   };
 };
 

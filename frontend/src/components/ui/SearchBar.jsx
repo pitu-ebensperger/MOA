@@ -1,4 +1,4 @@
-import { Search, X } from "@icons/lucide";
+import { Search, X } from "lucide-react";
 import { createPortal } from 'react-dom';
 import { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/Button.jsx'

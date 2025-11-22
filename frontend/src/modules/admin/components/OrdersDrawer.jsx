@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/Input.jsx";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/shadcn/ui/select.jsx";
 import { Accordion } from "@/components/ui/Accordion.jsx";
 import { formatDate_ddMMyyyy } from "@/utils/date.js";
-import { CalendarDays, PackageCheck, Truck, ChevronRight, Edit, Save, X, AlertCircle } from "@icons/lucide";
+import { CalendarDays, PackageCheck, Truck, ChevronRight, Edit, Save, X, AlertCircle } from "lucide-react";
 import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.jsx";
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
 import { OrderShape } from "@/utils/propTypes.js";

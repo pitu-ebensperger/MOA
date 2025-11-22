@@ -4,22 +4,39 @@ import { cx } from "@/utils/ui-helpers.js"
 
 
 const VARIANT_CLASSES = {
-  neutral: "bg-[color:var(--color-dark)] text-[color:var(--color-text-on-dark)]",
-  primary: "bg-[color:var(--color-primary1)] text-[color:var(--color-lightest2)]",
-  soft: "bg-[color:var(--color-neutral4)] text-[color:var(--color-text)]", 
+  dark: {
+    bg: "bg-[color:var(--color-dark)]",
+    text: "text-[color:var(--color-text-on-dark)]",
+    arrow: "var(--color-dark)",
+  },
+  neutral: {
+    bg: "bg-[color:var(--color-neutral4)]",
+    text: "text-[color:var(--color-text)]",
+    arrow: "var(--color-neutral4)",
+  },
+  light: {
+    bg: "bg-[color:var(--color-neutral1)]",
+    text: "text-[color:var(--color-text)]",
+    arrow: "var(--color-neutral1)",
+  },
+  primary: {
+    bg: "bg-[color:var(--color-primary1)]",
+    text: "text-[color:var(--color-text-on-dark)]",
+    arrow: "var(--color-primary1)",
+  },
 };
 
 export function Tooltip({
   label,           
   children,  
   position = "right", 
-  variant = "neutral", 
+  variant = "dark", 
 }) {
   const [isVisible, setIsVisible] = React.useState(false);
   const [coords, setCoords] = React.useState({ top: 0, left: 0 });
   const triggerRef = React.useRef(null);
 
-  const variantClass = VARIANT_CLASSES[variant] ?? VARIANT_CLASSES.neutral;
+  const variantConfig = VARIANT_CLASSES[variant] ?? VARIANT_CLASSES.dark;
   const tooltipId = React.useId();
   const isValidElement = React.isValidElement(children);
 
@@ -29,26 +46,27 @@ export function Tooltip({
     let top = 0;
     let left = 0;
 
-    const arrowSize = 6; // Tamaño de la flecha
-    const offset = 12; // Distancia entre el trigger y el tooltip
+    const offsetVertical = 16; // Distancia para top (no tapa contenido)
+    const offsetBottom = 32; // Distancia mayor para bottom (más separado)
+    const offsetHorizontal = 12; // Distancia para left/right
 
     switch (position) {
       case "top":
-        top = rect.top - offset;
+        top = rect.top - offsetVertical;
         left = rect.left + rect.width / 2;
         break;
       case "bottom":
-        top = rect.bottom + offset;
+        top = rect.bottom + offsetBottom;
         left = rect.left + rect.width / 2;
         break;
       case "left":
         top = rect.top + rect.height / 2;
-        left = rect.left - offset;
+        left = rect.left - offsetHorizontal;
         break;
       case "right":
       default:
         top = rect.top + rect.height / 2;
-        left = rect.right + offset;
+        left = rect.right + offsetHorizontal;
         break;
     }
 
@@ -96,44 +114,55 @@ export function Tooltip({
       })
     : children;
 
+  const getArrowStyles = () => {
+    const arrowColor = variantConfig.arrow;
+    
+    switch (position) {
+      case "top":
+        return {
+          borderTopColor: arrowColor,
+          borderRightColor: "transparent",
+          borderBottomColor: "transparent",
+          borderLeftColor: "transparent",
+        };
+      case "bottom":
+        return {
+          borderTopColor: "transparent",
+          borderRightColor: "transparent",
+          borderBottomColor: arrowColor,
+          borderLeftColor: "transparent",
+        };
+      case "left":
+        return {
+          borderTopColor: "transparent",
+          borderRightColor: "transparent",
+          borderBottomColor: "transparent",
+          borderLeftColor: arrowColor,
+        };
+      case "right":
+      default:
+        return {
+          borderTopColor: "transparent",
+          borderRightColor: arrowColor,
+          borderBottomColor: "transparent",
+          borderLeftColor: "transparent",
+        };
+    }
+  };
+
   const getArrowClasses = () => {
     const baseClasses = "absolute w-0 h-0 border-[6px] border-solid";
-    const variantBorder = variant === "primary" 
-      ? "border-[color:var(--color-primary1)]"
-      : variant === "soft"
-      ? "border-[color:var(--color-neutral4)]"
-      : "border-[color:var(--color-dark)]";
 
     switch (position) {
       case "top":
-        return cx(
-          baseClasses,
-          variantBorder,
-          "border-t-[color:inherit] border-r-transparent border-b-transparent border-l-transparent",
-          "top-full left-1/2 -translate-x-1/2"
-        );
+        return cx(baseClasses, "top-full left-1/2 -translate-x-1/2");
       case "bottom":
-        return cx(
-          baseClasses,
-          variantBorder,
-          "border-b-[color:inherit] border-t-transparent border-r-transparent border-l-transparent",
-          "bottom-full left-1/2 -translate-x-1/2"
-        );
+        return cx(baseClasses, "bottom-full left-1/2 -translate-x-1/2");
       case "left":
-        return cx(
-          baseClasses,
-          variantBorder,
-          "border-l-[color:inherit] border-t-transparent border-r-transparent border-b-transparent",
-          "left-full top-1/2 -translate-y-1/2"
-        );
+        return cx(baseClasses, "left-full top-1/2 -translate-y-1/2");
       case "right":
       default:
-        return cx(
-          baseClasses,
-          variantBorder,
-          "border-r-[color:inherit] border-t-transparent border-l-transparent border-b-transparent",
-          "right-full top-1/2 -translate-y-1/2"
-        );
+        return cx(baseClasses, "right-full top-1/2 -translate-y-1/2");
     }
   };
 
@@ -157,11 +186,13 @@ export function Tooltip({
         "opacity-0 invisible",
         "transition-all duration-150 ease-out",
         isVisible && "opacity-100 visible",
-        variantClass,
+        variantConfig.bg,
+        variantConfig.text,
+        variant === "light" && "border border-(--color-border)",
       )}
     >
       {label}
-      <span className={getArrowClasses()} />
+      <span className={getArrowClasses()} style={getArrowStyles()} />
     </span>,
     document.body
   ) : null;
@@ -175,14 +206,18 @@ export function Tooltip({
 }
 
 
+export const TooltipDark = (props) => (
+  <Tooltip {...props} variant="dark" />
+);
+
 export const TooltipNeutral = (props) => (
   <Tooltip {...props} variant="neutral" />
 );
 
-export const TooltipPrimary = (props) => (
-  <Tooltip {...props} variant="primary" />
+export const TooltipLight = (props) => (
+  <Tooltip {...props} variant="light" />
 );
 
-export const TooltipSoft = (props) => (
-  <Tooltip {...props} variant="soft" />
+export const TooltipPrimary = (props) => (
+  <Tooltip {...props} variant="primary" />
 );

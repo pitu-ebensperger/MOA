@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Heart, RefreshCw, Trash2, ShoppingCart, ArrowRight } from "@icons/lucide";
+import { Heart, RefreshCw, Trash2, ShoppingCart, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import ProductCard from "@/modules/products/components/ProductCard.jsx";
 import { useProducts } from "@/modules/products/hooks/useProducts.js";
 import { productsApi } from "@/services/products.api.js";
-import { useWishlistQuery, useToggleWishlist, useClearWishlist, useIsInWishlist } from "@/modules/profile/hooks/useWishlistQuery.js";
+import { useWishlistQuery, useToggleWishlist, useClearWishlist } from "@/modules/profile/hooks/useWishlistQuery.js";
 import { useCartContext } from "@/context/cart-context.js";
 import { Button } from "@/components/shadcn/ui/button.jsx";
 import { EmptyPlaceholder, EmptyPlaceholderDescription, EmptyPlaceholderIcon, EmptyPlaceholderTitle } from "@/components/shadcn/ui/empty-state.jsx";
@@ -204,4 +204,3 @@ export const WishlistPage = () => {
     </main>
   );
 };
-

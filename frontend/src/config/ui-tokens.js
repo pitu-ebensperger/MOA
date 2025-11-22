@@ -79,7 +79,7 @@ export const BADGE_SIZES = {
 
 /* BUTTON CONFIG -----------------------------------------------------------------------------*/
 
-export const BUTTON_APPEARANCES = ["solid", "soft", "tinted", "outline", "ghost", "link", "text", "bare"];
+export const BUTTON_APPEARANCES = ["solid", "soft", "tinted", "outline", "ghost", "ghost2", "link", "text", "bare"];
 export const BUTTON_INTENTS = [
   "primary",
   "secondary",

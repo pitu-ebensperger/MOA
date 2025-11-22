@@ -1,5 +1,5 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { X } from "@icons/lucide";
+import { X } from "lucide-react";
 import { cx } from "@/utils/ui-helpers.js"
 
 export function Dialog({ children, open, onOpenChange }) {

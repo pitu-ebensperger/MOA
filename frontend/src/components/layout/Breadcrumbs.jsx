@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ChevronRight } from "@icons/lucide";
+import { ChevronRight } from "lucide-react";
 import clsx from "clsx";
 
 const normalizeItems = (items = []) => {

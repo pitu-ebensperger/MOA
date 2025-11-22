@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { memo } from "react";
-import { Search } from "@icons/lucide";
+import { Search } from "lucide-react";
 import ProductCard from "@/modules/products/components/ProductCard.jsx"
-import { useWishlistQuery, useToggleWishlist, useIsInWishlist } from "@/modules/profile/hooks/useWishlistQuery.js"
+import { useWishlistQuery, useToggleWishlist } from "@/modules/profile/hooks/useWishlistQuery.js"
 import { ProductShape } from "@/utils/propTypes.js"
 import {
   EmptyPlaceholder,

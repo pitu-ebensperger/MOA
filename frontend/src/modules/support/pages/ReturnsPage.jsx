@@ -1,4 +1,4 @@
-import { Package, RotateCcw, Clock, CheckCircle2 } from "@icons/lucide";
+import { Package, RotateCcw, Clock, CheckCircle2 } from "lucide-react";
 
 export default function ReturnsPage() {
   return (

@@ -63,3 +63,22 @@ export function useAdminProducts({ page, limit, search, status, categoryId, only
     refetch: query.refetch,
   };
 }
+
+/**
+ * Función independiente para fetch completo sin paginación (útil para exportación)
+ * @param {Object} filters - Filtros de búsqueda
+ * @returns {Promise<{items: Array, total: number}>}
+ */
+export async function fetchAllAdminProducts({ search = "", status = "", categoryId = "", onlyLowStock = false }) {
+  const params = {
+    scope: "admin",
+    limit: 10000, // Límite alto para obtener todos los productos
+  };
+
+  if (search.trim()) params.search = search.trim();
+  if (status) params.status = status;
+  if (categoryId) params.categoryId = categoryId;
+  if (onlyLowStock) params.low_stock = true;
+
+  return await productsApi.list(params);
+}

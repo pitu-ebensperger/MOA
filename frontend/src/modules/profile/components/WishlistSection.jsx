@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
-import { Heart, ShoppingCart, Eye, Trash2 } from "@icons/lucide";
+import { Heart, ShoppingCart, Eye, Trash2 } from "lucide-react";
 import { DEFAULT_PLACEHOLDER_IMAGE } from "../../../config/constants.js";
 import { formatCurrencyCLP } from "@/utils/currency.js";
 import { wishlistApi } from "@/services/wishlist.api.js";

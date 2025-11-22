@@ -6,11 +6,17 @@ import {
   createAddress,
   updateAddress,
   setDefaultAddress,
-  deleteAddress
+  deleteAddress,
+  getRegiones,
+  getComunasByRegionCode
 } from "../src/controllers/addressController.js";
 import { verifyToken } from "../src/middleware/tokenMiddleware.js";
 
 const router = Router();
+
+// Endpoints públicos para datos de ubicación (no requieren auth)
+router.get("/api/regiones", getRegiones);
+router.get("/api/regiones/:regionCode/comunas", getComunasByRegionCode);
 
 // Todas las rutas de direcciones requieren autenticación
 

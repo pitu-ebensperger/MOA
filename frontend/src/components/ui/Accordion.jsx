@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown } from "@icons/lucide";
+import { ChevronDown } from "lucide-react";
 import { cx } from "@/utils/ui-helpers.js"
 
 const AccordionSection = ({ title, children, defaultOpen = false, className }) => {

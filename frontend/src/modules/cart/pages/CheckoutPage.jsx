@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart, Banknote, Wallet, Smartphone, CircleDollarSign, CheckCircle2, Package, Truck, Receipt, Store, Home } from "@icons/lucide";
+import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart, Banknote, Wallet, Smartphone, CircleDollarSign, CheckCircle2, Package, Truck, Receipt, Store, Home } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
 import { useAuth } from "@/context/auth-context.js"
 import { useAddresses } from "@/context/useAddresses.js"
@@ -17,6 +17,7 @@ import { createOrder } from "@/services/checkout.api.js"
 import { CHILE_REGIONES } from "@/config/chile-regiones.js"
 import '@/styles/alerts.css'
 import { alertInfo, alertWarning, alertOrderError, alertOrderSuccess, alertGlobalError } from '@/utils/alerts.js'
+import { useErrorHandler, useFormErrorHandler } from '@/hooks/useErrorHandler.js';
 import {
   Badge,
   Button,
@@ -38,12 +39,15 @@ import {
   Textarea,
 } from "../../../components/shadcn/ui/index.js";
 
+const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true';
+const debugError = (...args) => {
+  if (DEBUG_LOGS) {
+    console.error(...args);
+  }
+};
+
 const buildItemImage = (item) =>
   item?.imgUrl ?? item?.image ?? item?.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE;
-const DEBUG_LOGS = import.meta.env?.VITE_DEBUG_LOGS === 'true' || import.meta.env?.MODE === 'development';
-const debugLog = (...args) => { if (DEBUG_LOGS) console.log(...args); };
-const debugError = (...args) => { if (DEBUG_LOGS) console.error(...args); };
-
 const cartItemShape = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   name: PropTypes.string,
@@ -61,7 +65,7 @@ const addressShape = PropTypes.shape({
   calle: PropTypes.string,
   comuna: PropTypes.string,
   ciudad: PropTypes.string,
-  region: PropTypes.string,
+  region: PropTypes.oneOf(CHILE_REGIONES),
 });
 
 const userShape = PropTypes.shape({
@@ -77,12 +81,28 @@ const configShape = PropTypes.shape({
   telefono: PropTypes.string,
 });
 
-export const CheckoutPage = () => {
+export const CheckoutPage = ({
+  cartItems: controlledCartItems,
+  total: controlledTotal,
+  user: controlledUser,
+  addresses: controlledAddresses,
+  defaultAddress: controlledDefaultAddress,
+  config: controlledConfig,
+} = {}) => {
   const navigate = useNavigate();
-  const { cartItems, total, removeFromCart, clearCart } = useCartContext();
-  const { user } = useAuth();
-  const { addresses, defaultAddress } = useAddresses();
-  const { config } = useStoreConfig();
+  const cartContext = useCartContext();
+  const authContext = useAuth();
+  const addressesContext = useAddresses();
+  const storeConfig = useStoreConfig();
+
+  const cartItems = controlledCartItems ?? cartContext?.cartItems ?? [];
+  const total = typeof controlledTotal === 'number' ? controlledTotal : cartContext?.total ?? 0;
+  const removeFromCart = cartContext?.removeFromCart ?? (() => {});
+  const clearCart = cartContext?.clearCart ?? (() => {});
+  const user = controlledUser ?? authContext?.user ?? null;
+  const addresses = controlledAddresses ?? addressesContext?.addresses ?? [];
+  const defaultAddress = controlledDefaultAddress ?? addressesContext?.defaultAddress ?? null;
+  const config = controlledConfig ?? storeConfig?.config ?? {};
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [selectedAddressId, setSelectedAddressId] = useState(defaultAddress?.direccion_id || null);
   const [paymentMethod, setPaymentMethod] = useState('transferencia');
@@ -90,6 +110,16 @@ export const CheckoutPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [orderPreview, setOrderPreview] = useState(null);
+  const { handleError } = useErrorHandler({
+    showAlert: false,
+    defaultMessage: 'No pudimos procesar tu orden. Intenta nuevamente.',
+  });
+  const {
+    fieldErrors,
+    setFieldError,
+    clearFieldError,
+    clearAllErrors,
+  } = useFormErrorHandler();
   
   // Datos de contacto (prellenados con info del usuario)
   const [contactData, setContactData] = useState({
@@ -105,8 +135,22 @@ export const CheckoutPage = () => {
     ciudad: '',
     region: '',
   });
+  const clearAddressFieldErrors = useCallback(() => {
+    ['calle', 'comuna', 'ciudad', 'region'].forEach((field) => clearFieldError(field));
+  }, [clearFieldError]);
 
   const hasItems = cartItems.length > 0;
+  useEffect(() => {
+    if (shippingMethod === 'retiro') {
+      clearAddressFieldErrors();
+    }
+  }, [shippingMethod, clearAddressFieldErrors]);
+
+  useEffect(() => {
+    if (selectedAddressId) {
+      clearAddressFieldErrors();
+    }
+  }, [selectedAddressId, clearAddressFieldErrors]);
 
   const shippingInfo = useMemo(
     () => METODOS_DESPACHO[shippingMethod] ?? METODOS_DESPACHO.standard,
@@ -122,10 +166,12 @@ export const CheckoutPage = () => {
 
   const handleContactChange = (field, value) => {
     setContactData(prev => ({ ...prev, [field]: value }));
+    clearFieldError(field);
   };
 
   const handleAddressChange = (field, value) => {
     setNewAddress(prev => ({ ...prev, [field]: value }));
+    clearFieldError(field);
   };
 
   const handlePay = () => {
@@ -134,18 +180,42 @@ export const CheckoutPage = () => {
       return;
     }
 
-    // Validaciones
-    if (!contactData.nombre || !contactData.email || !contactData.telefono) {
-      alertWarning('Revisa nombre, correo y teléfono para continuar.', 'Datos incompletos');
-      return;
+    clearAllErrors();
+    let hasValidationErrors = false;
+    const ensureField = (field, message) => {
+      if (!message) return;
+      setFieldError(field, message);
+      hasValidationErrors = true;
+    };
+
+    if (!contactData.nombre) {
+      ensureField('nombre', 'El nombre es obligatorio');
+    }
+    if (!contactData.email) {
+      ensureField('email', 'El correo es obligatorio');
+    }
+    if (!contactData.telefono) {
+      ensureField('telefono', 'El teléfono es obligatorio');
     }
 
-    // Si no es retiro, validar dirección
-    if (shippingMethod !== 'retiro') {
-      if (!selectedAddressId && (!newAddress.calle || !newAddress.comuna || !newAddress.ciudad || !newAddress.region)) {
-        alertWarning('Faltan: calle, comuna, ciudad y región.', 'Dirección incompleta');
-        return;
+    if (shippingMethod !== 'retiro' && !selectedAddressId) {
+      if (!newAddress.calle) {
+        ensureField('calle', 'Indica la calle y número');
       }
+      if (!newAddress.comuna) {
+        ensureField('comuna', 'La comuna es obligatoria');
+      }
+      if (!newAddress.ciudad) {
+        ensureField('ciudad', 'La ciudad es obligatoria');
+      }
+      if (!newAddress.region) {
+        ensureField('region', 'Selecciona una región');
+      }
+    }
+
+    if (hasValidationErrors) {
+      alertWarning('Revisa los campos resaltados para continuar.', 'Datos incompletos');
+      return;
     }
 
     // Preparar preview de la orden (sin crear nada en BD todavía)
@@ -170,7 +240,6 @@ export const CheckoutPage = () => {
 
   const handleConfirmOrder = async () => {
     setIsProcessing(true);
-    debugLog('[handleConfirmOrder] Iniciando creación de orden');
 
     try {
       const checkoutData = {
@@ -209,11 +278,12 @@ export const CheckoutPage = () => {
       }
 
     } catch (error) {
+      const serverMsg = error.response?.data?.message;
       debugError('[handleConfirmOrder] Error en checkout:', error);
       debugError('[handleConfirmOrder] error.response:', error.response);
       debugError('[handleConfirmOrder] error.response?.data:', error.response?.data);
-      const serverMsg = error.response?.data?.message;
       debugError('[handleConfirmOrder] serverMsg:', serverMsg);
+      handleError(error, serverMsg || 'No pudimos crear tu orden en este momento.');
       if (serverMsg && /carrito está vacío/i.test(serverMsg)) {
         alertOrderError('El carrito del servidor está vacío. Agrega productos y vuelve a intentar.', config.email);
       } else if (serverMsg && /Error al crear orden/i.test(serverMsg)) {
@@ -253,7 +323,11 @@ export const CheckoutPage = () => {
                       autoComplete="name"
                       value={contactData.nombre}
                       onChange={(e) => handleContactChange('nombre', e.target.value)}
+                      aria-invalid={Boolean(fieldErrors.nombre)}
                     />
+                    {fieldErrors.nombre && (
+                      <p className="text-xs text-(--color-error)">{fieldErrors.nombre}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label required>Correo</Label>
@@ -263,7 +337,11 @@ export const CheckoutPage = () => {
                       autoComplete="email"
                       value={contactData.email}
                       onChange={(e) => handleContactChange('email', e.target.value)}
+                      aria-invalid={Boolean(fieldErrors.email)}
                     />
+                    {fieldErrors.email && (
+                      <p className="text-xs text-(--color-error)">{fieldErrors.email}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label required>Teléfono</Label>
@@ -273,7 +351,11 @@ export const CheckoutPage = () => {
                       autoComplete="tel"
                       value={contactData.telefono}
                       onChange={(e) => handleContactChange('telefono', e.target.value)}
+                      aria-invalid={Boolean(fieldErrors.telefono)}
                     />
+                    {fieldErrors.telefono && (
+                      <p className="text-xs text-(--color-error)">{fieldErrors.telefono}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label required>Método de pago</Label>
@@ -380,7 +462,11 @@ export const CheckoutPage = () => {
                             autoComplete="street-address"
                             value={newAddress.calle}
                             onChange={(e) => handleAddressChange('calle', e.target.value)}
+                            aria-invalid={Boolean(fieldErrors.calle)}
                           />
+                          {fieldErrors.calle && (
+                            <p className="text-xs text-(--color-error)">{fieldErrors.calle}</p>
+                          )}
                         </div>
                         <div className="grid gap-4 md:grid-cols-3">
                           <div className="space-y-2">
@@ -390,7 +476,11 @@ export const CheckoutPage = () => {
                               autoComplete="address-level3"
                               value={newAddress.comuna}
                               onChange={(e) => handleAddressChange('comuna', e.target.value)}
+                              aria-invalid={Boolean(fieldErrors.comuna)}
                             />
+                            {fieldErrors.comuna && (
+                              <p className="text-xs text-(--color-error)">{fieldErrors.comuna}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label required>Ciudad</Label>
@@ -399,11 +489,18 @@ export const CheckoutPage = () => {
                               autoComplete="address-level2"
                               value={newAddress.ciudad}
                               onChange={(e) => handleAddressChange('ciudad', e.target.value)}
+                              aria-invalid={Boolean(fieldErrors.ciudad)}
                             />
+                            {fieldErrors.ciudad && (
+                              <p className="text-xs text-(--color-error)">{fieldErrors.ciudad}</p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label required>Región</Label>
-                            <Select value={newAddress.region || ''} onValueChange={(val) => handleAddressChange('region', val)}>
+                            <Select
+                              value={newAddress.region || ''}
+                              onValueChange={(val) => handleAddressChange('region', val)}
+                            >
                               <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Seleccionar región" />
                               </SelectTrigger>
@@ -413,6 +510,9 @@ export const CheckoutPage = () => {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {fieldErrors.region && (
+                              <p className="text-xs text-(--color-error)">{fieldErrors.region}</p>
+                            )}
                           </div>
                         </div>
                       </>
@@ -761,4 +861,13 @@ CheckoutPage.propTypes = {
   addresses: PropTypes.arrayOf(addressShape),
   defaultAddress: addressShape,
   config: configShape,
+};
+
+CheckoutPage.defaultProps = {
+  cartItems: undefined,
+  total: undefined,
+  user: undefined,
+  addresses: undefined,
+  defaultAddress: undefined,
+  config: undefined,
 };

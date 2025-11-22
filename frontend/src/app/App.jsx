@@ -1,5 +1,6 @@
-import { lazy, Suspense, useEffect } from 'react'
+import React, { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { WifiOff } from 'lucide-react'
 
 import { Navbar } from '@/components/layout/Navbar.jsx'
 import { Footer } from '@/components/layout/Footer.jsx'
@@ -8,6 +9,7 @@ import { AddressProvider } from '@/context/AddressContext.jsx'
 import ErrorBoundary from '@/components/error/ErrorBoundary.jsx'
 import { ScrollToTop } from '@/components/layout/ScrollToTop.jsx'
 import { AdminRoute, ProtectedRoute } from '@/modules/auth/hooks/useAuth.jsx'
+import { observability } from '@/services/observability.js';
 
 // Eager load - Componentes críticos que se cargan inmediatamente
 import { HomePage } from '@/modules/home/pages/HomePage.jsx'
@@ -50,10 +52,10 @@ const AdminProductsPage = lazy(() => import('@/modules/admin/pages/AdminProducts
 const AdminCategoriesPage = lazy(() => import('@/modules/admin/pages/AdminCategoriesPage.jsx'))
 const CustomersPage = lazy(() => import('@/modules/admin/pages/CustomersPage.jsx'))
 const StoreSettingsPage = lazy(() => import('@/modules/admin/pages/StoreSettingsPage.jsx'))
-const AdminTestPage = lazy(() => import('@/modules/admin/pages/AdminTestPage.jsx'))
 
 // Lazy load - Style guide (solo desarrollo)
 const StyleGuidePage = lazy(() => import('@/modules/styleguide/pages/StyleGuidePage.jsx'))
+const ModalsDemo = lazy(() => import('@/modules/auth/pages/ModalsDemo.jsx'))
 
 import '@/styles/global.css'
 import '@/styles/tokens.css'
@@ -71,58 +73,44 @@ const PageLoader = () => (
 )
 
 // Componente de error para lazy loading fallido
-const LazyLoadError = () => (
-  <div className="flex min-h-[60vh] items-center justify-center p-4">
-    <div className="text-center space-y-4 max-w-md">
-      <div className="text-red-600 text-4xl">⚠️</div>
-      <h2 className="text-xl font-semibold text-(--text-strong)">Error al cargar</h2>
-      <p className="text-sm text-(--text-weak)">
-        No se pudo cargar esta página. Esto puede deberse a un problema de conexión o un error temporal.
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="px-4 py-2 bg-(--color-primary1) text-white rounded-lg hover:bg-(--color-hover) transition-colors"
-      >
-        Recargar página
-      </button>
+const LazyLoadError = () => {
+  React.useEffect(() => {
+    // Auto-reload después de 100ms si es error de HMR
+    const timer = setTimeout(() => {
+      if (import.meta.hot) {
+        console.log('[HMR] Auto-recargando por error de módulo...');
+        window.location.reload();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center p-4">
+      <div className="text-center space-y-4 max-w-md">
+        <div className="flex justify-center mb-2">
+          <WifiOff className="h-16 w-16 text-(--color-error)" strokeWidth={1.5} />
+        </div>
+        <h2 className="text-xl font-semibold text-(--text-strong)">Recargando módulo...</h2>
+        <p className="text-sm text-(--text-weak)">
+          Detectamos una actualización. La página se recargará automáticamente.
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 text-sm bg-(--color-primary1) text-white rounded-full hover:bg-(--color-hover) transition-colors shadow-sm hover:shadow-md"
+        >
+          Recargar ahora
+        </button>
+      </div>
     </div>
-  </div>
-)
+  );
+}
 
 // ErrorBoundary específico para Suspense (captura errores de lazy loading)
 class SuspenseErrorBoundary extends ErrorBoundary {
   render() {
     if (this.state.hasError) {
       return <LazyLoadError />;
-    }
-    return this.props.children;
-  }
-}
-
-// Componente de error para lazy loading fallido
-const LazyLoadError = ({ error, retry }) => (
-  <div className="flex min-h-[60vh] items-center justify-center p-4">
-    <div className="text-center space-y-4 max-w-md">
-      <div className="text-red-600 text-4xl">⚠️</div>
-      <h2 className="text-xl font-semibold text-(--text-strong)">Error al cargar</h2>
-      <p className="text-sm text-(--text-weak)">
-        No se pudo cargar esta página. Esto puede deberse a un problema de conexión.
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="px-4 py-2 bg-(--color-primary1) text-white rounded-lg hover:bg-(--color-hover) transition-colors"
-      >
-        Recargar página
-      </button>
-    </div>
-  </div>
-)
-
-// ErrorBoundary específico para Suspense (captura errores de lazy loading)
-class SuspenseErrorBoundary extends ErrorBoundary {
-  render() {
-    if (this.state.hasError) {
-      return <LazyLoadError error={this.state.error} retry={this.handleReload} />;
     }
     return this.props.children;
   }
@@ -147,8 +135,11 @@ export const App = () => {
 
       // Enviar a servicio de logging en producción
       if (import.meta.env.PROD) {
-        // TODO: Integrar con Sentry/LogRocket
-        // Sentry.captureException(event.error);
+        observability.captureException(event.error || event.message, {
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno,
+        });
       }
 
       // No prevenir el comportamiento por defecto para que ErrorBoundary lo capture
@@ -164,8 +155,9 @@ export const App = () => {
 
       // Enviar a servicio de logging en producción
       if (import.meta.env.PROD) {
-        // TODO: Integrar con Sentry/LogRocket
-        // Sentry.captureException(event.reason);
+        observability.captureException(event.reason, {
+          type: 'unhandledrejection',
+        });
       }
 
       // Prevenir que el error se muestre en consola por defecto
@@ -225,12 +217,10 @@ export const App = () => {
                 <Route path={admin.categories} element={<EntornoAdmin><AdminCategoriesPage /></EntornoAdmin>} />
                 <Route path={admin.customers} element={<EntornoAdmin><CustomersPage /></EntornoAdmin>} />
                 <Route path={admin.settings} element={<EntornoAdmin><StoreSettingsPage /></EntornoAdmin>} />
-                {import.meta.env.DEV && (
-                  <Route path={admin.test} element={<EntornoAdmin><AdminTestPage /></EntornoAdmin>} />
-                )}
               </Route>
 
               <Route path='/style-guide/*' element={<StyleGuidePage />} />
+              <Route path='/modals-demo' element={<ModalsDemo />} />
             
             {/* Error Routes */}
               <Route path="/error/500" element={<ServerErrorPage statusCode={500} />} />

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { verifyAdmin } from "../src/middleware/verifyAdmin.js";
 import { AdminController } from "../src/controllers/adminController.js";
 import orderAdminController from "../src/controllers/orderAdminController.js";
+import dashboardController from "../src/controllers/dashboardController.js";
 import { asyncHandler } from "../src/utils/error.utils.js";
 
 const router = Router();
@@ -23,6 +24,12 @@ router.get("/admin/analytics/products/top", verifyAdmin, asyncHandler(AdminContr
 router.get("/admin/analytics/categories", verifyAdmin, asyncHandler(AdminController.getCategoryAnalytics));
 router.get("/admin/analytics/stock", verifyAdmin, asyncHandler(AdminController.getStockAnalytics));
 router.get("/admin/analytics/orders/distribution", verifyAdmin, asyncHandler(AdminController.getOrderDistribution));
+router.get("/admin/analytics/customers/registrations", verifyAdmin, asyncHandler(AdminController.getCustomerRegistrations));
+
+// === RUTAS DE DASHBOARD STATS ===
+router.get("/admin/dashboard/stats", verifyAdmin, asyncHandler(dashboardController.getDashboardStats));
+router.get("/admin/dashboard/payment-methods", verifyAdmin, asyncHandler(dashboardController.getPaymentMethodStats));
+router.get("/admin/dashboard/shipping-methods", verifyAdmin, asyncHandler(dashboardController.getShippingMethodStats));
 
 // === RUTAS DE PRODUCTOS ADMIN ===
 router.get("/admin", verifyAdmin, asyncHandler(AdminController.getDashboardMetrics));

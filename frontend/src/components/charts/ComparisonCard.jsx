@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
-import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus } from "@icons/lucide";
+import { motion as Motion } from "framer-motion";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 /**
  * ComparisonCard - Comparación visual entre dos períodos
@@ -37,11 +37,11 @@ export const ComparisonCard = ({
   const TrendIcon = trendIcon;
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      className="rounded-3xl border border-(--color-border) bg-(--color-neutral1) p-6 shadow-(--shadow-sm)"
+      className="rounded-3xl bg-white/95 p-6 shadow-(--shadow-sm)"
     >
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
@@ -67,14 +67,14 @@ export const ComparisonCard = ({
           </span>
         </div>
         <div className="relative h-3 overflow-hidden rounded-full bg-(--color-neutral3)">
-          <motion.div
+          <Motion.div
             initial={{ width: 0 }}
             animate={{ width: `${currentPercentage}%` }}
             transition={{ duration: 1, delay: delay + 0.3, ease: "easeOut" }}
             className="absolute inset-y-0 left-0 rounded-full"
             style={{ backgroundColor: color }}
           >
-            <motion.div
+            <Motion.div
               animate={{
                 opacity: [0.5, 1, 0.5],
               }}
@@ -88,7 +88,7 @@ export const ComparisonCard = ({
                 background: `linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)`,
               }}
             />
-          </motion.div>
+          </Motion.div>
         </div>
       </div>
 
@@ -101,7 +101,7 @@ export const ComparisonCard = ({
           </span>
         </div>
         <div className="relative h-3 overflow-hidden rounded-full bg-(--color-neutral3)">
-          <motion.div
+          <Motion.div
             initial={{ width: 0 }}
             animate={{ width: `${previousPercentage}%` }}
             transition={{ duration: 1, delay: delay + 0.5, ease: "easeOut" }}
@@ -113,7 +113,7 @@ export const ComparisonCard = ({
 
       {/* Difference indicator */}
       {change !== 0 && (
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: delay + 0.8, duration: 0.4 }}
@@ -127,9 +127,9 @@ export const ComparisonCard = ({
             {change > 0 ? "+" : ""}
             {formatter(change)}
           </span>
-        </motion.div>
+        </Motion.div>
       )}
-    </motion.div>
+    </Motion.div>
   );
 };
 

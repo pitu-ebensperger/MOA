@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { X } from "@icons/lucide";
+import { X } from "lucide-react";
 import { cx } from "@/utils/ui-helpers.js";
 
 /**
@@ -26,6 +26,14 @@ export function Modal({
   const [isExiting, setIsExiting] = useState(false);
   const panelRef = useRef(null);
 
+  const handleClose = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onClose?.();
+      setIsExiting(false);
+    }, 200);
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) {
       setIsExiting(false);
@@ -47,15 +55,7 @@ export function Modal({
       window.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [open, closeOnOverlayClick]);
-
-  const handleClose = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose?.();
-      setIsExiting(false);
-    }, 200);
-  };
+  }, [open, closeOnOverlayClick, handleClose]);
 
   const handleOverlayClick = () => {
     if (closeOnOverlayClick) {

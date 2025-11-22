@@ -7,6 +7,7 @@ export function OrdersTable({
   columns,
   page,
   totalPages,
+  total,
   onPageChange,
 }) {
   return (
@@ -17,7 +18,7 @@ export function OrdersTable({
         <Pagination
           page={page}
           totalPages={totalPages}
-          totalItems={data.length}
+          totalItems={typeof total === 'number' ? total : data.length}
           onPageChange={onPageChange}
         />
       </div>
@@ -30,5 +31,6 @@ OrdersTable.propTypes = {
   columns: PropTypes.array.isRequired,
   page: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
+  total: PropTypes.number,
   onPageChange: PropTypes.func.isRequired,
 };

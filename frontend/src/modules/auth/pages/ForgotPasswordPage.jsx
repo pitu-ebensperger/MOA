@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail } from "@icons/lucide"
+import { Mail } from "lucide-react"
 import { requestPasswordReset } from '@/services/auth.api.js'
 import { toast, confirm } from '@/components/ui'
 

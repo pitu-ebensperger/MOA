@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { alerts } from '@/utils/sweetalert.js';
+import { observability } from '@/services/observability.js';
 
 /**
  * Hook para manejo consistente de errores en componentes
@@ -87,10 +88,10 @@ export function useErrorHandler({
 
       // En producción, enviar a servicio de logging
       if (import.meta.env.PROD) {
-        // TODO: Integrar con Sentry/LogRocket
-        // Sentry.captureException(err, {
-        //   extra: { message, timestamp: new Date() }
-        // });
+        observability.captureException(err || new Error(message), {
+          message,
+          timestamp: new Date().toISOString(),
+        });
       }
     },
     [showAlert, onError, defaultMessage]

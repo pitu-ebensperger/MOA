@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Edit3, Trash2, Check, X } from "@icons/lucide";
+import { Plus, Edit3, Trash2, Check, X } from "lucide-react";
 
 import { categoriesApi } from "@/services/categories.api.js";
 import { confirm } from '@/components/ui';
 import { Button } from "@/components/ui/Button.jsx";
+import { validateRequired, validateSlug } from '@/utils/validation';
 import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx";
 import {
   Dialog,
@@ -17,8 +18,6 @@ import { buildCategoryColumns } from "@/modules/admin/utils/categoriesColumns.js
 import { useAdminCategories, ADMIN_CATEGORIES_QUERY_KEY } from "@/modules/admin/hooks/useAdminCategories.js";
 import { DEFAULT_PAGE_SIZE } from "@/config/constants.js";
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
-
-const slugPattern = /^[a-z0-9-]+$/;
 
 const sanitizeSlug = (value) =>
   String(value)
@@ -170,14 +169,17 @@ export default function AdminCategoriesPage() {
     };
 
     const validationErrors = {};
-    if (!payload.nombre) {
-      validationErrors.name = "El nombre es obligatorio";
+    
+    // Validar nombre
+    const nameValidation = validateRequired(payload.nombre, 'El nombre');
+    if (!nameValidation.valid) {
+      validationErrors.name = nameValidation.error;
     }
-    if (!payload.slug) {
-      validationErrors.slug = "El slug es obligatorio";
-    } else if (!slugPattern.test(payload.slug)) {
-      validationErrors.slug =
-        "El slug solo puede contener letras minúsculas, números y guiones";
+    
+    // Validar slug
+    const slugValidation = validateSlug(payload.slug);
+    if (!slugValidation.valid) {
+      validationErrors.slug = slugValidation.error;
     }
 
     if (Object.keys(validationErrors).length > 0) {

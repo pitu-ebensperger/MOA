@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { X, Trash2, ShoppingCart } from "@icons/lucide";
+import { X, Trash2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/Button.jsx"
 import { Price } from "@/components/data-display/Price.jsx"
 

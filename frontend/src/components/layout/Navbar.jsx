@@ -1,10 +1,9 @@
 import PropTypes from 'prop-types';
-import { ShoppingCart, LogOut, LayoutDashboard, User } from "@icons/lucide";
+import { ShoppingCart, LogOut, LayoutDashboard, User } from "lucide-react";
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/auth-context.js';
 import { useCartContext } from '@/context/cart-context.js';
 import { API_PATHS } from '@/config/api-paths.js';
-import { alertAuthRequired } from '@/utils/alerts.js';
 
 const NAV_ITEMS = [
   { label: 'Inicio', href: API_PATHS.home.landing },
@@ -56,7 +55,7 @@ export function Navbar({ onNavigate }) {
                 type="button"
                 aria-label="Carrito (requiere login)"
                 className="nav-icon-bg relative"
-                onClick={() => alertAuthRequired().then(() => navigate(API_PATHS.auth.login))}
+                onClick={() => navigate(API_PATHS.auth.login, { state: { authRequired: true } })}
               >
                 <ShoppingCart className="nav-icon" />
               </button>
@@ -64,40 +63,52 @@ export function Navbar({ onNavigate }) {
           )}
           {isAuthenticated && (
             <>
-              {isAdmin && (
-                <Link
-                  to={API_PATHS.admin.dashboard}
-                  className="nav-btn nav-btn-primary flex items-center gap-2"
-                >
-                  <LayoutDashboard className="h-4 w-4" /> Dashboard
-                </Link>
+              {isAdmin ? (
+                <>
+                  <Link
+                    to={API_PATHS.admin.dashboard}
+                    className="nav-btn nav-btn-primary flex items-center gap-2"
+                  >
+                    <LayoutDashboard className="h-4 w-4" /> Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="nav-icon-bg text-red-600"
+                    aria-label="Cerrar sesión"
+                  >
+                    <LogOut className="nav-icon" />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Ver carrito"
+                    className="nav-icon-bg relative"
+                    onClick={() => navigate('/cart')}
+                  >
+                    <ShoppingCart className="nav-icon" />
+                    {cartItems.length > 0 && (
+                      <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-(--color-primary1) shadow-sm" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Ver perfil"
+                    className="nav-icon-bg"
+                    onClick={() => navigate('/profile')}
+                  >
+                    <User className="nav-icon" />
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="nav-icon-bg text-red-600"
+                    aria-label="Cerrar sesión"
+                  >
+                    <LogOut className="nav-icon" />
+                  </button>
+                </>
               )}
-              <button
-                type="button"
-                aria-label="Ver carrito"
-                className="nav-icon-bg relative"
-                onClick={() => navigate('/cart')}
-              >
-                <ShoppingCart className="nav-icon" />
-                {cartItems.length > 0 && (
-                  <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-(--color-primary1) shadow-sm" />
-                )}
-              </button>
-              <button
-                type="button"
-                aria-label="Ver perfil"
-                className="nav-icon-bg"
-                onClick={() => navigate('/profile')}
-              >
-                <User className="nav-icon" />
-              </button>
-              <button
-                onClick={handleLogout}
-                className="nav-icon-bg text-red-600"
-                aria-label="Cerrar sesión"
-              >
-                <LogOut className="nav-icon" />
-              </button>
             </>
           )}
         </div>

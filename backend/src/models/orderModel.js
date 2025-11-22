@@ -49,7 +49,32 @@ const createOrder = async (orderData) => {
     // Generar código de orden
     const order_code = await generateOrderCode();
 
-    // Crear orden con campos disponibles en DDL
+    // Validar y descontar stock con row-level locks (previene race conditions)
+    if (items && items.length > 0) {
+      for (const item of items) {
+        const stockResult = await client.query(
+          'SELECT stock, nombre FROM productos WHERE producto_id = $1 FOR UPDATE',
+          [item.producto_id]
+        );
+        
+        const product = stockResult.rows[0];
+        if (!product) {
+          throw new Error(`Producto ${item.producto_id} no encontrado`);
+        }
+        
+        if (product.stock < item.cantidad) {
+          throw new Error(`Stock insuficiente para ${product.nombre}. Disponible: ${product.stock}, solicitado: ${item.cantidad}`);
+        }
+        
+        // Descontar stock
+        await client.query(
+          'UPDATE productos SET stock = stock - $1 WHERE producto_id = $2',
+          [item.cantidad, item.producto_id]
+        );
+      }
+    }
+
+    // Crear orden con estado_orden='confirmed' para órdenes exitosas
     const insertOrderQuery = `
       INSERT INTO ordenes (
         order_code,
@@ -60,8 +85,9 @@ const createOrder = async (orderData) => {
         subtotal_cents,
         envio_cents,
         total_cents,
-        notas_cliente
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        notas_cliente,
+        estado_orden
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
     `;
 
@@ -75,6 +101,7 @@ const createOrder = async (orderData) => {
       envio_cents,
       total_cents,
       notas_cliente,
+      'confirmed', // Estado confirmado por defecto
     ]);
 
     // Insertar items de la orden
@@ -94,7 +121,7 @@ const createOrder = async (orderData) => {
       }
     }
 
-    // Limpiar carrito del usuario
+    // Limpiar carrito DESPUÉS de que todo lo anterior fue exitoso
     await client.query(
       'DELETE FROM carrito_items WHERE carrito_id IN (SELECT carrito_id FROM carritos WHERE usuario_id = $1)',
       [usuario_id]

@@ -70,15 +70,15 @@ export default function ProductsPage() {
 
   return (
     <main className="page mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <Breadcrumbs
-          className="mb-0"
-          items={[
-            { label: "Inicio", href: "/" },
-            { label: "Productos" },
-          ]}
-        />
+      <Breadcrumbs
+        className="mb-6"
+        items={[
+          { label: "Inicio", href: "/" },
+          { label: "Productos" },
+        ]}
+      />
 
+      <header className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
             <label className="flex items-center gap-2 text-sm text-(--text-weak)">

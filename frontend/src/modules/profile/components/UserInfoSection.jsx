@@ -5,7 +5,7 @@ import { authApi } from '../../../services/auth.api.js'
 import { usersApi } from '../../../services/users.api.js'
 import { IconButton } from "@/components/ui/Button.jsx";
 import { TooltipNeutral } from "@/components/ui/Tooltip.jsx";
-import { Edit3 } from "@icons/lucide";
+import { Edit3 } from "lucide-react";
 
 const UserInfoSection = () => {
   const { user, token } = useAuth();  

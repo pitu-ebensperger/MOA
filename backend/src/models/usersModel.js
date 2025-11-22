@@ -5,16 +5,15 @@ import { nanoid } from "nanoid";
 export const createUserModel = async (nombre, email, telefono, password, status = "activo") => {
   const publicId = nanoid();
   const hashedPassword = bcrypt.hashSync(password, 10);
-  const defaultRole = "user";
-  const defaultRoleCode = "USER";
+  const defaultRoleCode = "CLIENT";
 
   const sqlQuery = {
     text: `
-        INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING usuario_id, public_id, nombre, email, telefono, rol, rol_code, status, creado_en
+        INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        RETURNING usuario_id, public_id, nombre, email, telefono, rol_code, status, creado_en
         `,
-    values: [publicId, nombre, email, telefono, hashedPassword, defaultRole, defaultRoleCode, status],
+    values: [publicId, nombre, email, telefono, hashedPassword, defaultRoleCode, status],
   };
 
   const response = await pool.query(sqlQuery);
@@ -39,7 +38,6 @@ export const getUserByIdModel = async (id) => {
         nombre,
         email,
         telefono,
-        rol,
         status,
         rol_code AS "rolCode",
         creado_en AS "createdAt"
@@ -73,7 +71,7 @@ export const createAdminCustomerModel = async ({
   nombre,
   email,
   telefono = null,
-  rol = "cliente",
+  rol_code = "CLIENT",
   password,
   status = "activo",
 }) => {
@@ -83,11 +81,11 @@ export const createAdminCustomerModel = async ({
 
   const sqlQuery = {
     text: `
-      INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING usuario_id AS id, public_id AS "publicId", nombre, email, telefono, rol, rol_code AS "rolCode", status, creado_en AS "createdAt"
+      INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING usuario_id AS id, public_id AS "publicId", nombre, email, telefono, rol_code AS "rolCode", status, creado_en AS "createdAt"
     `,
-    values: [publicId, nombre, email, telefono, hashedPassword, rol, rol, status],
+    values: [publicId, nombre, email, telefono, hashedPassword, rol_code, status],
   };
 
   const response = await pool.query(sqlQuery);
@@ -99,7 +97,7 @@ export const updateAdminCustomerModel = async ({
   nombre,
   email,
   telefono,
-  rol,
+  rol_code,
   status,
 }) => {
   const sets = [];
@@ -125,10 +123,9 @@ export const updateAdminCustomerModel = async ({
     values.push(status);
   }
 
-  if (rol !== undefined) {
-    sets.push(`rol = $${values.length + 1}`);
-    sets.push(`rol_code = $${values.length + 2}`);
-    values.push(rol, rol);
+  if (rol_code !== undefined) {
+    sets.push(`rol_code = $${values.length + 1}`);
+    values.push(rol_code);
   }
 
   if (!sets.length) {
@@ -140,7 +137,7 @@ export const updateAdminCustomerModel = async ({
       UPDATE usuarios
       SET ${sets.join(", ")}
       WHERE usuario_id = $${values.length + 1}
-      RETURNING usuario_id AS id, public_id AS "publicId", nombre, email, telefono, rol, rol_code AS "rolCode", status, creado_en AS "createdAt"
+      RETURNING usuario_id AS id, public_id AS "publicId", nombre, email, telefono, rol_code AS "rolCode", status, creado_en AS "createdAt"
     `,
     values: [...values, id],
   };

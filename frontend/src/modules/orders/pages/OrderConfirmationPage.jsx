@@ -13,7 +13,7 @@ import {
   ShoppingBag,
   Mail,
   Phone
-} from "@icons/lucide"
+} from "lucide-react"
 
 import { Button } from "@/components/ui/Button.jsx"
 import { Spinner } from "@/components/ui/Spinner.jsx"

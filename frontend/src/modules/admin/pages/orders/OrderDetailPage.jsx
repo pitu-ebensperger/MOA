@@ -16,7 +16,7 @@ import {
   Edit,
   Save,
   X,
-} from "@icons/lucide";
+} from "lucide-react";
 
 import { ordersAdminApi } from '@/services/ordersAdmin.api.js';
 import { Button } from '@/components/ui/Button.jsx';

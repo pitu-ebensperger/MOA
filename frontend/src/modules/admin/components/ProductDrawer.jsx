@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button.jsx";
 import { Input, Textarea } from "@/components/ui/Input.jsx";
 import { Select } from "@/components/ui/Select.jsx";
 import { ProductShape, CategoryShape } from "@/utils/propTypes.js";
-import { Save, Trash2, X } from "@icons/lucide";
+import { Save, Trash2, X } from "lucide-react";
 
 const STATUS_VALUES = ["activo", "sin_stock", "borrador"];
 
@@ -298,16 +298,16 @@ export function ProductDrawer({
           </div>
 
           <DialogFooter className="pt-4">
-            <div className="flex w-full justify-end gap-3">
+            <div className="flex w-full justify-end gap-2">
               {initial && (
                 <Button
                   type="button"
                   appearance="ghost"
                   intent="error"
-                  size="sm"
-                  leadingIcon={<Trash2 className="h-4 w-4" />}
+                  size="xs"
+                  leadingIcon={<Trash2 className="h-3.5 w-3.5" />}
                   onClick={() => onDelete?.(initial)}
-                  className="mr-auto"
+                  className="mr-auto rounded-full"
                 >
                   Eliminar
                 </Button>
@@ -316,10 +316,10 @@ export function ProductDrawer({
                 type="button"
                 appearance="ghost"
                 intent="neutral"
-                size="sm"
-                leadingIcon={<X className="h-4 w-4" />}
+                size="xs"
+                leadingIcon={<X className="h-3.5 w-3.5" />}
                 onClick={onClose}
-                className="text-(--text-strong)"
+                className="text-(--text-strong) rounded-full"
               >
                 Cancelar
               </Button>
@@ -327,9 +327,10 @@ export function ProductDrawer({
                 type="submit"
                 appearance="solid"
                 intent="primary"
-                size="sm"
-                leadingIcon={<Save className="h-4 w-4" />}
+                size="xs"
+                leadingIcon={<Save className="h-3.5 w-3.5" />}
                 disabled={isSubmitting}
+                className="rounded-full"
               >
                 {isSubmitting ? "Guardando..." : initial ? "Actualizar producto" : "Guardar producto"}
               </Button>

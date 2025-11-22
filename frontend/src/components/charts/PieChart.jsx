@@ -73,6 +73,7 @@ export const PieChart = ({
   innerRadius = 0,
   outerRadius = 80,
   paddingAngle = 2,
+  legendRenderer, // optional custom legend renderer
 }) => {
   if (!data || data.length === 0) {
     return (
@@ -109,10 +110,13 @@ export const PieChart = ({
           ))}
         </Pie>
         <Tooltip content={<CustomTooltip formatter={tooltipFormatter} />} />
-        {showLegend && (
+        {showLegend && !legendRenderer && (
           <Legend
-            verticalAlign="bottom"
-            height={36}
+            verticalAlign="middle"
+            align="right"
+            layout="vertical"
+            iconType="circle"
+            wrapperStyle={{ paddingLeft: '20px' }}
             formatter={(value, entry) => (
               <span className="text-sm text-(--text-strong)">
                 {value}
@@ -121,6 +125,7 @@ export const PieChart = ({
             )}
           />
         )}
+        {legendRenderer && legendRenderer(data)}
       </RechartsPieChart>
     </ResponsiveContainer>
   );
@@ -138,4 +143,5 @@ PieChart.propTypes = {
   innerRadius: PropTypes.number,
   outerRadius: PropTypes.number,
   paddingAngle: PropTypes.number,
+  legendRenderer: PropTypes.func,
 };

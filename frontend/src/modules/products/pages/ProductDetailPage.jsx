@@ -9,10 +9,10 @@ import { productsApi } from "@/services/products.api.js"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
 import { useCategories } from "@/modules/products/hooks/useCategories.js"
 import { API_PATHS } from "@/config/api-paths.js"
-import { Minus, Plus, Recycle, ShieldCheck, Truck } from "@icons/lucide";
+import { Minus, Plus, Recycle, ShieldCheck, Truck } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
 import { useAuth } from "@/context/auth-context.js"
-import { alertAuthRequired } from "@/utils/alerts.js"
+import { useNavigate } from "react-router-dom"
 
 const initialState = {
   product: null,
@@ -311,9 +311,7 @@ export const ProductDetailPage = () => {
                 disabled={product.stock <= 0}
                 onClick={() => {
                   if (!isAuthenticated) {
-                    alertAuthRequired().then(() => {
-                      window.location.assign('/login');
-                    });
+                    navigate('/login', { state: { authRequired: true } });
                     return;
                   }
                   if (!addToCart) return;

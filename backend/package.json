@@ -13,18 +13,19 @@
     "snapshot": "npm pkg get dependencies devDependencies > ../snapshots/backend-deps.json || echo \"{}\" > ../snapshots/backend-deps.json",
     "db": "psql -U postgres -f database/schema/DDL.sql",
     "db:reset": "psql -U postgres -f database/schema/DDL.sql",
+    "db:install": "./scripts/install-database.sh",
+    "seed:users": "node database/seed/usersSeed.js",
     "seed:categories": "node database/seed/categoriesSeed.js",
     "seed:products": "node database/seed/productsSeed.js",
-    "seed:users": "node database/seed/usersSeed.js",
-    "seed:clients": "node database/seed/clientsSeed.js",
     "seed:addresses": "node database/seed/addressesSeed.js",
     "seed:orders": "node database/seed/ordersSeed.js",
     "seed:carts": "node database/seed/cartsSeed.js",
     "seed:wishlists": "node database/seed/wishlistsSeed.js",
-    "seed:all": "npm run seed:users && npm run seed:clients && npm run seed:categories && npm run seed:products && npm run seed:addresses && npm run seed:orders && npm run seed:carts && npm run seed:wishlists"
+    "seed:all": "npm run seed:users && npm run seed:categories && npm run seed:products && npm run seed:addresses && npm run seed:orders && npm run seed:carts && npm run seed:wishlists"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -38,6 +39,9 @@
     "stripe": "^19.3.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "babel-jest": "^30.2.0",
     "backend": "^0.0.0",
     "cross-env": "^10.1.0",
     "jest": "^30.2.0",

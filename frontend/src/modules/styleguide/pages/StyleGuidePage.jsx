@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Info, ShoppingCart, Star, Mail, Lock, User, Search as SearchIcon } from "@icons/lucide";
+import { Info, ShoppingCart, Star, Mail, Lock, User, Search as SearchIcon } from "lucide-react";
 import { Button, IconButton, AnimatedCTAButton } from "@/components/ui/Button.jsx"
 import { Input, Textarea } from "@/components/ui/Input.jsx"
 import { Select } from "@/components/ui/Select.jsx"
@@ -41,6 +41,9 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogClose } from "@/components/ui/radix/Dialog.jsx"
 import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
 import { MessagingSystemDemo } from "./MessagingSystemDemo.jsx";
+import { SessionExpirationDialog } from "@/components/auth/SessionExpirationDialog.jsx";
+import { Alert } from "@/components/ui/Alert.jsx";
+import { TablesShowcase } from "../components/TablesShowcase.jsx";
 
 const colorTokens = [
   {
@@ -137,6 +140,7 @@ const TAB_ITEMS = [
   { id: "forms", label: "Forms & Inputs" },
   { id: "componentes", label: "Componentes" },
   { id: "data-display", label: "Data Display" },
+  { id: "tables", label: "Tables & Toolbars" },
   { id: "modulos", label: "Módulos" },
   { id: "mensajeria", label: "Mensajería" },
   { id: "utilidades", label: "Utilidades" },
@@ -738,6 +742,113 @@ function FontDisplayLab() {
   );
 }
 
+const ERROR_HANDLERS = [
+  {
+    id: "error-boundary",
+    title: "ErrorBoundary global + fallback de Suspense",
+    location: "components/error/ErrorBoundary.jsx · app/App.jsx",
+    usage: [
+      "Envuelve toda la app y la variante Suspense para capturar errores de render y lazy loading.",
+      "Muestra UI de emergencia con acciones de recargar, ir a inicio o reportar ID único.",
+    ],
+    triggers: [
+      "Excepciones en el árbol de React (render/efectos) y errores en componentes administrativos.",
+      "Falla al cargar chunks lazy: SuspenseErrorBoundary muestra 'Error al cargar'.",
+    ],
+  },
+  {
+    id: "window-handlers",
+    title: "Listeners globales window.onerror / unhandledrejection",
+    location: "app/App.jsx",
+    usage: [
+      "Loggea errores no atrapados y rechazos de promesas para enviarlos a observabilidad en prod.",
+      "Deja que ErrorBoundary capture el flujo visual mientras se registra contexto (mensaje, stack, promise).",
+    ],
+    triggers: [
+      "Errores JS fuera del ciclo de React o promesas sin .catch().",
+      "Incidentes de red o loaders que explotan antes del render.",
+    ],
+  },
+  {
+    id: "react-query",
+    title: "React Query error config + auth guard",
+    location: "app/main.jsx · utils/handleAuthError.js",
+    usage: [
+      "onError global para queries/mutations (logs + hook para Sentry).",
+      "Retry con reglas: no reintenta 4xx ni 401/403; handleAuthError limpia storage y redirige a /login.",
+    ],
+    triggers: [
+      "Cualquier fallo en fetch de queries/mutations; corta reintentos en errores del cliente.",
+      "Eventos online/offline reactivan refetch y muestran warnings en consola.",
+    ],
+  },
+  {
+    id: "api-status-map",
+    title: "Mapa de errores HTTP → SweetAlert",
+    location: "utils/sweetalert.js (handleApiError)",
+    usage: [
+      "Normaliza respuestas y muestra alertas MOA (sessionExpired, unauthorized, networkError, etc.).",
+      "Disponible vía useErrorHandler o invocación directa para mantener copy consistente.",
+    ],
+    triggers: [
+      "400/422 datos inválidos, 401/403 auth, 404 no encontrado, 409 conflicto, 429 rate limit, 5xx server.",
+      "Modo offline: detecta !navigator.onLine y lanza alerta de conexión.",
+    ],
+  },
+  {
+    id: "hooks-error-handler",
+    title: "Hooks de manejo de errores de UI",
+    location: "hooks/useErrorHandler.js",
+    usage: [
+      "useErrorHandler normaliza errores, setea estado y dispara alerts.error por defecto.",
+      "useFormErrorHandler centraliza errores de campos y helpers de limpieza.",
+    ],
+    triggers: [
+      "Llamados manuales en catch de componentes para mostrar mensaje legible.",
+      "Validaciones de formularios y errores de negocio que queremos reflejar en inputs.",
+    ],
+  },
+  {
+    id: "cart-guards",
+    title: "Guardas de carrito y alertas de auth",
+    location: "modules/cart/hooks/useCart.js · utils/alerts.js",
+    usage: [
+      "ensureAuthenticated abre alerta 'Inicia sesión' antes de abrir drawer o mutar carrito.",
+      "alertError muestra copy de error cuando addToCart falla y deja el mensaje del servidor.",
+    ],
+    triggers: [
+      "Acciones de carrito sin sesión: fuerza login y limpia storage local.",
+      "Fallo al agregar/actualizar carrito por error de API o datos malos.",
+    ],
+  },
+  {
+    id: "checkout-orders",
+    title: "Flujo de errores en Checkout",
+    location: "modules/cart/pages/CheckoutPage.jsx · utils/alerts.js",
+    usage: [
+      "alertOrderError/alertGlobalError personalizan fallas al crear la orden y comunican soporte.",
+      "alertOrderSuccess abre CTA a perfil y limpia carrito cuando la orden se generó.",
+    ],
+    triggers: [
+      "API responde carrito vacío, conflictos o mensajes 'Error al crear orden'.",
+      "Excepciones en createOrder (catch) o responses sin success/ data.",
+    ],
+  },
+  {
+    id: "server-error-page",
+    title: "Pantalla de error de servidor + reintentos",
+    location: "modules/support/pages/ServerErrorPage.jsx",
+    usage: [
+      "Fallback específico para 500/502/503/504 o sin conexión, con salud /api/health y backoff.",
+      "Usa alerts.loading/warning/error/toast para comunicar cada intento y resultado.",
+    ],
+    triggers: [
+      "Navegar a la ruta de soporte de error o redirigir allí tras fallas críticas.",
+      "Health check fallido tras reintentos muestra alerta y mantiene detalle técnico.",
+    ],
+  },
+];
+
 const LAB_TESTS = [
   {
     id: "display-fonts",
@@ -764,9 +875,20 @@ export default function StyleGuidePage() {
   const [quickTab, setQuickTab] = useState("all");
   const [condensed, setCondensed] = useState(false);
   const [filtersModalOpen, setFiltersModalOpen] = useState(false);
+  const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
+  const [showExpiredAlert, setShowExpiredAlert] = useState(false);
+  const [sessionFeedback, setSessionFeedback] = useState(null);
   const [ordersDrawerOpen, setOrdersDrawerOpen] = useState(false);
   const [page, setPage] = useState(1);
   const pageSize = 5;
+  const sessionFeedbackTimerRef = useRef(null);
+  const sessionAlertTimerRef = useRef(null);
+  const [inputValue, setInputValue] = useState("");
+  const [emailValue, setEmailValue] = useState("");
+  const [passwordValue, setPasswordValue] = useState("");
+  const [textareaValue, setTextareaValue] = useState("");
+  const [selectValue, setSelectValue] = useState("");
+  const [selectValue2, setSelectValue2] = useState("");
 
   const handleTabChange = (tabId) => {
     const basePath = tabId === DEFAULT_TAB ? "/style-guide" : `/style-guide/${tabId}`;
@@ -796,8 +918,35 @@ export default function StyleGuidePage() {
     setComputedValues({ colors, spacings });
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (sessionFeedbackTimerRef.current) {
+        clearTimeout(sessionFeedbackTimerRef.current);
+      }
+      if (sessionAlertTimerRef.current) {
+        clearTimeout(sessionAlertTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleUsageToggle = (key) => {
     setUsagePanel((prev) => (prev === key ? null : key));
+  };
+
+  const triggerSessionFeedback = (variant, title, description) => {
+    if (sessionFeedbackTimerRef.current) {
+      clearTimeout(sessionFeedbackTimerRef.current);
+    }
+    setSessionFeedback({ variant, title, description });
+    sessionFeedbackTimerRef.current = setTimeout(() => setSessionFeedback(null), 6000);
+  };
+
+  const triggerExpiredAlert = () => {
+    if (sessionAlertTimerRef.current) {
+      clearTimeout(sessionAlertTimerRef.current);
+    }
+    setShowExpiredAlert(true);
+    sessionAlertTimerRef.current = setTimeout(() => setShowExpiredAlert(false), 300000);
   };
 
   const [sectionTheme, setSectionTheme] = useState("light");
@@ -1064,6 +1213,15 @@ export default function StyleGuidePage() {
     }
 
     if (activeTab === "buttons") {
+      const buttonPropertyDefinitions = [
+        { key: "appearance", label: "Appearance", values: BUTTON_APPEARANCES },
+        { key: "intent", label: "Intent", values: BUTTON_INTENTS },
+        { key: "size", label: "Size", values: BUTTON_SIZES },
+        { key: "shape", label: "Shape", values: BUTTON_SHAPES },
+        { key: "motion", label: "Motion", values: BUTTON_MOTION_EFFECTS },
+        { key: "width", label: "Width", values: BUTTON_WIDTHS },
+      ];
+
       return (
         <div className="space-y-6">
           <section className={sectionClass("gap-6")}>
@@ -1076,55 +1234,36 @@ export default function StyleGuidePage() {
 
             <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5">
               <h3 className="text-lg font-semibold text-[var(--color-primary1)]">Propiedades disponibles</h3>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Appearance</p>
-                  <div className="flex flex-wrap gap-2">
-                    {BUTTON_APPEARANCES.map((app) => (
-                      <code key={app} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{app}</code>
+              <div className="rounded-2xl border border-[var(--color-border-light)] bg-[var(--color-neutral1)]">
+                <table className="w-full border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-[var(--color-border)] bg-white/70 text-[0.7rem] uppercase tracking-[0.3rem] text-[var(--color-secondary2)]">
+                      <th className="w-32 px-4 py-2 text-left font-semibold">Propiedad</th>
+                      <th className="px-4 py-2 text-left font-semibold">Opciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {buttonPropertyDefinitions.map(({ key, label, values }) => (
+                      <tr key={key} className="border-b border-[var(--color-border-light)] last:border-none">
+                        <th scope="row" className="w-32 px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--color-secondary2)]">
+                          {label}
+                        </th>
+                        <td className="px-4 py-3">
+                          <div className="flex flex-wrap gap-2">
+                            {values.map((value) => (
+                              <code
+                                key={value}
+                                className="rounded-lg border border-[var(--color-border)] bg-white/80 px-2 py-1 text-xs text-[var(--color-primary2)]"
+                              >
+                                {value}
+                              </code>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
                     ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Intent</p>
-                  <div className="flex flex-wrap gap-2">
-                    {BUTTON_INTENTS.map((intent) => (
-                      <code key={intent} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{intent}</code>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Size</p>
-                  <div className="flex flex-wrap gap-2">
-                    {BUTTON_SIZES.map((size) => (
-                      <code key={size} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{size}</code>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Shape</p>
-                  <div className="flex flex-wrap gap-2">
-                    {BUTTON_SHAPES.map((shape) => (
-                      <code key={shape} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{shape}</code>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Motion</p>
-                  <div className="flex flex-wrap gap-2">
-                    {BUTTON_MOTION_EFFECTS.map((motion) => (
-                      <code key={motion} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{motion}</code>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-secondary2)]">Width</p>
-                  <div className="flex flex-wrap gap-2">
-                    {BUTTON_WIDTHS.map((width) => (
-                      <code key={width} className="rounded-lg bg-[var(--color-neutral1)] px-2 py-1 text-xs text-[var(--color-primary2)]">{width}</code>
-                    ))}
-                  </div>
-                </div>
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -1257,13 +1396,6 @@ export default function StyleGuidePage() {
     }
 
     if (activeTab === "forms") {
-      const [inputValue, setInputValue] = useState("");
-      const [emailValue, setEmailValue] = useState("");
-      const [passwordValue, setPasswordValue] = useState("");
-      const [textareaValue, setTextareaValue] = useState("");
-      const [selectValue, setSelectValue] = useState("");
-      const [selectValue2, setSelectValue2] = useState("");
-
       return (
         <div className="space-y-6">
           <section className={sectionClass("gap-6")}>
@@ -2097,6 +2229,10 @@ export default function StyleGuidePage() {
       );
     }
 
+    if (activeTab === "tables") {
+      return <TablesShowcase />;
+    }
+
     if (activeTab === "modulos") {
       return (
         <div className="space-y-6">
@@ -2206,16 +2342,77 @@ export default function StyleGuidePage() {
         <div className="space-y-6">
           <section className={sectionClass("gap-6")}>
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold text-[var(--color-primary1)]">Lab de estilos</h2>
+              <h2 className="text-xl font-semibold text-[var(--color-primary1)]">Mapa de error handling</h2>
               <p className="text-sm text-[var(--color-secondary2)]">
-                Espacio para testear combinaciones reales de componentes antes de llevarlas al diseño final.
+                Checklist vivo de todas las rutas de manejo de errores que hoy muestra el front y qué las dispara.
               </p>
             </div>
+            <div className="grid gap-4">
+              {ERROR_HANDLERS.map((handler) => (
+                <article
+                  key={handler.id}
+                  className="flex flex-col gap-4 rounded-2xl border border-[var(--color-border)] bg-white/95 p-5 shadow-sm"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <p className="text-xs uppercase tracking-[0.35rem] text-[var(--color-secondary2)]">Handler</p>
+                      <h3 className="text-lg font-semibold text-[var(--color-primary1)]">{handler.title}</h3>
+                      <p className="text-sm text-[var(--color-secondary2)]">
+                        Superficie real donde se muestra al usuario.
+                      </p>
+                    </div>
+                    <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-neutral1)] px-3 py-1 text-xs font-semibold text-[var(--color-secondary2)]">
+                      {handler.location}
+                    </span>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <p className="text-xs uppercase tracking-[0.3rem] text-[var(--color-secondary2)]">
+                        Dónde/para qué se usa
+                      </p>
+                      <ul className="space-y-1 text-sm text-[var(--color-text)]">
+                        {handler.usage.map((item) => (
+                          <li key={`${handler.id}-usage-${item}`} className="leading-relaxed">
+                            • {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-xs uppercase tracking-[0.3rem] text-[var(--color-secondary2)]">
+                        Qué lo gatilla
+                      </p>
+                      <ul className="space-y-1 text-sm text-[var(--color-text)]">
+                        {handler.triggers.map((item) => (
+                          <li key={`${handler.id}-triggers-${item}`} className="leading-relaxed">
+                            • {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className={sectionClass("gap-6")}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold text-[var(--color-primary1)]">Archivo de Lab (contenido previo)</h2>
+                <p className="text-sm text-[var(--color-secondary2)]">
+                  Experimentos antiguos que queremos conservar como referencia rápida.
+                </p>
+              </div>
+              <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-neutral1)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.3rem] text-[var(--color-secondary2)]">
+                Archivado
+              </span>
+            </div>
             <Accordion
-              sections={LAB_TESTS.map((test, index) => ({
+              sections={LAB_TESTS.map((test) => ({
                 key: test.id,
                 title: test.title,
-                defaultOpen: index === 0,
+                defaultOpen: false,
                 render: () => (
                   <div className="space-y-4">
                     <p className="text-sm text-[var(--color-secondary2)]">{test.description}</p>
@@ -2283,6 +2480,12 @@ export default function StyleGuidePage() {
     usagePanel,
     sectionBgClass.bg,
     sectionBgClass.border,
+    inputValue,
+    emailValue,
+    passwordValue,
+    textareaValue,
+    selectValue,
+    selectValue2,
     // sectionClass se define dentro del useMemo
     tableColumns,
     tableData,
@@ -2346,6 +2549,44 @@ export default function StyleGuidePage() {
 
         {tabContent}
 
+        {/* Session Expiration Dialog Demo */}
+        <div className="space-y-6 rounded-3xl border border-[var(--color-border)] bg-white/80 p-6 shadow-lg">
+          <div>
+            <h2 className="mb-2 text-xl font-semibold text-[var(--color-primary1)]">Session Expiration Dialog</h2>
+            <p className="mb-4 text-sm text-[var(--color-secondary2)]">
+              Modal que aparece cuando la sesión está por expirar (5 min antes). Solo se muestra a clientes, no a admins.
+            </p>
+            <Button onClick={() => setSessionDialogOpen(true)}>
+              Abrir Modal de Sesión
+            </Button>
+          </div>
+          
+          <div className="border-t border-[var(--color-border)] pt-4">
+            <h3 className="mb-2 text-lg font-semibold text-[var(--color-primary1)]">Alerta de Sesión Expirada</h3>
+            <p className="mb-4 text-sm text-[var(--color-secondary2)]">
+              Alerta que aparece después del logout automático cuando la sesión expira. En esta demo se mantiene visible 5 minutos o hasta que la cierres.
+            </p>
+            <Button 
+              appearance="outline"
+              onClick={triggerExpiredAlert}
+            >
+              Mostrar alerta (5 min)
+            </Button>
+          </div>
+
+          {sessionFeedback && (
+            <Alert
+              variant={sessionFeedback.variant}
+              title={sessionFeedback.title}
+              dismissible
+              onDismiss={() => setSessionFeedback(null)}
+              className="border-[color:var(--color-border)] bg-[var(--color-neutral2)]/90 shadow-inner"
+            >
+              {sessionFeedback.description}
+            </Alert>
+          )}
+        </div>
+
         {/* Filtros avanzados (Dialog global) */}
         <Dialog open={filtersModalOpen} onOpenChange={setFiltersModalOpen}>
           <DialogContent>
@@ -2384,6 +2625,44 @@ export default function StyleGuidePage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Session Expiration Dialog */}
+        <SessionExpirationDialog
+          open={sessionDialogOpen}
+          minutesRemaining={5}
+          onExtend={() => {
+            triggerSessionFeedback(
+              "success",
+              "Sesión extendida",
+              "Mantendremos tu sesión activa durante 30 minutos adicionales."
+            );
+            setSessionDialogOpen(false);
+          }}
+          onLogout={() => {
+            triggerSessionFeedback(
+              "info",
+              "Sesión cerrada",
+              "Cerramos tu sesión de forma segura. Puedes volver a iniciar sesión cuando lo necesites."
+            );
+            setSessionDialogOpen(false);
+          }}
+          onDismiss={() => setSessionDialogOpen(false)}
+        />
+
+        {/* Session Expired Alert Demo */}
+        {showExpiredAlert && (
+          <div className="fixed left-1/2 top-[80px] z-[9999] w-full max-w-lg -translate-x-1/2 px-4">
+            <Alert
+              variant="warning"
+              title="Sesión expirada"
+              dismissible
+              onDismiss={() => setShowExpiredAlert(false)}
+              className="border-[color:var(--color-warning)]/50 bg-[var(--color-warning-veil)] backdrop-blur-lg shadow-lg"
+            >
+              Tu sesión ha expirado por inactividad. Por favor, inicia sesión nuevamente.
+            </Alert>
+          </div>
+        )}
       </div>
     </div>
   );

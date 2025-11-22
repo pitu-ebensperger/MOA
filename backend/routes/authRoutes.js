@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, getUser } from "../src/controllers/authController.js";
+import { loginUser, getUser, refreshToken } from "../src/controllers/authController.js";
 import { 
   requestPasswordReset, 
   resetPassword 
@@ -17,6 +17,9 @@ router.get("/auth/perfil", verifyToken, getUser);
 
 // Alias singular /usuario (más semántico que plural, devuelve 1 usuario)
 router.get("/usuario", verifyToken, getUser);
+
+// Renovar token JWT (extender sesión)
+router.post("/auth/refresh-token", verifyToken, refreshToken);
 
 // Password reset endpoints
 router.post("/api/auth/request-password-reset", requestPasswordReset);

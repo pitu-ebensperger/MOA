@@ -4,7 +4,7 @@ import {
   ArrowRight,
   Trash2,
   ShoppingCart,
-} from "@icons/lucide";
+} from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
 import { Price } from "@/components/data-display/Price.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"

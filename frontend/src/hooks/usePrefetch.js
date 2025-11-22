@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
 
 /**
  * Hook para precargar componentes lazy antes de la navegación
@@ -15,10 +15,11 @@ import { useCallback } from 'react'
  * </Link>
  */
 export const usePrefetch = () => {
-  const prefetchedModules = new Set()
+  const prefetchedModulesRef = useRef(new Set())
 
   const prefetch = useCallback((importFn) => {
     const moduleKey = importFn.toString()
+    const prefetchedModules = prefetchedModulesRef.current
     
     // Evitar cargar el mismo módulo múltiples veces
     if (prefetchedModules.has(moduleKey)) {
@@ -32,7 +33,7 @@ export const usePrefetch = () => {
       console.warn('Error precargando módulo:', error)
       prefetchedModules.delete(moduleKey)
     })
-  }, [])
+  }, [prefetchedModulesRef])
 
   return prefetch
 }

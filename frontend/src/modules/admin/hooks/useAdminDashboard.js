@@ -45,6 +45,11 @@ export function useAdminDashboard() {
         staleTime: DASHBOARD_STALE_TIME,
       },
       {
+        queryKey: ["admin-customer-registrations"],
+        queryFn: () => analyticsApi.getCustomerRegistrations({ days: 30 }),
+        staleTime: DASHBOARD_STALE_TIME,
+      },
+      {
         queryKey: ["admin-recent-orders"],
         queryFn: () => ordersApi.list({ limit: 4, page: 1 }),
         staleTime: DASHBOARD_STALE_TIME * 0.5, // More frequent updates for recent orders
@@ -60,6 +65,7 @@ export function useAdminDashboard() {
     categoryAnalyticsQuery,
     stockAnalyticsQuery,
     orderDistributionQuery,
+    customerRegistrationsQuery,
     recentOrdersQuery,
   ] = queries;
 
@@ -71,13 +77,23 @@ export function useAdminDashboard() {
   const dashboardData = useMemo(() => {
     if (isLoading) return null;
 
-    const metrics = dashboardMetricsQuery.data || {};
-    const salesData = salesAnalyticsQuery.data || {};
-    const conversionData = conversionMetricsQuery.data || {};
-    const topProducts = topProductsQuery.data || [];
-    const categoryData = categoryAnalyticsQuery.data || [];
-    const stockData = stockAnalyticsQuery.data || {};
-    const orderDistribution = orderDistributionQuery.data || [];
+    const unwrap = (payload, fallback) => {
+      if (!payload) return fallback;
+      if (Array.isArray(payload)) return payload;
+      if (typeof payload === "object" && payload !== null && Object.prototype.hasOwnProperty.call(payload, "data")) {
+        return payload.data ?? fallback;
+      }
+      return payload;
+    };
+
+    const metrics = unwrap(dashboardMetricsQuery.data, {});
+    const salesData = unwrap(salesAnalyticsQuery.data, {});
+    const conversionData = unwrap(conversionMetricsQuery.data, {});
+    const topProducts = unwrap(topProductsQuery.data, []);
+    const categoryData = unwrap(categoryAnalyticsQuery.data, []);
+    const stockData = unwrap(stockAnalyticsQuery.data, {});
+    const orderDistribution = unwrap(orderDistributionQuery.data, []);
+    const customerRegistrations = unwrap(customerRegistrationsQuery.data, []);
     const recentOrders = recentOrdersQuery.data?.items || [];
 
     return {
@@ -89,7 +105,11 @@ export function useAdminDashboard() {
         totalCustomers: metrics.totalCustomers || 0,
         monthlyRevenue: salesData.currentMonth?.revenue || 0,
         previousMonthRevenue: salesData.previousMonth?.revenue || 0,
+        previousMonthOrders: salesData.previousMonth?.orders || 0,
+        previousMonthCustomers: salesData.previousMonth?.customers || 0,
         growthPercentage: salesData.growthPercentage || 0,
+        // Added order status counts inside metrics for unified access in UI
+        orderStatusCounts: metrics.orderStatusCounts || {},
       },
 
       // Stock analytics
@@ -135,9 +155,9 @@ export function useAdminDashboard() {
       categories: categoryData.map(category => ({
         id: category.id,
         name: category.name,
-        sales: category.totalSales || 0,
-        revenue: category.totalRevenue || 0,
-        orders: category.orderCount || 0,
+        sales: category.sales || 0,
+        revenue: category.revenue || 0,
+        orders: category.orders || 0,
         conversionRate: category.conversionRate || 0,
       })),
 
@@ -154,6 +174,12 @@ export function useAdminDashboard() {
 
       // Order status distribution
       orderStatusCounts: metrics.orderStatusCounts || {},
+
+      // Customer registrations (last 30 days)
+      customerRegistrations: customerRegistrations.map(item => ({
+        date: item.date,
+        registrations: item.registrations || 0,
+      })),
     };
   }, [
     isLoading,
@@ -165,6 +191,7 @@ export function useAdminDashboard() {
     stockAnalyticsQuery.data,
     orderDistributionQuery.data,
     recentOrdersQuery.data,
+    customerRegistrationsQuery.data,
   ]);
 
   // Refetch all data

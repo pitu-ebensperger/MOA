@@ -44,3 +44,16 @@ export function DropdownMenuItem({ children, onSelect, inset, className }) {
 export function DropdownMenuSeparator() {
   return <Dropdown.Separator className="my-1 h-px bg-(--color-border)" />;
 }
+
+export function DropdownMenuLabel({ children, className }) {
+  return (
+    <Dropdown.Label
+      className={cx(
+        "px-2.5 py-1.5 text-xs font-semibold text-(--color-secondary2)",
+        className
+      )}
+    >
+      {children}
+    </Dropdown.Label>
+  );
+}

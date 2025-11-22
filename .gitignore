@@ -30,7 +30,16 @@ backend/scripts/**.js
 
 **/styleguide/StyleGuidePage.jsx
 
+
 .copilot-temp
+vscode/
+.githhub/
+.github/copilot-instructions.md
+.qodo/
+.TODO.md
+docs/**.md
+docs/*.md
+docs/***.md
 
 docs/misDOCS/*.md
 dist/
@@ -38,8 +47,7 @@ frontend/dist/
 package-lock.json
 **/package-lock.json
 
-backend/backen.log
+backend/backend.log
 
-vscode/
 
-.TODO.md
+

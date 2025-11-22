@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { MapPin, Plus, Trash2, Star, StarOff, Edit } from "@icons/lucide";
+import { MapPin, Plus, Trash2, Star, StarOff, Edit } from "lucide-react";
 import { useAddresses } from '@/context/useAddresses.js'
 import { Button } from '@/components/shadcn/ui/button.jsx'
 import {
@@ -52,12 +52,14 @@ const addressShape = PropTypes.shape({
   departamento: PropTypes.string,
   comuna: PropTypes.string,
   ciudad: PropTypes.string,
-  region: PropTypes.string,
+  region: PropTypes.oneOf(REGIONES),
   codigo_postal: PropTypes.string,
   referencia: PropTypes.string,
   etiqueta: PropTypes.string,
   predeterminada: PropTypes.bool,
 });
+
+const noopAsync = async () => {};
 
 const AddressCard = ({ address, onEdit, onDelete, onSetDefault }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -314,8 +316,24 @@ AddressForm.defaultProps = {
   address: null,
 };
 
-export const AddressesSection = () => {
-  const { addresses, loading, error, addAddress, updateAddress, setDefault, removeAddress } = useAddresses();
+export const AddressesSection = ({
+  addresses: controlledAddresses,
+  loading: controlledLoading,
+  error: controlledError,
+  addAddress: controlledAddAddress,
+  updateAddress: controlledUpdateAddress,
+  setDefault: controlledSetDefault,
+  removeAddress: controlledRemoveAddress,
+} = {}) => {
+  const addressesContext = useAddresses();
+
+  const addresses = controlledAddresses ?? addressesContext?.addresses ?? [];
+  const loading = controlledLoading ?? addressesContext?.loading ?? false;
+  const error = controlledError ?? addressesContext?.error ?? null;
+  const addAddress = controlledAddAddress ?? addressesContext?.addAddress ?? noopAsync;
+  const updateAddress = controlledUpdateAddress ?? addressesContext?.updateAddress ?? noopAsync;
+  const setDefault = controlledSetDefault ?? addressesContext?.setDefault ?? noopAsync;
+  const removeAddress = controlledRemoveAddress ?? addressesContext?.removeAddress ?? noopAsync;
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
 
@@ -436,4 +454,24 @@ export const AddressesSection = () => {
       )}
     </div>
   );
+};
+
+AddressesSection.propTypes = {
+  addresses: PropTypes.arrayOf(addressShape),
+  loading: PropTypes.bool,
+  error: PropTypes.oneOfType([PropTypes.string, PropTypes.node, PropTypes.instanceOf(Error)]),
+  addAddress: PropTypes.func,
+  updateAddress: PropTypes.func,
+  setDefault: PropTypes.func,
+  removeAddress: PropTypes.func,
+};
+
+AddressesSection.defaultProps = {
+  addresses: undefined,
+  loading: undefined,
+  error: undefined,
+  addAddress: undefined,
+  updateAddress: undefined,
+  setDefault: undefined,
+  removeAddress: undefined,
 };

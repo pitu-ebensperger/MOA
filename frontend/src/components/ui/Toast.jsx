@@ -1,49 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { CheckCircle, AlertTriangle, XCircle, Info, X } from "@icons/lucide";
+import { CheckCircle, AlertTriangle, XCircle, Info, X } from "lucide-react";
 import { cx } from "@/utils/ui-helpers.js";
-
-/* Toast System -------------------------------------------------------------------------- */
-
-class ToastManager {
-  constructor() {
-    this.toasts = [];
-    this.listeners = [];
-  }
-
-  subscribe(listener) {
-    this.listeners.push(listener);
-    return () => {
-      this.listeners = this.listeners.filter((l) => l !== listener);
-    };
-  }
-
-  notify() {
-    for (const listener of this.listeners) {
-      listener(this.toasts);
-    }
-  }
-
-  show(toast) {
-    const id = Date.now() + Math.random();
-    const newToast = { ...toast, id };
-    this.toasts = [...this.toasts, newToast];
-    this.notify();
-    return id;
-  }
-
-  dismiss(id) {
-    this.toasts = this.toasts.filter((t) => t.id !== id);
-    this.notify();
-  }
-
-  dismissAll() {
-    this.toasts = [];
-    this.notify();
-  }
-}
-
-const toastManager = new ToastManager();
+import { toastManager } from "./toastService.js";
 
 /* Toast Component -------------------------------------------------------------------------- */
 
@@ -83,21 +42,22 @@ function ToastItem({ toast, onDismiss }) {
   const config = VARIANT_CONFIG[toast.variant] || VARIANT_CONFIG.info;
   const IconComponent = toast.icon || config.icon;
 
-  useEffect(() => {
-    if (toast.duration !== Infinity) {
-      const timer = setTimeout(() => {
-        handleDismiss();
-      }, toast.duration || 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast.duration]);
-
-  const handleDismiss = () => {
+  const handleDismiss = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
       onDismiss(toast.id);
     }, 300);
-  };
+  }, [onDismiss, toast.id]);
+
+  useEffect(() => {
+    if (toast.duration === Infinity) {
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      handleDismiss();
+    }, toast.duration || 3000);
+    return () => clearTimeout(timer);
+  }, [toast.duration, handleDismiss]);
 
   return (
     <div
@@ -178,72 +138,4 @@ export function ToastContainer() {
     </div>,
     document.body
   );
-}
-
-/* Toast API -------------------------------------------------------------------------- */
-
-export const toast = {
-  success: (message, options = {}) => {
-    return toastManager.show({
-      variant: "success",
-      message,
-      ...options,
-    });
-  },
-
-  error: (message, options = {}) => {
-    return toastManager.show({
-      variant: "error",
-      message,
-      duration: 4000,
-      ...options,
-    });
-  },
-
-  warning: (message, options = {}) => {
-    return toastManager.show({
-      variant: "warning",
-      message,
-      ...options,
-    });
-  },
-
-  info: (message, options = {}) => {
-    return toastManager.show({
-      variant: "info",
-      message,
-      ...options,
-    });
-  },
-
-  /**
-   * Muestra un toast personalizado
-   * @param {Object} options - { variant, title, message, duration, icon }
-   */
-  custom: (options) => {
-    return toastManager.show(options);
-  },
-
-  //Cierra un toast específico
-  dismiss: (id) => {
-    toastManager.dismiss(id);
-  },
-
-  // Cierra todos los toasts 
-  dismissAll: () => {
-    toastManager.dismissAll();
-  },
-};
-
-/* Hook useToast -------------------------------------------------------------------------- */
-
-// Hook para usar toasts en componentes
-export function useToast() {
-  return {
-    toast,
-    success: toast.success,
-    error: toast.error,
-    warning: toast.warning,
-    info: toast.info,
-  };
 }

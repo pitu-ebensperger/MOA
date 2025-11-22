@@ -2,6 +2,8 @@ import { env } from "@/config/env.js"
 
 const DEFAULT_TIMEOUT = env.API_TIMEOUT ?? 15000;
 const TOKEN_STORAGE_KEY = "moa.accessToken";
+const DEFAULT_429_DELAY_MS = 1000;
+const DEFAULT_MAX_429_RETRIES = 3;
 
 // token + handler global 401 (los setea AuthContext)
 let tokenGetter = () => null;
@@ -46,8 +48,21 @@ const getStoredToken = () => {
   return null;
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 // Petición base (fetch)
-async function request(path, { method = "GET", data, headers = {}, auth = null, timeout = DEFAULT_TIMEOUT, responseType = "json", params } = {}) {
+async function request(path, {
+  method = "GET",
+  data,
+  headers = {},
+  auth = null,
+  timeout = DEFAULT_TIMEOUT,
+  responseType = "json",
+  params,
+  retry429Attempt = 0,
+  max429Retries = DEFAULT_MAX_429_RETRIES,
+  retry429Delay = DEFAULT_429_DELAY_MS,
+} = {}) {
   // Sin soporte de mocks: siempre solicitar al backend.
 
   const baseURL = env.API_BASE_URL;
@@ -73,9 +88,11 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(new Error("Request timeout")), timeout);
 
+  const requestHeaders = { ...headers };
+
   const opts = {
     method,
-    headers: { ...headers },
+    headers: requestHeaders,
     signal: controller.signal,
   };
 
@@ -85,7 +102,7 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
       opts.body = data;
       // no seteamos Content-Type: el browser lo pone (boundary, etc.)
     } else {
-      opts.headers["Content-Type"] = "application/json";
+      requestHeaders["Content-Type"] = "application/json";
       opts.body = typeof data === "string" ? data : JSON.stringify(data);
     }
   }
@@ -118,7 +135,7 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
       token = getStoredToken();
     }
     if (token && typeof token === "string" && token.length > 0) {
-      opts.headers.Authorization = `Bearer ${token}`;
+      requestHeaders.Authorization = `Bearer ${token}`;
     }
   }
 
@@ -170,6 +187,25 @@ async function request(path, { method = "GET", data, headers = {}, auth = null, 
     const message = parsedJson?.ok && parsedJson.value?.message
       ? parsedJson.value.message
       : rawText || `HTTP ${res.status}`;
+    if (res.status === 429 && retry429Attempt < max429Retries) {
+      const retryAfterHeader = res.headers?.get?.("Retry-After");
+      const retryDelayMs = retryAfterHeader
+        ? Number(retryAfterHeader) * 1000
+        : retry429Delay;
+      await sleep(Number.isFinite(retryDelayMs) && retryDelayMs > 0 ? retryDelayMs : DEFAULT_429_DELAY_MS);
+      return request(path, {
+        method,
+        data,
+        headers,
+        auth,
+        timeout,
+        responseType,
+        params,
+        retry429Attempt: retry429Attempt + 1,
+        max429Retries,
+        retry429Delay,
+      });
+    }
     const err = new Error(message);
     err.status = res.status;
     err.data = errorData;

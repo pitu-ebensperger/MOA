@@ -10,20 +10,25 @@ import {
   formatearFecha,
   mensajeTiempoEntrega
 } from "@/utils/orderTracking.js";
-import { Mail, Phone, Store } from "@icons/lucide";
+import { Mail, Phone, Store } from "lucide-react";
 import { useStoreConfig } from "@/hooks/useStoreConfig.js";
 
+const estadoOrdenKeys = Object.keys(ESTADOS_ORDEN);
+const metodoDespachoKeys = Object.keys(METODOS_DESPACHO);
+
 const timelineEntryShape = PropTypes.shape({
-  estado: PropTypes.string,
+  estado: PropTypes.string.isRequired,
   fecha: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+  comentario: PropTypes.string,
 });
 
 const orderShape = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   order_code: PropTypes.string,
-  estado_envio: PropTypes.string,
-  estado: PropTypes.string,
-  metodo_despacho: PropTypes.oneOf(['standard', 'express', 'retiro']),
+  estado_envio: PropTypes.oneOf(estadoOrdenKeys),
+  estado: PropTypes.oneOf(estadoOrdenKeys),
+  estado_pago: PropTypes.string,
+  metodo_despacho: PropTypes.oneOf(metodoDespachoKeys),
   fecha_entrega_estimada: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   fecha_entrega_real: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   creado_en: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
@@ -232,4 +237,8 @@ export default function OrderStatusTimeline({ order }) {
 
 OrderStatusTimeline.propTypes = {
   order: orderShape,
+};
+
+OrderStatusTimeline.defaultProps = {
+  order: null,
 };

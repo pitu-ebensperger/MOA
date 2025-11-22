@@ -58,16 +58,12 @@ export {
 export { Skeleton } from "./Skeleton.jsx";
 
 // Messaging System (Toast, Confirm, etc.)
-export {
-  toast,
-  useToast,
-  ToastContainer,
-} from "./Toast.jsx";
-export {
-  confirm,
-  useConfirm,
-  ConfirmDialogContainer,
-} from "./ConfirmDialog.jsx";
+export { ToastContainer } from "./Toast.jsx";
+export { toast } from "./toastService.js";
+export { useToast } from "./useToast.js";
+export { ConfirmDialogContainer } from "./ConfirmDialog.jsx";
+export { confirm } from "./confirmDialogService.js";
+export { useConfirm } from "./useConfirm.js";
 export { MessageProvider } from "./MessageProvider.jsx";
 
 // Layout & Structure
@@ -99,7 +95,7 @@ export {
 export { Accordion, AccordionItem } from "./Accordion.jsx";
 export { Modal } from "./Modal.jsx";
 export { Dropdown } from "./DropdownMenu.jsx";
-export { Tooltip, TooltipNeutral, TooltipPrimary, TooltipSoft } from "./Tooltip.jsx";
+export { Tooltip, TooltipDark, TooltipNeutral, TooltipLight, TooltipPrimary } from "./Tooltip.jsx";
 
 // Navigation
 export { Pagination } from "./Pagination.jsx";

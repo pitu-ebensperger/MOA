@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
 import { useReactTable, getCoreRowModel, getSortedRowModel, getPaginationRowModel, flexRender } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronUp, ChevronDown, ListFilter, Pencil, Check, X } from "@icons/lucide";
+import { ArrowUpDown, ChevronUp, ChevronDown, ListFilter, Pencil, Check, X } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination.jsx"
 import { IconButton } from "@/components/ui/Button.jsx"
 import { InputSm } from "@/components/ui/Input.jsx"
@@ -78,13 +78,11 @@ export function DataTableV2({
             onAction: () => action.onAction?.(row.original),
           }));
           return (
-            <div className="px-1 py-2 flex justify-end">
-              <ResponsiveRowActions
-                actions={preparedActions}
-                menuLabel="Acciones del registro"
-                menuContentClassName="w-44"
-              />
-            </div>
+            <ResponsiveRowActions
+              actions={preparedActions}
+              menuLabel="Acciones del registro"
+              menuContentClassName="w-44"
+            />
           );
         },
       });
@@ -232,25 +230,32 @@ export function DataTableV2({
                     const metaAlign = meta.align;
                     const align = metaAlign === "right" ? "text-right" : metaAlign === "center" ? "text-center" : "text-left";
                     const isEditing = editable && editingRows[row.id] && meta.editable;
+                    const isActionsCell = cell.column.id === "_actions";
                     return (
-                      <td key={cell.id} className={`px-3 ${condensed ? "py-1.5" : "py-2.5"} ${align}`}>{isEditing ? (
-                        <div className="flex items-center gap-1">
-                          <InputSm value={editingRows[row.id][cell.column.id] ?? cell.getValue() ?? ""} onChange={(e) => { const value = e.target.value; setEditingRows((prev) => ({ ...prev, [row.id]: { ...prev[row.id], [cell.column.id]: value }, })); }} />
-                          <IconButton aria-label="Guardar" intent="primary" size="xs" icon={<Check size={14} />} onClick={() => {
-                            const changes = editingRows[row.id] ?? {};
-                            if (onCommitEdit && Object.keys(changes).length) {
-                              onCommitEdit(row.original, changes);
-                            }
-                            setEditingRows((prev) => { const next = { ...prev }; delete next[row.id]; return next; });
-                          }} />
-                          <IconButton aria-label="Cancelar" intent="neutral" size="xs" icon={<X size={14} />} onClick={() => { setEditingRows((prev) => { const next = { ...prev }; delete next[row.id]; return next; }); }} />
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          {editable && meta.editable && (<IconButton aria-label="Editar" size="xs" intent="neutral" icon={<Pencil size={14} />} onClick={() => { setEditingRows((prev) => ({ ...prev, [row.id]: prev[row.id] || {}, })); }} />)}
-                        </div>
-                      )}</td>
+                      <td key={cell.id} className={`px-3 ${condensed ? "py-1.5" : "py-2.5"} ${isActionsCell ? "" : align}`}>
+                        {isActionsCell ? (
+                          <div className="flex justify-end">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </div>
+                        ) : isEditing ? (
+                          <div className="flex items-center gap-1">
+                            <InputSm value={editingRows[row.id][cell.column.id] ?? cell.getValue() ?? ""} onChange={(e) => { const value = e.target.value; setEditingRows((prev) => ({ ...prev, [row.id]: { ...prev[row.id], [cell.column.id]: value }, })); }} />
+                            <IconButton aria-label="Guardar" intent="primary" size="xs" icon={<Check size={14} />} onClick={() => {
+                              const changes = editingRows[row.id] ?? {};
+                              if (onCommitEdit && Object.keys(changes).length) {
+                                onCommitEdit(row.original, changes);
+                              }
+                              setEditingRows((prev) => { const next = { ...prev }; delete next[row.id]; return next; });
+                            }} />
+                            <IconButton aria-label="Cancelar" intent="neutral" size="xs" icon={<X size={14} />} onClick={() => { setEditingRows((prev) => { const next = { ...prev }; delete next[row.id]; return next; }); }} />
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {editable && meta.editable && (<IconButton aria-label="Editar" size="xs" intent="neutral" icon={<Pencil size={14} />} onClick={() => { setEditingRows((prev) => ({ ...prev, [row.id]: prev[row.id] || {}, })); }} />)}
+                          </div>
+                        )}
+                      </td>
                     );
                   })}
                 </tr>

@@ -1,14 +1,19 @@
 import { useState, useEffect } from "react";
 import UserInfoSection from '../components/UserInfoSection.jsx';
 import WishlistSection from '../components/WishlistSection.jsx';
-import OrderSection from '../components/MyOrdersSection.jsx';
+import MyOrdersSection from '../components/MyOrdersSection.jsx';
 import { useUserOrders } from '../../../hooks/useUserOrders.js';
 import { useAuth } from "../../../context/auth-context.js";
 import { wishlistApi } from '../../../services/wishlist.api.js';
+import { useErrorHandler } from '@/hooks/useErrorHandler.js';
 
 export const ProfilePage = () => {
   const { token } = useAuth();
   const [wishlistItems, setWishlistItems] = useState([]);
+  const { handleError } = useErrorHandler({
+    showAlert: false,
+    defaultMessage: 'No pudimos recuperar tu información. Intenta nuevamente.',
+  });
 
   // Limpieza de seguridad: remover overlays trabados al montar
   useEffect(() => {
@@ -25,8 +30,8 @@ export const ProfilePage = () => {
       .then(data => {
         setWishlistItems(data.items || []);
       })
-      .catch(err => console.error("Error cargando wishlist:", err));
-  }, [token]);
+      .catch(err => handleError(err, 'No pudimos cargar tus favoritos'));
+  }, [token, handleError]);
 
   const handleRemoveFromWishlist = (productId) => {
     setWishlistItems(prev => prev.filter(item => 
@@ -41,6 +46,12 @@ export const ProfilePage = () => {
     error,
   } = useUserOrders({ limit: 4 });
 
+  useEffect(() => {
+    if (error) {
+      handleError(error, 'No pudimos cargar tus últimas órdenes');
+    }
+  }, [error, handleError]);
+
   return (
     <div className="min-h-screen bg-(--color-light) pt-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
@@ -54,7 +65,7 @@ export const ProfilePage = () => {
             onRemove={handleRemoveFromWishlist}
           />
 
-          <OrderSection 
+          <MyOrdersSection 
             orders={orders} 
             isLoading={isLoading} 
             error={error} 
@@ -64,4 +75,3 @@ export const ProfilePage = () => {
     </div>
   );
 };
-

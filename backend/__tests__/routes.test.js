@@ -12,6 +12,14 @@ describe("TEST API – MOA", () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('message', 'API funcionando');
   });
+  
+    describe('Admin order status endpoints docs presence', () => {
+      it('Should have admin routes registered', async () => {
+        const res = await request(app).get('/admin/analytics/dashboard');
+        // Expect 401/403 because no auth; just ensure route exists (not 404)
+        expect([401,403]).toContain(res.status);
+      });
+    });
 
   /* TESTS DE AUTENTICACIÓN  ------------------------------------------------------------- */
 

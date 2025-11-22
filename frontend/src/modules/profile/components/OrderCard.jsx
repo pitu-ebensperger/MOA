@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight } from "@icons/lucide";
+import { ChevronRight } from "lucide-react";
 import { formatCurrencyCLP } from "@/utils/currency.js";
 
 const OrderCard = ({ order }) => {

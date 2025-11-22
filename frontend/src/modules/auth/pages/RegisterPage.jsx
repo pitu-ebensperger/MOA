@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User as UserIcon, Phone } from "@icons/lucide";
-import { useAuth } from '@/context/auth-context.js'
+import { Mail, Lock, User as UserIcon, Phone } from "lucide-react";
+import { useAuth } from '@/context/auth-context.js';
+import { Button } from '@/components/ui/Button.jsx';
+import { 
+  validateEmail, 
+  validatePassword, 
+  validateName, 
+  validatePhone, 
+  validatePasswordMatch 
+} from '@/utils/validation';
 
 export default function RegisterPage({ onRegister }) {
   const navigate = useNavigate();
@@ -16,6 +24,7 @@ export default function RegisterPage({ onRegister }) {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   // control de inputs
@@ -28,14 +37,51 @@ export default function RegisterPage({ onRegister }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSubmitting(true);
+    setFieldErrors({});
 
-    // validación simple de contraseñas
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      setSubmitting(false);
+    // Validaciones usando utilidades centralizadas
+    const nextErrors = {};
+    
+    // Validar nombre
+    const nameValidation = validateName(formData.name, 3);
+    if (!nameValidation.valid) {
+      nextErrors.name = nameValidation.error;
+    }
+    
+    // Validar email
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.valid) {
+      nextErrors.email = emailValidation.error;
+    }
+    
+    // Validar teléfono
+    const phoneValidation = validatePhone(formData.phone);
+    if (!phoneValidation.valid) {
+      nextErrors.phone = phoneValidation.error;
+    }
+    
+    // Validar password con requisitos de letras y números
+    const passwordValidation = validatePassword(formData.password, {
+      minLength: 6,
+      requireLetters: true,
+      requireNumbers: true
+    });
+    if (!passwordValidation.valid) {
+      nextErrors.password = passwordValidation.error;
+    }
+    
+    // Validar confirmación
+    const matchValidation = validatePasswordMatch(formData.password, formData.confirmPassword);
+    if (!matchValidation.valid) {
+      nextErrors.confirmPassword = matchValidation.error;
+    }
+    
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
       return;
     }
+
+    setSubmitting(true);
 
     try {
       if (typeof onRegister === 'function') {
@@ -50,8 +96,8 @@ export default function RegisterPage({ onRegister }) {
           password: formData.password,
         });
       }
-      // redirigir al login al terminar
-      navigate('/login');
+      // redirigir al login con estado de registro exitoso
+      navigate('/login', { state: { registered: true, userName: formData.name } });
     } catch (err) {
       setError(err?.message || 'No se pudo crear la cuenta');
     } finally {
@@ -73,7 +119,7 @@ export default function RegisterPage({ onRegister }) {
 
             {/* Error simple */}
             {error && (
-              <div className="mt-4 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="mt-4 rounded-md border border-[#cc5f49] bg-[#cc5f49]/10 px-3 py-2 text-sm text-[#cc5f49]">
                 {error}
               </div>
             )}
@@ -90,12 +136,23 @@ export default function RegisterPage({ onRegister }) {
                   name="name"
                   type="text"
                   value={formData.name}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (fieldErrors.name) setFieldErrors(prev => ({...prev, name: ''}));
+                  }}
                   placeholder="Tu nombre completo"
-                  required
-                  autoComplete="name" // sugerencia del navegador
-            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+                  autoComplete="name"
+                  aria-invalid={!!fieldErrors.name}
+                  aria-describedby={fieldErrors.name ? 'name-error' : undefined}
+                  className={`w-full rounded-md border px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:ring-2 ${
+                    fieldErrors.name
+                      ? 'border-[#cc5f49] focus:border-[#cc5f49] focus:ring-[#cc5f49]/20'
+                      : 'border-[var(--color-border,#e5e7eb)] focus:border-[var(--color-primary1,#6B5444)] focus:ring-[rgba(68,49,20,0.15)]'
+                  }`}
                 />
+                {fieldErrors.name && (
+                  <p id="name-error" className="text-sm text-[#cc5f49] mt-1">{fieldErrors.name}</p>
+                )}
               </div>
 
               {/* Email */}
@@ -109,12 +166,23 @@ export default function RegisterPage({ onRegister }) {
                   name="email"
                   type="email"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (fieldErrors.email) setFieldErrors(prev => ({...prev, email: ''}));
+                  }}
                   placeholder="tu@email.com"
-                  required
                   autoComplete="email"
-            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+                  aria-invalid={!!fieldErrors.email}
+                  aria-describedby={fieldErrors.email ? 'email-error' : undefined}
+                  className={`w-full rounded-md border px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:ring-2 ${
+                    fieldErrors.email
+                      ? 'border-[#cc5f49] focus:border-[#cc5f49] focus:ring-[#cc5f49]/20'
+                      : 'border-[var(--color-border,#e5e7eb)] focus:border-[var(--color-primary1,#6B5444)] focus:ring-[rgba(68,49,20,0.15)]'
+                  }`}
                 />
+                {fieldErrors.email && (
+                  <p id="email-error" className="text-sm text-[#cc5f49] mt-1">{fieldErrors.email}</p>
+                )}
               </div>
 
               {/* Teléfono */}
@@ -128,14 +196,24 @@ export default function RegisterPage({ onRegister }) {
                   name="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (fieldErrors.phone) setFieldErrors(prev => ({...prev, phone: ''}));
+                  }}
                   placeholder="+56 9 1234 5678"
-                  required
                   autoComplete="tel"
                   inputMode="tel"
-                  pattern="^\+?\d[\d\s\-]{7,}$" // formato flexible: +56 9 1234 5678
-            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+                  aria-invalid={!!fieldErrors.phone}
+                  aria-describedby={fieldErrors.phone ? 'phone-error' : undefined}
+                  className={`w-full rounded-md border px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:ring-2 ${
+                    fieldErrors.phone
+                      ? 'border-[#cc5f49] focus:border-[#cc5f49] focus:ring-[#cc5f49]/20'
+                      : 'border-[var(--color-border,#e5e7eb)] focus:border-[var(--color-primary1,#6B5444)] focus:ring-[rgba(68,49,20,0.15)]'
+                  }`}
                 />
+                {fieldErrors.phone && (
+                  <p id="phone-error" className="text-sm text-[#cc5f49] mt-1">{fieldErrors.phone}</p>
+                )}
               </div>
 
               {/* Password */}
@@ -149,13 +227,24 @@ export default function RegisterPage({ onRegister }) {
                   name="password"
                   type="password"
                   value={formData.password}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (fieldErrors.password) setFieldErrors(prev => ({...prev, password: ''}));
+                  }}
                   placeholder="••••••••"
-                  required
                   autoComplete="new-password"
-                  minLength={6} // ajusta a tu política
-            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby={fieldErrors.password ? 'password-error' : undefined}
+                  className={`w-full rounded-md border px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:ring-2 ${
+                    fieldErrors.password
+                      ? 'border-[#cc5f49] focus:border-[#cc5f49] focus:ring-[#cc5f49]/20'
+                      : 'border-[var(--color-border,#e5e7eb)] focus:border-[var(--color-primary1,#6B5444)] focus:ring-[rgba(68,49,20,0.15)]'
+                  }`}
                 />
+                {fieldErrors.password && (
+                  <p id="password-error" className="text-sm text-[#cc5f49] mt-1">{fieldErrors.password}</p>
+                )}
+                <p className="text-xs text-neutral-500 mt-1">Mínimo 6 caracteres, debe incluir letras y números</p>
               </div>
 
               {/* Confirm Password */}
@@ -169,24 +258,37 @@ export default function RegisterPage({ onRegister }) {
                   name="confirmPassword"
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    handleChange(e);
+                    if (fieldErrors.confirmPassword) setFieldErrors(prev => ({...prev, confirmPassword: ''}));
+                  }}
                   placeholder="••••••••"
-                  required
                   autoComplete="new-password"
-                  minLength={6}
-            className="w-full rounded-md border border-[var(--color-border,#e5e7eb)] px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:border-[var(--color-primary1,#6B5444)] focus:ring-2 focus:ring-[rgba(68,49,20,0.15)]"
+                  aria-invalid={!!fieldErrors.confirmPassword}
+                  aria-describedby={fieldErrors.confirmPassword ? 'confirm-password-error' : undefined}
+                  className={`w-full rounded-md border px-3 py-2 text-[var(--color-text-primary,#1f1f1f)] outline-none transition focus:ring-2 ${
+                    fieldErrors.confirmPassword
+                      ? 'border-[#cc5f49] focus:border-[#cc5f49] focus:ring-[#cc5f49]/20'
+                      : 'border-[var(--color-border,#e5e7eb)] focus:border-[var(--color-primary1,#6B5444)] focus:ring-[rgba(68,49,20,0.15)]'
+                  }`}
                 />
+                {fieldErrors.confirmPassword && (
+                  <p id="confirm-password-error" className="text-sm text-[#cc5f49] mt-1">{fieldErrors.confirmPassword}</p>
+                )}
               </div>
 
               {/* Botón */}
-              <button
-                type="submit"
-                disabled={submitting}
-                aria-busy={submitting}
-          className="mt-2 inline-flex items-center justify-center rounded-md bg-[var(--color-primary1,#6B5444)] px-4 py-2 font-semibold text-white shadow-sm transition hover:brightness-105 hover:-translate-y-0.5 active:translate-y-px disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Creando cuenta…' : 'Registrarse'}
-              </button>
+              <div className='flex flex-col items-center justify-center w-full'>
+                <Button
+                  type="submit"
+                  shape="pill"
+                  motion="lift"
+                  className="font-regular px-5 mt-2 mb-0 mx-0 disabled:opacity-60 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                >
+                  {submitting ? 'Creando cuenta…' : 'Registrarse'}
+                </Button>
+              </div>
             </form>
 
             {/* Footer */}

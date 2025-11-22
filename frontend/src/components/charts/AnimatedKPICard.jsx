@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import { motion, useSpring, useTransform } from "framer-motion";
+import { motion as Motion, useSpring, useTransform } from "framer-motion";
 
 /**
  * AnimatedKPICard - Card con número animado que cuenta hasta el valor final
@@ -48,15 +48,15 @@ export const AnimatedKPICard = ({
     : 0;
 
   const trendDirection = trendPercentage >= 0 ? "up" : "down";
-  const trendColor = trendPercentage >= 0 ? "var(--color-success)" : "var(--color-error)";
+  const trendColor = trendPercentage >= 0 ? color : "var(--color-error)";
 
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, delay, ease: [0.4, 0, 0.2, 1] }}
       whileHover={{ scale: 1.02, boxShadow: "var(--shadow-lg)" }}
-      className="group relative overflow-hidden rounded-3xl border border-(--color-border) bg-(--color-neutral1) p-6 shadow-(--shadow-sm) transition-all"
+      className="group relative overflow-hidden rounded-3xl bg-white/95 p-6 shadow-sm transition-all"
     >
       {/* Gradient background decoration */}
       <div
@@ -71,14 +71,9 @@ export const AnimatedKPICard = ({
         <div className="mb-4 flex items-start justify-between">
           <div className="flex-1">
             <p className="text-sm font-medium text-(--text-secondary1)">{title}</p>
-            {previousValue && (
-              <p className="mt-1 text-xs text-(--text-muted)">
-                vs período anterior
-              </p>
-            )}
           </div>
           {Icon && (
-            <motion.div
+            <Motion.div
               initial={{ rotate: -20, scale: 0.8 }}
               animate={{ rotate: 0, scale: 1 }}
               transition={{ delay: delay + 0.2, duration: 0.5, ease: "backOut" }}
@@ -88,7 +83,7 @@ export const AnimatedKPICard = ({
               }}
             >
               <Icon className="h-6 w-6" style={{ color }} />
-            </motion.div>
+            </Motion.div>
           )}
         </div>
 
@@ -96,29 +91,29 @@ export const AnimatedKPICard = ({
         {loading ? (
           <div className="h-10 w-32 animate-pulse rounded-xl bg-(--color-neutral3)" />
         ) : (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: delay + 0.1, duration: 0.4 }}
             className="mb-3"
           >
-            <div className="text-3xl font-bold text-(--text-strong)">
+            <div className="text-2xl font-bold text-(--text-strong)">
               {prefix}
               {displayValue.toLocaleString("es-CL")}
               {suffix}
             </div>
-          </motion.div>
+          </Motion.div>
         )}
 
         {/* Trend Indicator */}
         {!loading && previousValue && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: delay + 0.3, duration: 0.4 }}
             className="flex items-center gap-2"
           >
-            <motion.div
+            <Motion.div
               animate={{
                 y: trendDirection === "up" ? [-2, 0, -2] : [2, 0, 2],
               }}
@@ -142,20 +137,20 @@ export const AnimatedKPICard = ({
               <span className="text-sm font-semibold">
                 {Math.abs(trendPercentage).toFixed(1)}%
               </span>
-            </motion.div>
+            </Motion.div>
             <span className="text-xs text-(--text-muted)">vs anterior</span>
-          </motion.div>
+          </Motion.div>
         )}
 
         {/* Mini sparkline progress */}
         {trend && (
-          <motion.div
+          <Motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: delay + 0.4, duration: 0.6 }}
             className="mt-3 h-1 w-full overflow-hidden rounded-full bg-(--color-neutral3)"
           >
-            <motion.div
+            <Motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               transition={{ delay: delay + 0.5, duration: 0.8, ease: "easeOut" }}
@@ -165,10 +160,10 @@ export const AnimatedKPICard = ({
                 backgroundColor: trendColor,
               }}
             />
-          </motion.div>
+          </Motion.div>
         )}
       </div>
-    </motion.div>
+    </Motion.div>
   );
 };
 

@@ -12,7 +12,7 @@ export function AdminPageHeader({
     <header
       className={cx(
         "flex flex-col gap-2",
-        "sm:flex-row sm:items-end sm:justify-between",
+        "sm:flex-row sm:items-center sm:justify-between",
         className,
       )}
     >

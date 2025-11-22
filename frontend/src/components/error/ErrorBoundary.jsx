@@ -1,6 +1,7 @@
 import { Component } from 'react';
-import { AlertTriangle, RefreshCw, Home, Bug } from "@icons/lucide";
+import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
 import { alerts } from '@/utils/sweetalert.js';
+import { observability } from '@/services/observability.js';
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -48,26 +49,10 @@ class ErrorBoundary extends Component {
     const isDevelopment = import.meta.env.DEV;
     
     if (!isDevelopment) {
-      // Ejemplo de envío de error
-      const errorData = {
-        message: error.message,
-        stack: error.stack,
+      observability.captureException(error, {
         componentStack: errorInfo.componentStack,
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        url: window.location.href,
-        errorId: this.state.errorId
-      };
-
-      // fetch('/api/errors', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(errorData)
-      // }).catch(() => {
-      //   console.warn('No se pudo enviar el error al servidor');
-      // });
-
-      console.warn('Error logged:', errorData);
+        errorId: this.state.errorId,
+      });
     }
   };
 

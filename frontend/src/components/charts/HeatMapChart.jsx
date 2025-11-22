@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { useMemo } from "react";
 
 /**
@@ -78,7 +78,7 @@ export const HeatMapChart = ({
 
             return (
               <g key={`cell-${yIndex}-${xIndex}`}>
-                <motion.rect
+                <Motion.rect
                   x={x}
                   y={y}
                   width={cellSize}
@@ -97,7 +97,7 @@ export const HeatMapChart = ({
 
                 {/* Value text */}
                 {showValues && value > 0 && (
-                  <motion.text
+                  <Motion.text
                     x={x + cellSize / 2}
                     y={y + cellSize / 2}
                     textAnchor="middle"
@@ -112,7 +112,7 @@ export const HeatMapChart = ({
                     }}
                   >
                     {formatValue(value)}
-                  </motion.text>
+                  </Motion.text>
                 )}
 
                 {/* Tooltip-like title */}

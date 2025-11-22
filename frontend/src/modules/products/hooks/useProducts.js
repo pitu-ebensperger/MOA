@@ -3,7 +3,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { productsApi } from "@/services/products.api.js"
 
 const PRODUCTS_QUERY_KEY = ["products"];
-const queryClient = useQueryClient();
 
 const normalizeFilters = (filters) => {
   if (!filters || typeof filters !== "object") return {};
@@ -11,6 +10,7 @@ const normalizeFilters = (filters) => {
 };
 
 export const useProducts = (filters) => {
+  const queryClient = useQueryClient();
   const normalizedFilters = useMemo(() => normalizeFilters(filters), [filters]);
   
   const query = useQuery({

@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 
 /**
  * SparklineChart - Mini gráfico de línea para mostrar tendencias inline
@@ -59,7 +59,7 @@ export const SparklineChart = ({
       )}
       
       {fillColor && (
-        <motion.path
+        <Motion.path
           d={areaPathData}
           fill={`url(#gradient-${Math.random()})`}
           initial={animate ? { opacity: 0 } : false}
@@ -69,7 +69,7 @@ export const SparklineChart = ({
       )}
 
       {/* Main line */}
-      <motion.path
+      <Motion.path
         d={pathData}
         fill="none"
         stroke={color}
@@ -86,7 +86,7 @@ export const SparklineChart = ({
         const x = padding + (index / (values.length - 1)) * effectiveWidth;
         const y = padding + effectiveHeight - ((value - min) / range) * effectiveHeight;
         return (
-          <motion.circle
+          <Motion.circle
             key={index}
             cx={x}
             cy={y}
@@ -100,7 +100,7 @@ export const SparklineChart = ({
       })}
 
       {/* Highlight last point */}
-      <motion.circle
+      <Motion.circle
         cx={padding + effectiveWidth}
         cy={padding + effectiveHeight - ((values.at(-1) - min) / range) * effectiveHeight}
         r={4}
@@ -115,7 +115,7 @@ export const SparklineChart = ({
           dur="2s"
           repeatCount="indefinite"
         />
-      </motion.circle>
+      </Motion.circle>
     </svg>
   );
 };

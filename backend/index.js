@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import dotenv from "dotenv";
 import { errorHandler, NotFoundError } from "./src/utils/error.utils.js";
 import rateLimit from "express-rate-limit";
@@ -9,6 +10,20 @@ dotenv.config();
 validateEnv();
 
 const app = express();
+
+// Compresión HTTP (gzip/deflate) para responses >1KB
+app.use(compression({
+  threshold: 1024, // Solo comprimir responses mayores a 1KB
+  level: 6, // Nivel de compresión (0-9, default: 6)
+  filter: (req, res) => {
+    // No comprimir si el cliente explícitamente lo solicita
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    // Usar el filtro por defecto de compression
+    return compression.filter(req, res);
+  }
+}));
 
 // Middleware global
 app.use(express.json({ limit: '10mb' })); // Límite de payload
@@ -41,12 +56,19 @@ app.use(cors({
 const windowMs = Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000); // 15 minutes
 const maxRequests = Number(process.env.RATE_LIMIT_MAX || 200);
 const authMaxRequests = Number(process.env.AUTH_RATE_LIMIT_MAX || 10);
+const rateLimitEnabled = process.env.RATE_LIMIT_ENABLED !== undefined
+  ? process.env.RATE_LIMIT_ENABLED === 'true'
+  : isProd;
 
 const generalLimiter = rateLimit({ windowMs, max: maxRequests, standardHeaders: true, legacyHeaders: false });
 const authLimiter = rateLimit({ windowMs, max: authMaxRequests, standardHeaders: true, legacyHeaders: false });
 
-// Apply general limiter to all routes
-app.use(generalLimiter);
+// Apply general limiter to all routes (omit in development unless explicitly enabled)
+if (rateLimitEnabled) {
+  app.use(generalLimiter);
+} else if (!isProd) {
+  console.warn('[RateLimit] General limiter deshabilitado en modo desarrollo');
+}
 
 /* ----------------------------- Rutas ----------------------------- */
 
@@ -61,6 +83,7 @@ import addressRoutes from "./routes/addressRoutes.js";
 import configRoutes from "./routes/configRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import home from "./routes/homeRoutes.js";
+import healthRoutes from "./routes/healthRoutes.js";
 
 // Ruta base para tests
 app.get("/", (req, res) => {
@@ -72,8 +95,11 @@ app.get("/", (req, res) => {
 });
 
 // Registro de rutas en orden de prioridad
+app.use(healthRoutes);      // Health check (no auth required)
 app.use(home);              // Rutas home (/)
-app.use(['/login', '/register'], authLimiter); // Rate limit auth endpoints
+if (rateLimitEnabled) {
+  app.use(['/login', '/register'], authLimiter); // Rate limit auth endpoints
+}
 app.use(authRoutes);        // Rutas de autenticación (/login, /register, etc.)
 app.use(userRoutes);        // Rutas de usuario (/usuario, /auth/perfil)
 app.use(categoriesRouter);  // Rutas de categorías (/categorias)

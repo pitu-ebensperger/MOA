@@ -1,12 +1,29 @@
--- Active: 1763403221678@@127.0.0.1@5432@moa
+-- ===============================================
+-- MOA E-COMMERCE DATABASE SCHEMA - FINAL VERSION
+-- ===============================================
+-- Version: 1.0.0 (Production Ready)
+-- Date: November 22, 2025
+-- Database: PostgreSQL 17+
+-- Description: Schema consolidado con todas las optimizaciones y migraciones aplicadas
+-- ===============================================
 
--- Reset
+-- Reset database (WARNING: Destructive operation)
 DROP DATABASE IF EXISTS moa;
-
 CREATE DATABASE moa;
-
 \c moa;
 
+-- ===============================================
+-- EXTENSIONS
+-- ===============================================
+
+-- Extensión para búsquedas por similitud de texto (trigram)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- ===============================================
+-- FUNCTIONS & TRIGGERS
+-- ===============================================
+
+-- Función para actualizar automáticamente la columna actualizado_en
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -15,6 +32,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ===============================================
+-- TABLES
+-- ===============================================
+
+-- Usuarios (clientes y administradores)
 CREATE TABLE usuarios (
     usuario_id BIGSERIAL PRIMARY KEY,
     public_id TEXT UNIQUE NOT NULL,
@@ -22,11 +44,28 @@ CREATE TABLE usuarios (
     email TEXT UNIQUE NOT NULL,
     telefono TEXT,
     password_hash TEXT NOT NULL,
-    rol TEXT DEFAULT 'user',
-    rol_code TEXT DEFAULT 'USER',
-    status TEXT DEFAULT 'activo',
+    rol_code TEXT DEFAULT 'CLIENT' CHECK (rol_code IN ('CLIENT', 'ADMIN')),
+    status TEXT DEFAULT 'activo' CHECK (status IN ('activo', 'inactivo', 'bloqueado')),
     creado_en TIMESTAMPTZ DEFAULT now()
 );
+
+-- Índices para usuarios
+CREATE INDEX idx_usuarios_email ON usuarios(email);
+CREATE INDEX idx_usuarios_rol_code ON usuarios(rol_code);
+CREATE INDEX idx_usuarios_status ON usuarios(status);
+
+CREATE TABLE password_reset_tokens (
+    token_id BIGSERIAL PRIMARY KEY,
+    usuario_id BIGINT NOT NULL REFERENCES usuarios (usuario_id) ON DELETE CASCADE,
+    token VARCHAR(255) UNIQUE NOT NULL,
+    creado_en TIMESTAMPTZ DEFAULT now(),
+    expira_en TIMESTAMPTZ NOT NULL,
+    usado_en TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_password_reset_token ON password_reset_tokens(token);
+CREATE INDEX IF NOT EXISTS idx_password_reset_usuario ON password_reset_tokens(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_password_reset_expires ON password_reset_tokens(expira_en);
 
 CREATE TABLE categorias (
     categoria_id SMALLSERIAL PRIMARY KEY,
@@ -39,6 +78,7 @@ CREATE TABLE categorias (
 CREATE TABLE direcciones (
     direccion_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES usuarios (usuario_id) ON DELETE CASCADE,
+    label TEXT DEFAULT 'casa' CHECK (label IN ('casa', 'oficina', 'trabajo', 'otro')),
     nombre_contacto TEXT NOT NULL,
     telefono_contacto TEXT NOT NULL,
     calle TEXT NOT NULL,
@@ -120,33 +160,49 @@ CREATE TABLE wishlist_items (
     UNIQUE (wishlist_id, producto_id)
 );
 
+-- Órdenes de compra
 CREATE TABLE ordenes (
     orden_id BIGSERIAL PRIMARY KEY,
-    order_code TEXT UNIQUE NOT NULL, -- MOA-YYYYMMDD-XXXX
+    order_code TEXT UNIQUE NOT NULL,
     usuario_id BIGINT REFERENCES usuarios (usuario_id),
     direccion_id BIGINT REFERENCES direcciones (direccion_id),
-    metodo_pago TEXT,
+    
+    -- Montos en centavos (evita problemas de precisión con decimales)
     subtotal_cents INT DEFAULT 0,
     envio_cents INT DEFAULT 0,
     total_cents INT NOT NULL,
-    metodo_despacho TEXT DEFAULT 'standard',
-    estado_pago TEXT DEFAULT 'pendiente',
-    estado_envio TEXT DEFAULT 'preparacion',
+    
+    -- Métodos (con validación a nivel BD)
+    metodo_pago TEXT CHECK (metodo_pago IN ('transferencia', 'webpay', 'tarjeta_credito', 'tarjeta_debito', 'paypal', 'efectivo')),
+    metodo_despacho TEXT DEFAULT 'standard' CHECK (metodo_despacho IN ('standard', 'express', 'retiro')),
+    
+    -- Estados (workflow completo)
+    estado_orden TEXT DEFAULT 'confirmed' CHECK (estado_orden IN ('draft', 'confirmed', 'cancelled')),
+    estado_pago TEXT DEFAULT 'pendiente' CHECK (estado_pago IN ('pendiente', 'pagado', 'rechazado', 'reembolsado')),
+    estado_envio TEXT DEFAULT 'preparacion' CHECK (estado_envio IN ('preparacion', 'enviado', 'en_transito', 'entregado', 'cancelado')),
+    
+    -- Notas
     notas_cliente TEXT,
-    notas_internas TEXT,
+    
+    -- Fechas de seguimiento
     fecha_pago TIMESTAMPTZ,
     fecha_envio TIMESTAMPTZ,
     fecha_entrega_real TIMESTAMPTZ,
-    numero_seguimiento TEXT,
-    empresa_envio TEXT,
+    
+    -- Tracking info
+    numero_seguimiento TEXT DEFAULT 'PENDIENTE_ASIGNAR',
+    empresa_envio TEXT DEFAULT 'por_asignar' CHECK (empresa_envio IN ('chilexpress', 'blue_express', 'starken', 'correos_chile', 'por_asignar')),
+    
     creado_en TIMESTAMPTZ DEFAULT now()
 );
 
--- Índices para optimización de órdenes
-CREATE INDEX IF NOT EXISTS idx_ordenes_usuario ON ordenes(usuario_id);
-CREATE INDEX IF NOT EXISTS idx_ordenes_estado_pago ON ordenes(estado_pago);
-CREATE INDEX IF NOT EXISTS idx_ordenes_estado_envio ON ordenes(estado_envio);
-CREATE INDEX IF NOT EXISTS idx_ordenes_creado_en ON ordenes(creado_en DESC);
+-- Índices optimizados para órdenes
+CREATE INDEX idx_ordenes_usuario ON ordenes(usuario_id);
+CREATE INDEX idx_ordenes_estado_pago ON ordenes(estado_pago);
+CREATE INDEX idx_ordenes_estado_envio ON ordenes(estado_envio);
+CREATE INDEX idx_ordenes_creado_en ON ordenes(creado_en DESC);
+CREATE INDEX idx_ordenes_estado_creado ON ordenes(estado_orden, creado_en);
+CREATE INDEX idx_ordenes_analytics ON ordenes(estado_orden, estado_pago, metodo_pago, creado_en) WHERE estado_orden = 'confirmed';
 
 CREATE TABLE orden_items (
     orden_item_id BIGSERIAL PRIMARY KEY,
@@ -178,18 +234,44 @@ CREATE TABLE configuracion_tienda (
 INSERT INTO configuracion_tienda (
     nombre_tienda, descripcion, direccion, telefono, email, instagram_url, facebook_url, twitter_url
 ) VALUES (
-    'MOA', 'Muebles y decoración', 'Providencia 1234, Santiago, Chile', '+56 2 2345 6789', 'contacto@moa.cl', 'http://instagram.com/moa', '', ''
+    'MOA', 'Muebles y decoración de diseño contemporáneo para crear espacios únicos. Calidad, estilo y funcionalidad en cada pieza.', 'Providencia 1234, Santiago, Chile', '+56 2 2345 6789', 'contacto@moa.cl', 'https://instagram.com/moa', '', ''
 );
 
 -- ===============================================
--- Extensiones y índices para búsqueda de texto
+-- ÍNDICES DE BÚSQUEDA AVANZADA
 -- ===============================================
 
--- Habilitar extensión pg_trgm para búsquedas de similitud
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
 -- Índice GIN para búsqueda por similitud de nombre (trigram)
-CREATE INDEX IF NOT EXISTS idx_productos_nombre_trgm ON productos USING gin(nombre gin_trgm_ops);
+CREATE INDEX idx_productos_nombre_trgm ON productos USING gin(nombre gin_trgm_ops);
 
 -- Índice GIN para búsqueda full-text en español
-CREATE INDEX IF NOT EXISTS idx_productos_search ON productos USING gin(to_tsvector('spanish', nombre || ' ' || COALESCE(descripcion, '')));
+CREATE INDEX idx_productos_search ON productos USING gin(to_tsvector('spanish', nombre || ' ' || COALESCE(descripcion, '')));
+
+-- ===============================================
+-- INITIAL DATA
+-- ===============================================
+
+-- Configuración inicial de la tienda
+INSERT INTO configuracion_tienda (
+    nombre_tienda, 
+    descripcion, 
+    direccion, 
+    telefono, 
+    email, 
+    instagram_url, 
+    facebook_url, 
+    twitter_url
+) VALUES (
+    'MOA', 
+    'Muebles y decoración de diseño contemporáneo para crear espacios únicos. Calidad, estilo y funcionalidad en cada pieza.', 
+    'Providencia 1234, Santiago, Chile', 
+    '+56 2 2345 6789', 
+    'contacto@moa.cl', 
+    'https://instagram.com/moa', 
+    '', 
+    ''
+);
+
+-- ===============================================
+-- END OF SCHEMA
+-- ===============================================
