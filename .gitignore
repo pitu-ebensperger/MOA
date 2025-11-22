@@ -58,8 +58,8 @@ snapshots/*.txt
 docs/development/archives/
 docs/drafts/
 docs/*.md
+docs/**/*.md
 *.draft.md
-docs/
 TODO.md
 .TODO.md
 
