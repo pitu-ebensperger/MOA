@@ -33,9 +33,9 @@ backend/backend.log
 Thumbs.db
 
 # IDE
-.idea
-.vscode/*
-!.vscode/extensions.json
+.idea/
+.vscode/
+**/.vscode/
 
 # Development files
 scripts/dev/
@@ -54,14 +54,10 @@ src/modules/styleguide/
 snapshots/*.json
 snapshots/*.txt
 
-# Development docs (mantener docs principales)
+# Development docs (archivos draft solamente)
 docs/development/archives/
 docs/drafts/
-docs/*.md
-docs/**/*.md
 *.draft.md
-TODO.md
-.TODO.md
 
 # Copilot temp
 .copilot-temp

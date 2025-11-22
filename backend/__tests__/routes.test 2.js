@@ -69,8 +69,8 @@ describe("TEST API – MOA", () => {
       console.log('Response body sample:', res.body);
       
       // Verificar que tenga la estructura esperada de paginación
-      expect(res.body).toHaveProperty('data');
-      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body).toHaveProperty('items');
+      expect(Array.isArray(res.body.items)).toBe(true);
     }
   });
 
@@ -243,7 +243,7 @@ describe("TEST API – MOA", () => {
       .post("/categorias")
       .send({}); // Sin datos requeridos
     
-    expect([400, 401, 404, 422]).toContain(res.status);
+    expect([400, 401, 422]).toContain(res.status);
     if (res.status === 400) {
       expect(res.body).toHaveProperty('success', false);
       expect(res.body).toHaveProperty('message');
@@ -267,7 +267,7 @@ describe("TEST API – MOA", () => {
       .send(duplicateProduct);
     
     // Al menos uno debería devolver un error de conflicto
-    expect([401, 404, 409, 500]).toContain(res2.status);
+    expect([401, 409, 500]).toContain(res2.status);
   });
 
   test("GET /productos/invalid-id → ID inválido debe manejar PgError correctamente", async () => {
@@ -344,7 +344,7 @@ describe("TEST API – MOA", () => {
       .set('Content-Type', 'text/plain')
       .send('not-json-data');
     
-    expect([400, 415, 500]).toContain(res.status);
+    expect([400, 415]).toContain(res.status);
   });
 
   /* TESTS DE 5XX ERRORS (SERVER ERRORS) */

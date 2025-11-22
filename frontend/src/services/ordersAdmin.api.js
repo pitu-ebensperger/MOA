@@ -61,7 +61,6 @@ const normalizeAdminOrder = (raw = {}) => {
     userPhone: raw.usuario_telefono ?? raw.userPhone ?? null,
     totalItems,
     items: normalizedItems,
-    notas_internas: raw.notas_internas ?? null,
   };
 };
 

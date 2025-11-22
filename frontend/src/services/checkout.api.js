@@ -12,7 +12,7 @@ import { apiClient } from '@/services/api-client'
  * @returns {Promise<Object>} - Orden creada
  */
 export const createOrder = async (checkoutData) => {
-  const response = await apiClient.post('/checkout/create-order', checkoutData);
+  const response = await apiClient.post('/api/checkout', checkoutData);
   return response;
 };
 

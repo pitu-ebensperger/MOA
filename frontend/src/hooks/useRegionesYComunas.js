@@ -19,7 +19,7 @@ export function useRegionesYComunas() {
       setError(null);
       
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/api/regiones`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/regiones`);
         
         if (!response.ok) {
           throw new Error('Error al cargar regiones');
@@ -51,7 +51,7 @@ export function useRegionesYComunas() {
       
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/api/regiones/${selectedRegion}/comunas`
+          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/regiones/${selectedRegion}/comunas`
         );
         
         if (!response.ok) {

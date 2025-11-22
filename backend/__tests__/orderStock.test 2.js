@@ -20,9 +20,9 @@ async function ensureTestUser() {
   if (rows.length) return rows[0].usuario_id;
   
   const insert = await pool.query(
-    `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status)
-     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING usuario_id`,
-    ['stocktest1', 'Stock Test User', email, '+56933333333', '$2a$10$abcdefghijklmnopqrstuv', 'CLIENT', 'activo']
+    `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING usuario_id`,
+    ['stocktest1', 'Stock Test User', email, '+56933333333', '$2a$10$abcdefghijklmnopqrstuv', 'cliente', 'CUSTOMER', 'activo']
   );
   return insert.rows[0].usuario_id;
 }
@@ -99,7 +99,7 @@ async function addItemToCart(usuarioId, productoId, cantidad) {
   );
 }
 
-function signToken(usuarioId, roleCode = 'CLIENT') {
+function signToken(usuarioId, roleCode = 'CUSTOMER') {
   const payload = { 
     id: usuarioId, 
     email: 'test@example.com', 
@@ -234,9 +234,9 @@ describe('Order Stock Validation Tests', () => {
     test('Dos órdenes simultáneas con stock limitado', async () => {
       // Setup: Stock de 10, dos usuarios quieren comprar 6 cada uno
       const usuario2Id = await pool.query(
-        `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status)
+        `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING usuario_id`,
-        [`stocktest2-${Date.now()}`, 'Stock Test User 2', `stock-test-user2-${Date.now()}@moa.cl`, '+56944444444', '$2a$10$abcdefghijklmnopqrstuv', 'CLIENT', 'activo']
+        [`stocktest2-${Date.now()}`, 'Stock Test User 2', `stock-test-user2-${Date.now()}@moa.cl`, '+56944444444', '$2a$10$abcdefghijklmnopqrstuv', 'cliente', 'CUSTOMER', 'activo']
       ).then(r => r.rows[0].usuario_id);
       
       const direccion2Id = await ensureTestAddress(usuario2Id);
@@ -287,19 +287,19 @@ describe('Order Stock Validation Tests', () => {
       const timestamp = Date.now();
       const users = await Promise.all([
         pool.query(
-          `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status)
-           VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING usuario_id`,
-          [`stocktest3-${timestamp}`, 'User 3', `stock-test-user3-${timestamp}@moa.cl`, '+56955555555', '$2a$10$abc', 'CLIENT', 'activo']
+          `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING usuario_id`,
+          [`stocktest3-${timestamp}`, 'User 3', `stock-test-user3-${timestamp}@moa.cl`, '+56955555555', '$2a$10$abc', 'cliente', 'CUSTOMER', 'activo']
         ).then(r => r.rows[0].usuario_id),
         pool.query(
-          `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status)
-           VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING usuario_id`,
-          [`stocktest4-${timestamp}`, 'User 4', `stock-test-user4-${timestamp}@moa.cl`, '+56966666666', '$2a$10$abc', 'CLIENT', 'activo']
+          `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING usuario_id`,
+          [`stocktest4-${timestamp}`, 'User 4', `stock-test-user4-${timestamp}@moa.cl`, '+56966666666', '$2a$10$abc', 'cliente', 'CUSTOMER', 'activo']
         ).then(r => r.rows[0].usuario_id),
         pool.query(
-          `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status)
-           VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING usuario_id`,
-          [`stocktest5-${timestamp}`, 'User 5', `stock-test-user5-${timestamp}@moa.cl`, '+56977777777', '$2a$10$abc', 'CLIENT', 'activo']
+          `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING usuario_id`,
+          [`stocktest5-${timestamp}`, 'User 5', `stock-test-user5-${timestamp}@moa.cl`, '+56977777777', '$2a$10$abc', 'cliente', 'CUSTOMER', 'activo']
         ).then(r => r.rows[0].usuario_id)
       ]);
       

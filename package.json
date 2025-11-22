@@ -22,6 +22,7 @@
     "test:coverage": "npm test -- --coverage"
   },
   "devDependencies": {
+    "call-bound": "^1.0.4",
     "gh-pages": "^5.0.0"
   }
 }

@@ -177,7 +177,7 @@ export default function AdminProductsPage() {
       if (categoryId) params.append('categoryId', categoryId);
       if (onlyLowStock) params.append('onlyLowStock', 'true');
 
-      // Descargar CSV desde backend
+      // Descargar CSV desde backend (fetch directo necesario para blob response)
       const token = localStorage.getItem('moa.accessToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/admin/productos/export?${params}`, {
         headers: {

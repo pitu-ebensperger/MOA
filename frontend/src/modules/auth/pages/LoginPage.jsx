@@ -174,6 +174,14 @@ export default function LoginPage() {
               className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in modal-content"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* Botón cerrar X */}
+              <button
+                onClick={() => setShowWelcomeModal(false)}
+                className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white hover:scale-110 transition-all"
+                aria-label="Cerrar"
+              >
+                <X className="h-5 w-5" strokeWidth={2} />
+              </button>
     
               <div className="bg-gradient-to-br from-[var(--color-primary3)] via-[var(--color-primary1)] to-[var(--color-primary2)] px-8 pt-8 pb-6 text-center modal-header-group group cursor-pointer">
                 <div className="relative inline-flex items-center justify-center w-20 h-20 mb-4">
@@ -213,42 +221,58 @@ export default function LoginPage() {
     {/* Modal de sesión expirada */}
     {showExpiredModal && (
       <div 
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4"
         onClick={() => setShowExpiredModal(false)}
       >
         <div 
-          className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-md mx-4 animate-scale-in"
+          className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-start gap-3 mb-4">
-            <div className="shrink-0 w-10 h-10 rounded-full bg-warning/100 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-warm" />
+          {/* Botón cerrar X */}
+          <button
+            onClick={() => setShowExpiredModal(false)}
+            className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-all"
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5" strokeWidth={2} />
+          </button>
+
+          {/* Header con tono amber para advertencia */}
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 px-8 pt-8 pb-6 border-b border-amber-100">
+            <div className="flex items-start gap-4">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                <AlarmClock className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-semibold text-(--color-primary1) mb-2">
+                  Tu sesión ha expirado
+                </h3>
+                <p className="text-sm text-(--color-text-secondary) leading-relaxed">
+                  Por tu seguridad, necesitas volver a iniciar sesión{expiredFromPath ? ` para acceder a ${expiredFromPath}` : ''}.
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 id="session-expired-title" className="text-lg font-display font-semibold text-(--color-warning) mb-1">
-                Tu sesión expiró
-              </h3>
-              <p className="text-sm text-(--color-text-secondary) leading-relaxed">
-                Por tu seguridad, necesitas volver a iniciar sesión{expiredFromPath ? ` para acceder a ${expiredFromPath}` : ''}.
+          </div>
+          
+          {/* Contenido */}
+          <div className="px-8 py-6">
+            <div className="bg-amber-50/50 rounded-xl p-4 mb-6 border border-amber-100">
+              <p className="text-xs text-(--color-text-muted) text-center">
+                Las sesiones expiran después de 24 horas de inactividad para proteger tu cuenta.
               </p>
             </div>
-            <button
-              onClick={() => setShowExpiredModal(false)}
-              className="shrink-0 p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
-              aria-label="Cerrar"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="flex justify-end">
-            <Button
-              onClick={() => setShowExpiredModal(false)}
-              shape="pill"
-              size="sm"
-              className="px-6"
-            >
-              Entendido
-            </Button>
+            
+            <div className="flex flex-col gap-3 items-center">
+              <Button
+                onClick={() => setShowExpiredModal(false)}
+                shape="pill"
+                width="fit"
+                size="sm"
+                className="px-8 hover:bg--color-primary2 hover:shadow-lg transition-all duration-200"
+              >
+                Entendido
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -249,7 +249,6 @@ const updateOrderStatus = async (ordenId, updates = {}) => {
   const {
     estado_pago,
     estado_envio,
-    notas_internas,
     fecha_pago,
     fecha_envio,
     fecha_entrega_real,
@@ -270,12 +269,6 @@ const updateOrderStatus = async (ordenId, updates = {}) => {
   if (estado_envio !== undefined) {
     fields.push(`estado_envio = $${paramIndex}`);
     params.push(estado_envio);
-    paramIndex++;
-  }
-
-  if (notas_internas !== undefined) {
-    fields.push(`notas_internas = $${paramIndex}`);
-    params.push(notas_internas);
     paramIndex++;
   }
 

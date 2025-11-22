@@ -1,19 +1,25 @@
+// IDs deben coincidir exactamente con el CHECK constraint de base de datos
 export const SHIPPING_COMPANIES = Object.freeze([
-  { id: "chilexpress", label: "Chilexpress" },
-  { id: "blue-express", label: "Blue Express" },
-  { id: "starken", label: "Starken" },
-  { id: "correos-de-chile", label: "Correos de Chile" },
-  { id: "retiro-en-tienda", label: "Retiro en tienda" },
+  { id: "chilexpress", dbId: "chilexpress", label: "Chilexpress" },
+  { id: "blue-express", dbId: "blue_express", label: "Blue Express" },
+  { id: "starken", dbId: "starken", label: "Starken" },
+  { id: "correos-de-chile", dbId: "correos_chile", label: "Correos de Chile" },
+  { id: "retiro-en-tienda", dbId: "por_asignar", label: "Retiro en tienda" },
 ]);
 
 export const SHIPPING_COMPANY_LABELS = SHIPPING_COMPANIES.map(({ label }) => label);
 
+// Mapa que permite buscar por ID, dbId o label (case-insensitive) y devuelve dbId
 const SHIPPING_COMPANY_LOOKUP = new Map(
-  SHIPPING_COMPANIES.flatMap(({ id, label }) => {
+  SHIPPING_COMPANIES.flatMap(({ id, dbId, label }) => {
     const normalizedLabel = label.toLowerCase();
+    const normalizedId = id.toLowerCase();
     return [
-      [id, label],
-      [normalizedLabel, label],
+      [id, dbId],
+      [normalizedId, dbId],
+      [dbId, dbId],
+      [label, dbId],
+      [normalizedLabel, dbId],
     ];
   }),
 );
@@ -27,12 +33,12 @@ export const normalizeShippingCompany = (value) => {
     return null;
   }
 
-  const normalizedKey = trimmed.toLowerCase();
+  const normalizedKey = trimmed.toLowerCase().replace(/[\s-]/g, "_");
   if (SHIPPING_COMPANY_LOOKUP.has(normalizedKey)) {
     return SHIPPING_COMPANY_LOOKUP.get(normalizedKey);
   }
 
-  // Permitir que ya venga con el ID/slug almacenado en base de datos
+  // Intentar búsqueda directa
   if (SHIPPING_COMPANY_LOOKUP.has(trimmed)) {
     return SHIPPING_COMPANY_LOOKUP.get(trimmed);
   }

@@ -166,7 +166,6 @@ const updateOrderStatus = async (req, res) => {
     const {
       estado_pago,
       estado_envio,
-      notas_internas,
       fecha_pago,
       fecha_envio,
       fecha_entrega_real,
@@ -175,7 +174,7 @@ const updateOrderStatus = async (req, res) => {
     } = req.body;
 
     // Validar que al menos un campo esté presente
-    if (!estado_pago && !estado_envio && !notas_internas && !fecha_pago && !fecha_envio && !fecha_entrega_real && !numero_seguimiento && !empresa_envio) {
+    if (!estado_pago && !estado_envio && !fecha_pago && !fecha_envio && !fecha_entrega_real && !numero_seguimiento && !empresa_envio) {
       return res.status(400).json({
         success: false,
         message: 'Debe proporcionar al menos un campo para actualizar',
@@ -183,7 +182,7 @@ const updateOrderStatus = async (req, res) => {
     }
 
     // Validar valores de estados si están presentes
-    const validEstadosPago = ['pendiente', 'procesando', 'pagado', 'fallido', 'reembolsado', 'cancelado'];
+    const validEstadosPago = ['pendiente', 'pagado', 'rechazado', 'reembolsado'];
     if (estado_pago && !validEstadosPago.includes(estado_pago)) {
       return res.status(400).json({
         success: false,
@@ -191,7 +190,7 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const validEstadosEnvio = ['preparacion', 'empaquetado', 'enviado', 'en_transito', 'entregado', 'devuelto'];
+    const validEstadosEnvio = ['preparacion', 'enviado', 'en_transito', 'entregado', 'cancelado'];
     if (estado_envio && !validEstadosEnvio.includes(estado_envio)) {
       return res.status(400).json({
         success: false,
@@ -218,17 +217,34 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Actualizar
-    const updatedOrder = await orderAdminModel.updateOrderStatus(id, {
+    // Establecer fechas automáticamente si no vienen en el request
+    const updateData = {
       estado_pago,
       estado_envio,
-      notas_internas,
       fecha_pago,
       fecha_envio,
       fecha_entrega_real,
       numero_seguimiento,
       empresa_envio: normalizedEmpresaEnvio,
-    });
+    };
+
+    // Auto-establecer fecha_pago si estado_pago cambia a 'pagado'
+    if (estado_pago === 'pagado' && !fecha_pago) {
+      updateData.fecha_pago = new Date().toISOString();
+    }
+
+    // Auto-establecer fecha_envio si estado_envio cambia a 'enviado'
+    if (estado_envio === 'enviado' && !fecha_envio) {
+      updateData.fecha_envio = new Date().toISOString();
+    }
+
+    // Auto-establecer fecha_entrega_real si estado_envio cambia a 'entregado'
+    if (estado_envio === 'entregado' && !fecha_entrega_real) {
+      updateData.fecha_entrega_real = new Date().toISOString();
+    }
+
+    // Actualizar
+    const updatedOrder = await orderAdminModel.updateOrderStatus(id, updateData);
 
     res.status(200).json({
       success: true,
@@ -264,6 +280,15 @@ const addTrackingInfo = async (req, res) => {
       });
     }
 
+    // Validar empresa de envío
+    const normalizedEmpresaEnvio = normalizeShippingCompany(empresa_envio);
+    if (!normalizedEmpresaEnvio) {
+      return res.status(400).json({
+        success: false,
+        message: `Empresa de envío inválida. Valores permitidos: ${SHIPPING_COMPANY_LABELS.join(', ')}`,
+      });
+    }
+
     // Verificar que la orden existe
     const existingOrder = await orderAdminModel.getOrderByIdAdmin(id);
     if (!existingOrder) {
@@ -276,7 +301,7 @@ const addTrackingInfo = async (req, res) => {
     // Agregar tracking
     const updatedOrder = await orderAdminModel.addTrackingInfo(id, {
       numero_seguimiento,
-      empresa_envio,
+      empresa_envio: normalizedEmpresaEnvio,
       fecha_envio,
     });
 
