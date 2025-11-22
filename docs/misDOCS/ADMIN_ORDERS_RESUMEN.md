@@ -25,6 +25,11 @@
    - Ejemplos cURL para testing
    - Guía de integración frontend
 
+5. **`/frontend/src/services/ordersAdmin.api.js`** (nuevo módulo core)
+   - Normaliza respuestas `snake_case` ↔ `camelCase`
+   - Expone `getAll`, `getById`, `updateOrderStatus`, `addTracking`, `getStats`, `exportOrders`
+   - Reutilizado por hooks (`useAdminOrders`, `useAdminOrderStats`), drawers y `orders.api.js` (compatibilidad legacy)
+
 ---
 
 ## 🚀 Endpoints Implementados
@@ -34,9 +39,11 @@
 | GET | `/admin/pedidos` | Listar órdenes con filtros |
 | GET | `/admin/pedidos/stats` | Estadísticas agregadas |
 | GET | `/admin/pedidos/:id` | Detalle completo de orden |
+| GET | `/admin/pedidos/export` | Exportar CSV con filtros y BOM UTF-8 |
 | PATCH | `/admin/pedidos/:id/estado` | Actualizar estados |
 | POST | `/admin/pedidos/:id/seguimiento` | Agregar tracking |
 | PATCH | `/admin/pedidos/:id/notas` | Actualizar notas internas |
+| PUT | `/api/admin/orders/:id/status` | Alias compatible (OrdersDrawer / hooks antiguos) |
 
 ---
 
@@ -187,16 +194,20 @@ router.get("/admin/pedidos", verifyAdmin, asyncHandler(orderAdminController.getA
 
 ### Service API
 ```javascript
-// /frontend/src/services/orders.api.js
+// /frontend/src/services/ordersAdmin.api.js
 export const ordersAdminApi = {
-  getAll: (params) => apiClient.private.get('/admin/pedidos', { params }),
-  getById: (id) => apiClient.private.get(`/admin/pedidos/${id}`),
-  updateStatus: (id, data) => apiClient.private.patch(`/admin/pedidos/${id}/estado`, data),
-  addTracking: (id, data) => apiClient.private.post(`/admin/pedidos/${id}/seguimiento`, data),
-  getStats: (params) => apiClient.private.get('/admin/pedidos/stats', { params }),
-  updateNotes: (id, notes) => apiClient.private.patch(`/admin/pedidos/${id}/notas`, { notas_internas: notes }),
+  getAll: (params) => apiClient.get('/admin/pedidos', { params }),
+  getById: (id) => apiClient.get(`/admin/pedidos/${id}`),
+  updateOrderStatus: (id, data) => apiClient.put(`/api/admin/orders/${id}/status`, data),
+  updateStatus: (id, data) => apiClient.patch(`/admin/pedidos/${id}/estado`, data),
+  addTracking: (id, data) => apiClient.post(`/admin/pedidos/${id}/seguimiento`, data),
+  getStats: (params) => apiClient.get('/admin/pedidos/stats', { params }),
+  exportOrders: (params, format = 'csv') =>
+    apiClient.get('/admin/pedidos/export', { params: { ...params, format }, responseType: 'blob' }),
 };
 ```
+
+`frontend/src/services/orders.api.js` ahora re-exporta este cliente para mantener compatibilidad con hooks/UX legacy.
 
 ### Ejemplo de Uso en React
 ```jsx
@@ -220,14 +231,15 @@ useEffect(() => {
 
 ### Corto Plazo
 - [ ] Testing manual con órdenes reales
-- [ ] Implementar filtros en frontend admin
-- [ ] Agregar exportación a CSV/Excel
+- [ ] Implementar filtros UI completos en AdminOrdersPageV2 (chips, búsqueda avanzada)
+- [ ] Extender exportación a XLSX/JSON o limitar UI a CSV para evitar descargas inconsistentes
 
 ### Mediano Plazo
-- [ ] Historial de cambios de estado (auditoría)
+- [ ] Historial/auditoría de cambios
 - [ ] Notificaciones automáticas al cliente
 - [ ] Integración con APIs de couriers (tracking automático)
 - [ ] Bulk actions (actualizar múltiples órdenes)
+- [ ] Documentar payload aceptado por `ordersAdminApi.updateOrderStatus` para mantener front/back sincronizados
 
 ### Largo Plazo
 - [ ] Dashboard de métricas en tiempo real
@@ -246,7 +258,7 @@ useEffect(() => {
 | Routes | ✅ Completo | Protegidas con verifyAdmin |
 | Documentación | ✅ Completo | 570+ líneas, ejemplos cURL |
 | Testing Manual | ⏳ Pendiente | Requiere BD con datos |
-| Frontend | ⏳ Pendiente | Service API y componentes |
+| Frontend | ✅ Integrado | `ordersAdminApi`, Drawer, CustomersPage y hooks sincronizados |
 
 ---
 
@@ -256,8 +268,11 @@ useEffect(() => {
 - **Model:** `/backend/src/models/orderAdminModel.js`
 - **Controller:** `/backend/src/controllers/orderAdminController.js`
 - **Routes:** `/backend/routes/adminRoutes.js`
-- **DDL:** `/backend/database/schema/DDL_DIRECCIONES_PAGOS.sql`
+- **DDL consolidada:** `/backend/database/schema/DDL.sql`
 - **Middleware:** `/backend/src/middleware/verifyAdmin.js`
+- **Constantes couriers:** `/shared/constants/shipping-companies.js`
+- **Cliente Frontend:** `/frontend/src/services/ordersAdmin.api.js`
+- **Compatibilidad legacy:** `/frontend/src/services/orders.api.js`
 
 ---
 

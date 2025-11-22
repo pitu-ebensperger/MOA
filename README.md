@@ -1,31 +1,308 @@
-# Proyecto Marketplace
+# Proyecto MOA - Marketplace E-commerce
 
-### Usuarios para frontend testing:
-- **admin@moa.cl** (contraseña: admin o demo o 123456)
-- **demo@moa.cl** (contraseña: demo o admin o 123456) 
-- **cliente@mail.cl** (contraseña: demo o admin o 123456)
- 
-#
-> Los mocks están deshabilitados por defecto en `frontend/.env`. Para activarlos define `VITE_USE_MOCKS=true`.
+> **Estado del proyecto:** 🟢 Funcional (85% completo) | **Última actualización:** Noviembre 2025
+
+## 📊 Estado Actual
+
+```
+✅ Core Features:        100%  ████████████████████
+✅ Admin Panel:          95%   ███████████████████░
+✅ Integración:          90%   ██████████████████░░
+⚠️  Testing:             5%    █░░░░░░░░░░░░░░░░░░░
+⚠️  Performance:         60%   ████████████░░░░░░░░
+```
+
+**Ver estado completo:** [docs/ESTADO_PROYECTO_NOV_2025.md](./docs/ESTADO_PROYECTO_NOV_2025.md)  
+**Resumen visual:** [docs/RESUMEN_VISUAL.md](./docs/RESUMEN_VISUAL.md)
+
+---
+
+## 🔐 Usuarios de Prueba
+
+| Usuario | Email | Contraseña | Rol |
+|---------|-------|------------|-----|
+| Admin | `admin@moa.cl` | `admin` / `demo` / `123456` | Administrador |
+| Demo | `demo@moa.cl` | `demo` / `admin` / `123456` | Cliente |
+| Cliente | `cliente@mail.cl` | `demo` / `admin` / `123456` | Cliente |
+
+---
 
 
-## Estructura del repositorio
+## 🚀 Quick Start
 
-Cada carpeta gestiona su propio node_modules locales, desde la raíz instalar dependencias antes de ejecutar
+### 1. Instalar Dependencias
 
-Instalar: `npm install`
-Ejecutar frontend:  `npm run -w frontend dev`
-Ejecutar backend: `npm run -w backend dev`
-`npm run db` / `npm run db:reset` 
-`npm run seed:all`
+```bash
+# Desde la raíz del proyecto
+npm install
+```
 
-- npm run seed:users --workspace backend (asegura la cuenta `admin@moa.cl/admin123`)
-- npm run seed:clients --workspace backend (agrega clientes de ejemplo; usa `CLIENTS_PASSWORD` si quieres cambiar la contraseña)
-- npm run seed:categories --workspace backend (correr para agregar categorias iniciales)
-- npm run seed:products --workspace backend (correr para agregar productos iniciales)
-- npm run seed:addresses --workspace backend (agrega direcciones ejemplo para cada cliente)
-- npm run seed:carts --workspace backend (prehistoria carritos con items)
-- npm run seed:wishlists --workspace backend (agrega listas de deseos de ejemplo)
+### 2. Configurar Base de Datos
+
+```bash
+# Crear schema completo
+npm run -w backend db
+
+# Sembrar datos de prueba
+npm run -w backend seed:all
+```
+
+### 3. Ejecutar Aplicación
+
+```bash
+# Frontend (puerto 5174)
+npm run -w frontend dev
+
+# Backend (puerto 4000)
+npm run -w backend dev
+```
+
+### 4. Acceder a la Aplicación
+
+- **Frontend:** http://localhost:5174
+- **Backend API:** http://localhost:4000
+- **Login como Admin:** admin@moa.cl / admin
+
+---
+
+## 📦 Scripts Disponibles
+
+### Frontend
+```bash
+npm run -w frontend dev      # Desarrollo (Vite)
+npm run -w frontend build    # Build producción
+npm run -w frontend preview  # Preview build
+npm run -w frontend lint     # Linting
+npm run -w frontend test     # Tests
+```
+
+### Backend
+```bash
+npm run -w backend dev       # Desarrollo (nodemon)
+npm run -w backend start     # Producción
+npm run -w backend test      # Tests
+```
+
+### Base de Datos
+
+```bash
+# Schema completo
+npm run -w backend db              # Crear todas las tablas
+npm run -w backend db:reset        # Recrear schema
+
+# Sembrar datos (individual)
+npm run -w backend seed:users      # Crea admin@moa.cl y usuarios base
+npm run -w backend seed:clients    # Clientes de ejemplo
+npm run -w backend seed:categories # Categorías iniciales
+npm run -w backend seed:products   # Productos de prueba
+npm run -w backend seed:addresses  # Direcciones ejemplo
+npm run -w backend seed:carts      # Carritos prellenados
+npm run -w backend seed:wishlists  # Listas de deseos ejemplo
+npm run -w backend seed:orders     # Órdenes de prueba
+
+# Sembrar todo
+npm run -w backend seed:all        # Ejecuta todos los seeds en orden
+```
+
+---
+
+## 🏗️ Estructura del Proyecto
+
+```
+MOA/
+├── backend/                    # API REST (Node.js + Express)
+│   ├── routes/                 # 11 archivos de rutas
+│   ├── src/
+│   │   ├── controllers/        # 13 controllers
+│   │   ├── models/             # 10 models (PostgreSQL)
+│   │   ├── middleware/         # Auth + Admin verification
+│   │   └── services/           # Email service
+│   └── database/
+│       ├── schema/             # DDL y migraciones
+│       └── seed/               # 8 seeders
+│
+├── frontend/                   # SPA (React 19 + Vite)
+│   ├── src/
+│   │   ├── modules/            # 11 módulos de features
+│   │   │   ├── admin/          # Panel administrativo
+│   │   │   ├── auth/           # Login, registro, reset
+│   │   │   ├── cart/           # Carrito y checkout
+│   │   │   ├── products/       # Catálogo y detalle
+│   │   │   ├── profile/        # Perfil de usuario
+│   │   │   └── orders/         # Gestión de órdenes
+│   │   ├── components/         # 40+ componentes UI
+│   │   ├── services/           # 15 API clients
+│   │   ├── hooks/              # Custom hooks
+│   │   └── context/            # Context providers
+│   └── public/
+│
+├── docs/                       # Documentación técnica
+│   ├── ESTADO_PROYECTO_NOV_2025.md  # Estado completo
+│   ├── RESUMEN_VISUAL.md            # Resumen gráfico
+│   ├── TODO.md                      # Tareas pendientes
+│   └── misDOCS/                     # Documentación detallada
+│
+└── scripts/                    # Scripts de utilidad
+```
+
+---
+
+## 🎯 Funcionalidades Implementadas
+
+### ✅ Core Features (100%)
+
+- **Autenticación completa**
+  - Login/Registro con JWT
+  - Reset de contraseña con email
+  - Protección de rutas privadas
+  - Roles (admin/customer)
+
+- **Catálogo de Productos**
+  - Listado con paginación
+  - Filtros por categoría y precio
+  - Búsqueda de productos
+  - Vista detallada
+  - **Validación de stock en tiempo real**
+
+- **Carrito de Compras**
+  - Agregar/eliminar productos
+  - Actualizar cantidades
+  - Persistencia en BD
+  - **Validación de stock antes de compra**
+
+- **Proceso de Checkout**
+  - Selección de dirección
+  - Métodos de pago
+  - Vista previa del pedido
+  - Confirmación con modal
+  - Página de confirmación rediseñada
+
+- **Gestión de Órdenes**
+  - Historial de compras
+  - Estados de pago y envío
+  - Timeline visual
+  - Tracking de envío
+
+- **Lista de Deseos**
+  - Agregar/eliminar favoritos
+  - Mover a carrito
+  - Vista en perfil
+
+- **Perfil de Usuario**
+  - Información personal
+  - Historial de compras
+  - Gestión de direcciones
+  - Lista de favoritos
+
+### ✅ Panel de Administración (95%)
+
+- **Dashboard**
+  - Métricas en tiempo real
+  - Gráficos de ventas
+  - Alertas de stock
+  - Productos más vendidos
+
+- **Gestión de Órdenes**
+  - Vista completa de pedidos
+  - Filtros avanzados
+  - Actualización de estados
+  - Agregar tracking
+  - Exportar a CSV
+
+- **Gestión de Clientes**
+  - CRUD completo
+  - Historial de compras
+  - Cambio de estados
+  - Filtros y búsqueda
+
+- **Gestión de Productos**
+  - CRUD completo
+  - Control de stock
+  - Asignación de categorías
+  - Desactivación de productos
+
+- **Configuración de Tienda**
+  - Información de contacto
+  - Redes sociales
+  - Horarios de atención
+  - Footer dinámico
+
+---
+
+## 🛠️ Tecnologías
+
+### Frontend
+- React 19.1.1
+- Vite 7.1.7
+- TanStack Query v5 (estado servidor)
+- React Router v7
+- TailwindCSS 4
+- Radix UI (componentes)
+- Lucide React (iconos)
+- Recharts (gráficos)
+
+### Backend
+- Node.js + Express 5.1.0
+- PostgreSQL
+- JWT (autenticación)
+- bcryptjs (passwords)
+- Nodemailer (emails)
+- Stripe SDK (preparado)
+
+---
+
+## ⚙️ Configuración JWT y Sesiones
+
+### Tiempos de Expiración del Token
+
+El proyecto incluye un sistema de monitoreo de sesión que:
+- ⚠️ Avisa 5 minutos antes de que expire la sesión
+- 🔄 Permite extender la sesión activa
+- 🚪 Hace logout automático cuando expira
+- 📧 Muestra alerta de "Sesión expirada"
+
+**Configurar tiempos en `backend/.env`:**
+
+```bash
+# Clientes regulares (default: 24 horas)
+JWT_EXPIRES_IN=24h
+
+# Administradores (default: 7 días)
+JWT_ADMIN_EXPIRES_IN=7d
+
+# Ejemplos válidos: 30m, 1h, 12h, 24h, 2d, 7d, 30d
+```
+
+**⚡ Valores recomendados:**
+- **Desarrollo**: `JWT_EXPIRES_IN=1h` (clientes), `JWT_ADMIN_EXPIRES_IN=24h` (admin)
+- **Producción**: `JWT_EXPIRES_IN=24h` (clientes), `JWT_ADMIN_EXPIRES_IN=7d` (admin)
+- **Alta seguridad**: `JWT_EXPIRES_IN=30m` (clientes), `JWT_ADMIN_EXPIRES_IN=2d` (admin)
+
+**📦 Dependencia requerida (frontend):**
+```bash
+npm install jwt-decode
+```
+
+---
+
+## ⚠️ Pendientes para Producción
+
+### 🔴 Crítico
+- [ ] Pasarela de pago: se mantiene simulada (fuera de alcance)
+- [ ] Remover logs sensibles
+- [ ] Implementar logger estructurado
+
+### 🟡 Importante
+- [ ] Testing completo (> 70% cobertura)
+- [ ] Optimización de performance (bundle < 500KB)
+- [ ] Documentación API (Swagger)
+
+### 🟢 Opcional
+- [ ] Notificaciones automáticas por email
+- [ ] Integración con APIs de couriers
+- [ ] Sistema de cupones/descuentos
+
+**Ver roadmap completo:** [docs/TODO.md](./docs/TODO.md)
 
 
 **`docs/`**
@@ -123,25 +400,3 @@ Ejecutar backend: `npm run -w backend dev`
 Correr tests:
 **Frontend** cd frontend && npm test
 **Backend** cd backend && npm test
-
-
-### Stripe (pasarela de pago)
-
-- Define las variables de entorno `STRIPE_SECRET_KEY` y `STRIPE_WEBHOOK_SECRET` para habilitar la pasarela de Stripe en modo sandbox o producción.
-- La API expone el endpoint `/webhooks/stripe`, que Stripe usará para enviar confirmaciones asincrónicas.
-- Puedes usar las credenciales de prueba de Stripe y los números de tarjeta `4242 4242 4242 4242` para simular cobros sin mover dinero real; recuerda cambiar a claves reales para producción.
-
- 
-### Tarjetas de prueba Webpay (integración)
-Usa estas tarjetas ficticias mientras trabajas con el ambiente de integración. No requieren fecha de expiración válida: puedes ingresar cualquier combinación razonable.
-
-| Tipo | Tarjeta | CVV | Resultado esperado |
-| --- | --- | --- | --- |
-| VISA | 4051 8856 0044 6623 | 123 | Aprobada |
-| AMEX | 3700 0000 0002 032 | 1234 | Aprobada |
-| MASTERCARD | 5186 0595 5959 0568 | 123 | Rechazada |
-| Redcompra | 4051 8842 3993 7763 | 123 | Aprobada (si se permite débito) |
-| Redcompra | 4511 3466 6003 7060 | 123 | Aprobada (si se permite débito) |
-| Redcompra | 5186 0085 4123 3829 | 123 | Rechazada (si se permite débito) |
-| Prepago VISA | 4051 8860 0005 6590 | 123 | Aprobada |
-| Prepago MASTERCARD | 5186 1741 1062 9480 | 123 | Rechazada |

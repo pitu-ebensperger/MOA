@@ -1,307 +1,188 @@
--- Active: 1763403221678@@127.0.0.1@5432@pitu
+- Active: 1763403221678@@127.0.0.1@5432@pitu
 # TODO - MOA Project
-
-**Última actualización:** 17 de noviembre, 2025
-
----
-
-## ✅ COMPLETADOS RECIENTEMENTE
-
-- ~~Reemplazar todos los imports del frontend por el alias `@/`~~ ✅ 
-
-- ~~Añadir validaciones PropTypes para los componentes clave de perfil y checkout ✅ COMPLETADO (hoy)~~
-
-- ~~Checkout actualizado (hoy)~~
-  - ~~ `CheckoutPage.jsx` reemplaza el badge `bg-[var(--color-primary3)]` por `bg-(--color-primary3)` y usa el selector de `paymentMethods` del contexto (`formatPaymentMethod`/`selectedPaymentId`) en lugar de estados y `paymentOptions` no usados.~~
-
-- ~~Renovamos la navegación admin y wishlist (hoy)~~
-  - `AdminSidebar.jsx` y `Navbar.jsx` usan rutas reales (`API_PATHS`) y el menú de perfil lleva a la pestaña correcta `/perfil?tab=orders`.
-  - Los botones “Agregar al carro” de `Profile -> Card.jsx` invocan `addToCart`/login en lugar de ser decorativos, y `ProfilePage.jsx` puede inicializar la pestaña correcta según `location.state.initialTab`.
-  - `OrdersPage.jsx` y `ordersApi.updateStatus` permiten cambiar estados de pedido contra mocks o API real y refrescan la vista; `CustomersPage.jsx` gestiona creación, edición, cambios de estado y desactivación directamente desde el panel.
+**Última actualización:** 21 de noviembre, 2025 - 23:53 CLST
 
 ---
 
-## 🔴 CRÍTICOS (Bloqueantes para producción)
+## 📊 Resumen Ejecutivo
 
-### Base de Datos
-- **[BLOQUEANTE]** Ejecutar script DDL de direcciones y pagos:
-  ```bash
-  cd backend/database/schema
-  psql -d moa -f DDL_DIRECCIONES_PAGOS.sql
-  ```
-  - **Impacto:** Sin esto, el flujo de checkout NO funcionará
-  - **Agrega:** Columnas necesarias a tabla `ordenes`
-  - **Crea:** Tablas `direcciones` y `metodos_pago` con triggers
-  - **Documentado en:** `docs/FLUJO_COMPRA_COMPLETO.md`
-  
-- TODO: definir el sistema de identificadores (si no se usará `uuid-ossp`, eliminar esa extensión del schema y normalizar `public_id`)
+### ✅ Lo que YA está completo y funcional:
+- **Backend core**: Express 5, PostgreSQL 17, JWT auth con refresh token, rate limiting, error handling completo
+- **Frontend optimizado**: React 19, lazy loading (30+ rutas), bundle ~150KB, TanStack Query con cache 5min
+- **Sesiones inteligentes**: Monitor de expiración JWT, warning 5min antes, auto-logout, extensión de sesión
+- **E-commerce funcional**: Productos, categorías, carrito, wishlist, órdenes completas con tracking
+- **Admin dashboard**: Gestión clientes, órdenes (filtros/búsqueda/estados), productos (CRUD básico), estadísticas
+- **Emails transaccionales**: Confirmación de orden (HTML responsive), reset password, Nodemailer configurado
+- **Validaciones**: Stock en tiempo real, errores PG/JWT normalizados, middleware tokenMiddleware con `usuario_id`
+- **Infraestructura**: DDL consolidado con migrations, 8 seeders, rate limit (200 req/15min, 10 auth/15min)
 
-- ~~Incluir y combinar DDL de direcciones/pagos en esquema consolidado (DDL.sql principal)~~ ✅
-  - Se agregaron las tablas y triggers a `backend/database/schema/DDL.sql` (direcciones y metodos_pago)
-  - Se creó migración `002_addresses_payments.sql` y `003_sync_addresses_payments_constraints.sql` para entornos ya existentes
-  - Ahora el setup inicial y las migraciones crean todo lo necesario de una sola vez
+### ⚠️ Lo que falta (opcional/mejoras futuras):
+- **Documentación técnica**: Swagger/OpenAPI, guía de contribución, manual de admin, troubleshooting
+- **Páginas legales**: Términos y condiciones, política de privacidad/devoluciones, aviso legal/GDPR  
+- **Performance adicional**: Optimizar imágenes (WebP), CDN, PWA, service workers
+- **Sentry**: 1 TODO placeholder en `ImageWithFallback.jsx` (opcional para logging de errores)
 
-### Testing
-- **[BLOQUEANTE]** Probar flujo de compra end-to-end:
-  1. Iniciar backend: `cd backend && node index.js`
-  2. Iniciar frontend: `cd frontend && npm run dev`
-  3. Realizar compra completa: carrito → checkout → orden creada
-  4. Verificar en BD que orden se creó correctamente con todos los campos
-  5. Ver orden en perfil de usuario con OrderStatusTimeline
-  6. Verificar cálculos de costos (envío, subtotal, total)
+----------------
 
----
+## Pendientes
 
-## 🟡 ALTA PRIORIDAD
+### 🔴 Críticos (bloquean producción)
+_(Ninguno - todos resueltos)_
 
-### Pasarela de Pago
-- Integrar pasarela de pago real (actualmente simulado):
-  - **Opciones:** Transbank WebPay Plus (recomendado para Chile), Flow, o Stripe
-  - **Archivo:** `backend/src/controllers/orderController.js`
-  - **Método:** `processPayment()` - reemplazar simulación con integración real
-  - **Agregar:** Webhooks para confirmaciones de pago asíncronas
-  - **Almacenar:** Tokens de pago en tabla `metodos_pago` (nunca números completos)
-  - **Estados:** Manejar estados pendiente → procesando → pagado/fallido
+### 🟡 Alta prioridad
+_(Todos completados - movidos a histórico)_
 
-### Confirmación de Orden
-- Crear página de confirmación de orden (OrderConfirmationPage.jsx):
-  - **Ruta:** `/order-confirmation/:orderCode`
-  - **Mostrar:** Después del checkout exitoso
-  - **Incluir:** 
-    - Código de orden (MOA-YYYYMMDD-XXXX)
-    - Fecha estimada de entrega
-    - Resumen de productos
-    - Información de envío
-    - Total pagado
-  - **Botones:** "Ver tracking", "Volver a inicio", "Descargar comprobante"
-  - **Email:** Preparar template de confirmación
+### 🟢 Media prioridad
+_(Todas completadas - movidas a histórico)_
 
-### Admin - Gestión de Estados
-- Implementar gestión completa de estados de orden en admin:
-  - **Componente:** Actualizar `OrdersDrawer.jsx`
-  - **Permitir cambiar:**
-    - `estado_envio`: preparacion → empaquetado → enviado → en_transito → entregado
-    - `estado_pago`: pendiente → procesando → pagado/fallido
-  - **Agregar campos:**
-    - Número de seguimiento (tracking number)
-    - Empresa de courier (dropdown: Chilexpress, Blue Express, Starken)
-    - Notas internas para admin
-  - **Endpoint:** PUT `/api/admin/orders/:id/status`
+### 🔵 Baja / mejoras futuras
+- [ ] **Testing E2E**: Ejecutar tests completos de flujos (registro→login→carrito→checkout→orden) con usuarios históricos (Camila 18 meses, Ignacio 17 días) y nuevos registros, verificar admin dashboard muestra timeline 2023-2024 correctamente
+- [ ] **Revisar `/backend/src/utils/env.js`**: Auditar validaciones de variables de entorno, asegurar todos los campos requeridos (DB_NAME, JWT_SECRET, JWT_EXPIRES_IN, etc.) tienen checks, agregar validaciones production-specific (CORS_ORIGIN, NODE_ENV), documentar variables obligatorias
+- [ ] **Eliminar scripts de desarrollo antes de deploy**: Revisar y remover archivos en `/backend/scripts/` no necesarios en producción (ej: `testLogin.mjs`, `getAdminToken.js`, debug helpers)
+- [ ] **Actualizar cart/checkout/confirmation**: Verificar que usan data desde backend (no mocks hardcoded), validar flujo completo con carritos reales
+- [ ] **Revisar config pool de PostgreSQL**: Confirmar valores óptimos en `backend/database/config.js` (max: 20, idleTimeoutMillis: 30000, connectionTimeoutMillis: 2000) para producción
+- [ ] Performance avanzada adicional: optimizar imágenes (WebP/lazy), CDN de assets, PWA/service worker, web workers y terminar imports específicos de `lucide-react`.
+- [ ] Documentación: redactar Swagger/OpenAPI, guía de contribución, manual de admin, troubleshooting guide; agregar links en README principal a `docs/FLUJO_COMPRA_COMPLETO.md`, `docs/CONVERSION_IMPORTS_ALIAS.md`, `docs/INTEGRACION_CHECKOUT_TIMELINE.md`.
+- [ ] Legal: términos y condiciones, política de privacidad/devoluciones, aviso legal/GDPR.
+- [ ] Revisar en `.env` el bloque `# Password Reset Cleanup + Configuración de CORS` (variables y valores finales).
+- [ ] Revisar envs antes de deploy (cambiarnode) para asegurar valores actualizados.
 
-### Linting
-- ✅ Se reemplazaron las clases `bg-[var(--color-primary3)]` por `bg-(--color-primary3)` y ahora el selector de métodos de pago reutiliza `paymentMethods`/`setSelectedPaymentId` desde el contexto, eliminando las referencias a estados no usados.
-- 📝 Próximos pasos recomendados
-  1. Migrar las constantes/exportaciones compartidas de `AddressContext.jsx` y `PaymentContext.jsx` a archivos separados para mantener compatibilidad con fast refresh.
-  2. Normalizar los `useMemo`/`useEffect` en `CustomersPage.jsx` e incluir `handleOpenEditDialog`/`handleStatusChange` y la lista de dependencias adecuada para evitar warnings de exhaustividad.
-  3. Ajustar `UserInfoSection.jsx` para que el efecto que depende de `user` incluya al usuario en su arreglo de dependencias o reestructure el hook para evitar advertencias.
+#### 🎨 Estético / UI/UX
+- [ ] **Modales de autenticación** (`frontend/src/modules/auth/pages/LoginPage.jsx` líneas 135-230):
+  - Modal de bienvenida (registro exitoso) con gradiente terracota MOA
+  - Modal de sesión expirada con advertencia amber
+  - Revisar textos, espaciados, animaciones y consistencia visual
 
-### Checkout context
-- Rebuild the payment context by destructuring the tuple from `createStrictContext`, exporting the strict hook, and wrapping `App` (or `AddressProvider`) with the now-correct `PaymentProvider` so `usePaymentMethods` is usable in the checkout flow.
-- Define a real `paymentMethod` state in `CheckoutPage` (or reuse `selectedPaymentId`) before rendering the `<Select>` at line 295, and align it with `paymentOptions` so the form no longer references an undefined variable.
+--------------------
 
-### Autenticación
-- TODO: Añadir validaciones completas a los formularios de los procesos de auth (login, registro, olvidé mi contraseña y cambio de contraseña) para evitar payloads inválidos, mostrar feedback de campos obligatorios, y extender tanto en frontend como en backend el manejo de errores relacionado con credenciales y formatos.
+## 🌟 Algún día / Maybe
+*Features que enriquecerían el proyecto pero no se incluyen en esta entrega por tiempo*
 
-### Perfil
-- Revisar `frontend/src/modules/profile/components/UserInfoSection.jsx` y documentar mejoras o inconsistencias detectadas en la sección de información personal para priorizar los ajustes necesarios.
+### Backend
+- [ ] **Cart Cleanup Job**: Limpieza automática de carritos abandonados >30 días (cron job similar a `passwordResetCleanup.js`)
+- [ ] **Integración APIs de Couriers**: Tracking automático con Chilexpress, Blue Express, Starken (webhooks para actualizar estado_envio)
+- [ ] **Notificaciones push**: Web Push API para notificaciones en navegador (cambios de estado, ofertas, stock)
+- [ ] **Sistema de cupones/descuentos**: Tabla `cupones` con validaciones de uso único, expiración, monto/porcentaje
+- [ ] **Reviews y ratings de productos**: Sistema de valoraciones con moderación admin, promedio de estrellas
+- [ ] **Wishlist pública/compartible**: Generar enlaces únicos para compartir wishlists con amigos/familia
+- [ ] **Historial de precios**: Tabla `precio_historico` para mostrar variaciones y alertas de bajadas de precio
+- [ ] **Stock reservations**: Reservar stock temporalmente (15min) durante checkout para evitar overselling
+- [ ] **Logs de auditoría**: Tabla `audit_logs` para rastrear cambios críticos (cambios de precio, stock, estados de orden)
 
-### Manejo de errores y páginas
-- Auditar y documentar el middleware `errorHandler` en `backend/src/utils/error.utils.js` y su registro al final de `backend/index.js`, incluyendo el orden de routers (`home`, `auth`, `wishlist`, `cart`, etc.) para asegurarse de que `AppError`, `ValidationError` y los manejadores de errores de PostgreSQL/JWT (más el caso `entity.parse.failed`) devuelven siempre respuestas consistentes.
-- Revisar `homeController.js` (`backend/src/controllers/homeController.js`) para confirmar que la respuesta al landing no expone productos inactivos, limita la cantidad de filas devueltas y valida los campos que el frontend consume (categorías destacadas, productos, secciones editoriales).
-  - El helper `buildErrorResponse` centraliza `success: false`, `message` y `timestamp`, `handlePgError` y `handleJwtError` traducen códigos 23505/23503/22P02 y errores de tokens, y `errorHandler` cubre rutas desconocidas y errores no operacionales con 500.
-- Añadir/actualizar pruebas en `backend/__tests__/routes.test.js` para garantizar respuestas 4xx/5xx sobre las rutas principales y capturar `AppError`/`ValidationError`/PG/JWT.
-  - Los tests ejercen login, carrito, wishlist, categorías, productos, admin y pagos sin token y con payload inválidos, además de rutas generadoras de 5xx, JSON malformado, `entity.parse.failed` y errores de JWT.
-- Crear o actualizar la experiencia de usuario cuando ocurren errores críticos en el frontend (`ServerErrorPage.jsx`, `ErrorBoundary` o fallback en `App.jsx`) manteniendo `NotFoundPage.jsx` como la ruta `*` actual, y documentar qué errores aterrizan en cada vista.
-  - `ErrorBoundary` rodea toda `App` y ofrece fallback con recarga, reporte y detalles técnicos (solo en DEV).
-  - Las rutas `/error/500`, `/error/502`, `/error/503`, `/error/504` usan `ServerErrorPage` para mostrar títulos/recursos distintos y manejan fallback offline/`errorCode=0`; `App.jsx` mantiene `NotFoundPage` en la ruta `*` para rutas no declaradas.
+### Frontend
+- [ ] **PWA completa**: Service workers, offline mode, instalación en dispositivos móviles
+- [ ] **Comparador de productos**: Seleccionar 2-4 productos y ver comparación lado a lado
+- [ ] **Filtros avanzados de productos**: Rango de precios, múltiples categorías, ordenamiento por popularidad/novedad
+- [ ] **Búsqueda con autocompletado**: Sugerencias en tiempo real mientras el usuario escribe
+- [ ] **Chat de soporte**: Widget de chat en vivo o chatbot básico para consultas frecuentes
+- [ ] **Vista de productos relacionados**: Algoritmo "los que compraron esto también compraron"
+- [ ] **Galería de imágenes mejorada**: Zoom en hover, vista 360°, múltiples imágenes por producto
+- [ ] **Modo oscuro**: Theme switcher con persistencia en localStorage
+- [ ] **Internacionalización (i18n)**: Soporte multi-idioma (español/inglés)
 
----
+### DevOps & Infraestructura
+- [ ] **CI/CD con GitHub Actions**: Pipeline automático para tests, linting, deploy a staging/producción
+- [ ] **Docker & Docker Compose**: Containerización completa (frontend, backend, PostgreSQL, Redis)
+- [ ] **Monitoreo con Sentry**: Tracking de errores en producción con source maps
+- [ ] **CDN para assets estáticos**: Cloudflare/AWS CloudFront para imágenes y archivos CSS/JS
+- [ ] **Redis para caching**: Cache de queries frecuentes (productos, categorías), sesiones
+- [ ] **Backups automáticos a S3/Cloud Storage**: Copias de BD subidas a storage externo con retención 30 días
+- [ ] **Load balancer y escalado horizontal**: Múltiples instancias del backend con Nginx/HAProxy
+- [ ] **Logs centralizados**: ELK stack (Elasticsearch, Logstash, Kibana) o similar
 
-## 🟢 MEDIA PRIORIDAD
+### Analytics & Marketing
+- [ ] **Dashboard de métricas avanzadas**: Tasa de conversión, abandono de carrito, CAC, LTV
+- [ ] **Emails automatizados**: Carrito abandonado (recordatorio 24h), restock de productos en wishlist
+- [ ] **Recomendaciones personalizadas**: ML básico para sugerir productos según historial de navegación
+- [ ] **Programa de lealtad**: Sistema de puntos/rewards por compras repetidas
+- [ ] **Integración con Google Analytics 4**: Tracking de eventos, embudos de conversión
+--------------------
 
-### API Real de Órdenes
-- Conectar seguimiento de pedidos con API real:
-  - **Componente:** `MyOrdersSection.jsx` (actualmente usa mock data)
-  - **Llamar:** `GET /api/orders` para obtener órdenes del usuario
-  - **Implementar:** 
-    - Filtros por estado (pendiente, pagado, enviado, etc.)
-    - Paginación (limit, offset)
-    - Búsqueda por código de orden
-  - **Mostrar:** En `OrderStatusTimeline` con datos reales
 
-### Notificaciones
-- Implementar sistema de notificaciones al cambiar estados:
-  - **Email:** 
-    - Usar nodemailer o servicio (SendGrid, Mailgun)
-    - Plantillas para cada estado
-    - Enviar cuando cambia `estado_envio` o `estado_pago`
-  - **WhatsApp/SMS (Opcional):**
-    - Integrar Twilio
-    - Enviar tracking link
-  - **Push Notifications (Opcional):**
-    - Web Push API
-    - Notificar en browser
+### ✅ Checklist pre-deploy (no olvidar)
+- [ ] HTTPS configurado en servidor producción
+- [ ] Monitoreo de errores (conectar comentarios TODO de Sentry en código)
+- [ ] Revisar y testear nodemail
+- [ ] Documentación de deployment actualizada con pasos de setup producción
 
-### Tracking de Couriers
-- Integrar APIs de couriers reales:
-  - **Chilexpress:** 
-    - API: https://developers.chipax.com/docs/chilexpress
-    - Auto-actualizar `estado_envio` basado en tracking
-  - **Blue Express:**
-    - API: https://www.blue.cl/integraciones
-    - Sincronizar estados de envío
-  - **Starken:**
-    - API: https://www.starken.cl/developers
-    - Tracking automático
-  - **Implementar:** Webhook o cron job para actualizar estados
+- [x] ✅ Compresión HTTP activada en backend (compression middleware con threshold 1KB, level 6)
+- [x] ✅ Tests unitarios de stock implementados (6 tests: descuento automático, race conditions, rollback, multi-producto, límites)
+- [x] ✅ Tests de permisos admin implementados (15 tests: autenticación, validaciones estados, tracking, exportación, notas internas)
 
-### UX / Interacciones suaves
-- TODO: Añadir scroll suave a las listas principales (productos, órdenes y direcciones) para mejorar la navegación en pantallas largas; revisar componentes afectados (`ProductList`, `MyOrdersSection`, `AddressesSection`, etc.) y decidir si se gestiona vía CSS (`scroll-behavior: smooth`) o utilitarios JS para efectos más complejos.
+- [x] ✅ Remover helpers de debug manual (eliminado `frontend/src/components/debug`)
+- [x] ✅ DDL ejecutado en BD (`backend/database/schema/DDL.sql` - incluye password reset y estado_orden)
+- [x] ✅ Flujo de compra probado end-to-end (validación stock, email, timeline, costos, navegación)
+- [x] ✅ Backup BD configurado (script `backend/scripts/backup-db.sh`, guía en `docs/DATABASE_BACKUP_GUIDE.md`)
+- [x] ✅ Emails de confirmación configurados (Nodemailer con Ethereal fallback, plantilla HTML responsive)
+- [x] ✅ JWT expiración ajustada y documentada (24h clientes, 7d admin, refresh token, session monitor)
+- [x] ✅ Variables de entorno verificadas (guía completa en `docs/PRODUCTION_ENV_CHECKLIST.md`)
+- [ ] Build prod (`npm run build`) OK sin errores ni warnings
+- [x] ✅ Health endpoint `/api/health` implementado (monitoring ready con status DB, uptime, version)
+- [x] ✅ Rate limit habilitado (200 req/15min general, 10 req/15min auth)
+- [x] ✅ jwt-decode instalado en frontend (`package.json` tiene `jwt-decode: ^4.0.0`)
+- [x] ✅ Auditoría TODOs completada: 7 TODOs restantes en frontend (5 producto CRUD, 1 Sentry, 1 alias); backend sin TODOs
+- [x] ✅ adminController.js TODOs: ya resueltos, líneas 851/876 no contienen pendientes
 
-### API Admin para Estados
-- Implementar endpoint de actualización de estados:
-  - **Archivo:** `frontend/src/modules/admin/pages/orders/OrdersPage.jsx`
-  - **Actual:** Tiene `// TODO: Implementar llamada a API para actualizar estado`
-  - **Crear:** 
-    - Backend: PUT `/api/admin/orders/:id/status`
-    - Controller: `updateOrderStatus()` en `orderController.js`
-  - **Validar:** Solo admin puede cambiar estados
 
-### TypeScript/PropTypes
-- Agregar validación de tipos:
-  - **Componentes prioritarios:**
-    - `OrderStatusTimeline.jsx`
-    - `AddressesSection.jsx`
-    - `CheckoutPage.jsx`
-    - `MyOrdersSection.jsx`
-  - **Opciones:**
-    - PropTypes (rápido, no requiere cambios grandes)
-    - TypeScript (largo plazo, mejor DX)
 
----
 
-## 🔵 BAJA PRIORIDAD / MEJORAS FUTURAS
 
-### Admin - Clientes
-- Completar funcionalidades en `CustomersPage.jsx`:
-  - Implementar actualización de status de cliente en backend
-  - Abrir formulario de edición de cliente (modal o drawer)
-  - Implementar desactivación/reactivación de clientes
-  - Agregar refetch cuando API real esté lista
-  - Implementar búsqueda y filtros avanzados
-  - Historial de compras por cliente
 
-### Rutas y Alias
-- Quitar alias temporal en `api-paths.js`:
-  - **Archivo:** `frontend/src/config/api-paths.js`
-  - **Buscar:** `// TODO: quitar alias temporal cuando UI demo tenga ruta propia`
-  - **Acción:** Crear ruta propia para UI demo o eliminar si no se usa
 
-### Performance
-- Implementar code-splitting para mejorar carga inicial:
-  - **Usar:** `React.lazy()` y `Suspense`
-  - **Módulos a dividir:**
-    - Páginas de admin (lazy load)
-    - Páginas de productos (lazy load)
-    - Páginas de perfil
-  - **Objetivo:** Reducir chunk principal de 1061 KB a < 500 KB
-  - **Separar:** Vendors grandes (react, lucide-react, radix-ui)
 
-### Barrel Exports
-- Crear archivos index.js para imports más limpios:
-  - **Crear:**
-    - `@/components/ui/index.js` → exportar Button, Badge, Card, etc.
-    - `@/components/data-display/index.js` → exportar Price, DataTable, etc.
-    - `@/services/index.js` → exportar todos los API clients
-  - **Beneficio:** `import { Button, Badge, Card } from '@/components/ui'`
 
-### AdminTestPage
-- Decidir sobre AdminTestPage.jsx:
-  - **Estado actual:** Comentado en `App.jsx`
-  - **Ruta propuesta:** `/admin/test`
-  - **Opciones:**
-    1. Crear página para testing de componentes de admin
-    2. Eliminar referencias si no se necesita
+-------------------------------------------------------------------------------------------------
 
-### Documentación
-- Registrar documentos en README principal:
-  - Agregar links a:
-    - `docs/FLUJO_COMPRA_COMPLETO.md` (pasos para deploy)
-    - `docs/CONVERSION_IMPORTS_ALIAS.md` (guía de imports)
-    - `docs/INTEGRACION_CHECKOUT_TIMELINE.md`
-  - Crear sección "Documentación Técnica"
-
----
-
-## 🧹 LIMPIEZA / MANTENIMIENTO
-
-### Scripts
-- Eliminar `scripts/convert-imports.js`:
-  - **Razón:** Conversión de imports ya completada
-  - **Antes de eliminar:** Confirmar que no se necesitará más
-
-### Mockups
-- Remover mockups antiguos:
-  - **Buscar:** Referencias a "post sacada front"
-  - **Verificar:** Que diseño final está implementado en todos los módulos
-  - **Limpiar:** Archivos mock antiguos no usados
-- Eliminar cualquier mock data o endpoints simulados (`mockOrders`, `mockProducts`, etc.) que aún se usen en el build y reemplazarlos por integraciones reales antes del deploy
-
-### TODOs en Código
-- Auditar y resolver comentarios TODO:
-  - **Buscar:** `// TODO:` en todos los archivos `.js` y `.jsx`
-  - **Acción:** 
-    - Resolver pendientes
-    - Documentar en este archivo si es tarea grande
-    - Eliminar comentarios ya resueltos
-  - **Archivos conocidos con TODOs:**
-    - `frontend/src/modules/admin/pages/orders/OrdersPage.jsx`
-    - `frontend/src/config/api-paths.js`
-    - `frontend/src/modules/admin/pages/CustomersPage.jsx`
-
----
-
-## 📝 NOTAS IMPORTANTES
-
-### Orden de Implementación Recomendado
-1. ✅ Ejecutar DDL (CRÍTICO)
-2. ✅ Probar flujo end-to-end (CRÍTICO)
-3. 🔴 Integrar pasarela de pago real
-4. 🔴 Crear página de confirmación
-5. 🟡 Implementar gestión de estados en admin
-6. 🟡 Conectar API real de órdenes
-7. 🟢 Notificaciones por email
-8. 🟢 Tracking con couriers
-
-### Referencias Útiles
-- Flujo completo: `docs/FLUJO_COMPRA_COMPLETO.md`
-- Imports: `docs/CONVERSION_IMPORTS_ALIAS.md`
-- Checkout: `docs/INTEGRACION_CHECKOUT_TIMELINE.md`
-- Backend models: `/backend/src/models/orderModel.js`
-- Backend controllers: `/backend/src/controllers/orderController.js`
-- Frontend checkout: `/frontend/src/modules/cart/pages/CheckoutPage.jsx`
-
-## 🚀 PRÓXIMOS PASOS
-
-- Actualizar la documentación de mocks (README o `docs/MOCK_DATA.md`) para dejar constancia de que `usersDb` ahora incluye direcciones, wishlists y carritos que antes vivían en `customers.js`, y qué campos (role/stats/metadata) deben existir en los consumidores.
-- Recorrer el código que depende de `customersDb` (admin/orders/auth) y verificar que no quedan imports antiguos ni suposiciones sobre el shape anterior; ajustar cualquier helper o test que use `customersDb` o los campos `status`/`phone` que cambiaron.
-- Ejecutor pruebas específicas como `npm run test:auth` y un smoke test de `OrdersDrawer`/`CustomersPage` localmente para confirmar que la nueva estructura de `usersDb` satisface las vistas administrativas y los mocks de auth.
-
----
-
-## ✅ CHECKLIST PRE-DEPLOY
-
-Antes de llevar a producción, verificar:
-
-- [ ] DDL ejecutado en base de datos
-- [ ] Flujo de compra probado end-to-end
-- [ ] Pasarela de pago integrada y probada
-- [ ] Emails de confirmación configurados
-- [ ] Ajustar el tiempo de expiración del JWT en backend y documentarlo antes del deploy (IMPORTANTE)
-- [ ] Variables de entorno configuradas (DB, API keys, etc.)
-- [ ] Cambiar el entorno de ejecución de modo desarrollo a producción y validar la configuración resultante
-- [ ] Build de producción exitoso (`npm run build`)
-- [ ] HTTPS configurado
-- [ ] Backup de base de datos configurado
-- [ ] Monitoreo de errores (Sentry, etc.)
-- [ ] Documentación de deployment actualizada
+## ✅ Completados (histórico reciente)
+- ✅ **[22 Nov 2025] Base de datos production-ready**: DDL.sql simplificado con solo `rol_code` (CLIENT/ADMIN) ejecutado en BD limpia, `clientsData.js` con 14 usuarios distribuidos en 18 meses (2023-06-15 a 2024-11-05), `ordersData.js` con 22 órdenes simulando comportamiento natural (early adopters: 3-5 compras, usuarios nuevos: 0-1), `moreDataSeed.js` eliminado (datos curados reemplazan generador random), todos los seeds ejecutados ✅ (15 usuarios, 33 productos, 22 órdenes, 14 direcciones, 7 wishlists), DB_NAME estandarizado en config.js y .env, `ordersSeed.js` corregido (eliminado notas_internas, agregado estado_orden), verificación de timeline: usuarios desde 2 años 5 meses hasta 17 días de antigüedad.
+- ✅ **[22 Nov 2025] Tests implementados**: 6 tests unitarios para validación de stock (`stockValidation.test.js`) cubren descuento automático, race conditions con `SELECT FOR UPDATE`, rollback de transacciones, validación multi-producto, límites de stock; 15 tests de permisos admin (`adminOrderPermissions.test.js`) verifican que solo admins pueden actualizar estados/tracking, validaciones de estados permitidos, filtros, exportación, notas internas no visibles para customers.
+- ✅ **[22 Nov 2025] Fixes críticos de órdenes y checkout**: Stock se descuenta automáticamente al crear órdenes con `SELECT FOR UPDATE` (previene race conditions), carrito se limpia solo después de commit exitoso, estado_orden='confirmed' por defecto, validación de dirección obligatoria en backend/frontend, endpoint `/checkout/create-order` creado como alias, compresión HTTP activada (gzip/deflate para responses >1KB).
+- ✅ **[22 Nov 2025] Validaciones auth completas**: LoginPage y RegisterPage usan `validateEmail`, `validatePassword`, `validateName`, `validatePhone` de `utils/validation.js` con mensajes específicos por campo, requisitos de longitud/formato claros, feedback visual en inputs con errores.
+- ✅ **[22 Nov 2025] Admin productos modales**: AdminProductsPage.jsx YA tiene `ProductDrawer` y `ProductDetailDrawer` implementados correctamente para crear/editar/duplicar/ver productos, sin uso de `alert()`.
+- ✅ **Barrel exports y limpieza código**: creados `@/components/data-display/index.js` y `@/services/index.js` para imports centralizados; removido alias temporal `uiDemo` de `api-paths.js`; scripts mock ya no existen (limpiados previamente); auditoría TODOs completada con solo 1 TODO restante en frontend (`ImageWithFallback.jsx` - placeholder Sentry para logging opcional).
+- ✅ **Admin estados API documentada y testeada**: especificación completa en `docs/misDOCS/ADMIN_ORDERS_STATUS_API_SPEC.md` (payload, validaciones, ejemplos, 400/401/403/404); 15 tests de integración en `__tests__/adminOrderStatus.test.js` (validaciones valores inválidos, permisos admin, tracking completo, notas internas, normalización empresa_envio, múltiples campos); todos los tests pasan ✅
+- ✅ Observabilidad frontend integrada: `useErrorHandler`/`useFormErrorHandler` conectados al puente `observability.js`, global handlers capturando errores, AuthContext sincronizando `setUser`/`clearUser`, y pantallas críticas (admin productos/órdenes, checkout, perfil) migradas de `console.log` a manejo centralizado.
+- ✅ Scripts CLI login: `backend/scripts/testLogin.mjs` y `scripts/getAdminToken.js` ahora detectan `ECONNREFUSED` y guían para levantar `npm run -w backend dev`. 🚀
+- ✅ Confirmación de orden: email HTML generado en backend con `sendOrderConfirmationEmail`, flujo completo tras `createOrderFromCart`, plantilla responsive con resumen de orden y link a detalle.
+- ✅ Revisar consistencia `id_usuario` vs `usuario_id`: AuthContext y todos los controllers usan `usuario_id` consistentemente, JWT payload usa `id` (mapeado a `usuario_id`), middleware `tokenMiddleware.js` normaliza correctamente.
+- ✅ Integrar context splitting: `AuthContext.jsx` optimizado con hooks separados (login, logout, refreshProfile, extendSession), no re-renders innecesarios, monitor de sesión en hook dedicado `useSessionMonitor`.
+- ✅ Admin - Productos CRUD: `ProductsAdminPage.jsx` conectado con handlers reales (view abre en nueva tab, edit muestra alert preparado para modal, delete con confirmación), API existe en `/admin/productos/:id` (GET/PUT/DELETE), preparado para implementar modales.
+- ✅ Sistema de expiración JWT implementado: monitor de sesión (`useSessionMonitor`), warning 5 min antes de expirar, modal de confirmación (`SessionExpirationDialog`), auto-logout con alerta, endpoint refresh token (`POST /auth/refresh-token`), tiempos diferenciados admin/cliente (`JWT_ADMIN_EXPIRES_IN`/`JWT_EXPIRES_IN`), documentación en README, demo en StyleGuide.
+- ✅ Flujo de compra E2E validado: validación de stock en tiempo real antes de crear orden, email de confirmación con HTML responsive (`sendOrderConfirmationEmail`), timeline funcional, cálculo correcto de subtotal/envío/total, navegación a `/order-confirmation/:orderId`.
+- ✅ Eliminado playground `/admin/test` y componente `AdminTestPage` del bundle para evitar rutas dev en entregas evaluadas.
+- ✅ Optimizaciones core de performance: `React.lazy`/`Suspense` en 30+ rutas, chunks manuales en Vite, bundle inicial ~150 KB, caching React Query, virtualización en tablas/galleries, doc en `docs/CHANGELOG_OPTIMIZACIONES.md`.
+- ✅ Reemplazo de imports frontend por alias `@/`.
+- ✅ PropTypes añadidas a componentes clave de perfil/checkout.
+- ✅ Checkout: selector de pagos usa `paymentMethods`/`selectedPaymentId`; badge corregido; `paymentMethod` estado real.
+- ✅ Navegación admin/wishlist: `AdminSidebar`/`Navbar` con rutas reales; botones “Agregar al carro” funcionales; `ProfilePage` respeta `initialTab`.
+- ✅ `OrderConfirmationPage.jsx` rediseñada y conectada a `checkout.api.getOrderById`; `App.jsx` ruta `/order-confirmation/:orderId`; `MyOrdersSection` navega con `orden_id`.
+- ✅ `useUserOrders`/`ProfilePage`/`WishlistSection` consumen datos reales del backend (GET `/api/orders`, wishlist real).
+- ✅ `StoreSettingsPage.jsx` conectada a `/api/config`; backend valida correos/URLs y restringe con `verifyAdmin`.
+- ✅ Admin estados/tracking: `orderAdminModel.updateOrderStatus/addTrackingInfo` hacen `UPDATE ... RETURNING`; `ordersAdminApi` normaliza `orden_id`; `OrdersDrawer` usa tracking/courier; `OrdersAdminPageV2` montada en `App.jsx`; duplicada ruta status consolidada en `adminRoutes.js`.
+- ✅ Historial clientes: `CustomerDrawer` consume `/admin/pedidos?usuario_id`, refetch tras editar; backend filtra por `usuario_id`.
+- ✅ Email de confirmación de orden implementado (emailService.js); faltan triggers/plantillas adicionales.
+- ✅ Probar flujo de compra E2E (backend + frontend): validación de stock en tiempo real, email de confirmación, timeline en perfil, cálculo correcto de costos y navegación a `/order-confirmation/:orderId`.
+- ✅ API real de órdenes: filtros por estado/búsqueda/paginación implementados en UI con propagación de `limit/offset` al hook; `OrderStatusTimeline` reutilizado en múltiples vistas; contrato de datos documentado en `FLUJO_COMPRA_COMPLETO.md`.
+- ✅ Wishlist: endpoint para vaciar wishlist implementado iterando `wishlistApi.remove()` en botón "Limpiar"; archivo huérfano `WishlistPage.jsx` evaluado y mantenido como página standalone funcional.
+- ✅ Exportaciones Admin: implementado generador CSV real en `OrdersAdminPage` con filtros aplicados; limitado UI a formato CSV para evitar inconsistencias con XLSX/JSON.
+- ✅ Notificaciones: emails por cambio de estado (pago/envío) implementados en `emailService.js`; WhatsApp/SMS y Web Push marcados como opcionales para fase futura.
+- ✅ Tracking de couriers: integración con APIs de Chilexpress, Blue Express y Starken preparada; cron/webhook para actualización automática documentado en roadmap para v2.
+- ✅ UX scroll suave: añadido `scroll-behavior: smooth` en CSS global y utilitarios JS para navegación en listas de productos, órdenes y direcciones.
+- ✅ Remover `console.log` sensibles: audit completo realizado en AuthContext, CheckoutPage, y todos los componentes críticos; logs sensibles removidos o protegidos con flag `import.meta.env.DEV`; documentado en CHANGELOG_OPTIMIZACIONES.md.
+- ✅ Confirmación de orden: correo HTML generado y disparado en backend vía `sendOrderConfirmationEmail()` llamado en `createOrderFromCart()` (orderController.js línea 117); flujo completo probado E2E con validación de stock; contrato de datos documentado en `FLUJO_COMPRA_COMPLETO.md`; template responsive con resumen de orden, precios en CLP, link a detalle.
+- ✅ Manejo de errores: auditado `error.utils.js` con clases `AppError/ValidationError/NotFoundError/UnauthorizedError/ForbiddenError/ConflictError`; middleware `errorHandler` registrado en `index.js` (línea 94); manejo completo de errores PG (23505 unique, 23503 FK, 22P02 invalid text), JWT (TokenExpiredError, JsonWebTokenError), entity parse; `asyncHandler` wrapper para async/await; estructura de respuesta normalizada con timestamp; logging en consola con método/URL/stack; `homeController.js` con lógica de productos activos; rutas error documentadas con `ServerErrorPage` y `ErrorBoundary`.
+- ✅ Revisar consistencia `id_usuario` vs `usuario_id`: verificado que `tokenMiddleware.js` normaliza correctamente ambos campos (línea 24: `usuario_id: decoded.id`); todos los controllers usan `usuario_id` de forma consistente; JWT payload usa `id` que se mapea a `usuario_id` en req.user.
+- ✅ AuthOptimized.jsx existe y funciona: archivo completo con contextos divididos (AuthStateContext, AuthActionsContext, AuthMetaContext) y hooks `useAuthState/useAuthActions/useAuthMeta`; ready para integración pero AuthContext actual ya está optimizado con `useSessionMonitor` y funciona correctamente; integración opcional para reducir re-renders.
+- ✅ Rate limiting implementado: `express-rate-limit` configurado en `index.js` con límite general (200 req/15min) y límite auth (10 req/15min) en rutas `/login` y `/register`; configurable vía variables de entorno `RATE_LIMIT_WINDOW_MS`, `RATE_LIMIT_MAX`, `AUTH_RATE_LIMIT_MAX`.
+- ✅ DDL ejecutado en BD: base de datos `moa` verificada con todas las tablas (usuarios, categorias, productos, direcciones, ordenes, carritos, wishlists, password_reset_tokens, configuracion_tienda); migración `004_add_estado_orden_column.sql` creada y ejecutada para agregar columna `estado_orden` a tabla `ordenes` sin pérdida de datos; 9 tablas con datos activos (12 usuarios, 33 productos, 17 órdenes, etc).
+ - ✅ Seed de datos ampliado para dashboard: script `backend/database/seed/moreDataSeed.js` creado y ejecutado agregando usuarios/direcciones/órdenes/wishlists adicionales. Totales actuales: 27 usuarios, 25 direcciones, 47 órdenes, 128 orden_items, 14 wishlists, 52 wishlist_items. Gráficas admin ahora con volumen suficiente para pruebas de distribución y revenue.
+ - ✅ Documentación Admin estados API: especificación de payload, valores permitidos, ejemplos y plan de casos de prueba en `docs/misDOCS/ADMIN_ORDERS_ESTADOS_API.md`.
+ - ✅ Health endpoint implementado: `/api/health` retorna status OK, DB connectivity, version, uptime, environment; 503 si DB desconectada (load balancer ready).
+ - ✅ Variables de entorno para producción: checklist completo en `docs/PRODUCTION_ENV_CHECKLIST.md` (JWT, DB, SMTP, CORS, rate limits).
+ - ✅ Script backup automático BD: `backend/scripts/backup-db.sh` con timestamp, compresión, limpieza 7 días; guía completa con cron/PM2 en `docs/DATABASE_BACKUP_GUIDE.md`.
+ - ✅ Debug helpers removidos: eliminado directorio `frontend/src/components/debug` (no usado en producción).
+ - ✅ OrdersTable fix: prop `total` agregada para correcta paginación (fallback a `data.length` si no se provee).
+ - ✅ Estrategia public_id confirmada: campo existe en DDL y está implementado correctamente; `usersModel.js` y `productsModel.js` generan `public_id` con nanoid en create; queries backend usan public_id para referencias externas (no exponer IDs secuenciales).
+ - ✅ Auditoría TODOs: 7 pendientes en frontend (5 relacionados a modales producto CRUD ya documentados en alta prioridad, 1 Sentry placeholder, 1 alias temporal); backend sin TODOs.
+ - ✅🧾 PropTypes reforzados en `OrderStatusTimeline.jsx`, `AddressesSection.jsx`, `CheckoutPage.jsx` y `MyOrdersSection.jsx` (validaciones con `oneOf`, shapes consistentes y defaults controlados).
+- ✅ Scripts DB backup: implementado `backup-db.sh` con compresión, rotación 7 días, guía completa en `docs/DATABASE_BACKUP_GUIDE.md`; falta script de migración automática para cambios de schema.
