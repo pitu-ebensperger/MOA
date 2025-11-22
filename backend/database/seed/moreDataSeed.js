@@ -22,8 +22,13 @@ async function seedMoreData() {
     
     for (let i = 1; i <= 15; i++) {
       const userId = `cliente${12 + i}`;
+      // Generar fechas de creación distribuidas entre 2-6 meses atrás
+      const daysAgo = 60 + Math.floor(Math.random() * 120); // 60-180 días
+      const createdDate = new Date();
+      createdDate.setDate(createdDate.getDate() - daysAgo);
+      
       const result = await client.query(
-        `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol, rol_code, status)
+        `INSERT INTO usuarios (public_id, nombre, email, telefono, password_hash, rol_code, status, creado_en)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          ON CONFLICT (email) DO NOTHING
          RETURNING usuario_id, email`,
@@ -33,9 +38,9 @@ async function seedMoreData() {
           `cliente${12 + i}@demo.cl`,
           `+569 ${Math.floor(10000000 + Math.random() * 90000000)}`,
           passwordHash,
-          'Cliente',
-          'CUSTOMER',
-          'activo'
+          'CLIENT',
+          'activo',
+          createdDate
         ]
       );
       if (result.rows.length > 0) {
@@ -46,7 +51,7 @@ async function seedMoreData() {
     
     // 2. Obtener todos los usuarios para asignar direcciones
     const allUsersResult = await client.query(
-      `SELECT usuario_id FROM usuarios WHERE rol_code = 'CUSTOMER' ORDER BY usuario_id`
+      `SELECT usuario_id FROM usuarios WHERE rol_code = 'CLIENT' ORDER BY usuario_id`
     );
     const allUserIds = allUsersResult.rows.map(r => r.usuario_id);
     
@@ -227,7 +232,7 @@ async function seedMoreData() {
       `SELECT u.usuario_id 
        FROM usuarios u
        LEFT JOIN wishlists w ON u.usuario_id = w.usuario_id
-       WHERE w.wishlist_id IS NULL AND u.rol_code = 'CUSTOMER'
+       WHERE w.wishlist_id IS NULL AND u.rol_code = 'CLIENT'
        LIMIT 10`
     );
     

@@ -6,13 +6,11 @@ import { CLIENTS } from "./clientsData.js";
 const DEFAULT_PASSWORD = process.env.CLIENTS_PASSWORD || "Cliente123!";
 
 const normalizeClient = (client) => {
-  const rol = (client.rol || "cliente").toLowerCase();
-  const rolCode = client.rolCode || rol.toUpperCase();
+  const rol_code = client.rol_code || "CLIENT";
   const status = (client.status || "activo").toLowerCase();
   return {
     ...client,
-    rol,
-    rolCode,
+    rol_code,
     status,
     password: client.password || DEFAULT_PASSWORD,
   };
@@ -32,18 +30,18 @@ async function seedClients() {
           email,
           telefono,
           password_hash,
-          rol,
           rol_code,
-          status
+          status,
+          creado_en
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (email) DO UPDATE SET
           nombre = EXCLUDED.nombre,
           telefono = EXCLUDED.telefono,
           password_hash = EXCLUDED.password_hash,
-          rol = EXCLUDED.rol,
           rol_code = EXCLUDED.rol_code,
-          status = EXCLUDED.status
+          status = EXCLUDED.status,
+          creado_en = EXCLUDED.creado_en
         RETURNING usuario_id;
       `;
       const values = [
@@ -52,17 +50,17 @@ async function seedClients() {
         normalized.email,
         normalized.telefono,
         passwordHash,
-        normalized.rol,
-        normalized.rolCode,
+        normalized.rol_code,
         normalized.status,
+        normalized.creado_en || new Date(),
       ];
 
       const result = await pool.query(query, values);
-      console.log(`Cliente asegurado: ${normalized.email} → ID ${result.rows[0].usuario_id}`);
+      console.log(`✓ Cliente: ${normalized.email} → ID ${result.rows[0].usuario_id} (${normalized.creado_en ? 'con fecha histórica' : 'fecha actual'})`);
     }
-    console.log("Seed de clientes completado correctamente.");
+    console.log("\n✅ Seed de clientes completado correctamente.");
   } catch (error) {
-    console.error("Error al insertar clientes:", error);
+    console.error("❌ Error al insertar clientes:", error);
     process.exitCode = 1;
   } finally {
     await pool.end();
