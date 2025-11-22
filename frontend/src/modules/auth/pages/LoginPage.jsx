@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Mail, Lock, X, Clock, ShoppingCart, PartyPopper, AlarmClock } from "lucide-react";
+import { Mail, Lock, X, Clock, ShoppingCart, PartyPopper } from "lucide-react";
 import { useAuth, isAdminRole } from '@/context/auth-context.js'
 import { useRedirectAfterAuth } from '@/modules/auth/hooks/useRedirectAuth.jsx'
 import { Button } from '@/components/ui/Button.jsx'
@@ -90,6 +90,36 @@ export default function LoginPage() {
     }
   }, []);
 
+  // Estilos de animación
+  const styles = `
+    @keyframes icon-bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    @keyframes circle-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.15; }
+      50% { transform: scale(0.9); opacity: 0.15; }
+    }
+    
+    .animate-icon-bounce,
+    .animate-circle-pulse {
+      transition: all 0.3s ease;
+    }
+    
+    .modal-header-group:hover .animate-icon-bounce,
+    .modal-content:has(.modal-button-wrapper:hover) .animate-icon-bounce {
+      animation: icon-bounce 2s ease-in-out infinite;
+      animation-delay: 0.1s;
+    }
+    
+    .modal-header-group:hover .animate-circle-pulse,
+    .modal-content:has(.modal-button-wrapper:hover) .animate-circle-pulse {
+      animation: circle-pulse 2s ease-in-out infinite;
+      animation-delay: 0.1s;
+    }
+  `;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -130,103 +160,95 @@ export default function LoginPage() {
   };
 
   return (
+    <>
+    <style>{styles}</style>
     <div className="page">
     
     {/* Modal de bienvenida (después de registro) - FUERA del contenedor principal */}
     {showWelcomeModal && (
       <div 
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4"
-        onClick={() => setShowWelcomeModal(false)}
-      >
-        <div 
-          className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header decorativo con gradiente MOA */}
-          <div className="bg-gradient-to-br from-[#D4704B] via-[#B8653F] to-[#8B4513] px-8 pt-8 pb-6 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-md mb-4">
-              <span className="text-4xl">🎉</span>
-            </div>
-            <h3 className="text-2xl font-serif font-bold text-white mb-2">
-              ¡Bienvenido a MOA{welcomeUserName ? `, ${welcomeUserName.split(' ')[0]}` : ''}!
-            </h3>
-            <p className="text-white/90 text-sm">
-              Tu cuenta ha sido creada exitosamente
-            </p>
-          </div>
-          
-          {/* Contenido */}
-          <div className="px-8 py-6">
-            <p className="text-center text-(--color-text-secondary) text-sm leading-relaxed mb-6">
-              Ahora puedes iniciar sesión para comenzar a explorar nuestra colección de muebles artesanales y decoración única.
-            </p>
-            
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={() => setShowWelcomeModal(false)}
-                shape="pill"
-                motion="lift"
-                className="w-full"
-              >
-                Iniciar sesión
-              </Button>
-              <button
-                onClick={() => setShowWelcomeModal(false)}
-                className="text-sm text-(--color-text-muted) hover:text-(--color-primary1) transition-colors"
-              >
-                Cerrar
-              </button>
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4"
+            onClick={() => setShowWelcomeModal(false)}
+          >
+            <div 
+              className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+    
+              <div className="bg-gradient-to-br from-[var(--color-primary3)] via-[var(--color-primary1)] to-[var(--color-primary2)] px-8 pt-8 pb-6 text-center modal-header-group group cursor-pointer">
+                <div className="relative inline-flex items-center justify-center w-20 h-20 mb-4">
+                  <div className="absolute inset-0 rounded-full bg-white/10 backdrop-blur-md animate-circle-pulse" />
+                  <PartyPopper className="h-20 w-20 text-white relative z-10 animate-icon-bounce" strokeWidth={1} />
+                </div>
+                <div className="text-2xl font-serif font-regular text-white mb-0">
+                  ¡Bienvenido a MOA{welcomeUserName ? `, ${welcomeUserName.split(' ')[0]}` : ''}!
+                </div>
+                <p className="text-white/90 text-regular text-md">
+                  Tu cuenta ha sido creada exitosamente
+                </p>
+              </div>
+              
+              {/* Contenido */}
+              <div className="px-8 py-6">
+                <p className="text-center text-(--color-text-secondary) text-sm leading-relaxed mb-6">
+                  Ahora puedes iniciar sesión para comenzar a explorar nuestra colección de muebles artesanales y decoración única.
+                </p>
+                
+                <div className="flex flex-col gap-3 items-center modal-button-wrapper group">
+                  <Button
+                    onClick={() => setShowWelcomeModal(false)}
+                    shape="pill"
+                    width="fit"
+                    className="px-8 hover:bg--color-primary2 hover:shadow-lg transition-all duration-200"
+                    size="sm"
+                  >
+                    Iniciar sesión
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    )}
+    )}   
 
-    {/* Modal de sesión expirada - FUERA del contenedor principal */}
+    {/* Modal de sesión expirada */}
     {showExpiredModal && (
       <div 
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
         onClick={() => setShowExpiredModal(false)}
       >
         <div 
-          className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in"
+          className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-md mx-4 animate-scale-in"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header con tono amber para advertencia */}
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 px-8 pt-8 pb-6 border-b border-amber-100">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-amber-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-semibold text-(--color-primary1) mb-2">
-                  Tu sesión ha expirado
-                </h3>
-                <p className="text-sm text-(--color-text-secondary) leading-relaxed">
-                  Por tu seguridad, necesitas volver a iniciar sesión{expiredFromPath ? ` para acceder a ${expiredFromPath}` : ''}.
-                </p>
-              </div>
+          <div className="flex items-start gap-3 mb-4">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-warning/100 flex items-center justify-center">
+              <Clock className="h-5 w-5 text-warm" />
             </div>
-          </div>
-          
-          {/* Contenido */}
-          <div className="px-8 py-6">
-            <div className="bg-amber-50/50 rounded-xl p-4 mb-6 border border-amber-100">
-              <p className="text-xs text-(--color-text-muted) text-center">
-                Las sesiones expiran después de 24 horas de inactividad para proteger tu cuenta.
+            <div className="flex-1">
+              <h3 id="session-expired-title" className="text-lg font-display font-semibold text-(--color-warning) mb-1">
+                Tu sesión expiró
+              </h3>
+              <p className="text-sm text-(--color-text-secondary) leading-relaxed">
+                Por tu seguridad, necesitas volver a iniciar sesión{expiredFromPath ? ` para acceder a ${expiredFromPath}` : ''}.
               </p>
             </div>
-            
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={() => setShowExpiredModal(false)}
-                shape="pill"
-                motion="lift"
-                className="w-full"
-              >
-                Entendido
-              </Button>
-            </div>
+            <button
+              onClick={() => setShowExpiredModal(false)}
+              className="shrink-0 p-1 rounded-lg hover:bg-neutral-100 text-neutral-400 hover:text-neutral-600 transition-colors"
+              aria-label="Cerrar"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={() => setShowExpiredModal(false)}
+              shape="pill"
+              size="sm"
+              className="px-6"
+            >
+              Entendido
+            </Button>
           </div>
         </div>
       </div>
@@ -366,5 +388,6 @@ export default function LoginPage() {
       </div>
     </main>
     </div>
+    </>
   );
 }

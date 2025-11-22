@@ -23,14 +23,22 @@ import { API_PATHS } from "@/config/api-paths.js"
 import { formatCurrencyCLP } from "@/utils/currency.js"
 import { formatDate_ddMMyyyy } from "@/utils/date.js"
 
+// ⚠️ NOTA: Algunos valores legacy no coinciden con DDL actual
+// DDL válido: 'preparacion' | 'enviado' | 'en_transito' | 'entregado' | 'cancelado'
 const DELIVERY_STATUS_DAYS = {
   delivered: 0,
+  entregado: 0,
   in_transit: 2,
-  processing: 3,
+  en_transito: 2,
+  // 'processing' y 'empaquetado' NO existen en DDL
+  processing: 3, // legacy - mapear a 'preparacion'
   preparing: 4,
-  empaquetado: 4,
+  preparacion: 4,
+  empaquetado: 4, // legacy - no existe en DDL
   shipped: 2,
+  enviado: 2,
   cancelled: 0,
+  cancelado: 0,
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -191,12 +199,17 @@ export const OrderConfirmationPage = () => {
   const orderStatus = order?.estado_pago ?? order?.status ?? "pending"
   
   const getStatusBadge = (status) => {
+    // ⚠️ Estados válidos DDL: 'pendiente' | 'pagado' | 'rechazado' | 'reembolsado'
     const statusConfig = {
       completado: { label: 'Pagado', variant: 'success' },
+      pagado: { label: 'Pagado', variant: 'success' },
       pending: { label: 'Pendiente', variant: 'warning' },
-      processing: { label: 'Procesando', variant: 'info' },
-      cancelled: { label: 'Cancelado', variant: 'danger' },
-      approved: { label: 'Aprobado', variant: 'success' }
+      pendiente: { label: 'Pendiente', variant: 'warning' },
+      processing: { label: 'Pendiente', variant: 'info' }, // legacy - mapear a pendiente
+      cancelled: { label: 'Rechazado', variant: 'danger' },
+      rechazado: { label: 'Rechazado', variant: 'danger' },
+      approved: { label: 'Pagado', variant: 'success' },
+      reembolsado: { label: 'Reembolsado', variant: 'default' }
     }
     return statusConfig[status?.toLowerCase()] ?? { label: status, variant: 'default' }
   }

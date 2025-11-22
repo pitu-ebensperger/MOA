@@ -69,8 +69,8 @@ describe("TEST API – MOA", () => {
       console.log('Response body sample:', res.body);
       
       // Verificar que tenga la estructura esperada de paginación
-      expect(res.body).toHaveProperty('items');
-      expect(Array.isArray(res.body.items)).toBe(true);
+      expect(res.body).toHaveProperty('data');
+      expect(Array.isArray(res.body.data)).toBe(true);
     }
   });
 

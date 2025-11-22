@@ -1,4 +1,4 @@
-#!/bin/bash
+#//TODO: DELETE THIS BEFORE DEPLOY 
 
 # ===============================================
 # MOA E-commerce - Database Installation Script

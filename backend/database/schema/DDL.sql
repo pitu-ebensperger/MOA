@@ -177,7 +177,7 @@ CREATE TABLE ordenes (
     metodo_despacho TEXT DEFAULT 'standard' CHECK (metodo_despacho IN ('standard', 'express', 'retiro')),
     
     -- Estados (workflow completo)
-    estado_orden TEXT DEFAULT 'confirmed' CHECK (estado_orden IN ('draft', 'confirmed', 'cancelled')),
+    estado_orden TEXT DEFAULT 'confirmado' CHECK (estado_orden IN ('borrador', 'confirmado', 'cancelado')),
     estado_pago TEXT DEFAULT 'pendiente' CHECK (estado_pago IN ('pendiente', 'pagado', 'rechazado', 'reembolsado')),
     estado_envio TEXT DEFAULT 'preparacion' CHECK (estado_envio IN ('preparacion', 'enviado', 'en_transito', 'entregado', 'cancelado')),
     
@@ -202,7 +202,7 @@ CREATE INDEX idx_ordenes_estado_pago ON ordenes(estado_pago);
 CREATE INDEX idx_ordenes_estado_envio ON ordenes(estado_envio);
 CREATE INDEX idx_ordenes_creado_en ON ordenes(creado_en DESC);
 CREATE INDEX idx_ordenes_estado_creado ON ordenes(estado_orden, creado_en);
-CREATE INDEX idx_ordenes_analytics ON ordenes(estado_orden, estado_pago, metodo_pago, creado_en) WHERE estado_orden = 'confirmed';
+CREATE INDEX idx_ordenes_analytics ON ordenes(estado_orden, estado_pago, metodo_pago, creado_en) WHERE estado_orden = 'confirmado';
 
 CREATE TABLE orden_items (
     orden_item_id BIGSERIAL PRIMARY KEY,

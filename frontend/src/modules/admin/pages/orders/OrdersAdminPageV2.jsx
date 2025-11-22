@@ -33,26 +33,17 @@ import {
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 import { useErrorHandler, useFormErrorHandler } from '@/hooks/useErrorHandler.js';
 import { confirm } from '@/components/ui';
+import { ESTADOS_PAGO_OPTIONS, ESTADOS_ENVIO_OPTIONS } from '../../../../../shared/constants/order-states.js';
 
-// Estados y opciones
+// Estados y opciones (agregar opción "Todos" a las constantes compartidas)
 const ESTADOS_PAGO = [
   { value: '', label: 'Todos los pagos' },
-  { value: 'pendiente', label: 'Pendiente' },
-  { value: 'procesando', label: 'Procesando' },
-  { value: 'pagado', label: 'Pagado' },
-  { value: 'fallido', label: 'Fallido' },
-  { value: 'reembolsado', label: 'Reembolsado' },
-  { value: 'cancelado', label: 'Cancelado' },
+  ...ESTADOS_PAGO_OPTIONS
 ];
 
 const ESTADOS_ENVIO = [
   { value: '', label: 'Todos los envíos' },
-  { value: 'preparacion', label: 'En Preparación' },
-  { value: 'empaquetado', label: 'Empaquetado' },
-  { value: 'enviado', label: 'Enviado' },
-  { value: 'en_transito', label: 'En Tránsito' },
-  { value: 'entregado', label: 'Entregado' },
-  { value: 'devuelto', label: 'Devuelto' },
+  ...ESTADOS_ENVIO_OPTIONS
 ];
 
 const METODOS_DESPACHO = [

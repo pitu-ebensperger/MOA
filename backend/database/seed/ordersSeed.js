@@ -1,4 +1,12 @@
 // Seed histórico de órdenes
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: join(__dirname, "..", "..", ".env") });
+
 import pool from "../config.js";
 import { ORDER_HISTORY } from "./ordersData.js";
 
@@ -82,8 +90,8 @@ async function seedOrders() {
             metodo_despacho,
             estado_pago,
             estado_envio,
+            estado_orden,
             notas_cliente,
-            notas_internas,
             fecha_pago,
             fecha_envio,
             fecha_entrega_real,
@@ -105,8 +113,8 @@ async function seedOrders() {
             metodo_despacho = EXCLUDED.metodo_despacho,
             estado_pago = EXCLUDED.estado_pago,
             estado_envio = EXCLUDED.estado_envio,
+            estado_orden = EXCLUDED.estado_orden,
             notas_cliente = EXCLUDED.notas_cliente,
-            notas_internas = EXCLUDED.notas_internas,
             fecha_pago = EXCLUDED.fecha_pago,
             fecha_envio = EXCLUDED.fecha_envio,
             fecha_entrega_real = EXCLUDED.fecha_entrega_real,
@@ -127,8 +135,8 @@ async function seedOrders() {
           order.metodo_despacho || "standard",
           order.estado_pago || "pendiente",
           order.estado_envio || "preparacion",
+          order.estado_orden || "confirmado",
           order.notas_cliente || null,
-          order.notas_internas || null,
           order.fecha_pago || null,
           order.fecha_envio || null,
           order.fecha_entrega_real || null,

@@ -28,8 +28,12 @@ router.get("/admin/analytics/customers/registrations", verifyAdmin, asyncHandler
 
 // === RUTAS DE DASHBOARD STATS ===
 router.get("/admin/dashboard/stats", verifyAdmin, asyncHandler(dashboardController.getDashboardStats));
+router.get("/admin/dashboard/kpis", verifyAdmin, asyncHandler(dashboardController.getDashboardKPIs));
 router.get("/admin/dashboard/payment-methods", verifyAdmin, asyncHandler(dashboardController.getPaymentMethodStats));
 router.get("/admin/dashboard/shipping-methods", verifyAdmin, asyncHandler(dashboardController.getShippingMethodStats));
+router.get("/admin/dashboard/top-products", verifyAdmin, asyncHandler(dashboardController.getTopProducts));
+router.get("/admin/dashboard/sales-evolution", verifyAdmin, asyncHandler(dashboardController.getSalesEvolution));
+router.get("/admin/dashboard/orders-by-status", verifyAdmin, asyncHandler(dashboardController.getOrdersByStatus));
 
 // === RUTAS DE PRODUCTOS ADMIN ===
 router.get("/admin", verifyAdmin, asyncHandler(AdminController.getDashboardMetrics));

@@ -15,10 +15,10 @@ describe('Stock Validation Tests', () => {
   beforeAll(async () => {
     // Crear usuario de prueba
     const userResult = await pool.query(
-      `INSERT INTO usuarios (public_id, nombre, email, password_hash, rol, rol_code)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO usuarios (public_id, nombre, email, password_hash, rol_code)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING usuario_id`,
-      [nanoid(), 'Test Stock User', `stock-test-${Date.now()}@test.com`, 'hash', 'cliente', 'CUSTOMER']
+      [nanoid(), 'Test Stock User', `stock-test-${Date.now()}@test.com`, 'hash', 'CLIENT']
     );
     testUserId = userResult.rows[0].usuario_id;
     

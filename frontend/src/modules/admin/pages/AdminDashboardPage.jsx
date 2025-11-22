@@ -41,6 +41,11 @@ import { formatDate_ddMMyyyy } from "@/utils/date.js";
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 import PaymentMethodsChart from "@/modules/admin/components/PaymentMethodsChart.jsx";
 import ShippingMethodsChart from "@/modules/admin/components/ShippingMethodsChart.jsx";
+import StatCard from "@/modules/admin/components/dashboard/StatCard.jsx";
+import SalesEvolutionChart from "@/modules/admin/components/dashboard/SalesEvolutionChart.jsx";
+import TopProductsList from "@/modules/admin/components/dashboard/TopProductsList.jsx";
+import OrderStatusDistribution from "@/modules/admin/components/dashboard/OrderStatusDistribution.jsx";
+import { useDashboardKPIs } from "@/modules/admin/hooks/useDashboardStats.js";
 import { ROUTES } from "@/routes/routes.js";
 
 // Icon mapping outside component to prevent recreation
@@ -95,6 +100,60 @@ ChartCard.propTypes = {
   loading: PropTypes.bool,
   action: PropTypes.node,
   className: PropTypes.string,
+};
+
+// Componente de KPIs del Overview con nuevos StatCards
+const OverviewKPIs = () => {
+  const { data: kpis, isLoading } = useDashboardKPIs(30);
+
+  const formatCurrency = (cents) => {
+    if (!cents) return '$0';
+    return `$${(cents / 100).toLocaleString('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  };
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatCard
+        label="Ingresos Totales"
+        value={formatCurrency(kpis?.ingresos?.value || 0)}
+        previousValue={kpis?.ingresos?.previousValue}
+        icon={DollarSign}
+        period="últimos 30 días"
+        colorScheme="success"
+        isLoading={isLoading}
+      />
+
+      <StatCard
+        label="Órdenes"
+        value={kpis?.ordenes?.value || 0}
+        previousValue={kpis?.ordenes?.previousValue}
+        icon={ShoppingCart}
+        period="últimos 30 días"
+        colorScheme="primary"
+        isLoading={isLoading}
+      />
+
+      <StatCard
+        label="Clientes"
+        value={kpis?.clientes?.value || 0}
+        previousValue={kpis?.clientes?.previousValue}
+        icon={Users}
+        period="últimos 30 días"
+        colorScheme="info"
+        isLoading={isLoading}
+      />
+
+      <StatCard
+        label="Ticket Promedio"
+        value={formatCurrency(kpis?.aov?.value || 0)}
+        previousValue={kpis?.aov?.previousValue}
+        icon={TrendingUp}
+        period="últimos 30 días"
+        colorScheme="warning"
+        isLoading={isLoading}
+      />
+    </div>
+  );
 };
 
 export default function AdminDashboardPage() {
@@ -231,54 +290,17 @@ export default function AdminDashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
-              className="space-y-4"
+              className="space-y-6"
             >
-              {/* Main Metrics with Animation */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <AnimatedKPICard
-                  title="Ingresos del mes"
-                  value={metrics.monthlyRevenue || 0}
-                  previousValue={metrics.previousMonthRevenue || 0}
-                  icon={DollarSign}
-                  trend
-                  prefix="$"
-                  color="var(--color-success)"
-                  loading={isLoading}
-                  delay={0}
-                />
+              <OverviewKPIs />
 
-                <AnimatedKPICard
-                  title="Pedidos totales"
-                  value={metrics.totalOrders || 0}
-                  previousValue={metrics.previousMonthOrders || 0}
-                  icon={ShoppingCart}
-                  trend
-                  color="var(--color-primary1)"
-                  loading={isLoading}
-                  delay={0.1}
-                />
+              {/* Gráfico de Evolución de Ventas */}
+              <SalesEvolutionChart periodo={30} />
 
-                <AnimatedKPICard
-                  title="Productos activos"
-                  value={metrics.totalProducts || 0}
-                  previousValue={Math.floor((metrics.totalProducts || 0) * 0.95)}
-                  icon={Package}
-                  trend
-                  color="var(--color-secondary1)"
-                  loading={isLoading}
-                  delay={0.2}
-                />
-
-                <AnimatedKPICard
-                  title="Clientes totales"
-                  value={metrics.totalCustomers || 0}
-                  previousValue={metrics.previousMonthCustomers || 0}
-                  icon={Users}
-                  trend
-                  color="var(--color-primary2)"
-                  loading={isLoading}
-                  delay={0.3}
-                />
+              {/* Grid de 2 columnas: Top Productos y Estado de Órdenes */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <TopProductsList periodo={30} limit={5} />
+                <OrderStatusDistribution />
               </div>
 
               {/* Charts Row 1 */}

@@ -30,32 +30,32 @@ const DAY_NAMES = [
 ];
 
 const ORDER_STATUS_KEYS = [
-  "pending",
-  "confirmed",
-  "processing",
-  "shipped",
-  "delivered",
-  "cancelled",
+  "pendiente",
+  "confirmado",
+  "procesando",
+  "enviado",
+  "entregado",
+  "cancelado",
 ];
 
 const determineOrderStatus = (estadoPago, estadoEnvio) => {
   const payment = String(estadoPago || "").toLowerCase();
   const shipping = String(estadoEnvio || "").toLowerCase();
 
-  if (payment === "cancelado" || shipping === "devuelto") return "cancelled";
-  if (shipping === "entregado") return "delivered";
-  if (shipping === "enviado") return "shipped";
-  if (payment === "pendiente") return "pending";
+  if (payment === "cancelado" || shipping === "cancelado") return "cancelado";
+  if (shipping === "entregado") return "entregado";
+  if (shipping === "enviado") return "enviado";
+  if (payment === "pendiente") return "pendiente";
   if (payment === "pagado") {
     if (shipping === "" || shipping === "preparacion") {
-      return "confirmed";
+      return "confirmado";
     }
-    return "shipped";
+    return "enviado";
   }
   if (shipping === "preparacion" || payment === "procesando") {
-    return "processing";
+    return "procesando";
   }
-  return "processing";
+  return "procesando";
 };
 
 const buildStatusCounts = (rows) => {

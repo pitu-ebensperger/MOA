@@ -23,7 +23,7 @@ export const getDashboardStats = async (req, res) => {
         
       FROM ordenes
       WHERE creado_en >= NOW() - INTERVAL '${parseInt(periodo)} days'
-        AND estado_orden = 'confirmed'
+        AND estado_orden = 'confirmado'
     `;
 
     const { rows } = await pool.query(statsQuery);
@@ -120,8 +120,200 @@ export const getShippingMethodStats = async (req, res) => {
   }
 };
 
+/**
+ * Obtiene KPIs principales del dashboard
+ */
+export const getDashboardKPIs = async (req, res) => {
+  try {
+    const { periodo = '30' } = req.query;
+
+    // KPIs del período actual
+    const currentQuery = `
+      WITH current_period AS (
+        SELECT 
+          COUNT(DISTINCT orden_id)::INT as total_ordenes,
+          COUNT(DISTINCT usuario_id)::INT as total_clientes,
+          COALESCE(SUM(total_cents), 0)::BIGINT as ingresos_totales,
+          COALESCE(ROUND(AVG(total_cents)), 0)::INT as ticket_promedio
+        FROM ordenes
+        WHERE estado_orden = 'confirmed'
+          AND creado_en >= NOW() - INTERVAL '${parseInt(periodo)} days'
+      ),
+      previous_period AS (
+        SELECT 
+          COUNT(DISTINCT orden_id)::INT as total_ordenes_prev,
+          COUNT(DISTINCT usuario_id)::INT as total_clientes_prev,
+          COALESCE(SUM(total_cents), 0)::BIGINT as ingresos_totales_prev,
+          COALESCE(ROUND(AVG(total_cents)), 0)::INT as ticket_promedio_prev
+        FROM ordenes
+        WHERE estado_orden = 'confirmed'
+          AND creado_en >= NOW() - INTERVAL '${parseInt(periodo) * 2} days'
+          AND creado_en < NOW() - INTERVAL '${parseInt(periodo)} days'
+      )
+      SELECT 
+        cp.*,
+        pp.total_ordenes_prev,
+        pp.total_clientes_prev,
+        pp.ingresos_totales_prev,
+        pp.ticket_promedio_prev
+      FROM current_period cp, previous_period pp
+    `;
+
+    const { rows } = await pool.query(currentQuery);
+    const kpis = rows[0];
+
+    res.json({
+      success: true,
+      data: {
+        ingresos: {
+          value: kpis.ingresos_totales,
+          previousValue: kpis.ingresos_totales_prev
+        },
+        ordenes: {
+          value: kpis.total_ordenes,
+          previousValue: kpis.total_ordenes_prev
+        },
+        clientes: {
+          value: kpis.total_clientes,
+          previousValue: kpis.total_clientes_prev
+        },
+        aov: {
+          value: kpis.ticket_promedio,
+          previousValue: kpis.ticket_promedio_prev
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('[DashboardController] Error obteniendo KPIs:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al obtener KPIs',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
+ * Obtiene top productos más vendidos
+ */
+export const getTopProducts = async (req, res) => {
+  try {
+    const { periodo = '30', limit = '5' } = req.query;
+
+    const query = `
+      SELECT 
+        p.producto_id,
+        p.nombre,
+        p.img_url,
+        p.precio_cents,
+        c.nombre as categoria,
+        SUM(oi.cantidad)::INT as unidades_vendidas,
+        COALESCE(SUM(oi.cantidad * oi.precio_unit), 0)::BIGINT as ingresos_totales,
+        COALESCE(ROUND(AVG(oi.precio_unit)), 0)::INT as precio_promedio
+      FROM orden_items oi
+      JOIN productos p ON oi.producto_id = p.producto_id
+      LEFT JOIN categorias c ON p.categoria_id = c.categoria_id
+      JOIN ordenes o ON oi.orden_id = o.orden_id
+      WHERE o.estado_orden = 'confirmed'
+        AND o.creado_en >= NOW() - INTERVAL '${parseInt(periodo)} days'
+      GROUP BY p.producto_id, p.nombre, p.img_url, p.precio_cents, c.nombre
+      ORDER BY unidades_vendidas DESC
+      LIMIT ${parseInt(limit)}
+    `;
+
+    const { rows } = await pool.query(query);
+
+    res.json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    console.error('[DashboardController] Error obteniendo top productos:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al obtener productos más vendidos',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
+ * Obtiene evolución de ventas (diaria, semanal, mensual)
+ */
+export const getSalesEvolution = async (req, res) => {
+  try {
+    const { periodo = '30' } = req.query;
+
+    const query = `
+      SELECT 
+        DATE(creado_en) as fecha,
+        COUNT(*)::INT as num_ordenes,
+        COALESCE(SUM(total_cents), 0)::BIGINT as ingresos
+      FROM ordenes
+      WHERE estado_orden = 'confirmed'
+        AND creado_en >= NOW() - INTERVAL '${parseInt(periodo)} days'
+      GROUP BY DATE(creado_en)
+      ORDER BY fecha ASC
+    `;
+
+    const { rows } = await pool.query(query);
+
+    res.json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    console.error('[DashboardController] Error obteniendo evolución de ventas:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al obtener evolución de ventas',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
+ * Obtiene distribución de órdenes por estado
+ */
+export const getOrdersByStatus = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        estado_envio,
+        COUNT(*)::INT as cantidad,
+        ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 2) as porcentaje
+      FROM ordenes
+      WHERE estado_orden = 'confirmed'
+      GROUP BY estado_envio
+      ORDER BY cantidad DESC
+    `;
+
+    const { rows } = await pool.query(query);
+
+    res.json({
+      success: true,
+      data: rows
+    });
+
+  } catch (error) {
+    console.error('[DashboardController] Error obteniendo órdenes por estado:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error al obtener distribución de órdenes',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 export default {
   getDashboardStats,
   getPaymentMethodStats,
-  getShippingMethodStats
+  getShippingMethodStats,
+  getDashboardKPIs,
+  getTopProducts,
+  getSalesEvolution,
+  getOrdersByStatus
 };

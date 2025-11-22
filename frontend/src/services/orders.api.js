@@ -1,11 +1,18 @@
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
 
+// ⚠️ DEPRECATED: Este archivo contiene código legacy de normalización
+// Los estados ahora se deben usar desde @config/order-states.js
+// Estados válidos del DDL:
+// - estado_pago: 'pendiente' | 'pagado' | 'rechazado' | 'reembolsado'
+// - estado_envio: 'preparacion' | 'enviado' | 'en_transito' | 'entregado' | 'cancelado'
+
 const STATUS_PAYLOADS = {
   pending: { estado_pago: "pendiente", estado_envio: "preparacion" },
-  processing: { estado_pago: "procesando", estado_envio: "preparacion" },
+  // processing: NO EXISTE EN DDL - usar 'pendiente'
   shipped: { estado_pago: "pagado", estado_envio: "enviado" },
   fulfilled: { estado_pago: "pagado", estado_envio: "entregado" },
-  cancelled: { estado_pago: "cancelado", estado_envio: "devuelto" },
+  // cancelled estado_envio: 'cancelado' (no 'devuelto')
+  cancelled: { estado_pago: "rechazado", estado_envio: "cancelado" },
 };
 
 const normalizeLegacyOrder = (order = {}) => {

@@ -127,3 +127,19 @@ export const BUTTON_LEGACY_VARIANTS = {
   round: { appearance: "soft", intent: "neutral", shape: "pill" },
   drawer: { appearance: "ghost", intent: "neutral", width: "full" },
 };
+
+/* CLOSE ICON TOKENS (X) --------------------------------------------------------------------*/ 
+// Estandarización de tamaños y estilos para iconos de cierre en modales/drawers
+export const CLOSE_ICON_SIZES = {
+  sm: 12,   // Tags, chips pequeños
+  md: 14,   // Botones inline, tablas
+  lg: 16,   // Drawers, dialogs estándar (h-4 w-4)
+  xl: 20,   // Modales grandes (h-5 w-5)
+};
+
+export const CLOSE_ICON_STYLES = {
+  default: "text-neutral-400 hover:text-neutral-600 transition-colors",
+  modal: "text-neutral-400 hover:text-neutral-600 transition-colors shrink-0 p-1 rounded-lg hover:bg-neutral-100",
+  alert: "text-neutral-500 hover:text-neutral-700 transition-colors",
+  primary: "text-(--color-primary1)/60 hover:text-(--color-primary1) transition-colors",
+};

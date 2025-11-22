@@ -74,7 +74,7 @@ const createOrder = async (orderData) => {
       }
     }
 
-    // Crear orden con estado_orden='confirmed' para órdenes exitosas
+    // Crear orden con estado_orden='confirmado' para órdenes exitosas
     const insertOrderQuery = `
       INSERT INTO ordenes (
         order_code,
@@ -101,7 +101,7 @@ const createOrder = async (orderData) => {
       envio_cents,
       total_cents,
       notas_cliente,
-      'confirmed', // Estado confirmado por defecto
+      'confirmado', // Estado confirmado por defecto
     ]);
 
     // Insertar items de la orden

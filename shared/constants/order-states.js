@@ -5,28 +5,28 @@
 
 // Estados de la orden (workflow principal)
 export const ESTADOS_ORDEN = {
-  DRAFT: 'draft',
-  CONFIRMED: 'confirmed',
-  CANCELLED: 'cancelled'
+  BORRADOR: 'borrador',
+  CONFIRMADO: 'confirmado',
+  CANCELADO: 'cancelado'
 };
 
 export const ESTADOS_ORDEN_VALIDOS = Object.values(ESTADOS_ORDEN);
 
 export const ESTADOS_ORDEN_OPTIONS = [
   { 
-    value: ESTADOS_ORDEN.DRAFT, 
+    value: ESTADOS_ORDEN.BORRADOR, 
     label: 'Borrador',
     description: 'Orden creada pero no confirmada',
     color: 'gray'
   },
   { 
-    value: ESTADOS_ORDEN.CONFIRMED, 
+    value: ESTADOS_ORDEN.CONFIRMADO, 
     label: 'Confirmada',
     description: 'Orden confirmada y lista para procesamiento',
     color: 'green'
   },
   { 
-    value: ESTADOS_ORDEN.CANCELLED, 
+    value: ESTADOS_ORDEN.CANCELADO, 
     label: 'Cancelada',
     description: 'Orden cancelada por el usuario o sistema',
     color: 'red'
@@ -74,7 +74,7 @@ export const ESTADOS_PAGO_OPTIONS = [
 export const ESTADOS_ENVIO = {
   PREPARACION: 'preparacion',
   ENVIADO: 'enviado',
-  EN_TRANSITO: 'en transito',
+  EN_TRANSITO: 'en_transito',
   ENTREGADO: 'entregado',
   CANCELADO: 'cancelado'
 };

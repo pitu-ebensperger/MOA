@@ -25,25 +25,11 @@ import { StatusPill } from '@/components/ui/StatusPill.jsx';
 import { formatCurrencyCLP } from '@/utils/currency.js';
 import { formatDateTime } from '@/utils/date.js';
 import AdminPageHeader from '@/modules/admin/components/AdminPageHeader.jsx';
+import { ESTADOS_PAGO_OPTIONS, ESTADOS_ENVIO_OPTIONS } from '../../../../../shared/constants/order-states.js';
 
-// Estados de pago y envío
-const ESTADOS_PAGO = [
-  { value: 'pendiente', label: 'Pendiente' },
-  { value: 'procesando', label: 'Procesando' },
-  { value: 'pagado', label: 'Pagado' },
-  { value: 'fallido', label: 'Fallido' },
-  { value: 'reembolsado', label: 'Reembolsado' },
-  { value: 'cancelado', label: 'Cancelado' },
-];
-
-const ESTADOS_ENVIO = [
-  { value: 'preparacion', label: 'En Preparación' },
-  { value: 'empaquetado', label: 'Empaquetado' },
-  { value: 'enviado', label: 'Enviado' },
-  { value: 'en_transito', label: 'En Tránsito' },
-  { value: 'entregado', label: 'Entregado' },
-  { value: 'devuelto', label: 'Devuelto' },
-];
+// Estados de pago y envío (importados desde constantes compartidas)
+const ESTADOS_PAGO = ESTADOS_PAGO_OPTIONS;
+const ESTADOS_ENVIO = ESTADOS_ENVIO_OPTIONS;
 
 // Mapeo de colores para estados
 const getStatusColor = (estado, tipo) => {

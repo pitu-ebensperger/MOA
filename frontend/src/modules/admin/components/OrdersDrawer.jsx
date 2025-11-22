@@ -14,6 +14,7 @@ import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.j
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
 import { OrderShape } from "@/utils/propTypes.js";
 import { SHIPPING_COMPANIES } from "@config/shipping-companies.js";
+import { ESTADOS_PAGO_OPTIONS, ESTADOS_ENVIO_OPTIONS } from "../../../../../shared/constants/order-states.js";
 
 // Helpers pequeños para no ensuciar el JSX
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");
@@ -275,12 +276,11 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
                               <SelectValue placeholder="Seleccionar estado" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="pendiente">Pendiente</SelectItem>
-                              <SelectItem value="procesando">Procesando</SelectItem>
-                              <SelectItem value="pagado">Pagado</SelectItem>
-                              <SelectItem value="fallido">Fallido</SelectItem>
-                              <SelectItem value="reembolsado">Reembolsado</SelectItem>
-                              <SelectItem value="cancelado">Cancelado</SelectItem>
+                              {ESTADOS_PAGO_OPTIONS.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         )}
@@ -303,12 +303,11 @@ export default function OrdersDrawer({ open, order, onClose, breadcrumb = null, 
                               <SelectValue placeholder="Seleccionar estado" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="preparacion">Preparación</SelectItem>
-                              <SelectItem value="empaquetado">Empaquetado</SelectItem>
-                              <SelectItem value="enviado">Enviado</SelectItem>
-                              <SelectItem value="en_transito">En tránsito</SelectItem>
-                              <SelectItem value="entregado">Entregado</SelectItem>
-                              <SelectItem value="devuelto">Devuelto</SelectItem>
+                              {ESTADOS_ENVIO_OPTIONS.map(option => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         )}
