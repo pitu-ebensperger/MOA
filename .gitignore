@@ -1,53 +1,66 @@
 //.gitignore (raíz)
-node_modules
-**/node_modules
-
+# Dependencies
+node_modules/
+**/node_modules/
 package-lock.json
+**/package-lock.json
 
-.vite
-**/.vite
-
+# Environment Variables
 .env
-**/.env
+.env.local
 .env.*.local
-**/.env.*.local
+**/.env
+**/.env.local
+**/.env.production
 .env copy
 
-snapshots/**
-snapshots/*.txt
-snapshots/*.json
+# Build outputs
+dist/
+frontend/dist/
+frontend/.vite/
+backend/.vite/
+.vite
 
+# Logs
+*.log
+npm-debug.log*
+backend/backend.log
+
+# OS Files
 .DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# IDE
 .idea
 .vscode/*
 !.vscode/extensions.json
 
-scripts/*.jsx
-scripts/*.js
-src/scripts/**.js
-frontend/scripts/**.js
-backend/scripts/**.js
+# Development files
+scripts/dev/
+frontend/dev-pages/
+**/styleguide/
 
-**/styleguide/StyleGuidePage.jsx
+# Temporary
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
 
+# Snapshots (dev tool)
+snapshots/*.json
+snapshots/*.txt
 
+# Development docs (mantener docs principales)
+docs/development/archives/
+docs/drafts/
+*.draft.md
+
+# Copilot temp
 .copilot-temp
-vscode/
-.githhub/
-.github/copilot-instructions.md
 .qodo/
-.TODO.md
-docs/**.md
-docs/*.md
-docs/***.md
-
-docs/misDOCS/*.md
-dist/
-frontend/dist/
-package-lock.json
-**/package-lock.json
-
-backend/backend.log
 
 
 
