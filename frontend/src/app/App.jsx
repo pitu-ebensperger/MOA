@@ -53,8 +53,7 @@ const AdminCategoriesPage = lazy(() => import('@/modules/admin/pages/AdminCatego
 const CustomersPage = lazy(() => import('@/modules/admin/pages/CustomersPage.jsx'))
 const StoreSettingsPage = lazy(() => import('@/modules/admin/pages/StoreSettingsPage.jsx'))
 
-// Lazy load - Style guide (solo desarrollo)
-const StyleGuidePage = lazy(() => import('@/modules/styleguide/pages/StyleGuidePage.jsx'))
+// Lazy load - Modals demo (solo desarrollo)
 const ModalsDemo = lazy(() => import('@/modules/auth/pages/ModalsDemo.jsx'))
 
 import '@/styles/global.css'
@@ -219,7 +218,6 @@ export const App = () => {
                 <Route path={admin.settings} element={<EntornoAdmin><StoreSettingsPage /></EntornoAdmin>} />
               </Route>
 
-              <Route path='/style-guide/*' element={<StyleGuidePage />} />
               <Route path='/modals-demo' element={<ModalsDemo />} />
             
             {/* Error Routes */}
