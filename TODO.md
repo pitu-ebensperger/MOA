@@ -71,6 +71,7 @@ _(Todas completadas - movidas a histórico)_
 - [ ] Monitoreo de errores (conectar comentarios TODO de Sentry en código)
 - [ ] Revisar y testear nodemail
 - [ ] **Eliminar artifacts de desarrollo antes de deploy**: remover scripts y helpers de desarrollo (ej: `scripts/start-dev.sh`, `dev:all` en `package.json`), dependencias dev-only (`concurrently`, etc.), y endpoints/páginas de debug (ej: `/admin/test`).
+ - [ ] **Eliminar artifacts de desarrollo antes de deploy**: remover scripts y helpers de desarrollo (por ejemplo scripts de arranque), dependencias dev-only (ej: `concurrently`), y endpoints/páginas de debug (ej: `/admin/test`).
 - [ ] Documentación de deployment actualizada con pasos de setup producción
 - [ ] Build prod (`npm run build`) OK sin errores ni warnings
 -
