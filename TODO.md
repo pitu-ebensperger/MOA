@@ -38,6 +38,16 @@ _(Todas completadas - movidas a histórico)_
 ### 🔵 Baja / mejoras futuras
 - [ ] **Tests de race condition de stock**: 2 tests de concurrencia en `orderStock.test.js` fallan de forma intermitente por timing de PostgreSQL (no crítico - lógica de stock funciona correctamente con `SELECT FOR UPDATE`)
 - [ ] **Testing E2E**: Ejecutar tests completos de flujos (registro→login→carrito→checkout→orden) con usuarios históricos (Camila 18 meses, Ignacio 17 días) y nuevos registros, verificar admin dashboard muestra timeline 2023-2024 correctamente
+ - [ ] **Revisar `/backend/src/utils/env.js`**: Auditar validaciones de variables de entorno, asegurar todos los campos requeridos (DB_NAME, JWT_SECRET, JWT_EXPIRES_IN, etc.) tienen checks, agregar validaciones production-specific (CORS_ORIGIN, NODE_ENV), documentar variables obligatorias
+ - [ ] **Eliminar scripts de desarrollo antes de deploy**: Revisar y remover archivos en `/backend/scripts/` no necesarios en producción (ej: `testLogin.mjs`, `getAdminToken.js`, debug helpers)
+ - [ ] **Actualizar cart/checkout/confirmation**: Verificar que usan data desde backend (no mocks hardcoded), validar flujo completo con carritos reales
+ - [ ] **Revisar config pool de PostgreSQL**: Confirmar valores óptimos en `backend/database/config.js` (max: 20, idleTimeoutMillis: 30000, connectionTimeoutMillis: 2000) para producción
+ - [ ] **Auditoría fetch/axios/jQuery**: Revisar uso de librerías HTTP en frontend/backend, estandarizar en una sola (fetch nativo o axios), eliminar jQuery si existe, verificar manejo consistente de errores y cancelación de requests
+ - [ ] Performance avanzada adicional: optimizar imágenes (WebP/lazy), CDN de assets, PWA/service worker, web workers y terminar imports específicos de `lucide-react`.
+ - [ ] Documentación: redactar Swagger/OpenAPI, guía de contribución, manual de admin, troubleshooting guide; agregar links en README principal a `docs/FLUJO_COMPRA_COMPLETO.md`, `docs/CONVERSION_IMPORTS_ALIAS.md`, `docs/INTEGRACION_CHECKOUT_TIMELINE.md`.
+ - [ ] Legal: términos y condiciones, política de privacidad/devoluciones, aviso legal/GDPR.
+ - [ ] Revisar en `.env` el bloque `# Password Reset Cleanup + Configuración de CORS` (variables y valores finales).
+ - [ ] Revisar envs antes de deploy (cambiarnode) para asegurar valores actualizados.
 - [ ] **Revisar `/backend/src/utils/env.js`**: Auditar validaciones de variables de entorno, asegurar todos los campos requeridos (DB_NAME, JWT_SECRET, JWT_EXPIRES_IN, etc.) tienen checks, agregar validaciones production-specific (CORS_ORIGIN, NODE_ENV), documentar variables obligatorias
 - [ ] **Eliminar scripts de desarrollo antes de deploy**: Revisar y remover archivos en `/backend/scripts/` no necesarios en producción (ej: `testLogin.mjs`, `getAdminToken.js`, debug helpers)
 - [ ] **Actualizar cart/checkout/confirmation**: Verificar que usan data desde backend (no mocks hardcoded), validar flujo completo con carritos reales
@@ -56,7 +66,14 @@ _(Todas completadas - movidas a histórico)_
   - Revisar textos, espaciados, animaciones y consistencia visual
 
 --------------------
-
+### ✅ Checklist pre-deploy (no olvidar)
+- [ ] HTTPS configurado en servidor producción
+- [ ] Monitoreo de errores (conectar comentarios TODO de Sentry en código)
+- [ ] Revisar y testear nodemail
+- [ ] **Eliminar artifacts de desarrollo antes de deploy**: remover scripts y helpers de desarrollo (ej: `scripts/start-dev.sh`, `dev:all` en `package.json`), dependencias dev-only (`concurrently`, etc.), y endpoints/páginas de debug (ej: `/admin/test`).
+- [ ] Documentación de deployment actualizada con pasos de setup producción
+- [ ] Build prod (`npm run build`) OK sin errores ni warnings
+-
 ## 🌟 Algún día / Maybe
 *Features que enriquecerían el proyecto pero no se incluyen en esta entrega por tiempo*
 
@@ -105,7 +122,16 @@ _(Todas completadas - movidas a histórico)_
 - [ ] HTTPS configurado en servidor producción
 - [ ] Monitoreo de errores (conectar comentarios TODO de Sentry en código)
 - [ ] Revisar y testear nodemail
+
+- [ ] **Eliminar artifacts de desarrollo antes de deploy**: remover scripts y helpers de desarrollo (ej: `scripts/start-dev.sh`, `dev:all` en `package.json`), dependencias dev-only (`concurrently`, etc.), y endpoints/páginas de debug (ej: `/admin/test`).
 - [ ] Documentación de deployment actualizada con pasos de setup producción
+- [ ] Build prod (`npm run build`) OK sin errores ni warnings
+
+
+
+
+
+
 
 - [x] ✅ Compresión HTTP activada en backend (compression middleware con threshold 1KB, level 6)
 - [x] ✅ Tests unitarios de stock implementados (6 tests: descuento automático, race conditions, rollback, multi-producto, límites)
@@ -118,7 +144,6 @@ _(Todas completadas - movidas a histórico)_
 - [x] ✅ Emails de confirmación configurados (Nodemailer con Ethereal fallback, plantilla HTML responsive)
 - [x] ✅ JWT expiración ajustada y documentada (24h clientes, 7d admin, refresh token, session monitor)
 - [x] ✅ Variables de entorno verificadas (guía completa en `docs/PRODUCTION_ENV_CHECKLIST.md`)
-- [ ] Build prod (`npm run build`) OK sin errores ni warnings
 - [x] ✅ Health endpoint `/api/health` implementado (monitoring ready con status DB, uptime, version)
 - [x] ✅ Rate limit habilitado (200 req/15min general, 10 req/15min auth)
 - [x] ✅ jwt-decode instalado en frontend (`package.json` tiene `jwt-decode: ^4.0.0`)
@@ -136,6 +161,9 @@ _(Todas completadas - movidas a histórico)_
 -------------------------------------------------------------------------------------------------
 
 ## ✅ Completados (histórico reciente)
+ - ✅ **[22 Nov 2025] OrderConfirmation visual guide implemented**: `OrderConfirmationPage.jsx` added and wired to route `/order-confirmation/:orderId`, responsive UI, badges, tracking, email banner.
+ - ✅ **[22 Nov 2025] Checkout address flow updated**: `CheckoutPage.jsx` supports shipping address selection and new address payload (`direccion_nueva` / `direccion_id`) and persists via `checkout.api`.
+ - ✅ **[22 Nov 2025] Payment methods UI updated**: Checkout payment selector and payment status badges implemented; admin/payment stats components present.
 - ✅ **[22 Nov 2025] Tests corregidos masivamente**: De 45/117 tests pasando (38%) a **109/111 (98.2%)**. Corregidos: sintaxis (await inesperado), INSERTs con placeholders incorrectos (usuarios 8→7, órdenes 5→6, direcciones 8→9), eliminadas referencias a `notas_internas`, actualizados estados a español (pendiente, pagado, rechazado, reembolsado, preparacion, enviado, entregado), corregida normalización de empresas de envío (`blue-express`→`blue_express`, `correos-de-chile`→`correos_chile`), agregada validación en `addTrackingInfo`, implementadas fechas automáticas en cambios de estado (estado_pago='pagado' → fecha_pago auto, estado_envio='enviado' → fecha_envio auto, estado_envio='entregado' → fecha_entrega_real auto), instalada dependencia `call-bound` faltante. Solo 2 tests de race condition fallan intermitentemente por timing (no crítico).
 - ✅ **[22 Nov 2025] Base de datos production-ready**: DDL.sql simplificado con solo `rol_code` (CLIENT/ADMIN) ejecutado en BD limpia, `clientsData.js` con 14 usuarios distribuidos en 18 meses (2023-06-15 a 2024-11-05), `ordersData.js` con 22 órdenes simulando comportamiento natural (early adopters: 3-5 compras, usuarios nuevos: 0-1), `moreDataSeed.js` eliminado (datos curados reemplazan generador random), todos los seeds ejecutados ✅ (15 usuarios, 33 productos, 22 órdenes, 14 direcciones, 7 wishlists), DB_NAME estandarizado en config.js y .env, `ordersSeed.js` corregido (eliminado notas_internas, agregado estado_orden), verificación de timeline: usuarios desde 2 años 5 meses hasta 17 días de antigüedad.
 - ✅ **[22 Nov 2025] Tests implementados**: 6 tests unitarios para validación de stock (`stockValidation.test.js`) cubren descuento automático, race conditions con `SELECT FOR UPDATE`, rollback de transacciones, validación multi-producto, límites de stock; 15 tests de permisos admin (`adminOrderPermissions.test.js`) verifican que solo admins pueden actualizar estados/tracking, validaciones de estados permitidos, filtros, exportación, notas internas no visibles para customers.
