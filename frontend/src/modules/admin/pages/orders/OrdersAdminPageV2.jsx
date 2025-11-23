@@ -33,11 +33,11 @@ import {
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 import { useErrorHandler, useFormErrorHandler } from '@/hooks/useErrorHandler.js';
 import { confirm } from '@/components/ui';
-import { PAYMENT_STATUS_MAP, SHIPPING_STATUS_MAP } from '@/config/status-maps.js';
+import { PAYMENT_STATUS_MAP, ENVIOS_STATUS_MAP } from '@/config/status-maps.js';
 
 // Convertir maps a arrays de opciones
 const ESTADOS_PAGO_OPTIONS = Object.entries(PAYMENT_STATUS_MAP).map(([value, label]) => ({ value, label }));
-const ESTADOS_ENVIO_OPTIONS = Object.entries(SHIPPING_STATUS_MAP).map(([value, label]) => ({ value, label }));
+const ESTADOS_ENVIO_OPTIONS = Object.entries(ENVIOS_STATUS_MAP).map(([value, label]) => ({ value, label }));
 
 // Estados y opciones (agregar opción "Todos" a las constantes compartidas)
 const ESTADOS_PAGO = [

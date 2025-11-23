@@ -83,6 +83,30 @@ if (typeof globalThis.window !== 'undefined') {
   });
 }
 
+// Debug helpers (dev only) - exponer funciones para inspeccionar queries desde la consola
+if (import.meta.env.DEV && typeof globalThis.window !== 'undefined') {
+  window.__MOA_QUERY_DUMP = () => {
+    try {
+      // Mostrar objetos Query en consola
+      // eslint-disable-next-line no-console
+      console.log('React Query - all queries:', queryClient.getQueryCache().getAll());
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('No se pudo obtener query cache', e);
+    }
+  };
+
+  window.__MOA_QUERY_KEYS = () => {
+    try {
+      return queryClient.getQueryCache().getAll().map(q => q.queryKey);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('No se pudo leer query keys', e);
+      return [];
+    }
+  };
+}
+
 // 🔇 SUPPRESS CONSOLE ERRORS EN PRODUCCIÓN (solo errores, mantener warns)
 if (import.meta.env.PROD && typeof console !== 'undefined') {
   const originalError = console.error;

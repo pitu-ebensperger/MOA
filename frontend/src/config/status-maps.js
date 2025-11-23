@@ -23,7 +23,7 @@ export const PAYMENT_STATUS_MAP = {
 };
 
 /* ENVÍOS */
-export const SHIPMENT_STATUS_MAP = {
+export const ENVIOS_STATUS_MAP = {
   delivered:   { variant: "success", label: "Entregado" },
   in_transit:  { variant: "info",    label: "En tránsito" },
   delayed:     { variant: "warning", label: "Retrasado" },
@@ -31,6 +31,11 @@ export const SHIPMENT_STATUS_MAP = {
   processing:  { variant: "info",    label: "Procesando" },
   preparing:   { variant: "info",    label: "Preparando" },
 };
+
+// Backwards-compatible aliases: many files historically used these names
+export const SHIPMENT_STATUS_MAP = ENVIOS_STATUS_MAP;
+export const SHIPPING_STATUS_MAP = ENVIOS_STATUS_MAP;
+
 
 /* USUARIOS */
 export const USER_STATUS_MAP = {

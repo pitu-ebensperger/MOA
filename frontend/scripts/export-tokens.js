@@ -33,7 +33,7 @@ import {
   PRODUCT_STATUS_MAP,
   ORDER_STATUS_MAP,
   PAYMENT_STATUS_MAP,
-  SHIPMENT_STATUS_MAP,
+  ENVIOS_STATUS_MAP,
   USER_STATUS_MAP,
 } from "../src/config/status-maps.js";
 
@@ -95,8 +95,8 @@ const designTokens = {
       map: PAYMENT_STATUS_MAP,
     },
     shipment: {
-      states: Object.keys(SHIPMENT_STATUS_MAP),
-      map: SHIPMENT_STATUS_MAP,
+      states: Object.keys(ENVIOS_STATUS_MAP),
+      map: ENVIOS_STATUS_MAP,
     },
     user: {
       states: Object.keys(USER_STATUS_MAP),
@@ -147,7 +147,7 @@ try {
   console.log(`   - ${Object.keys(PRODUCT_STATUS_MAP).length} Product statuses`);
   console.log(`   - ${Object.keys(ORDER_STATUS_MAP).length} Order statuses`);
   console.log(`   - ${Object.keys(PAYMENT_STATUS_MAP).length} Payment statuses`);
-  console.log(`   - ${Object.keys(SHIPMENT_STATUS_MAP).length} Shipment statuses`);
+  console.log(`   - ${Object.keys(ENVIOS_STATUS_MAP).length} Shipment statuses`);
   console.log(`   - ${Object.keys(USER_STATUS_MAP).length} User statuses`);
   
   // eslint-disable-next-line no-undef

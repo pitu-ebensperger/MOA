@@ -35,6 +35,8 @@ export default function ModalsDemo() {
 
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [showExpiredModal, setShowExpiredModal] = useState(false);
+  // Valor local para demo (evita ReferenceError cuando se renderiza el texto)
+  const expiredFromPath = '';
 
   return (
     <>
@@ -121,9 +123,9 @@ export default function ModalsDemo() {
                  onClick={(e) => e.stopPropagation()}
                >
                  <div className="flex items-start gap-3 mb-4">
-                   <div className="shrink-0 w-10 h-10 rounded-full bg-warning/100 flex items-center justify-center">
-                     <Clock className="h-5 w-5 text-warm" />
-                   </div>
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-warning/100 flex items-center justify-center">
+                      <AlarmClock className="h-5 w-5 text-warm" />
+                    </div>
                    <div className="flex-1">
                      <h3 id="session-expired-title" className="text-lg font-display font-semibold text-(--color-warning) mb-1">
                        Tu sesión expiró
