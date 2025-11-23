@@ -5,7 +5,7 @@ import {
   PRODUCT_STATUS_MAP,
   ORDER_STATUS_MAP,
   PAYMENT_STATUS_MAP,
-  ENVIOS_STATUS_MAP,
+  SHIPPING_STATUS_MAP,
   USER_STATUS_MAP,
 } from "../../config/status-maps.js";
 
@@ -14,7 +14,7 @@ const DOMAIN_MAP = {
   product: PRODUCT_STATUS_MAP,
   order: ORDER_STATUS_MAP,
   payment: PAYMENT_STATUS_MAP,
-  shipment: ENVIOS_STATUS_MAP,
+  shipment: SHIPPING_STATUS_MAP,
   user: USER_STATUS_MAP,
 };
 

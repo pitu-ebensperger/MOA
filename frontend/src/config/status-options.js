@@ -2,7 +2,7 @@ import {
   PRODUCT_STATUS_MAP,
   ORDER_STATUS_MAP,
   PAYMENT_STATUS_MAP,
-  ENVIOS_STATUS_MAP,
+  SHIPPING_STATUS_MAP,
   USER_STATUS_MAP,
 } from "./status-maps.js";
 
@@ -33,7 +33,7 @@ export const ORDER_STATUS_OPTIONS = mapToOptions(ORDER_STATUS_MAP);
 export const PAYMENT_STATUS_OPTIONS = mapToOptions(PAYMENT_STATUS_MAP);
 
 // Opciones de envío
-export const SHIPMENT_STATUS_OPTIONS = mapToOptions(ENVIOS_STATUS_MAP);
+export const SHIPPING_STATUS_OPTIONS = mapToOptions(SHIPPING_STATUS_MAP);
 
 // Opciones de usuario
 export const USER_STATUS_OPTIONS = mapToOptions(USER_STATUS_MAP);

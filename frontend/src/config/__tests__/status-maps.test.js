@@ -2,7 +2,7 @@ import {
   PRODUCT_STATUS_MAP,
   ORDER_STATUS_MAP,
   PAYMENT_STATUS_MAP,
-  ENVIOS_STATUS_MAP,
+  SHIPPING_STATUS_MAP,
   USER_STATUS_MAP,
 } from "../status-maps.js";
 
@@ -71,8 +71,8 @@ function runTests() {
     "refunded",
   ]));
 
-  // ENVIOS_STATUS_MAP (envíos)
-  results.push(...validateStatusMap("ENVIOS_STATUS_MAP", ENVIOS_STATUS_MAP, [
+  // SHIPPING_STATUS_MAP (envíos)
+  results.push(...validateStatusMap("SHIPPING_STATUS_MAP", SHIPPING_STATUS_MAP, [
     "delivered",
     "in_transit",
     "delayed",

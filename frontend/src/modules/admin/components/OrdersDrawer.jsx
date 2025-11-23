@@ -14,11 +14,11 @@ import OrderStatusTimeline from "@/components/data-display/OrderStatusTimeline.j
 import { ordersAdminApi } from "@/services/ordersAdmin.api.js";
 import { OrderShape } from "@/utils/propTypes.js";
 import { SHIPPING_COMPANIES } from "@config/shipping-companies.js";
-import { PAYMENT_STATUS_MAP, ENVIOS_STATUS_MAP } from '@/config/status-maps.js';
+import { PAYMENT_STATUS_MAP, SHIPPING_STATUS_MAP } from '@/config/status-maps.js';
 
 // Convertir maps a arrays de opciones para Select
 const ESTADOS_PAGO_OPTIONS = Object.entries(PAYMENT_STATUS_MAP).map(([value, label]) => ({ value, label }));
-const ESTADOS_ENVIO_OPTIONS = Object.entries(ENVIOS_STATUS_MAP).map(([value, label]) => ({ value, label }));
+const ESTADOS_ENVIO_OPTIONS = Object.entries(SHIPPING_STATUS_MAP).map(([value, label]) => ({ value, label }));
 
 // Helpers pequeños para no ensuciar el JSX
 const safeDate = (value) => (value ? formatDate_ddMMyyyy(value) : "–");

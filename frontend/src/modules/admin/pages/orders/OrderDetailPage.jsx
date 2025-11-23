@@ -25,11 +25,11 @@ import { StatusPill } from '@/components/ui/StatusPill.jsx';
 import { formatCurrencyCLP } from '@/utils/currency.js';
 import { formatDateTime } from '@/utils/date.js';
 import AdminPageHeader from '@/modules/admin/components/AdminPageHeader.jsx';
-import { PAYMENT_STATUS_MAP, ENVIOS_STATUS_MAP } from '@/config/status-maps.js';
+import { PAYMENT_STATUS_MAP, SHIPPING_STATUS_MAP } from '@/config/status-maps.js';
 
 // Convertir maps a arrays de opciones para el Select
 const ESTADOS_PAGO_OPTIONS = Object.entries(PAYMENT_STATUS_MAP).map(([value, label]) => ({ value, label }));
-const ESTADOS_ENVIO_OPTIONS = Object.entries(ENVIOS_STATUS_MAP).map(([value, label]) => ({ value, label }));
+const ESTADOS_ENVIO_OPTIONS = Object.entries(SHIPPING_STATUS_MAP).map(([value, label]) => ({ value, label }));
 
 // Estados de pago y envío (importados desde constantes compartidas)
 const ESTADOS_PAGO = ESTADOS_PAGO_OPTIONS;
