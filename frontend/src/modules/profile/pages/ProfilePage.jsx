@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import UserInfoSection from '../components/UserInfoSection.jsx';
 import WishlistSection from '../components/WishlistSection.jsx';
 import MyOrdersSection from '../components/MyOrdersSection.jsx';
+import { AddressesSection } from '../components/AddressesSection.jsx';
 import { useUserOrders } from '../../../hooks/useUserOrders.js';
 import { useAuth } from "../../../context/auth-context.js";
 import { wishlistApi } from '../../../services/wishlist.api.js';
@@ -10,6 +11,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler.js';
 export const ProfilePage = () => {
   const { token } = useAuth();
   const [wishlistItems, setWishlistItems] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview'); // overview, addresses
   const { handleError } = useErrorHandler({
     showAlert: false,
     defaultMessage: 'No pudimos recuperar tu información. Intenta nuevamente.',
@@ -57,20 +59,53 @@ export const ProfilePage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 space-y-8">
         <UserInfoSection />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          <WishlistSection 
-            products={wishlistItems} 
-            isLoading={isLoading} 
-            error={error}
-            onRemove={handleRemoveFromWishlist}
-          />
-
-          <MyOrdersSection 
-            orders={orders} 
-            isLoading={isLoading} 
-            error={error} 
-          />
+        {/* Tabs de navegación */}
+        <div className="border-b border-(--border)">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'overview'
+                  ? 'border-(--color-primary1) text-(--color-primary1)'
+                  : 'border-transparent text-(--text-secondary1) hover:text-(--text-strong) hover:border-(--border)'
+              }`}
+            >
+              Vista General
+            </button>
+            <button
+              onClick={() => setActiveTab('addresses')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                activeTab === 'addresses'
+                  ? 'border-(--color-primary1) text-(--color-primary1)'
+                  : 'border-transparent text-(--text-secondary1) hover:text-(--text-strong) hover:border-(--border)'
+              }`}
+            >
+              Mis Direcciones
+            </button>
+          </nav>
         </div>
+
+        {/* Contenido según tab activo */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <WishlistSection 
+              products={wishlistItems} 
+              isLoading={isLoading} 
+              error={error}
+              onRemove={handleRemoveFromWishlist}
+            />
+
+            <MyOrdersSection 
+              orders={orders} 
+              isLoading={isLoading} 
+              error={error} 
+            />
+          </div>
+        )}
+
+        {activeTab === 'addresses' && (
+          <AddressesSection />
+        )}
       </div>
     </div>
   );

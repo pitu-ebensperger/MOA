@@ -1,5 +1,5 @@
 import PropTypes from "prop-types"
-import { TanstackDataTable } from "@/components/data-display/DataTable.jsx"
+import { UnifiedDataTable } from "@/components/data-display/UnifiedDataTable.jsx"
 import { Pagination } from "@/components/ui/Pagination.jsx"
 
 export function OrdersTable({
@@ -12,7 +12,7 @@ export function OrdersTable({
 }) {
   return (
     <div className="mt-4">
-      <TanstackDataTable data={data} columns={columns} />
+      <UnifiedDataTable data={data} columns={columns} />
 
       <div className="mt-6">
         <Pagination

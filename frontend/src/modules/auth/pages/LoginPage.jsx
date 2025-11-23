@@ -254,10 +254,12 @@ export default function LoginPage() {
             </div>
           </div>
           
+
+          
           {/* Contenido */}
           <div className="px-8 py-6">
             <div className="bg-amber-50/50 rounded-xl p-4 mb-6 border border-amber-100">
-              <p className="text-xs text-(--color-text-muted) text-center">
+              <p className="text-xs text-(--color-text-secondary) text-center">
                 Las sesiones expiran después de 24 horas de inactividad para proteger tu cuenta.
               </p>
             </div>

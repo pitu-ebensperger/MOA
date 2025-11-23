@@ -1,9 +1,6 @@
 import { useRegionesYComunas } from '@/hooks/useRegionesYComunas';
 
 /**
- * Componente de selección en cascada para Región → Comuna
- * Se puede usar en formularios de dirección (checkout, perfil, etc.)
- * 
  * @param {Object} props
  * @param {string} props.regionValue - Código de región seleccionado
  * @param {string} props.comunaValue - Nombre de comuna seleccionada

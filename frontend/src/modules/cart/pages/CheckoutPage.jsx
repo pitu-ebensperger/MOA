@@ -1,10 +1,10 @@
 import PropTypes from "prop-types";
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart, Banknote, Wallet, Smartphone, CircleDollarSign, CheckCircle2, Package, Truck, Receipt, Store, Home } from "lucide-react";
+import { Trash2, MapPin, CreditCard, MessageSquareHeart, ShoppingCart, Banknote, Wallet, Smartphone, CircleDollarSign, CheckCircle2, Truck, Store, Home } from "lucide-react";
 import { useCartContext } from "@/context/cart-context.js"
 import { useAuth } from "@/context/auth-context.js"
-import { useAddresses } from "@/context/useAddresses.js"
+import { useAddresses, useCreateAddress } from "@/hooks/useAddresses.query.js"
 import { useStoreConfig } from "@/hooks/useStoreConfig.js"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/radix/Dialog.jsx"
 import { DEFAULT_PLACEHOLDER_IMAGE } from "@/config/constants.js"
@@ -12,6 +12,7 @@ import { Price } from "@/components/data-display/Price.jsx"
 import { API_PATHS } from "@/config/api-paths.js"
 import { resolveProductPrice } from "@/modules/products/utils/products.js"
 import { METODOS_DESPACHO } from "@/utils/orderTracking.js"
+import { METODOS_PAGO, METODOS_PAGO_OPTIONS } from "@/shared/constants/payment-methods.js"
 import ShippingMethodSelector from "@/modules/cart/components/ShippingMethodSelector.jsx"
 import { createOrder } from "@/services/checkout.api.js"
 import { CHILE_REGIONES } from "@/config/chile-regiones.js"
@@ -19,7 +20,6 @@ import '@/styles/alerts.css'
 import { alertInfo, alertWarning, alertOrderError, alertOrderSuccess, alertGlobalError } from '@/utils/alerts.js'
 import { useErrorHandler, useFormErrorHandler } from '@/hooks/useErrorHandler.js';
 import {
-  Badge,
   Button,
   buttonClasses,
   Card,
@@ -92,7 +92,8 @@ export const CheckoutPage = ({
   const navigate = useNavigate();
   const cartContext = useCartContext();
   const authContext = useAuth();
-  const addressesContext = useAddresses();
+  const addressesQuery = useAddresses();
+  const createAddressMutation = useCreateAddress();
   const storeConfig = useStoreConfig();
 
   const cartItems = controlledCartItems ?? cartContext?.cartItems ?? [];
@@ -100,12 +101,12 @@ export const CheckoutPage = ({
   const removeFromCart = cartContext?.removeFromCart ?? (() => {});
   const clearCart = cartContext?.clearCart ?? (() => {});
   const user = controlledUser ?? authContext?.user ?? null;
-  const addresses = controlledAddresses ?? addressesContext?.addresses ?? [];
-  const defaultAddress = controlledDefaultAddress ?? addressesContext?.defaultAddress ?? null;
+  const addresses = controlledAddresses ?? addressesQuery?.addresses ?? [];
+  const defaultAddress = controlledDefaultAddress ?? addressesQuery?.defaultAddress ?? null;
   const config = controlledConfig ?? storeConfig?.config ?? {};
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [selectedAddressId, setSelectedAddressId] = useState(defaultAddress?.direccion_id || null);
-  const [paymentMethod, setPaymentMethod] = useState('transferencia');
+  const [paymentMethod, setPaymentMethod] = useState(METODOS_PAGO.TRANSFERENCIA);
   const [notes, setNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -130,6 +131,7 @@ export const CheckoutPage = ({
 
   // Dirección nueva (si no usa guardada)
   const [newAddress, setNewAddress] = useState({
+    etiqueta: '',
     calle: '',
     comuna: '',
     ciudad: '',
@@ -219,12 +221,17 @@ export const CheckoutPage = ({
     }
 
     // Preparar preview de la orden (sin crear nada en BD todavía)
+    let direccionParaPreview = null;
+    if (shippingMethod !== 'retiro') {
+      direccionParaPreview = selectedAddressId 
+        ? addresses.find(a => a.direccion_id === selectedAddressId) 
+        : newAddress;
+    }
+
     const preview = {
       items: cartItems,
       contacto: contactData,
-      direccion: selectedAddressId 
-        ? addresses.find(a => a.direccion_id === selectedAddressId) 
-        : newAddress,
+      direccion: direccionParaPreview,
       metodo_despacho: shippingMethod,
       metodo_pago: paymentMethod,
       notas: notes,
@@ -242,6 +249,38 @@ export const CheckoutPage = ({
     setIsProcessing(true);
 
     try {
+      let direccionIdParaOrden = null;
+
+      // Si requiere dirección (no es retiro)
+      if (orderPreview.metodo_despacho !== 'retiro') {
+        if (orderPreview.selectedAddressId) {
+          // Usar dirección guardada existente
+          direccionIdParaOrden = orderPreview.selectedAddressId;
+        } else {
+          // Crear nueva dirección primero usando hook con optimistic updates
+          try {
+            const addressDataToCreate = {
+              calle: newAddress.calle,
+              comuna: newAddress.comuna,
+              ciudad: newAddress.ciudad,
+              region: newAddress.region,
+              predeterminada: addresses.length === 0, // Primera dirección es predeterminada
+            };
+            
+            // Agregar etiqueta solo si se proporcionó
+            if (newAddress.etiqueta?.trim()) {
+              addressDataToCreate.etiqueta = newAddress.etiqueta.trim();
+            }
+            
+            const nuevaDireccion = await createAddressMutation.mutateAsync(addressDataToCreate);
+            direccionIdParaOrden = nuevaDireccion.direccion_id;
+          } catch (addressError) {
+            debugError('[handleConfirmOrder] Error creando dirección:', addressError);
+            throw new Error('No pudimos guardar la dirección de envío. ' + (addressError.response?.data?.message || addressError.message));
+          }
+        }
+      }
+
       const checkoutData = {
         metodo_despacho: orderPreview.metodo_despacho,
         metodo_pago: orderPreview.metodo_pago,
@@ -249,16 +288,10 @@ export const CheckoutPage = ({
         contacto: orderPreview.contacto,
       };
 
-      // Si usa dirección guardada
-      if (orderPreview.selectedAddressId && orderPreview.metodo_despacho !== 'retiro') {
-        checkoutData.usar_direccion_guardada = true;
-        checkoutData.direccion_id = orderPreview.selectedAddressId;
-      } 
-      // Si es dirección nueva
-      else if (orderPreview.metodo_despacho !== 'retiro') {
-        checkoutData.usar_direccion_guardada = false;
-        checkoutData.direccion_nueva = newAddress;
-      };
+      // Agregar direccion_id solo si existe (retiro no necesita dirección)
+      if (direccionIdParaOrden) {
+        checkoutData.direccion_id = direccionIdParaOrden;
+      }
 
       const response = await createOrder(checkoutData);
 
@@ -278,18 +311,25 @@ export const CheckoutPage = ({
       }
 
     } catch (error) {
-      const serverMsg = error.response?.data?.message;
+      const serverMsg = error.response?.data?.message || error.message;
       debugError('[handleConfirmOrder] Error en checkout:', error);
       debugError('[handleConfirmOrder] error.response:', error.response);
       debugError('[handleConfirmOrder] error.response?.data:', error.response?.data);
       debugError('[handleConfirmOrder] serverMsg:', serverMsg);
+      
       handleError(error, serverMsg || 'No pudimos crear tu orden en este momento.');
+      
+      // Mensajes específicos según el tipo de error
       if (serverMsg && /carrito está vacío/i.test(serverMsg)) {
         alertOrderError('El carrito del servidor está vacío. Agrega productos y vuelve a intentar.', config.email);
+      } else if (serverMsg && /dirección/i.test(serverMsg)) {
+        alertOrderError('Hubo un problema con la dirección de envío. Verifica los datos e intenta nuevamente.', config.email);
+      } else if (serverMsg && /stock insuficiente/i.test(serverMsg)) {
+        alertOrderError('Algunos productos no tienen stock disponible. Revisa tu carrito.', config.email);
       } else if (serverMsg && /Error al crear orden/i.test(serverMsg)) {
         alertGlobalError();
       } else {
-        alertOrderError(serverMsg || error.message || 'Error desconocido', config.email);
+        alertOrderError(serverMsg || 'Error desconocido al procesar tu orden', config.email);
       }
     } finally {
       setIsProcessing(false);
@@ -364,44 +404,31 @@ export const CheckoutPage = ({
                         <SelectValue placeholder="Seleccionar método de pago" />
                       </SelectTrigger>
                       <SelectContent className="w-[--radix-select-trigger-width]">
-                        <SelectItem value="transferencia">
-                          <div className="flex items-center gap-2">
-                            <Banknote className="h-4 w-4" />
-                            <span>Transferencia bancaria</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="webpay">
-                          <div className="flex items-center gap-2">
-                            <Smartphone className="h-4 w-4" />
-                            <span>Webpay Plus (Transbank)</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="tarjeta_credito">
-                          <div className="flex items-center gap-2">
-                            <CreditCard className="h-4 w-4" />
-                            <span>Tarjeta de crédito</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="tarjeta_debito">
-                          <div className="flex items-center gap-2">
-                            <Wallet className="h-4 w-4" />
-                            <span>Tarjeta de débito</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="link_pago">
-                          <div className="flex items-center gap-2">
-                            <MessageSquareHeart className="h-4 w-4" />
-                            <span>Link de pago por email</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="efectivo">
-                          <div className="flex items-center gap-2">
-                            <CircleDollarSign className="h-4 w-4" />
-                            <span>Efectivo contra entrega</span>
-                          </div>
-                        </SelectItem>
+                        {METODOS_PAGO_OPTIONS.map((option) => {
+                          const iconMap = {
+                            Banknote,
+                            Smartphone,
+                            CreditCard,
+                            Wallet,
+                            MessageSquareHeart,
+                            CircleDollarSign,
+                          };
+                          const IconComponent = iconMap[option.icon] || CreditCard;
+                          
+                          return (
+                            <SelectItem key={option.value} value={option.value}>
+                              <div className="flex items-center gap-2">
+                                <IconComponent className="h-4 w-4" />
+                                <span>{option.label}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-(--color-text-muted)">
+                      {METODOS_PAGO_OPTIONS.find(o => o.value === paymentMethod)?.descripcion}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -425,14 +452,14 @@ export const CheckoutPage = ({
                     {/* Selector de dirección guardada */}
                     {addresses.length > 0 && (
                       <div className="space-y-2">
-                        <Label>Dirección guardada</Label>
+                        <Label>Dirección de envío</Label>
                         <Select
                           value={selectedAddressId ? selectedAddressId.toString() : 'new'}
                           onValueChange={(val) => {
                             if (val === 'new') {
                               setSelectedAddressId(null);
                             } else {
-                              const parsed = parseInt(val, 10);
+                              const parsed = Number.parseInt(val, 10);
                               setSelectedAddressId(Number.isNaN(parsed) ? null : parsed);
                             }
                           }}
@@ -441,10 +468,20 @@ export const CheckoutPage = ({
                             <SelectValue placeholder="Seleccionar dirección" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="new">Nueva dirección personalizada</SelectItem>
+                            <SelectItem value="new">
+                              <div className="flex items-center gap-2">
+                                <Home className="h-4 w-4" />
+                                <span>➕ Nueva dirección</span>
+                              </div>
+                            </SelectItem>
                             {addresses.map(addr => (
                               <SelectItem key={addr.direccion_id} value={addr.direccion_id.toString()}>
-                                {addr.etiqueta || `${addr.calle}, ${addr.comuna}`}
+                                <div className="flex flex-col">
+                                  <span className="font-medium">{addr.etiqueta || addr.calle}</span>
+                                  <span className="text-xs text-(--color-text-muted)">
+                                    {addr.comuna}, {addr.ciudad}
+                                  </span>
+                                </div>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -455,10 +492,28 @@ export const CheckoutPage = ({
                     {/* O nueva dirección */}
                     {!selectedAddressId && (
                       <>
+                        {addresses.length === 0 && (
+                          <div className="rounded-lg bg-(--color-primary4)/40 p-3 text-sm text-(--color-primary2)">
+                            <p className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              <span>Ingresa la dirección donde recibirás tu pedido. Se guardará para futuras compras.</span>
+                            </p>
+                          </div>
+                        )}
+                        <div className="space-y-2">
+                          <Label>Etiqueta (opcional)</Label>
+                          <Input 
+                            placeholder="Casa, Oficina, Estudio..." 
+                            value={newAddress.etiqueta}
+                            onChange={(e) => handleAddressChange('etiqueta', e.target.value)}
+                            maxLength={50}
+                          />
+                          <p className="text-xs text-(--color-text-muted)">Ayuda a identificar esta dirección en el futuro</p>
+                        </div>
                         <div className="space-y-2">
                           <Label required>Calle y número</Label>
                           <Input 
-                            placeholder="Avenida Italia 1234" 
+                            placeholder="Avenida Italia 1234, Depto 501" 
                             autoComplete="street-address"
                             value={newAddress.calle}
                             onChange={(e) => handleAddressChange('calle', e.target.value)}
@@ -749,14 +804,19 @@ export const CheckoutPage = ({
               {/* Dirección */}
               {orderPreview.metodo_despacho !== 'retiro' && (
                 <div className="space-y-2">
-                  <h3 className="text-xs font-semibold text-(--color-secondary2)">Dirección de envío</h3>
+                  <h3 className="text-xs font-semibold text-(--color-secondary2) flex items-center gap-2">
+                    <MapPin className="h-3.5 w-3.5" />
+                    Dirección de envío
+                  </h3>
                   <div className="rounded-xl border border-(--border) bg-(--color-lightest) p-3 text-sm">
-                    {orderPreview.direccion?.calle && (
+                    {orderPreview.direccion?.calle ? (
                       <>
-                        <p>{orderPreview.direccion.calle}</p>
-                        <p>{orderPreview.direccion.comuna}, {orderPreview.direccion.ciudad}</p>
-                        <p>{orderPreview.direccion.region}</p>
+                        <p className="font-medium text-(--color-primary2)">{orderPreview.direccion.calle}</p>
+                        <p className="text-(--color-text-muted)">{orderPreview.direccion.comuna}, {orderPreview.direccion.ciudad}</p>
+                        <p className="text-(--color-text-muted)">{orderPreview.direccion.region}</p>
                       </>
+                    ) : (
+                      <p className="text-(--color-text-muted)">No se especificó dirección</p>
                     )}
                   </div>
                 </div>
@@ -780,17 +840,26 @@ export const CheckoutPage = ({
                 <div className="space-y-2">
                   <h3 className="text-xs font-semibold text-(--color-secondary2)">Método de pago</h3>
                   <div className="rounded-xl border border-(--border) bg-(--color-lightest) p-3 text-sm">
-                    <p className="flex items-center gap-2 capitalize">
-                      {orderPreview.metodo_pago === 'transferencia' ? (
-                        <Banknote className="h-4 w-4 text-(--color-primary1)" />
-                      ) : orderPreview.metodo_pago === 'efectivo' ? (
-                        <CircleDollarSign className="h-4 w-4 text-(--color-primary1)" />
-                      ) : orderPreview.metodo_pago === 'webpay' ? (
-                        <CreditCard className="h-4 w-4 text-(--color-primary1)" />
-                      ) : (
-                        <Wallet className="h-4 w-4 text-(--color-primary1)" />
-                      )}
-                      {orderPreview.metodo_pago.replace(/_/g, ' ')}
+                    <p className="flex items-center gap-2">
+                      {(() => {
+                        const iconMap = {
+                          Banknote,
+                          Smartphone,
+                          CreditCard,
+                          Wallet,
+                          MessageSquareHeart,
+                          CircleDollarSign,
+                        };
+                        const paymentOption = METODOS_PAGO_OPTIONS.find(o => o.value === orderPreview.metodo_pago);
+                        const IconComponent = paymentOption ? iconMap[paymentOption.icon] : CreditCard;
+                        
+                        return (
+                          <>
+                            <IconComponent className="h-4 w-4 text-(--color-primary1)" />
+                            <span>{paymentOption?.label || orderPreview.metodo_pago}</span>
+                          </>
+                        );
+                      })()}
                     </p>
                   </div>
                 </div>

@@ -55,6 +55,7 @@ const StoreSettingsPage = lazy(() => import('@/modules/admin/pages/StoreSettings
 
 // Lazy load - Modals demo (solo desarrollo)
 const ModalsDemo = lazy(() => import('@/modules/auth/pages/ModalsDemo.jsx'))
+const TestRegionesPage = lazy(() => import('@/pages/TestRegionesPage.jsx'))
 
 import '@/styles/global.css'
 import '@/styles/tokens.css'
@@ -219,6 +220,7 @@ export const App = () => {
               </Route>
 
               <Route path='/modals-demo' element={<ModalsDemo />} />
+              <Route path='/test-regiones' element={<TestRegionesPage />} />
             
             {/* Error Routes */}
               <Route path="/error/500" element={<ServerErrorPage statusCode={500} />} />

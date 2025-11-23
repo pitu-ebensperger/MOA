@@ -4,7 +4,7 @@ import { Plus, Package, X, AlertCircle, Download, FileSpreadsheet, FileText, Che
 import ProductDrawer from "@/modules/admin/components/ProductDrawer.jsx"
 import ProductDetailDrawer from "@/modules/admin/components/ProductDetailDrawer.jsx"
 
-import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx"
+import { UnifiedDataTable } from "@/components/data-display/UnifiedDataTable.jsx"
 import { Button } from "@/components/ui/Button.jsx"
 import { Badge } from "@/components/ui/Badge.jsx"
 import { productsApi } from "@/services/products.api.js"
@@ -384,7 +384,7 @@ export default function AdminProductsPage() {
       )}
 
       {/* Tabla con toolbar integrado */}
-      <DataTableV2
+      <UnifiedDataTable
         columns={columns}
         data={items}
         loading={isLoading}

@@ -20,3 +20,6 @@ COMMENT ON TABLE password_reset_tokens IS 'Tokens para recuperación de contrase
 COMMENT ON COLUMN password_reset_tokens.token IS 'Token único generado con crypto';
 COMMENT ON COLUMN password_reset_tokens.expires_at IS 'Fecha de expiración (típicamente 1 hora)';
 COMMENT ON COLUMN password_reset_tokens.used_at IS 'Fecha cuando se usó el token (null = no usado)';
+
+
+-- TODO: esto no esta ya en el otro????

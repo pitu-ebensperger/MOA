@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "dev": "npm run -w frontend dev",
+    "dev:all": "concurrently -k -n FRONT,BACK -c blue,green \"npm run -w frontend dev\" \"npm run -w backend dev\"",
     "build": "npm run -w frontend build && rm -rf dist && cp -R frontend/dist dist",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
@@ -17,7 +18,7 @@
     "f:dev": "npm run -w frontend dev",
     "f:lint": "npm run -w frontend lint",
     "b:dev": "npm run -w backend dev || echo \"(backend vacío)\"",
-    "test": "cross-env NODE_ENV=test jest --detectOpenHandles --forceExit",
+    
     "test:watch": "npm test -- --watch",
     "test:coverage": "npm test -- --coverage"
   },

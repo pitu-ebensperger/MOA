@@ -1,83 +1,66 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
 /**
- * Hook para manejar regiones y comunas de Chile con cascading logic
- * Consume los endpoints del backend /api/regiones y /api/regiones/:code/comunas
+ * Hook para manejar regiones y comunas de Chile con TanStack Query
+ * ✅ Caché automático (regiones no cambian frecuentemente)
+ * ✅ Sin useState/useEffect innecesarios
+ * ✅ Mejor manejo de errores
  */
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+
+// Función para fetch de regiones
+const fetchRegiones = async () => {
+  const response = await fetch(`${API_BASE}/api/regiones`);
+  if (!response.ok) throw new Error('Error al cargar regiones');
+  const data = await response.json();
+  return data.data || [];
+};
+
+// Función para fetch de comunas
+const fetchComunas = async (regionCode) => {
+  const response = await fetch(`${API_BASE}/api/regiones/${regionCode}/comunas`);
+  if (!response.ok) throw new Error('Error al cargar comunas');
+  const data = await response.json();
+  return data.data?.comunas || [];
+};
+
 export function useRegionesYComunas() {
-  const [regiones, setRegiones] = useState([]);
-  const [comunas, setComunas] = useState([]);
   const [selectedRegion, setSelectedRegion] = useState('');
-  const [loadingRegiones, setLoadingRegiones] = useState(false);
-  const [loadingComunas, setLoadingComunas] = useState(false);
-  const [error, setError] = useState(null);
 
-  // Cargar regiones al montar el componente
-  useEffect(() => {
-    const fetchRegiones = async () => {
-      setLoadingRegiones(true);
-      setError(null);
-      
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/regiones`);
-        
-        if (!response.ok) {
-          throw new Error('Error al cargar regiones');
-        }
+  // Query de regiones (caché de 1 hora - datos estáticos)
+  const regionesQuery = useQuery({
+    queryKey: ['regiones'],
+    queryFn: fetchRegiones,
+    staleTime: 60 * 60 * 1000, // 1 hora - regiones no cambian
+    cacheTime: 24 * 60 * 60 * 1000, // 24 horas en memoria
+  });
 
-        const data = await response.json();
-        setRegiones(data.data || []);
-      } catch (err) {
-        setError(err.message);
-        console.error('Error cargando regiones:', err);
-      } finally {
-        setLoadingRegiones(false);
-      }
-    };
-
-    fetchRegiones();
-  }, []);
-
-  // Cargar comunas cuando cambia la región seleccionada
-  useEffect(() => {
-    if (!selectedRegion) {
-      setComunas([]);
-      return;
-    }
-
-    const fetchComunas = async () => {
-      setLoadingComunas(true);
-      setError(null);
-      
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/regiones/${selectedRegion}/comunas`
-        );
-        
-        if (!response.ok) {
-          throw new Error('Error al cargar comunas');
-        }
-
-        const data = await response.json();
-        setComunas(data.data?.comunas || []);
-      } catch (err) {
-        setError(err.message);
-        console.error('Error cargando comunas:', err);
-      } finally {
-        setLoadingComunas(false);
-      }
-    };
-
-    fetchComunas();
-  }, [selectedRegion]);
+  // Query de comunas (solo si hay región seleccionada)
+  const comunasQuery = useQuery({
+    queryKey: ['comunas', selectedRegion],
+    queryFn: () => fetchComunas(selectedRegion),
+    enabled: Boolean(selectedRegion), // Solo fetch si hay región
+    staleTime: 30 * 60 * 1000, // 30 minutos
+    cacheTime: 60 * 60 * 1000, // 1 hora
+  });
 
   return {
-    regiones,
-    comunas,
+    // Regiones
+    regiones: regionesQuery.data ?? [],
+    loadingRegiones: regionesQuery.isLoading,
+    
+    // Comunas
+    comunas: comunasQuery.data ?? [],
+    loadingComunas: comunasQuery.isLoading,
+    
+    // Control de región
     selectedRegion,
     setSelectedRegion,
-    loadingRegiones,
-    loadingComunas,
-    error,
+    
+    // Estados combinados
+    error: regionesQuery.error || comunasQuery.error,
+    isLoading: regionesQuery.isLoading || comunasQuery.isLoading,
   };
 }

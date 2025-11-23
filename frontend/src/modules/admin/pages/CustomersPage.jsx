@@ -5,7 +5,7 @@ import { toast } from '@/components/ui';
 import { useDebounce } from '@/hooks/useDebounce.js';
 import CustomerDrawer from "@/modules/admin/components/CustomerDrawer.jsx"
 import OrdersDrawer from "@/modules/admin/components/OrdersDrawer.jsx"
-import { VirtualizedTable } from "@/components/data-display/VirtualizedTable.jsx";
+import { UnifiedDataTable } from "@/components/data-display/UnifiedDataTable.jsx";
 import { TableToolbar, TableSearch } from "../../../components/data-display/TableToolbar.jsx";
 import { Button, IconButton } from "@/components/ui/Button.jsx"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../components/ui/radix/DropdownMenu.jsx";
@@ -345,8 +345,9 @@ export default function CustomersPage() {
             </div>
           )}
           {!isLoadingCustomers && filteredCustomers.length > 0 && (
-            <VirtualizedTable
+            <UnifiedDataTable
               data={filteredCustomers}
+              virtualized
               columns={[
                 { key: 'nombre', header: 'Nombre', width: '180px' },
                 { key: 'correo', header: 'Correo', width: '260px' },

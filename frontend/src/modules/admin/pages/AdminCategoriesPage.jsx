@@ -6,7 +6,7 @@ import { categoriesApi } from "@/services/categories.api.js";
 import { confirm } from '@/components/ui';
 import { Button } from "@/components/ui/Button.jsx";
 import { validateRequired, validateSlug } from '@/utils/validation';
-import { DataTableV2 } from "@/components/data-display/DataTableV2.jsx";
+import { UnifiedDataTable } from "@/components/data-display/UnifiedDataTable.jsx";
 import {
   Dialog,
   DialogContent,
@@ -261,7 +261,7 @@ export default function AdminCategoriesPage() {
         </div>
       )}
 
-      <DataTableV2
+      <UnifiedDataTable
         columns={columns}
         data={paginatedCategories}
         loading={isLoading}

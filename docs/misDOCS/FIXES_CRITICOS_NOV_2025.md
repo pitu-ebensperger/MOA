@@ -461,30 +461,9 @@ if (!matchValidation.valid) {
 10. ✅ Validación password <6 caracteres → Mensaje específico
 11. ✅ Response `/api/products` → Header `Content-Encoding: gzip` presente
 
-### Tests Automatizados Implementados:
-
-#### Tests de Validación de Stock (`__tests__/stockValidation.test.js` - 6 tests):
-- ✅ **Descuento automático**: Verifica que stock se descuenta correctamente al crear orden
-- ✅ **Stock insuficiente**: Rechaza orden si no hay suficiente stock disponible
-- ✅ **Rollback transaccional**: Stock NO cambia si transacción falla (producto inválido)
-- ✅ **Race conditions**: `SELECT FOR UPDATE` previene que 2 usuarios compren mismo stock simultáneamente
-- ✅ **Órdenes secuenciales**: Permite múltiples órdenes hasta agotar stock completamente
-- ✅ **Multi-producto**: Valida stock para todos los productos en una orden y hace rollback completo si uno falla
-
-#### Tests de Permisos Admin (`__tests__/adminOrderPermissions.test.js` - 15 tests):
-- ✅ **Autenticación**: Admin puede actualizar estados, customer rechazado (403), sin token rechazado (401)
-- ✅ **Validaciones de estados**: Rechaza estados inválidos, acepta estados válidos de pago/envío
-- ✅ **Actualización parcial**: Permite actualizar solo estado_pago o solo estado_envio
-- ✅ **Tracking**: Admin puede agregar seguimiento, customer rechazado, valida campos requeridos
-- ✅ **Listado**: Admin ve todas las órdenes, customer rechazado, filtros por estado funcionan
-- ✅ **Exportación**: Admin puede exportar, customer rechazado
-- ✅ **Notas internas**: Admin puede agregar, no visibles para customers
-
-#### Tests Existentes:
-- ✅ 15 tests de integración en `__tests__/adminOrderStatus.test.js` (estados, tracking, validaciones)
-- ✅ 4 tests de rutas en `__tests__/routes.test.js` (endpoints básicos)
-
-**Total:** 25 tests automatizados + 15 tests de integración + 4 tests de rutas = **44 tests**
+### Tests Automatizados (Existentes):
+- ✅ 15 tests de integración en `__tests__/adminOrderStatus.test.js` (todos pasan)
+- ✅ 4 tests de rutas en `__tests__/routes.test.js` (todos pasan)
 
 ---
 

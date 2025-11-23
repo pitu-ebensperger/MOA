@@ -18,7 +18,7 @@ import { Button, IconButton } from '@/components/ui/Button.jsx';
 import { Input } from '@/components/ui/Input.jsx';
 import { Select } from '@/components/ui/Select.jsx';
 import { StatusPill } from '@/components/ui/StatusPill.jsx';
-import { TanstackDataTable } from '@/components/data-display/DataTable.jsx';
+import { UnifiedDataTable } from '@/components/data-display/UnifiedDataTable.jsx';
 import { Pagination } from '@/components/ui/Pagination.jsx';
 import { TableToolbar, TableSearch } from '@/components/data-display/TableToolbar.jsx';
 import { TooltipNeutral } from '@/components/ui/Tooltip.jsx';
@@ -33,7 +33,11 @@ import {
 import AdminPageHeader from "@/modules/admin/components/AdminPageHeader.jsx";
 import { useErrorHandler, useFormErrorHandler } from '@/hooks/useErrorHandler.js';
 import { confirm } from '@/components/ui';
-import { ESTADOS_PAGO_OPTIONS, ESTADOS_ENVIO_OPTIONS } from '../../../../../shared/constants/order-states.js';
+import { PAYMENT_STATUS_MAP, SHIPPING_STATUS_MAP } from '@/config/status-maps.js';
+
+// Convertir maps a arrays de opciones
+const ESTADOS_PAGO_OPTIONS = Object.entries(PAYMENT_STATUS_MAP).map(([value, label]) => ({ value, label }));
+const ESTADOS_ENVIO_OPTIONS = Object.entries(SHIPPING_STATUS_MAP).map(([value, label]) => ({ value, label }));
 
 // Estados y opciones (agregar opción "Todos" a las constantes compartidas)
 const ESTADOS_PAGO = [
@@ -675,7 +679,7 @@ export default function OrdersAdminPage() {
         </div>
       ) : (
         <>
-          <TanstackDataTable
+          <UnifiedDataTable
             columns={tableColumns}
             data={ordersData}
           />

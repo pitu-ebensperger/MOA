@@ -1,27 +1,21 @@
--- ===============================================
--- MOA E-COMMERCE DATABASE SCHEMA - FINAL VERSION
--- ===============================================
--- Version: 1.0.0 (Production Ready)
--- Date: November 22, 2025
--- Database: PostgreSQL 17+
--- Description: Schema consolidado con todas las optimizaciones y migraciones aplicadas
--- ===============================================
-
--- Reset database (WARNING: Destructive operation)
+-- RESET DATABASE !!!!! ------------------------------------------------------------------------------------------
 DROP DATABASE IF EXISTS moa;
+
+------------------------------------------------------------------------------------------------------------------------
+
+
 CREATE DATABASE moa;
 \c moa;
 
--- ===============================================
--- EXTENSIONS
--- ===============================================
+-- TODO: Revisar uso de pg_trgm - verificar si está siendo utilizada en búsquedas
+-- TODO: Revisar orden de db, no seria mejor dejar indices, triggers, psw_token al final??
 
--- Extensión para búsquedas por similitud de texto (trigram)
+
+
+
+
+
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
--- ===============================================
--- FUNCTIONS & TRIGGERS
--- ===============================================
 
 -- Función para actualizar automáticamente la columna actualizado_en
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -32,11 +26,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- ===============================================
--- TABLES
--- ===============================================
 
--- Usuarios (clientes y administradores)
+
+
+-- Usuarios ------------------------------------------------------------------------------------------
 CREATE TABLE usuarios (
     usuario_id BIGSERIAL PRIMARY KEY,
     public_id TEXT UNIQUE NOT NULL,
@@ -54,6 +47,9 @@ CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_usuarios_rol_code ON usuarios(rol_code);
 CREATE INDEX idx_usuarios_status ON usuarios(status);
 
+
+-- Token Reset Contraseña ------------------------------------------------------------------------------------------
+
 CREATE TABLE password_reset_tokens (
     token_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES usuarios (usuario_id) ON DELETE CASCADE,
@@ -67,6 +63,8 @@ CREATE INDEX IF NOT EXISTS idx_password_reset_token ON password_reset_tokens(tok
 CREATE INDEX IF NOT EXISTS idx_password_reset_usuario ON password_reset_tokens(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_password_reset_expires ON password_reset_tokens(expira_en);
 
+-- Categorias ------------------------------------------------------------------------------------------
+
 CREATE TABLE categorias (
     categoria_id SMALLSERIAL PRIMARY KEY,
     nombre TEXT NOT NULL,
@@ -74,6 +72,8 @@ CREATE TABLE categorias (
     descripcion TEXT,
     cover_image TEXT
 );
+
+-- Direcciones ------------------------------------------------------------------------------------------
 
 CREATE TABLE direcciones (
     direccion_id BIGSERIAL PRIMARY KEY,
@@ -101,6 +101,8 @@ CREATE TRIGGER trigger_direcciones_updated_at
 BEFORE UPDATE ON direcciones
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
+
+-- Productos ------------------------------------------------------------------------------------------
 
 CREATE TABLE productos (
     producto_id BIGSERIAL PRIMARY KEY,
@@ -131,6 +133,8 @@ CREATE INDEX IF NOT EXISTS idx_productos_status ON productos(status);
 CREATE INDEX IF NOT EXISTS idx_productos_slug ON productos(slug);
 CREATE INDEX IF NOT EXISTS idx_productos_sku ON productos(sku);
 
+-- Carritos ------------------------------------------------------------------------------------------
+
 CREATE TABLE carritos (
     carrito_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT REFERENCES usuarios (usuario_id) UNIQUE,
@@ -148,6 +152,8 @@ CREATE TABLE carrito_items (
     UNIQUE (carrito_id, producto_id)
 );
 
+-- Wishlist ------------------------------------------------------------------------------------------
+
 CREATE TABLE wishlists (
     wishlist_id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT REFERENCES usuarios (usuario_id)
@@ -160,7 +166,7 @@ CREATE TABLE wishlist_items (
     UNIQUE (wishlist_id, producto_id)
 );
 
--- Órdenes de compra
+-- Ordenes ------------------------------------------------------------------------------------------
 CREATE TABLE ordenes (
     orden_id BIGSERIAL PRIMARY KEY,
     order_code TEXT UNIQUE NOT NULL,
@@ -216,6 +222,9 @@ CREATE TABLE orden_items (
 CREATE INDEX IF NOT EXISTS idx_orden_items_orden ON orden_items(orden_id);
 CREATE INDEX IF NOT EXISTS idx_orden_items_producto ON orden_items(producto_id);
 
+
+-- Config Tienda ------------------------------------------------------------------------------------------
+
 CREATE TABLE configuracion_tienda (
     id SERIAL PRIMARY KEY,
     nombre_tienda TEXT NOT NULL,
@@ -237,41 +246,11 @@ INSERT INTO configuracion_tienda (
     'MOA', 'Muebles y decoración de diseño contemporáneo para crear espacios únicos. Calidad, estilo y funcionalidad en cada pieza.', 'Providencia 1234, Santiago, Chile', '+56 2 2345 6789', 'contacto@moa.cl', 'https://instagram.com/moa', '', ''
 );
 
--- ===============================================
--- ÍNDICES DE BÚSQUEDA AVANZADA
--- ===============================================
+
+-- ÍNDICES DE BÚSQUEDA AVANZADA ------------------------------------------------------------------------------------------
 
 -- Índice GIN para búsqueda por similitud de nombre (trigram)
 CREATE INDEX idx_productos_nombre_trgm ON productos USING gin(nombre gin_trgm_ops);
 
 -- Índice GIN para búsqueda full-text en español
-CREATE INDEX idx_productos_search ON productos USING gin(to_tsvector('spanish', nombre || ' ' || COALESCE(descripcion, '')));
-
--- ===============================================
--- INITIAL DATA
--- ===============================================
-
--- Configuración inicial de la tienda
-INSERT INTO configuracion_tienda (
-    nombre_tienda, 
-    descripcion, 
-    direccion, 
-    telefono, 
-    email, 
-    instagram_url, 
-    facebook_url, 
-    twitter_url
-) VALUES (
-    'MOA', 
-    'Muebles y decoración de diseño contemporáneo para crear espacios únicos. Calidad, estilo y funcionalidad en cada pieza.', 
-    'Providencia 1234, Santiago, Chile', 
-    '+56 2 2345 6789', 
-    'contacto@moa.cl', 
-    'https://instagram.com/moa', 
-    '', 
-    ''
-);
-
--- ===============================================
--- END OF SCHEMA
--- ===============================================
+CREATE INDEX idx_productos_search ON productos USING gin(to_tsvector('spanish', nombre || ' ' || COALESCE(descripcion, '')))

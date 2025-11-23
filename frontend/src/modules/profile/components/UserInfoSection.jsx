@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../../context/auth-context.js'
 import { authApi } from '../../../services/auth.api.js'
 import { usersApi } from '../../../services/users.api.js'
@@ -9,7 +10,17 @@ import { Edit3 } from "lucide-react";
 
 const UserInfoSection = () => {
   const { user, token } = useAuth();  
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+
+  // Query para obtener perfil del usuario
+  const { data: profileData, isLoading: loading, error } = useQuery({
+    queryKey: ['userProfile', token],
+    queryFn: () => authApi.profile(),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    retry: 2,
+  });
 
   const [form, setForm] = useState({
     nombre: "",
@@ -17,35 +28,41 @@ const UserInfoSection = () => {
     telefono: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
+  // Actualizar form cuando lleguen los datos
   useEffect(() => {
-    if (!token) {
-      console.warn('[UserInfoSection] No hay token, no se puede cargar perfil');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    // Usar authApi.profile() que obtiene perfil por token, sin necesidad de user.id
-    authApi.profile()
-      .then((data) => {
-        setForm({
-          nombre: data.nombre || "",
-          email: data.email || "",
-          telefono: data.telefono || "",
-        });
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("❌ Error cargando usuario:", err);
-        console.error("Error details:", err.message, err.status, err.data);
-        setError(err);
-        setLoading(false);
+    if (profileData) {
+      setForm({
+        nombre: profileData.nombre || "",
+        email: profileData.email || "",
+        telefono: profileData.telefono || "",
       });
-  }, [token, user]); // Solo depende del token, user se actualiza desde el AuthContext
+    }
+  }, [profileData]);
+
+  // Mutation para actualizar usuario
+  const updateUserMutation = useMutation({
+    mutationFn: ({ userId, data }) => usersApi.updateUser(userId, data),
+    onSuccess: (updatedData) => {
+      // Actualizar cache
+      queryClient.setQueryData(['userProfile', token], (old) => ({
+        ...old,
+        ...updatedData.user,
+      }));
+      
+      // Actualizar form local
+      if (updatedData.user) {
+        setForm({
+          nombre: updatedData.user.nombre,
+          email: updatedData.user.email,
+          telefono: updatedData.user.telefono,
+        });
+      }
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      console.error("Error PATCH:", error);
+    },
+  });
 
   const handleChange = (e) => {
     setForm({
@@ -54,32 +71,20 @@ const UserInfoSection = () => {
     });
   };
 
-  const handleSaveClick = async () => {
+  const handleSaveClick = () => {
     if (!user || !(user.id || user.usuario_id)) {
       console.error('[UserInfoSection] No hay usuario válido para actualizar');
-      setError({ message: 'Sesión inválida. Por favor inicia sesión nuevamente.' });
       return;
     }
 
-    try {
-      const userId = user.id || user.usuario_id;
-      const updatedUser = await usersApi.updateUser(userId, {
+    const userId = user.id || user.usuario_id;
+    updateUserMutation.mutate({
+      userId,
+      data: {
         nombre: form.nombre,
         telefono: form.telefono,
-      });
-
-      if (updatedUser.user) {
-        setForm({
-          nombre: updatedUser.user.nombre,
-          email: updatedUser.user.email,
-          telefono: updatedUser.user.telefono,
-        });
-      }
-
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Error PATCH:", error);
-    }
+      },
+    });
   };
 
   // Guard: Si no hay token, mostrar mensaje de autenticación requerida
@@ -203,15 +208,17 @@ const UserInfoSection = () => {
                     type="button"
                     className="flex-1 px-4 py-2 bg-white/75 text-(--text-strong) rounded-full font-medium transition-all hover:bg-white hover:shadow-md active:scale-95 text-sm"
                     onClick={() => setIsEditing(false)}
+                    disabled={updateUserMutation.isPending}
                   >
                     Cancelar
                   </button>
                   <button
                     type="button"
-                    className="flex-1 px-4 py-2 bg-(--color-primary1) text-white rounded-full font-medium transition-all hover:bg-(--color-primary2) hover:shadow-md active:scale-95 text-sm"
+                    className="flex-1 px-4 py-2 bg-(--color-primary1) text-white rounded-full font-medium transition-all hover:bg-(--color-primary2) hover:shadow-md active:scale-95 text-sm disabled:opacity-50"
                     onClick={handleSaveClick}
+                    disabled={updateUserMutation.isPending}
                   >
-                    Guardar Cambios
+                    {updateUserMutation.isPending ? 'Guardando...' : 'Guardar Cambios'}
                   </button>
                 </div>
               )}
