@@ -8,10 +8,12 @@ import { API_PATHS } from "../../../config/api-paths.js";
 import { buildCategoryTabs, normalizeFeaturedProduct } from "../../../utils/normalizers.js";
 import { useCartContext } from "@/context/cart-context.js";
 import { useWishlist } from "@/modules/profile/hooks/useWishlist.js";
+import { useAuth } from "@/context/auth-context.js";
 
 export default function ProductsSection({ products, categories }) {
   const { addToCart } = useCartContext() ?? {};
   const { wishlist, toggleWishlist } = useWishlist() ?? {};
+  const { token } = useAuth();
 
   const tabs = useMemo(() => buildCategoryTabs(categories), [categories]);
   const [activeCategory, setActiveCategory] = useState(tabs[0]?.value ?? ALL_CATEGORY_ID);
@@ -82,13 +84,31 @@ export default function ProductsSection({ products, categories }) {
                   item.producto_id === product.id || item.id === product.id
               ) ?? false;
 
+const handleWishlist = () => {
+  if (!token) {
+    alert("Debes iniciar sesión para usar la wishlist");
+    return false;
+  }
+  toggleWishlist(product);
+  return true;
+};
+
+
+            const handleAddToCart = () => {
+              if (!token) {
+                alert("Debes iniciar sesión para usar el carrito");
+                return;
+              }
+              addToCart(product);
+            };
+
             return (
               <ProductCard
                 key={product.id}
                 product={product}
                 isInWishlist={isSaved}
-                onToggleWishlist={toggleWishlist}
-                onAddToCart={() => addToCart(product)}
+onToggleWishlist={(allow) => handleWishlist(allow)}
+                onAddToCart={handleAddToCart}
               />
             );
           })}

@@ -36,11 +36,16 @@ export default function ProductCard({
     setIsLiked(Boolean(isInWishlist));
   }, [isInWishlist]);
 
-  const handleWishlistToggle = (event) => {
-    event.preventDefault();
-    setIsLiked((prev) => !prev);
-    onToggleWishlist(product);
-  };
+const handleWishlistToggle = (event) => {
+  event.preventDefault();
+  
+  const allow = onToggleWishlist();
+
+  if (!allow) return; 
+  
+  setIsLiked((prev) => !prev);
+};
+
 
   useEffect(() => {
     if (!cartButtonPressed) return undefined;

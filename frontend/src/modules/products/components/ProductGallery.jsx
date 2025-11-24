@@ -1,10 +1,12 @@
 import ProductCard from "./ProductCard.jsx";
 import { useWishlist } from "../../profile/hooks/useWishlist.js";
 import { useCartContext } from "@/context/cart-context.js";
+import { useAuth } from "@/context/auth-context.js";
 
 export default function ProductGallery({ products = [] }) {
   const { wishlist, toggleWishlist } = useWishlist();
-  const { addToCart } = useCartContext(); 
+  const { addToCart } = useCartContext();
+  const { token } = useAuth();
 
   if (!Array.isArray(products) || products.length === 0) {
     return (
@@ -22,19 +24,37 @@ export default function ProductGallery({ products = [] }) {
             item.producto_id === product.id || item.id === product.id
         );
 
+        const handleWishlist = () => {
+          if (!token) {
+            alert("Debes iniciar sesión para usar la wishlist");
+            return false; // Muy importante → bloquea el ProductCard
+          }
+          toggleWishlist(product);
+          return true;
+        };
+
+        const handleAddToCart = () => {
+          if (!token) {
+            alert("Debes iniciar sesión para usar el carrito");
+            return;
+          }
+          addToCart(product);
+        };
+
         return (
           <ProductCard
             key={product.id}
             product={product}
             isInWishlist={isSaved}
-            onToggleWishlist={toggleWishlist}
-            onAddToCart={() => addToCart(product)}
+            onToggleWishlist={handleWishlist}
+            onAddToCart={handleAddToCart}
           />
         );
       })}
     </section>
   );
 }
+
 
 
 
