@@ -6,7 +6,22 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+
+// app.use(cors()); Mantener este para pruebas locales
+
+// Configuración de CORS para producción
+app.use(
+  cors({
+    origin: [
+      "https://moa-frontend.vercel.app",
+      "https://moa-branch.vercel.app",
+      "https://moa-branch-g4ymhnqw9-naharas-projects-f67a97ff.vercel.app",
+    ],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 /* ---------------------------- Rutas ---------------------------- */
 import home from "./routes/homeRoutes.js";
