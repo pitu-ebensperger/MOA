@@ -12,14 +12,10 @@ app.use(express.json());
 // Configuración de CORS para producción
 app.use(
   cors({
-    origin: [
-      "https://moa-frontend.vercel.app",
-      "https://moa-branch.vercel.app",
-      "https://moa-branch-g4ymhnqw9-naharas-projects-f67a97ff.vercel.app",
-    ],
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+    origin: ["http://localhost:5173", /\.vercel\.app$/],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   })
 );
 
