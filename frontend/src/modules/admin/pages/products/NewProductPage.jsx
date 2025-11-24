@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "../../../../components/ui/Button.jsx";
 import { productsApi } from "../../../../services/products.api.js";
+import { useCategories } from "../../../products/hooks/useCategories.js";
 
 const initialForm = {
   nombre: "",
@@ -16,6 +17,10 @@ const initialForm = {
 };
 
 export default function NewProductPage() {
+  const { categories, isLoading } = useCategories();
+  console.log("categories:", categories);
+  console.log("isLoading:", isLoading);
+
   const [form, setForm] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -64,13 +69,11 @@ export default function NewProductPage() {
 
   return (
     <main className="p-6">
-
       <h1>Crear nuevo producto</h1>
       <p className="mb-10">Agrega un nuevo producto al catálogo de MOA.</p>
 
       {/* --- Formulario --- */}
       <form className="space-y-8 max-w-3xl" onSubmit={handleSubmit}>
-
         {/* Primera fila */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <label className="flex flex-col text-sm">
@@ -127,27 +130,23 @@ export default function NewProductPage() {
           </label>
 
           <label className="flex flex-col text-sm">
-            Categoría ID
-            <input
-              type="number"
+            Categoría
+            <select
               name="categoria_id"
               value={form.categoria_id}
               onChange={handleChange}
               className="input-admin"
-              placeholder="Ej: 1"
-            />
-          </label>
+              required
+            >
+              <option value="">Selecciona una categoría</option>
 
-          <label className="flex flex-col text-sm">
-            Colección ID
-            <input
-              type="number"
-              name="collection_id"
-              value={form.collection_id}
-              onChange={handleChange}
-              className="input-admin"
-              placeholder="Ej: 1"
-            />
+              {!isLoading &&
+                categories?.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+            </select>
           </label>
         </div>
 
@@ -189,7 +188,11 @@ export default function NewProductPage() {
 
         {/* Acciones */}
         <div className="flex gap-3 pt-4">
-          <Button intent="secondary" type="button" onClick={() => setForm(initialForm)}>
+          <Button
+            intent="secondary"
+            type="button"
+            onClick={() => setForm(initialForm)}
+          >
             Limpiar
           </Button>
 
@@ -199,7 +202,9 @@ export default function NewProductPage() {
         </div>
 
         {feedback && (
-          <p className={`text-sm ${feedback.type === "error" ? "text-red-600" : "text-green-600"}`}>
+          <p
+            className={`text-sm ${feedback.type === "error" ? "text-red-600" : "text-green-600"}`}
+          >
             {feedback.message}
           </p>
         )}

@@ -90,3 +90,74 @@ export async function getProductById(req, res) {
     });
   }
 }
+
+export async function createProduct(req, res) {
+  try {
+    const {
+      nombre,
+      categoria_id,
+      collection_id,
+      sku,
+      precio_cents,
+      compare_at_price_cents,
+      stock,
+      descripcion_corta,
+      descripcion,
+      img_url,
+    } = req.body;
+
+    if (!nombre || !sku || precio_cents == null) {
+      return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+
+    const slug = nombre
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "");
+
+    const public_id = `prod_${Date.now()}`;
+
+    const query = `
+      INSERT INTO productos (
+        public_id,
+        nombre,
+        slug,
+        sku,
+        precio_cents,
+        compare_at_price_cents,
+        stock,
+        descripcion,
+        descripcion_corta,
+        img_url,
+        categoria_id,
+        collection_id
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      RETURNING *;
+    `;
+
+    const values = [
+      public_id,
+      nombre,
+      slug,
+      sku,
+      precio_cents,
+      compare_at_price_cents,
+      stock ?? 0,
+      descripcion,
+      descripcion_corta,
+      img_url,
+      categoria_id || null,
+      collection_id || null,
+    ];
+
+    const { rows } = await pool.query(query, values);
+
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error("Error al crear producto:", error);
+    res.status(500).json({
+      error: "Error al crear el producto en la base de datos",
+    });
+  }
+}
