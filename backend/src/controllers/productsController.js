@@ -1,4 +1,5 @@
 import pool from "../../database/config.js";
+import { updateProductStock } from "../models/productsModel.js";
 
 export async function getProducts(req, res) {
   try {

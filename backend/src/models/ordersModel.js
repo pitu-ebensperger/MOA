@@ -15,6 +15,7 @@ export const createOrderDB = async ({
 
     const order_code = `MOA-${new Date().toISOString().slice(0, 10).replace(/-/g, "")}-${Math.floor(Math.random() * 9000 + 1000)}`;
 
+    // 1. Crear orden
     const insertOrderSQL = `
       INSERT INTO ordenes (order_code, usuario_id, total_cents, delivery_method, payment_method, notes)
       VALUES ($1,$2,$3,$4,$5,$6)
@@ -32,20 +33,44 @@ export const createOrderDB = async ({
 
     const orden_id = rows[0].orden_id;
 
+    // 2. Insert item + descuento de stock
     const insertItemSQL = `
       INSERT INTO orden_items (orden_id, producto_id, cantidad, precio_unit)
       VALUES ($1,$2,$3,$4)
     `;
 
+    const updateStockSQL = `
+      UPDATE productos
+      SET stock = stock - $1
+      WHERE producto_id = $2
+      AND stock >= $1
+      RETURNING stock;
+    `;
+
     for (const item of items) {
+      // 2.1 Insertamos item en orden_items
       await client.query(insertItemSQL, [
         orden_id,
         item.id,
         item.quantity,
         item.price_cents,
       ]);
+
+      // 2.2 Descontar stock, evitando stock negativo
+      const stockResult = await client.query(updateStockSQL, [
+        item.quantity,
+        item.id,
+      ]);
+
+      // Si no devolvió filas → no había stock suficiente
+      if (stockResult.rows.length === 0) {
+        throw new Error(
+          `No hay stock suficiente para el producto ID ${item.id}`
+        );
+      }
     }
 
+    // 3. Confirmar transacción
     await client.query("COMMIT");
 
     return { orden_id, order_code };
