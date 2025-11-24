@@ -12,30 +12,50 @@ const normalizeWishlistProduct = (product, index) => {
     };
   }
 
-  const price = Number(product.price ?? 0);
+  const priceCents =
+    product.precio_cents ??
+    product.price_cents ??
+    product.price ??
+    0;
+
+  const price = Number(priceCents) / 100;
+
   return {
-    id: product.id ?? product.slug ?? `wishlist-${index}`,
-    name: product.name ?? product.slug ?? `Producto ${index + 1}`,
+    id: product.producto_id ?? product.id ?? product.slug ?? `wishlist-${index}`,
+    name: product.nombre ?? product.name ?? product.slug ?? `Producto ${index + 1}`,
     price: Number.isFinite(price) ? price : 0,
-    img: product.img ?? product.imgUrl ?? product.gallery?.[0] ?? DEFAULT_PLACEHOLDER_IMAGE,
+    img:
+      product.img_url ??
+      product.img ??
+      product.imgUrl ??
+      product.gallery?.[0] ??
+      DEFAULT_PLACEHOLDER_IMAGE,
   };
 };
 
 const WishlistSection = ({ products = [], isLoading = false, error = null }) => {
-  const sample = (Array.isArray(products) ? products : []).slice(0, 4).map(normalizeWishlistProduct);
+  const sample = (Array.isArray(products) ? products : [])
+    .slice(0, 4)
+    .map(normalizeWishlistProduct);
+
   const hasItems = sample.length > 0;
 
   return (
-    <>
-      <h2 className="font-italiana text-2xl text-dark mt-24 mb-10 flex justify-center">Mis Favoritos</h2>
+    <div className="max-w-7xl mx-auto px-6">
+      <h2 className="font-italiana text-2xl text-dark mt-24 mb-10 flex justify-center">
+        Mis Favoritos
+      </h2>
+
       {isLoading && (
         <p className="text-center text-sm text-dark/70">Cargando favoritos...</p>
       )}
+
       {!isLoading && error && (
         <p role="alert" className="text-center text-sm text-red-600">
           No pudimos cargar tus favoritos. Intenta nuevamente.
         </p>
       )}
+
       {!isLoading && !error && hasItems ? (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
           {sample.map((product) => (
@@ -43,11 +63,13 @@ const WishlistSection = ({ products = [], isLoading = false, error = null }) => 
           ))}
         </div>
       ) : null}
+
       {!isLoading && !error && !hasItems && (
         <div className="rounded-xl border border-dashed border-primary2/40 bg-white/60 p-8 text-center text-sm text-dark/70">
           Aún no tienes productos guardados.
         </div>
       )}
+
       <div className="mt-8 flex justify-end">
         <Link
           type="button"
@@ -57,8 +79,9 @@ const WishlistSection = ({ products = [], isLoading = false, error = null }) => 
           Ver más
         </Link>
       </div>
-    </>
+    </div>
   );
 };
 
 export default WishlistSection;
+

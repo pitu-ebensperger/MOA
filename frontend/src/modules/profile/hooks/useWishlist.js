@@ -1,18 +1,27 @@
 import { usePersistentState } from "../../../hooks/usePersistentState.js";
 import { useAuth } from "../../../context/auth-context.js";
-import { useEffect } from "react";
-
-const WISHLIST_STORAGE_KEY = "wishlist";
+import { useEffect, useMemo } from "react";
 
 export const useWishlist = () => {
-  const { token } = useAuth();
+  const { token, user, isAuthenticated } = useAuth();
 
-  const [wishlist, setWishlist] = usePersistentState(WISHLIST_STORAGE_KEY, {
+  const storageKey = useMemo(() => {
+    return user ? `wishlist.${user.id}` : "wishlist.anon";
+  }, [user]);
+
+  const [wishlist, setWishlist] = usePersistentState(storageKey, {
     initialValue: [],
   });
 
   useEffect(() => {
-    if (!token) return;
+    if (!user) {
+      setWishlist([]);
+      localStorage.removeItem(storageKey);
+    }
+  }, [user, setWishlist, storageKey]);
+
+  useEffect(() => {
+    if (!token || !isAuthenticated || !user) return;
 
     fetch("http://localhost:3000/wishlist", {
       headers: { Authorization: `Bearer ${token}` },
@@ -23,11 +32,13 @@ export const useWishlist = () => {
           setWishlist(data.items);
         }
       })
-      .catch((err) => console.error("Error cargando wishlist:", err));
-  }, [token]);
+      .catch(() => {});
+  }, [token, isAuthenticated, user, setWishlist]);
 
   const addToWishlist = async (product) => {
-    if (!token) return alert("Debes iniciar sesión para usar favoritos ❤️");
+    if (!token) return;
+
+    const realId = product.producto_id ?? product.id;
 
     try {
       const res = await fetch("http://localhost:3000/wishlist/add", {
@@ -36,22 +47,19 @@ export const useWishlist = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ productId: product.id }),
+        body: JSON.stringify({ producto_id: realId }),
       });
 
-      if (!res.ok) {
-        console.error("Error al agregar a wishlist", await res.text());
-        return;
-      }
+      if (!res.ok) return;
 
-      setWishlist((prev) => [...prev, { producto_id: product.id, ...product }]);
+      setWishlist((prev) => [...prev, { producto_id: realId, ...product }]);
     } catch (error) {
-      console.error("Error wishlist add:", error);
+      console.error(error);
     }
   };
 
   const removeFromWishlist = async (productId) => {
-    if (!token) return alert("Debes iniciar sesión");
+    if (!token) return;
 
     try {
       const res = await fetch(
@@ -62,33 +70,25 @@ export const useWishlist = () => {
         }
       );
 
-      if (!res.ok) {
-        console.error("Error al eliminar de wishlist");
-        return;
-      }
+      if (!res.ok) return;
 
       setWishlist((prev) =>
         prev.filter((item) => item.producto_id !== productId)
       );
     } catch (error) {
-      console.error("Error wishlist remove:", error);
+      console.error(error);
     }
   };
 
   const toggleWishlist = (product) => {
-    const exists = wishlist.some(
-      (item) => item.producto_id === product.id || item.id === product.id
-    );
+    const realId = product.producto_id ?? product.id;
+    const exists = wishlist.some((item) => item.producto_id === realId);
 
     if (exists) {
-      removeFromWishlist(product.id);
+      removeFromWishlist(realId);
     } else {
       addToWishlist(product);
     }
-  };
-
-  const clearWishlist = () => {
-    setWishlist([]);
   };
 
   return {
@@ -96,6 +96,5 @@ export const useWishlist = () => {
     addToWishlist,
     removeFromWishlist,
     toggleWishlist,
-    clearWishlist,
   };
 };

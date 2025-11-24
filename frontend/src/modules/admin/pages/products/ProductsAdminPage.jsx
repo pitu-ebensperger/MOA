@@ -4,10 +4,14 @@ import { Plus, RefreshCw } from "lucide-react";
 
 import { TanstackDataTable } from "../../../../components/data-display/DataTable.jsx";
 import { Pagination } from "../../../../components/ui/Pagination.jsx";
+import { Button } from "../../../../components/ui/Button.jsx";
 
 import { useAdminProducts } from "../../hooks/useAdminProducts.js";
 import { useCategories } from "../../../products/hooks/useCategories.js";
 import { buildProductColumns } from "../../utils/ProductsColumns.jsx";
+
+// import { useNavigate } from "react-router-dom";
+// import { API_PATHS } from "../../../../config/api-paths.js";
 
 export default function ProductsAdminPage() {
   const [page, setPage] = React.useState(1);
@@ -28,7 +32,7 @@ export default function ProductsAdminPage() {
   const { categories } = useCategories();
   const categoryMap = React.useMemo(
     () => Object.fromEntries((categories ?? []).map((c) => [c.id, c.name])),
-    [categories],
+    [categories]
   );
 
   const columns = React.useMemo(
@@ -45,12 +49,13 @@ export default function ProductsAdminPage() {
           console.log("delete product", product);
         },
       }),
-    [categoryMap],
+    [categoryMap]
   );
+
+  // const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-sans text-xl font-semibold tracking-tight text-(--text-strong)">
@@ -70,17 +75,18 @@ export default function ProductsAdminPage() {
           >
             <RefreshCw className="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            className="inline-flex items-center gap-1 rounded-full bg-(--color-primary1) px-3 py-2 text-sm text-white hover:opacity-90"
-          >
-            <Plus className="h-4 w-4" />
-            Nuevo producto
-          </button>
+
+<button
+  onClick={() => console.log("CLICK NATIVE")}
+  style={{ padding: "10px", background: "brown", color: "white" }}
+>
+  Nuevo producto (TEST)
+</button>
+
+
         </div>
       </div>
 
-      {/* Filtros */}
       <div className="flex flex-wrap gap-3 rounded-2xl border border-(--border-subtle) bg-(--surface-subtle) px-4 py-3">
         <div className="min-w-[200px] flex-1">
           <input
@@ -125,7 +131,6 @@ export default function ProductsAdminPage() {
         </label>
       </div>
 
-      {/* Tabla TanStack */}
       <TanstackDataTable
         columns={columns}
         data={items}
@@ -136,7 +141,6 @@ export default function ProductsAdminPage() {
         onPageChange={setPage}
       />
 
-      {/* Paginación */}
       <div className="mt-3">
         <Pagination
           page={page}

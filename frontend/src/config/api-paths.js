@@ -38,6 +38,7 @@ export const API_PATHS = {
   admin: {
     dashboard: "/admin",
     products: "/admin/productos",
+    newProduct: "/admin/productos/nuevo",
     orders: "/admin/pedidos",
     customers: "/admin/clientes",
     settings: "/admin/configuraciones",

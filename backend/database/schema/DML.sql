@@ -1,5 +1,8 @@
+-- Active: 1763944864416@@127.0.0.1@5432@moa
 SELECT * FROM usuarios;
 -- Crear usuario administrador
 TRUNCATE TABLE RESTART IDENTITY;
 
-DROP TABLE
+DROP TABLE wishlist_items CASCADE;
+
+CREATE SCHEMA moa;

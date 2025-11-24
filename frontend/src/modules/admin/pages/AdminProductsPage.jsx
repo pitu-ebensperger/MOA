@@ -23,8 +23,13 @@ import { useCategories } from "../../products/hooks/useCategories.js";
 import { buildProductColumns } from "../utils/ProductsColumns.jsx";
 import { DEFAULT_PAGE_SIZE } from "../../../config/constants.js";
 import { PRODUCT_STATUS_OPTIONS } from "../../../config/status-options.js";
+import { useNavigate } from "react-router-dom";
+
 
 export default function ProductsAdminPage() {
+
+  const navigate = useNavigate();
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -47,7 +52,7 @@ export default function ProductsAdminPage() {
   const { categories } = useCategories();
   const categoryMap = useMemo(
     () => Object.fromEntries((categories ?? []).map((c) => [c.id, c.name])),
-    [categories],
+    [categories]
   );
 
   const columns = useMemo(
@@ -74,7 +79,7 @@ export default function ProductsAdminPage() {
           }
         },
       }),
-    [categoryMap, refetch],
+    [categoryMap, refetch]
   );
 
   const clearAll = () => {
@@ -105,7 +110,11 @@ export default function ProductsAdminPage() {
             setPage(1);
             if (v) {
               setActiveTags((tags) => [
-                { key: "status", value: v, label: `Estado: ${PRODUCT_STATUS_OPTIONS.find((o) => o.value === v)?.label ?? v}` },
+                {
+                  key: "status",
+                  value: v,
+                  label: `Estado: ${PRODUCT_STATUS_OPTIONS.find((o) => o.value === v)?.label ?? v}`,
+                },
                 ...tags.filter((t) => t.key !== "status"),
               ]);
             } else {
@@ -128,14 +137,19 @@ export default function ProductsAdminPage() {
         <FilterTags
           tags={activeTags}
           onRemove={(tag) => {
-            setActiveTags((tags) => tags.filter((t) => !(t.key === tag.key && t.value === tag.value)));
+            setActiveTags((tags) =>
+              tags.filter((t) => !(t.key === tag.key && t.value === tag.value))
+            );
             if (tag.key === "status") setStatus("");
           }}
         />
         <div className="ml-auto flex items-center gap-2">
           <ColumnsMenuButton table={table} />
           <ClearFiltersButton onClear={clearAll} />
-          <LayoutToggleButton condensed={condensed} onToggle={() => setCondensed((v) => !v)} />
+          <LayoutToggleButton
+            condensed={condensed}
+            onToggle={() => setCondensed((v) => !v)}
+          />
           <Button
             appearance="ghost"
             intent="neutral"
@@ -150,13 +164,17 @@ export default function ProductsAdminPage() {
             intent="primary"
             size="sm"
             leadingIcon={<Plus className="h-4 w-4" />}
+            onClick={() => {
+              console.log("CLICK ok!");
+              navigate("/admin/productos/nuevo");
+            }}
           >
             Nuevo producto
           </Button>
         </div>
       </TableToolbar>
     ),
-    [search, status, onlyLowStock, activeTags, condensed, refetch],
+    [search, status, onlyLowStock, activeTags, condensed, refetch]
   );
 
   return (

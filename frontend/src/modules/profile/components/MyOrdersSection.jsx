@@ -45,7 +45,7 @@ export default function OrderSection() {
   const hasPurchases = recentPurchases.length > 0;
 
   return (
-    <>
+    <div className="max-w-7xl mx-auto px-6">
       <h2 className="font-italiana text-2xl text-dark mt-24 mb-10 flex justify-center">
         Mis Compras
       </h2>
@@ -61,7 +61,7 @@ export default function OrderSection() {
       )}
 
       {!isLoading && !error && hasPurchases && (
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 mb-20">
           {recentPurchases.map((p) => (
             <Card key={p.id} data={p} />
           ))}
@@ -73,7 +73,7 @@ export default function OrderSection() {
           Aún no registras compras.
         </div>
       )}
-    </>
+    </div>
   );
 }
 
