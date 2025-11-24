@@ -59,7 +59,7 @@ const WishlistSection = ({ products = [], isLoading = false, error = null }) => 
       {!isLoading && !error && hasItems ? (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
           {sample.map((product) => (
-            <Card key={product.id} data={product} />
+            <Card key={product.id} data={product} noHover/>
           ))}
         </div>
       ) : null}

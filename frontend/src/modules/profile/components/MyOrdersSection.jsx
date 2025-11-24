@@ -25,11 +25,10 @@ const normalizeOrderProduct = (item, index) => {
   };
 };
 
-
 export default function OrderSection() {
   const { orders, isLoading, error } = useMyOrders();
 
-  const allItems = orders.flatMap(o => o.items ?? []);
+  const allItems = orders.flatMap((o) => o.items ?? []);
 
   const uniqueMap = new Map();
   for (const item of allItems) {
@@ -51,7 +50,9 @@ export default function OrderSection() {
       </h2>
 
       {isLoading && (
-        <p className="text-center text-sm text-dark/70">Cargando tus compras...</p>
+        <p className="text-center text-sm text-dark/70">
+          Cargando tus compras...
+        </p>
       )}
 
       {!isLoading && error && (
@@ -63,7 +64,7 @@ export default function OrderSection() {
       {!isLoading && !error && hasPurchases && (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-4 mb-20">
           {recentPurchases.map((p) => (
-            <Card key={p.id} data={p} />
+            <Card key={p.id} data={p} noHover />
           ))}
         </div>
       )}
@@ -76,5 +77,3 @@ export default function OrderSection() {
     </div>
   );
 }
-
-

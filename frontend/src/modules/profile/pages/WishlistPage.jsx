@@ -51,7 +51,7 @@ export const WishlistPage = () => {
       {!isLoading && !error && wishlistProducts.length > 0 && (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {wishlistProducts.map((product) => (
-            <Card key={product.id ?? product.slug} data={product} />
+            <Card key={product.id ?? product.slug} data={product} noHover/>
           ))}
         </div>
       )}
