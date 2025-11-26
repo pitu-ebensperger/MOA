@@ -21,3 +21,14 @@ export async function updateProductStock(productId, quantity) {
     throw error;
   }
 }
+
+export const deleteProduct = async (productId) => {
+  const sql = `
+    DELETE FROM productos
+    WHERE producto_id = $1
+    RETURNING producto_id;
+  `;
+
+  const { rows } = await pool.query(sql, [productId]);
+  return rows.length > 0;
+};

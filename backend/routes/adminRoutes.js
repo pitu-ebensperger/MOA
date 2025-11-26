@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyToken } from "../src/middleware/tokenMiddleware.js";
+import { deleteProductController } from "../src/controllers/productsController.js";
 
 const router = Router();
 
@@ -10,7 +11,11 @@ router.get("/admin/pedidos", verifyToken, (req, res) => {
 
 router.get("/admin/pedidos/:id", verifyToken, (req, res) => {
   const { id } = req.params;
-  res.status(501).json({ message: `Detalle de pedido admin ${id} no implementado` });
+  res
+    .status(501)
+    .json({ message: `Detalle de pedido admin ${id} no implementado` });
 });
+
+router.delete("/admin/productos/:id", verifyToken, deleteProductController);
 
 export default router;

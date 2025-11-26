@@ -1,5 +1,6 @@
 import pool from "../../database/config.js";
 import { updateProductStock } from "../models/productsModel.js";
+import { deleteProduct } from "../models/productsModel.js";
 
 export async function getProducts(req, res) {
   try {
@@ -162,3 +163,27 @@ export async function createProduct(req, res) {
     });
   }
 }
+
+export const deleteProductController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    const deleted = await deleteProduct(Number(id));
+
+    if (!deleted) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    return res.json({
+      ok: true,
+      message: "Producto eliminado correctamente",
+    });
+  } catch (error) {
+    console.error("Error eliminando producto:", error);
+    return res.status(500).json({ error: "Error eliminando producto" });
+  }
+};
