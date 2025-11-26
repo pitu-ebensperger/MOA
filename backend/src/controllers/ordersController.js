@@ -25,8 +25,19 @@ export const createOrder = async (req, res) => {
       ...result,
     });
   } catch (error) {
-    console.error("Error al crear orden:", error);
-    return res.status(500).json({ error: "Error creando orden" });
+    console.error("🔥 ERROR REAL AL CREAR ORDEN >>>", error.message);
+
+    if (error.message.includes("No hay stock suficiente")) {
+      return res.status(400).json({
+        error: "stock_insuficiente",
+        detail: error.message,
+      });
+    }
+
+    return res.status(500).json({
+      error: "server_error",
+      detail: "Error creando orden",
+    });
   }
 };
 

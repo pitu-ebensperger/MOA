@@ -4,9 +4,8 @@ import { authApi } from "../services/auth.api.js";
 import { AuthContext, isAdminRole } from "./auth-context.js";
 import { usePersistentState } from "../hooks/usePersistentState.js";
 
-// ---- Constantes y utilidades ----------------------------------
 const TOKEN_KEY = "moa.accessToken";
-const USER_KEY  = "moa.user";
+const USER_KEY = "moa.user";
 const STATUS = { IDLE: "idle", LOADING: "loading", AUTH: "authenticated" };
 
 const safeParseJson = (value) => {
@@ -15,25 +14,30 @@ const safeParseJson = (value) => {
 
 const identity = (value) => value;
 
-// ---- Contexto --------------------------------------------------
 export const AuthProvider = ({ children }) => {
-  // Estado inicial: si hay token guardado, intentamos cargar perfil
   const [token, setToken] = usePersistentState(TOKEN_KEY, {
     initialValue: null,
     parser: identity,
     serializer: identity,
   });
+
   const [user, setUser] = usePersistentState(USER_KEY, {
     initialValue: null,
     parser: safeParseJson,
     serializer: (value) => JSON.stringify(value),
   });
+
   const [status, setStatus] = useState(() => (token ? STATUS.LOADING : STATUS.IDLE));
   const [error, setError] = useState(null);
 
-  // --- Sync helpers (token/user <-> storage + api-client) -------
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    Promise.resolve().then(() => setIsReady(true));
+  }, []);
+
   const syncToken = useCallback((nextToken) => {
-    setTokenGetter(() => nextToken);           // api-client leerá el token actual
+    setTokenGetter(() => nextToken);
     setToken(nextToken ?? null);
   }, [setToken]);
 
@@ -48,15 +52,13 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   }, [syncToken, syncUser]);
 
-  // api-client: define cómo actuar ante 401 global y cómo obtener token
   useEffect(() => {
     setTokenGetter(() => token);
     setOnUnauthorized(() => logout);
   }, [token, logout]);
 
-  // Si hay token pero no user, intenta cargar perfil
   useEffect(() => {
-    if (!token || user) return undefined;
+    if (!token || user) return;
     let cancelled = false;
 
     (async () => {
@@ -75,7 +77,6 @@ export const AuthProvider = ({ children }) => {
     return () => { cancelled = true; };
   }, [token, user, syncUser, logout]);
 
-  // --- Acciones públicas ---------------------------------------
   const login = useCallback(
     async (credentials) => {
       setStatus(STATUS.LOADING);
@@ -116,7 +117,6 @@ export const AuthProvider = ({ children }) => {
     [syncToken, syncUser],
   );
 
-  // para editar perfil
   const refreshProfile = useCallback(async () => {
     setStatus(STATUS.LOADING);
     setError(null);
@@ -144,13 +144,14 @@ export const AuthProvider = ({ children }) => {
       register,
       logout,
       refreshProfile,
+      isReady,
     }),
-    [user, token, status, error, login, register, logout, refreshProfile],
+    [user, token, status, error, login, register, logout, refreshProfile, isReady],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {isReady ? children : null}
+    </AuthContext.Provider>
+  );
 };
-
-// Re-export hooks/utilities to avoid breaking existing imports
-// Nota: para usar hooks/utilidades importa desde "./auth-context.js"
-// export { useAuth, isAdminRole } from "./auth-context.js";
