@@ -1,6 +1,9 @@
 import pool from "../../database/config.js";
-import { updateProductStock } from "../models/productsModel.js";
-import { deleteProduct } from "../models/productsModel.js";
+import {
+  updateProductStock,
+  deleteProduct,
+  updateProduct,
+} from "../models/productsModel.js";
 
 export async function getProducts(req, res) {
   try {
@@ -185,5 +188,60 @@ export const deleteProductController = async (req, res) => {
   } catch (error) {
     console.error("Error eliminando producto:", error);
     return res.status(500).json({ error: "Error eliminando producto" });
+  }
+};
+
+export const updateProductController = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id || isNaN(Number(id))) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
+
+    const body = req.body;
+
+    const updates = {
+      nombre: body.name,
+      slug: body.name
+        ? body.name
+            .toLowerCase()
+            .replace(/ /g, "-")
+            .replace(/[^\w-]+/g, "")
+        : undefined,
+      sku: body.sku,
+      precio_cents: body.price,
+      compare_at_price_cents: body.compareAtPrice,
+      stock: body.stock,
+      status: body.status,
+      descripcion: body.description,
+      descripcion_corta: body.descriptionShort,
+      img_url: body.imgUrl,
+      gallery: body.gallery,
+      badge: body.badge,
+      tags: body.tags,
+      color: body.color,
+      material: body.material,
+      dimensions: body.dimensions,
+      weight: body.weight,
+      specs: body.specs,
+      categoria_id: body.fk_category_id,
+      collection_id: body.fk_collection_id,
+    };
+
+    Object.keys(updates).forEach((key) => {
+      if (updates[key] === undefined) delete updates[key];
+    });
+
+    const updated = await updateProduct(Number(id), updates);
+
+    if (!updated) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+
+    return res.json(updated);
+  } catch (error) {
+    console.error("Error actualizando producto:", error);
+    return res.status(500).json({ error: "Error actualizando producto" });
   }
 };

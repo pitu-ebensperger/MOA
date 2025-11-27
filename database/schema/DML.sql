@@ -6,3 +6,5 @@ TRUNCATE TABLE RESTART IDENTITY;
 DROP TABLE wishlist_items CASCADE;
 
 CREATE SCHEMA moa;
+
+SELECT * FROM productos WHERE producto_id = 39;
