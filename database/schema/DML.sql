@@ -1,6 +1,5 @@
--- Active: 1763944864416@@127.0.0.1@5432@moa
 SELECT * FROM usuarios;
--- Crear usuario administrador
+-- Crear usuario admin
 TRUNCATE TABLE RESTART IDENTITY;
 
 DROP TABLE wishlist_items CASCADE;
